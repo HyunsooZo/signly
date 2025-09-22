@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Contract extends AggregateRoot<ContractId> {
+public class Contract extends AggregateRoot {
     private final ContractId id;
     private final UserId creatorId;
     private final TemplateId templateId;
@@ -20,10 +20,10 @@ public class Contract extends AggregateRoot<ContractId> {
     private ContractStatus status;
     private final List<Signature> signatures;
     private LocalDateTime expiresAt;
-    private final LocalDateTime createdAt;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private Contract(ContractId id, UserId creatorId, TemplateId templateId,
+    public Contract(ContractId id, UserId creatorId, TemplateId templateId,
                     String title, ContractContent content, PartyInfo firstParty,
                     PartyInfo secondParty, LocalDateTime expiresAt) {
         this.id = id;
@@ -49,6 +49,20 @@ public class Contract extends AggregateRoot<ContractId> {
 
         return new Contract(ContractId.generate(), creatorId, templateId,
                           title.trim(), content, firstParty, secondParty, expiresAt);
+    }
+
+    public static Contract restore(ContractId id, UserId creatorId, TemplateId templateId,
+                                 String title, ContractContent content, PartyInfo firstParty,
+                                 PartyInfo secondParty, ContractStatus status,
+                                 List<Signature> signatures, LocalDateTime expiresAt,
+                                 LocalDateTime createdAt, LocalDateTime updatedAt) {
+        Contract contract = new Contract(id, creatorId, templateId, title, content,
+                                       firstParty, secondParty, expiresAt);
+        contract.status = status;
+        contract.signatures.addAll(signatures);
+        contract.createdAt = createdAt;
+        contract.updatedAt = updatedAt;
+        return contract;
     }
 
     private static void validateTitle(String title) {
@@ -190,7 +204,6 @@ public class Contract extends AggregateRoot<ContractId> {
                 .collect(Collectors.toList());
     }
 
-    @Override
     public ContractId getId() {
         return id;
     }

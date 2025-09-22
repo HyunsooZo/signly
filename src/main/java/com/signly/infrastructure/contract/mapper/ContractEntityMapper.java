@@ -30,8 +30,6 @@ public class ContractEntityMapper {
             contract.getExpiresAt()
         );
 
-        entity.setCreatedAt(contract.getCreatedAt());
-        entity.setUpdatedAt(contract.getUpdatedAt());
 
         List<SignatureJpaEntity> signatureEntities = contract.getSignatures().stream()
             .map(this::toSignatureEntity)
@@ -60,24 +58,24 @@ public class ContractEntityMapper {
             entity.getSecondPartyOrganization()
         );
 
-        Contract contract = Contract.create(
+        List<Signature> signatures = entity.getSignatures().stream()
+            .map(this::toDomainSignature)
+            .collect(Collectors.toList());
+
+        return Contract.restore(
+            contractId,
             creatorId,
             templateId,
             entity.getTitle(),
             content,
             firstParty,
             secondParty,
-            entity.getExpiresAt()
+            entity.getStatus(),
+            signatures,
+            entity.getExpiresAt(),
+            entity.getCreatedAt(),
+            entity.getUpdatedAt()
         );
-
-        setPrivateFields(contract, contractId, entity.getStatus(), entity.getCreatedAt(), entity.getUpdatedAt());
-
-        entity.getSignatures().forEach(signatureEntity -> {
-            Signature signature = toDomainSignature(signatureEntity);
-            addSignatureToContract(contract, signature);
-        });
-
-        return contract;
     }
 
     private SignatureJpaEntity toSignatureEntity(Signature signature) {
@@ -99,38 +97,4 @@ public class ContractEntityMapper {
         );
     }
 
-    private void setPrivateFields(Contract contract, ContractId id, ContractStatus status,
-                                java.time.LocalDateTime createdAt, java.time.LocalDateTime updatedAt) {
-        try {
-            java.lang.reflect.Field idField = Contract.class.getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(contract, id);
-
-            java.lang.reflect.Field statusField = Contract.class.getDeclaredField("status");
-            statusField.setAccessible(true);
-            statusField.set(contract, status);
-
-            java.lang.reflect.Field createdAtField = Contract.class.getDeclaredField("createdAt");
-            createdAtField.setAccessible(true);
-            createdAtField.set(contract, createdAt);
-
-            java.lang.reflect.Field updatedAtField = Contract.class.getDeclaredField("updatedAt");
-            updatedAtField.setAccessible(true);
-            updatedAtField.set(contract, updatedAt);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to set private fields", e);
-        }
-    }
-
-    private void addSignatureToContract(Contract contract, Signature signature) {
-        try {
-            java.lang.reflect.Field signaturesField = Contract.class.getDeclaredField("signatures");
-            signaturesField.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            List<Signature> signatures = (List<Signature>) signaturesField.get(contract);
-            signatures.add(signature);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to add signature to contract", e);
-        }
-    }
 }
