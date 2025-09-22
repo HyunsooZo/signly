@@ -60,6 +60,10 @@ public class User extends AggregateRoot {
         return this.userType == UserType.OWNER && this.status == UserStatus.ACTIVE;
     }
 
+    public boolean canCreateContract() {
+        return this.status == UserStatus.ACTIVE;
+    }
+
     public void activate() {
         if (this.status == UserStatus.SUSPENDED) {
             throw new ValidationException("정지된 사용자는 활성화할 수 없습니다");
