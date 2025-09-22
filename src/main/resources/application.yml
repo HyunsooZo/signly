@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: e-signature-signly
+
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/esign_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        show_sql: false
+    open-in-view: false
+
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 2000ms
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  security:
+    user:
+      name: admin
+      password: admin
+
+jwt:
+  secret: ${JWT_SECRET:mySecretKey12345678901234567890123456789012345678901234567890}
+  access-token-validity: 900000  # 15분
+  refresh-token-validity: 604800000  # 7일
+
+storage:
+  pdf:
+    path: ${PDF_STORAGE_PATH:/var/esign/documents}
+    max-size: 10485760  # 10MB
+
+contract:
+  expiry-days: 7
+  retention-years: 1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
+logging:
+  level:
+    com.signly: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
