@@ -46,9 +46,7 @@ public class ContractWebController {
         try {
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-            Page<ContractResponse> contracts = status != null ?
-                    contractService.getContractsByOwnerAndStatus(userId, status, pageRequest) :
-                    contractService.getContractsByOwner(userId, pageRequest);
+            Page<ContractResponse> contracts = contractService.getContractsByCreator(userId, pageRequest);
 
             model.addAttribute("pageTitle", "계약서 관리");
             model.addAttribute("contracts", contracts);
@@ -177,10 +175,10 @@ public class ContractWebController {
             form.setContent(contract.content());
             form.setFirstPartyName(contract.firstParty().name());
             form.setFirstPartyEmail(contract.firstParty().email());
-            form.setFirstPartyAddress(contract.firstParty().address());
+            form.setFirstPartyAddress(contract.firstParty().organizationName());
             form.setSecondPartyName(contract.secondParty().name());
             form.setSecondPartyEmail(contract.secondParty().email());
-            form.setSecondPartyAddress(contract.secondParty().address());
+            form.setSecondPartyAddress(contract.secondParty().organizationName());
             form.setExpiresAt(contract.expiresAt());
 
             model.addAttribute("pageTitle", "계약서 수정");
