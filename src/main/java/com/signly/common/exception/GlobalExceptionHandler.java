@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -164,6 +165,36 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException ex, WebRequest request) {
+        String resourcePath = ex.getResourcePath();
+
+        // favicon.ico 요청은 로그를 남기지 않고 조용히 404 반환
+        if (resourcePath != null && resourcePath.contains("favicon.ico")) {
+            ErrorResponse errorResponse = new ErrorResponse(
+                    "NOT_FOUND",
+                    "Resource not found",
+                    HttpStatus.NOT_FOUND.value(),
+                    request.getDescription(false),
+                    LocalDateTime.now()
+            );
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
+
+        // 다른 리소스는 로그를 남김
+        logger.warn("Resource not found: {}", resourcePath);
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                "NOT_FOUND",
+                "요청한 리소스를 찾을 수 없습니다",
+                HttpStatus.NOT_FOUND.value(),
+                request.getDescription(false),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
