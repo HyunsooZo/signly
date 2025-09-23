@@ -52,6 +52,15 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 // 서명 API는 공개 허용 (토큰 검증은 별도 로직에서)
                 .requestMatchers("/api/sign/**").permitAll()
+                // 인증 관련 페이지는 공개 허용
+                .requestMatchers("/", "/login", "/register", "/forgot-password").permitAll()
+                .requestMatchers("/WEB-INF/views/auth/**").permitAll()
+                // 홈 페이지는 공개 허용
+                .requestMatchers("/home", "/about").permitAll()
+                .requestMatchers("/WEB-INF/views/home/**").permitAll()
+                // 템플릿 관리 페이지 (개발 중이므로 임시 허용)
+                .requestMatchers("/templates/**").permitAll()
+                .requestMatchers("/WEB-INF/views/templates/**").permitAll()
                 // 개발 도구는 공개 허용
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
