@@ -1,4 +1,4 @@
-package com.signly.contract.presentation;
+package com.signly.contract.presentation.rest;
 
 import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.*;
@@ -17,11 +17,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/contracts")
-public class ContractController {
+public class ContractRestController {
 
     private final ContractService contractService;
 
-    public ContractController(ContractService contractService) {
+    public ContractRestController(ContractService contractService) {
         this.contractService = contractService;
     }
 

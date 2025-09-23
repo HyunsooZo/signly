@@ -1,4 +1,4 @@
-package com.signly.user.presentation;
+package com.signly.user.presentation.rest;
 
 import com.signly.user.application.UserService;
 import com.signly.user.application.dto.*;
@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "User", description = "사용자 관리 API")
 @RestController
 @RequestMapping("/api/users")
-public class UserController {
+public class UserRestController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public UserRestController(UserService userService) {
         this.userService = userService;
     }
 

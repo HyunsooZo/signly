@@ -1,4 +1,4 @@
-package com.signly.template.presentation;
+package com.signly.template.presentation.rest;
 
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.dto.CreateTemplateCommand;
@@ -21,11 +21,11 @@ import java.util.List;
 @Tag(name = "Template", description = "계약서 템플릿 관리 API")
 @RestController
 @RequestMapping("/api/templates")
-public class TemplateController {
+public class TemplateRestController {
 
     private final TemplateService templateService;
 
-    public TemplateController(TemplateService templateService) {
+    public TemplateRestController(TemplateService templateService) {
         this.templateService = templateService;
     }
 

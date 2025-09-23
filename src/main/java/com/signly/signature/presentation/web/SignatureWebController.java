@@ -1,4 +1,4 @@
-package com.signly.presentation.web;
+package com.signly.signature.presentation.web;
 
 import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.repository.ContractRepository;
@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/sign")
-public class SigningWebController {
+public class SignatureWebController {
 
     private final ContractRepository contractRepository;
 
-    public SigningWebController(ContractRepository contractRepository) {
+    public SignatureWebController(ContractRepository contractRepository) {
         this.contractRepository = contractRepository;
     }
 

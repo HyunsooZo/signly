@@ -1,4 +1,4 @@
-package com.signly.presentation.web;
+package com.signly.user.presentation.web;
 
 import com.signly.user.application.UserService;
 import com.signly.user.application.dto.RegisterUserCommand;
@@ -18,12 +18,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Controller
-public class AuthWebController {
+public class UserWebController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthWebController.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserWebController.class);
     private final UserService userService;
 
-    public AuthWebController(UserService userService) {
+    public UserWebController(UserService userService) {
         this.userService = userService;
     }
 

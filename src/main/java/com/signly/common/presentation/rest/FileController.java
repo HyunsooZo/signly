@@ -1,4 +1,4 @@
-package com.signly.presentation.file;
+package com.signly.common.presentation.rest;
 
 import com.signly.common.storage.FileStorageService;
 import com.signly.common.storage.StoredFile;
