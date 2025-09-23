@@ -1,13 +1,13 @@
-package com.signly.infrastructure.persistence.repository.impl;
+package com.signly.template.infrastructure.repository.impl;
 
-import com.signly.domain.template.model.ContractTemplate;
-import com.signly.domain.template.model.TemplateId;
-import com.signly.domain.template.model.TemplateStatus;
-import com.signly.domain.template.repository.TemplateRepository;
-import com.signly.domain.user.model.UserId;
-import com.signly.infrastructure.persistence.entity.TemplateEntity;
-import com.signly.infrastructure.persistence.mapper.TemplateEntityMapper;
-import com.signly.infrastructure.persistence.repository.jpa.TemplateJpaRepository;
+import com.signly.template.domain.model.ContractTemplate;
+import com.signly.template.domain.model.TemplateId;
+import com.signly.template.domain.model.TemplateStatus;
+import com.signly.template.domain.repository.TemplateRepository;
+import com.signly.user.domain.model.UserId;
+import com.signly.template.infrastructure.TemplateEntity;
+import com.signly.template.infrastructure.TemplateEntityMapper;
+import com.signly.template.infrastructure.TemplateJpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;

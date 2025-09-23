@@ -1,8 +1,8 @@
-package com.signly.infrastructure.persistence.mapper;
+package com.signly.template.infrastructure.mapper;
 
-import com.signly.domain.template.model.*;
-import com.signly.domain.user.model.UserId;
-import com.signly.infrastructure.persistence.entity.TemplateEntity;
+import com.signly.template.domain.model.*;
+import com.signly.user.domain.model.UserId;
+import com.signly.template.infrastructure.TemplateEntity;
 import org.springframework.stereotype.Component;
 
 @Component

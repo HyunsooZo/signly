@@ -1,6 +1,6 @@
-package com.signly.application.template.dto;
+package com.signly.template.application.dto;
 
-import com.signly.domain.template.model.TemplateStatus;
+import com.signly.template.domain.model.TemplateStatus;
 
 import java.time.LocalDateTime;
 

@@ -1,4 +1,4 @@
-package com.signly.domain.template.model;
+package com.signly.template.domain.model;
 
 import com.signly.common.exception.ValidationException;
 import com.fasterxml.jackson.core.JsonProcessingException;

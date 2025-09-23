@@ -1,9 +1,9 @@
-package com.signly.domain.template.repository;
+package com.signly.template.domain.repository;
 
-import com.signly.domain.template.model.ContractTemplate;
-import com.signly.domain.template.model.TemplateId;
-import com.signly.domain.template.model.TemplateStatus;
-import com.signly.domain.user.model.UserId;
+import com.signly.template.domain.model.ContractTemplate;
+import com.signly.template.domain.model.TemplateId;
+import com.signly.template.domain.model.TemplateStatus;
+import com.signly.user.domain.model.UserId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

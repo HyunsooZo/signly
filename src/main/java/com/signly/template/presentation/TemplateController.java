@@ -1,10 +1,10 @@
-package com.signly.presentation.rest;
+package com.signly.template.presentation;
 
-import com.signly.application.template.TemplateService;
-import com.signly.application.template.dto.CreateTemplateCommand;
-import com.signly.application.template.dto.TemplateResponse;
-import com.signly.application.template.dto.UpdateTemplateCommand;
-import com.signly.domain.template.model.TemplateStatus;
+import com.signly.template.application.TemplateService;
+import com.signly.template.application.dto.CreateTemplateCommand;
+import com.signly.template.application.dto.TemplateResponse;
+import com.signly.template.application.dto.UpdateTemplateCommand;
+import com.signly.template.domain.model.TemplateStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

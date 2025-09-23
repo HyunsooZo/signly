@@ -1,6 +1,6 @@
-package com.signly.infrastructure.persistence.entity;
+package com.signly.template.infrastructure.entity;
 
-import com.signly.domain.template.model.TemplateStatus;
+import com.signly.template.domain.model.TemplateStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

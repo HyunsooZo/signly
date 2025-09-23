@@ -1,8 +1,8 @@
-package com.signly.domain.template.model;
+package com.signly.template.domain.model;
 
 import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
-import com.signly.domain.user.model.UserId;
+import com.signly.user.domain.model.UserId;
 
 import java.time.LocalDateTime;
 

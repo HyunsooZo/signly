@@ -1,7 +1,7 @@
-package com.signly.application.template.mapper;
+package com.signly.template.application.mapper;
 
-import com.signly.application.template.dto.TemplateResponse;
-import com.signly.domain.template.model.ContractTemplate;
+import com.signly.template.application.dto.TemplateResponse;
+import com.signly.template.domain.model.ContractTemplate;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,4 +1,4 @@
-package com.signly.application.template.dto;
+package com.signly.template.application.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
