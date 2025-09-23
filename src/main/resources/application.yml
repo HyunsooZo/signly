@@ -3,32 +3,40 @@ spring:
     name: e-signature-signly
 
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
   datasource:
-    url: jdbc:mysql://localhost:3306/esign_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:root}
+    url: jdbc:mysql://localhost:3306/signly?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: ${DB_USERNAME:signly}
     password: ${DB_PASSWORD:password}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: ${DDL_AUTO:update}
+    show-sql: ${SHOW_SQL:false}
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
-        show_sql: false
+        use_sql_comments: true
     open-in-view: false
 
-  redis:
-    host: localhost
-    port: 6379
-    timeout: 2000ms
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
 
   mail:
-    host: smtp.gmail.com
-    port: 587
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
     properties:
@@ -37,37 +45,82 @@ spring:
           auth: true
           starttls:
             enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:10MB}
+      max-request-size: ${MAX_REQUEST_SIZE:10MB}
 
   security:
-    user:
-      name: admin
-      password: admin
+    require-ssl: false
 
-jwt:
-  secret: ${JWT_SECRET:mySecretKey12345678901234567890123456789012345678901234567890}
-  access-token-validity: 900000  # 15분
-  refresh-token-validity: 604800000  # 7일
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
 
-storage:
-  pdf:
-    path: ${PDF_STORAGE_PATH:/var/esign/documents}
-    max-size: 10485760  # 10MB
+app:
+  name: Signly E-Signature Service
+  version: 1.0.0
+  description: 전자계약 서비스 API
 
-contract:
-  expiry-days: 7
-  retention-years: 1
+  jwt:
+    secret: ${JWT_SECRET:mySecretKeyForJWT123456789012345678901234567890}
+    access-token-validity-in-ms: ${ACCESS_TOKEN_VALIDITY:3600000} # 1시간
+    refresh-token-validity-in-ms: ${REFRESH_TOKEN_VALIDITY:86400000} # 24시간
+
+  file:
+    upload-dir: ${UPLOAD_DIR:./uploads}
+    max-size: ${MAX_FILE_SIZE_BYTES:10485760} # 10MB
+
+  email:
+    from: ${EMAIL_FROM:noreply@signly.com}
+
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}
+    allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
   endpoint:
     health:
-      show-details: when_authorized
+      show-details: ${HEALTH_SHOW_DETAILS:when_authorized}
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
 logging:
   level:
-    com.signly: DEBUG
-    org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
+    com.signly: ${LOG_LEVEL:INFO}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
+    org.springframework.web: ${WEB_LOG_LEVEL:WARN}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${LOG_FILE:logs/signly.log}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    disable-swagger-default-url: true
+  show-actuator: true

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>계약서 서명 요청</title>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .highlight {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #4CAF50;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo" th:text="${companyName}">Signly</div>
+        </div>
+
+        <div class="content">
+            <h2>계약서 서명 요청</h2>
+
+            <p>안녕하세요, <strong th:text="${signerName}">서명자</strong>님!</p>
+
+            <p>다음 계약서에 대한 서명을 요청드립니다:</p>
+
+            <div class="highlight">
+                <strong>계약서 제목:</strong> <span th:text="${contractTitle}">계약서 제목</span>
+            </div>
+
+            <p>아래 버튼을 클릭하여 계약서를 확인하고 서명해 주세요.</p>
+
+            <div style="text-align: center;">
+                <a th:href="${contractUrl}" class="button">계약서 서명하기</a>
+            </div>
+
+            <p><strong>주의사항:</strong></p>
+            <ul>
+                <li>계약서를 신중히 검토한 후 서명해 주세요.</li>
+                <li>서명은 법적 효력을 가지므로 신중히 진행해 주세요.</li>
+                <li>문의사항이 있으시면 계약서 작성자에게 연락해 주세요.</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>이 이메일은 <span th:text="${companyName}">Signly</span> 전자계약 시스템에서 자동으로 발송되었습니다.</p>
+            <p>본 이메일에 회신하지 마세요.</p>
+        </div>
+    </div>
+</body>
+</html>
