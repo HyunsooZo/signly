@@ -61,6 +61,9 @@ public class SecurityConfig {
                 // 템플릿 관리 페이지 (개발 중이므로 임시 허용)
                 .requestMatchers("/templates/**").permitAll()
                 .requestMatchers("/WEB-INF/views/templates/**").permitAll()
+                // 계약서 관리 페이지 (개발 중이므로 임시 허용)
+                .requestMatchers("/contracts/**").permitAll()
+                .requestMatchers("/WEB-INF/views/contracts/**").permitAll()
                 // 개발 도구는 공개 허용
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
