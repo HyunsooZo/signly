@@ -55,7 +55,7 @@ public class ContractExpirationScheduler {
             // 1일 후 만료 예정인 계약서들
             List<Contract> contractsExpiringTomorrow = contractRepository
                     .findByStatusAndExpiresAtBefore(
-                        com.signly.domain.contract.model.ContractStatus.PENDING,
+                        com.signly.contract.domain.model.ContractStatus.PENDING,
                         dayAfterTomorrow
                     )
                     .stream()

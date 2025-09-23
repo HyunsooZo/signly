@@ -3,8 +3,8 @@ package com.signly.contract.infrastructure.mapper;
 import com.signly.contract.domain.model.*;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
-import com.signly.infrastructure.contract.entity.ContractJpaEntity;
-import com.signly.infrastructure.contract.entity.SignatureJpaEntity;
+import com.signly.contract.infrastructure.entity.ContractJpaEntity;
+import com.signly.contract.infrastructure.entity.SignatureJpaEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

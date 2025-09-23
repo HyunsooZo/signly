@@ -1,7 +1,7 @@
 package com.signly.contract.infrastructure.repository;
 
 import com.signly.contract.domain.model.ContractStatus;
-import com.signly.infrastructure.contract.entity.ContractJpaEntity;
+import com.signly.contract.infrastructure.entity.ContractJpaEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

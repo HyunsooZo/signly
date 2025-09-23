@@ -1,7 +1,7 @@
 package com.signly.user.infrastructure.mapper;
 
 import com.signly.user.domain.model.*;
-import com.signly.user.infrastructure.UserEntity;
+import com.signly.user.infrastructure.entity.UserEntity;
 import org.springframework.stereotype.Component;
 
 @Component

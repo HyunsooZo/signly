@@ -1,9 +1,9 @@
-package com.signly.presentation.auth;
+package com.signly.core.auth;
 
-import com.signly.application.auth.AuthService;
-import com.signly.application.auth.dto.LoginRequest;
-import com.signly.application.auth.dto.LoginResponse;
-import com.signly.application.auth.dto.RefreshTokenRequest;
+import com.signly.core.auth.AuthService;
+import com.signly.core.auth.dto.LoginRequest;
+import com.signly.core.auth.dto.LoginResponse;
+import com.signly.core.auth.dto.RefreshTokenRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

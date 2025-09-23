@@ -2,7 +2,7 @@ package com.signly.template.infrastructure.mapper;
 
 import com.signly.template.domain.model.*;
 import com.signly.user.domain.model.UserId;
-import com.signly.template.infrastructure.TemplateEntity;
+import com.signly.template.infrastructure.entity.TemplateEntity;
 import org.springframework.stereotype.Component;
 
 @Component

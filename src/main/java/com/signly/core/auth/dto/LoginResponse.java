@@ -1,6 +1,6 @@
-package com.signly.application.auth.dto;
+package com.signly.core.auth.dto;
 
-import com.signly.domain.user.model.UserType;
+import com.signly.user.domain.model.UserType;
 
 public record LoginResponse(
     String accessToken,

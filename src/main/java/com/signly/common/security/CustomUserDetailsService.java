@@ -1,8 +1,8 @@
 package com.signly.common.security;
 
-import com.signly.domain.user.model.Email;
-import com.signly.domain.user.model.User;
-import com.signly.domain.user.repository.UserRepository;
+import com.signly.user.domain.model.Email;
+import com.signly.user.domain.model.User;
+import com.signly.user.domain.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

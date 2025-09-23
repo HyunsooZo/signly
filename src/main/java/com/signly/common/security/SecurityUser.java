@@ -1,7 +1,7 @@
 package com.signly.common.security;
 
-import com.signly.domain.user.model.User;
-import com.signly.domain.user.model.UserStatus;
+import com.signly.user.domain.model.User;
+import com.signly.user.domain.model.UserStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

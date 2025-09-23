@@ -1,15 +1,15 @@
-package com.signly.application.auth;
+package com.signly.core.auth;
 
-import com.signly.application.auth.dto.LoginRequest;
-import com.signly.application.auth.dto.LoginResponse;
-import com.signly.application.auth.dto.RefreshTokenRequest;
+import com.signly.core.auth.dto.LoginRequest;
+import com.signly.core.auth.dto.LoginResponse;
+import com.signly.core.auth.dto.RefreshTokenRequest;
 import com.signly.common.exception.UnauthorizedException;
 import com.signly.common.security.JwtTokenProvider;
 import com.signly.common.security.SecurityUser;
-import com.signly.domain.user.model.Email;
-import com.signly.domain.user.model.Password;
-import com.signly.domain.user.model.User;
-import com.signly.domain.user.repository.UserRepository;
+import com.signly.user.domain.model.Email;
+import com.signly.user.domain.model.Password;
+import com.signly.user.domain.model.User;
+import com.signly.user.domain.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -75,7 +75,7 @@ public class AuthService {
         }
 
         String userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-        User user = userRepository.findById(com.signly.domain.user.model.UserId.of(userId))
+        User user = userRepository.findById(com.signly.user.domain.model.UserId.of(userId))
                 .orElseThrow(() -> new UnauthorizedException("사용자를 찾을 수 없습니다"));
 
         if (!user.isActive()) {

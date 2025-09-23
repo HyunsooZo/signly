@@ -1,7 +1,7 @@
-package com.signly.template.infrastructure.repository.jpa;
+package com.signly.template.infrastructure.repository;
 
 import com.signly.template.domain.model.TemplateStatus;
-import com.signly.template.infrastructure.TemplateEntity;
+import com.signly.template.infrastructure.entity.TemplateEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

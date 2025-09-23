@@ -1,4 +1,4 @@
-package com.signly.application.auth.dto;
+package com.signly.core.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
