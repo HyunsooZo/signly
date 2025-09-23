@@ -22,6 +22,24 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                         HttpServletResponse response,
                         AuthenticationException authException) throws IOException {
 
+        String requestURI = request.getRequestURI();
+
+        // /sign/** 경로는 인증 에러가 아니라 404로 처리 (컨트롤러에서 처리하도록)
+        if (requestURI.startsWith("/sign/")) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
+
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "NOT_FOUND");
+            errorResponse.put("message", "페이지를 찾을 수 없습니다");
+            errorResponse.put("status", 404);
+            errorResponse.put("path", requestURI);
+
+            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+            return;
+        }
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
@@ -30,7 +48,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         errorResponse.put("error", "UNAUTHORIZED");
         errorResponse.put("message", "인증이 필요합니다");
         errorResponse.put("status", 401);
-        errorResponse.put("path", request.getRequestURI());
+        errorResponse.put("path", requestURI);
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }

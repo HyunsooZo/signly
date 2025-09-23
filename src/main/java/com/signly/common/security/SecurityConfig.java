@@ -42,10 +42,20 @@ public class SecurityConfig {
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .authorizeHttpRequests(authz -> authz
+                // 서명 관련 페이지는 완전히 public으로 처리
+                .requestMatchers("/sign/**").permitAll()
+                // JSP 뷰 파일들도 허용 (Forward 시 필요)
+                .requestMatchers("/WEB-INF/views/sign/**").permitAll()
+                // 정적 리소스는 공개 허용
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                // API 인증 엔드포인트는 공개 허용
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/contracts/*/signing").permitAll()
+                // 서명 API는 공개 허용 (토큰 검증은 별도 로직에서)
+                .requestMatchers("/api/sign/**").permitAll()
+                // 개발 도구는 공개 허용
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
+                // 나머지 모든 요청은 인증 필요
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
