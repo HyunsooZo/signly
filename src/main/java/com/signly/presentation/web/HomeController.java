@@ -9,6 +9,11 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model) {
+        return "redirect:/login";
+    }
+
+    @GetMapping("/home")
+    public String dashboard(Model model) {
         model.addAttribute("pageTitle", "Signly - 전자계약 서비스");
         return "home/index";
     }
