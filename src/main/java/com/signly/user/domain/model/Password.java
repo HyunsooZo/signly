@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class Password {
 
     private static final Pattern PASSWORD_PATTERN = Pattern.compile(
-            "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$"
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$"
     );
 
     private final String value;
@@ -19,7 +19,7 @@ public class Password {
         }
 
         if (!PASSWORD_PATTERN.matcher(value).matches()) {
-            throw new ValidationException("비밀번호는 8자 이상이며 영문, 숫자, 특수문자를 포함해야 합니다");
+            throw new ValidationException("비밀번호는 8자 이상이며 대소문자, 숫자, 특수문자를 포함해야 합니다");
         }
 
         this.value = value;

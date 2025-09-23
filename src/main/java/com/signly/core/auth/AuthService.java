@@ -14,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,13 +24,16 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
     public AuthService(AuthenticationManager authenticationManager,
                       JwtTokenProvider jwtTokenProvider,
+                      PasswordEncoder passwordEncoder,
                       UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
 
@@ -108,7 +112,7 @@ public class AuthService {
         User user = userRepository.findByEmail(Email.of(email))
                 .orElseThrow(() -> new UnauthorizedException("사용자를 찾을 수 없습니다"));
 
-        com.signly.common.util.PasswordEncoder passwordEncoder = new com.signly.common.util.PasswordEncoder();
+        // passwordEncoder 빈을 주입받아 사용
         if (!user.validatePassword(Password.of(password), passwordEncoder)) {
             throw new UnauthorizedException("비밀번호가 올바르지 않습니다");
         }

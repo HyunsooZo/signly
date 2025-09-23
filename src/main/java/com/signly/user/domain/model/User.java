@@ -2,7 +2,7 @@ package com.signly.user.domain.model;
 
 import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
-import com.signly.common.util.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 

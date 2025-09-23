@@ -4,7 +4,7 @@ import com.signly.user.application.dto.*;
 import com.signly.user.application.mapper.UserDtoMapper;
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
-import com.signly.common.util.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import com.signly.user.domain.model.*;
 import com.signly.user.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;

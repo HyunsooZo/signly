@@ -25,7 +25,7 @@ class PasswordTest {
     void createPassword_WithInvalidFormat_ShouldThrowException(String invalidPassword) {
         assertThatThrownBy(() -> Password.of(invalidPassword))
                 .isInstanceOf(ValidationException.class)
-                .hasMessage("비밀번호는 8자 이상이며 영문, 숫자, 특수문자를 포함해야 합니다");
+                .hasMessage("비밀번호는 8자 이상이며 대소문자, 숫자, 특수문자를 포함해야 합니다");
     }
 
     @Test

@@ -1,7 +1,8 @@
 package com.signly.user.domain.model;
 
 import com.signly.common.exception.ValidationException;
-import com.signly.common.util.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ class UserTest {
 
     @BeforeEach
     void setUp() {
-        passwordEncoder = new PasswordEncoder();
+        passwordEncoder = new BCryptPasswordEncoder();
         validEmail = Email.of("test@example.com");
         validPassword = Password.of("Test123!@#");
     }
