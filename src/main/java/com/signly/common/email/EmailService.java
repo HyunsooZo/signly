@@ -5,8 +5,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -16,14 +14,11 @@ import java.util.Map;
 public class EmailService {
 
     private final JavaMailSender mailSender;
-    private final TemplateEngine templateEngine;
     private final String fromEmail;
 
     public EmailService(JavaMailSender mailSender,
-                       TemplateEngine templateEngine,
                        @Value("${app.email.from:noreply@signly.com}") String fromEmail) {
         this.mailSender = mailSender;
-        this.templateEngine = templateEngine;
         this.fromEmail = fromEmail;
     }
 
@@ -42,10 +37,8 @@ public class EmailService {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-            Context context = new Context();
-            context.setVariables(variables);
-
-            String htmlContent = templateEngine.process("email/" + template.getTemplateName(), context);
+            // 간단한 HTML 템플릿 생성 (실제로는 파일에서 읽어오거나 별도 템플릿 엔진 사용)
+            String htmlContent = generateEmailTemplate(template, variables);
 
             helper.setFrom(fromEmail);
             helper.setTo(to);
@@ -57,6 +50,34 @@ public class EmailService {
         } catch (MessagingException e) {
             throw new RuntimeException("이메일 전송 중 오류가 발생했습니다", e);
         }
+    }
+
+    private String generateEmailTemplate(EmailTemplate template, Map<String, Object> variables) {
+        // 간단한 템플릿 생성 (추후 개선 필요)
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html>");
+        html.append("<html><head><meta charset='UTF-8'></head><body>");
+        html.append("<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>");
+        html.append("<h2>").append(template.getSubject()).append("</h2>");
+
+        switch (template) {
+            case CONTRACT_SIGNING_REQUEST:
+                html.append("<p>안녕하세요, ").append(variables.get("signerName")).append("님</p>");
+                html.append("<p>").append(variables.get("contractTitle")).append(" 계약서에 서명을 요청드립니다.</p>");
+                html.append("<p><a href='").append(variables.get("contractUrl")).append("'>여기를 클릭하여 서명하기</a></p>");
+                break;
+            case CONTRACT_SIGNED:
+                html.append("<p>").append(variables.get("signerName")).append("님이 계약서에 서명하였습니다.</p>");
+                html.append("<p>계약서: ").append(variables.get("contractTitle")).append("</p>");
+                break;
+            default:
+                html.append("<p>Signly에서 알림 메일을 보내드립니다.</p>");
+        }
+
+        html.append("<br><p>감사합니다.<br>").append(variables.get("companyName")).append("</p>");
+        html.append("</div></body></html>");
+
+        return html.toString();
     }
 
     public void sendContractSigningRequest(String to, String contractTitle, String signerName, String contractUrl) {
