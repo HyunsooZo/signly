@@ -5,10 +5,21 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
+  web:
+    resources:
+      add-mappings: true
+
+  mvc:
+    favicon:
+      enabled: false
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+
   datasource:
-    url: jdbc:mysql://localhost:3306/signly?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/signly_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
     username: ${DB_USERNAME:signly}
-    password: ${DB_PASSWORD:password}
+    password: ${DB_PASSWORD:signly123!}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -37,8 +48,8 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
+    username: ${MAIL_USERNAME:bzhs1992@gmail.com}
+    password: ${MAIL_PASSWORD:zqjdwmroqtztbbcx}
     properties:
       mail:
         smtp:
@@ -110,7 +121,7 @@ logging:
     org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
     org.springframework.web: ${WEB_LOG_LEVEL:WARN}
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){blue} %clr([%thread]){magenta} %clr(%-5level){%highlight} %clr(%logger{36}){cyan} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
   file:
     name: ${LOG_FILE:logs/signly.log}
