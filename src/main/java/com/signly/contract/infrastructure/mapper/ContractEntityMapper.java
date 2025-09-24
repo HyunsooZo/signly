@@ -27,6 +27,7 @@ public class ContractEntityMapper {
             contract.getSecondParty().getEmail(),
             contract.getSecondParty().getOrganizationName(),
             contract.getStatus(),
+            contract.getSignToken().value(),
             contract.getExpiresAt()
         );
 
@@ -62,6 +63,8 @@ public class ContractEntityMapper {
             .map(this::toDomainSignature)
             .collect(Collectors.toList());
 
+        SignToken signToken = SignToken.of(entity.getSignToken());
+
         return Contract.restore(
             contractId,
             creatorId,
@@ -72,6 +75,7 @@ public class ContractEntityMapper {
             secondParty,
             entity.getStatus(),
             signatures,
+            signToken,
             entity.getExpiresAt(),
             entity.getCreatedAt(),
             entity.getUpdatedAt()

@@ -10,7 +10,7 @@ public class SignatureDtoMapper {
     public SignatureResponse toResponse(ContractSignature signature) {
         return new SignatureResponse(
                 signature.id().value(),
-                signature.contractId().value(),
+                signature.contractId().getValue(),
                 signature.signerInfo().signerEmail(),
                 signature.signerInfo().signerName(),
                 signature.signerInfo().signedAt(),

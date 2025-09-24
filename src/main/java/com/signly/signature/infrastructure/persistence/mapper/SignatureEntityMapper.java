@@ -14,7 +14,7 @@ public class SignatureEntityMapper {
     public SignatureEntity toEntity(ContractSignature signature) {
         return new SignatureEntity(
                 signature.id().value(),
-                signature.contractId().value(),
+                signature.contractId().getValue(),
                 signature.signerInfo().signerEmail(),
                 signature.signerInfo().signerName(),
                 signature.signatureData().value(),

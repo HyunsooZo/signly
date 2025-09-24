@@ -35,4 +35,6 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
     long countByCreatorIdAndStatus(String creatorId, ContractStatus status);
 
     long countByTemplateId(String templateId);
+
+    ContractJpaEntity findBySignToken(String signToken);
 }

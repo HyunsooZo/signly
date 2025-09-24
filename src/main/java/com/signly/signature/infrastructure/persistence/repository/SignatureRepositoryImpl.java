@@ -37,7 +37,7 @@ public class SignatureRepositoryImpl implements SignatureRepository {
 
     @Override
     public List<ContractSignature> findByContractId(ContractId contractId) {
-        return jpaRepository.findByContractId(contractId.value())
+        return jpaRepository.findByContractId(contractId.getValue())
                 .stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
@@ -45,13 +45,13 @@ public class SignatureRepositoryImpl implements SignatureRepository {
 
     @Override
     public Optional<ContractSignature> findByContractIdAndSignerEmail(ContractId contractId, String signerEmail) {
-        return jpaRepository.findByContractIdAndSignerEmail(contractId.value(), signerEmail)
+        return jpaRepository.findByContractIdAndSignerEmail(contractId.getValue(), signerEmail)
                 .map(mapper::toDomain);
     }
 
     @Override
     public boolean existsByContractIdAndSignerEmail(ContractId contractId, String signerEmail) {
-        return jpaRepository.existsByContractIdAndSignerEmail(contractId.value(), signerEmail);
+        return jpaRepository.existsByContractIdAndSignerEmail(contractId.getValue(), signerEmail);
     }
 
     @Override

@@ -19,7 +19,7 @@ public class Contract extends AggregateRoot {
     private final PartyInfo secondParty;
     private ContractStatus status;
     private final List<Signature> signatures;
-    private final SignToken signToken;
+    private SignToken signToken;
     private LocalDateTime expiresAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -56,12 +56,14 @@ public class Contract extends AggregateRoot {
     public static Contract restore(ContractId id, UserId creatorId, TemplateId templateId,
                                  String title, ContractContent content, PartyInfo firstParty,
                                  PartyInfo secondParty, ContractStatus status,
-                                 List<Signature> signatures, LocalDateTime expiresAt,
-                                 LocalDateTime createdAt, LocalDateTime updatedAt) {
+                                 List<Signature> signatures, SignToken signToken,
+                                 LocalDateTime expiresAt, LocalDateTime createdAt,
+                                 LocalDateTime updatedAt) {
         Contract contract = new Contract(id, creatorId, templateId, title, content,
                                        firstParty, secondParty, expiresAt);
         contract.status = status;
         contract.signatures.addAll(signatures);
+        contract.signToken = signToken;
         contract.createdAt = createdAt;
         contract.updatedAt = updatedAt;
         return contract;

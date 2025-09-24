@@ -15,7 +15,8 @@ import java.util.List;
     @Index(name = "idx_contract_status", columnList = "status"),
     @Index(name = "idx_contract_first_party_email", columnList = "first_party_email"),
     @Index(name = "idx_contract_second_party_email", columnList = "second_party_email"),
-    @Index(name = "idx_contract_expires_at", columnList = "expires_at")
+    @Index(name = "idx_contract_expires_at", columnList = "expires_at"),
+    @Index(name = "idx_contract_sign_token", columnList = "sign_token")
 })
 public class ContractJpaEntity extends BaseEntity {
 
@@ -61,6 +62,9 @@ public class ContractJpaEntity extends BaseEntity {
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<SignatureJpaEntity> signatures = new ArrayList<>();
 
+    @Column(name = "sign_token", nullable = false, unique = true, length = 36)
+    private String signToken;
+
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
@@ -70,7 +74,7 @@ public class ContractJpaEntity extends BaseEntity {
                            String content, String firstPartyName, String firstPartyEmail,
                            String firstPartyOrganization, String secondPartyName,
                            String secondPartyEmail, String secondPartyOrganization,
-                           ContractStatus status, LocalDateTime expiresAt) {
+                           ContractStatus status, String signToken, LocalDateTime expiresAt) {
         this.id = id;
         this.creatorId = creatorId;
         this.templateId = templateId;
@@ -83,6 +87,7 @@ public class ContractJpaEntity extends BaseEntity {
         this.secondPartyEmail = secondPartyEmail;
         this.secondPartyOrganization = secondPartyOrganization;
         this.status = status;
+        this.signToken = signToken;
         this.expiresAt = expiresAt;
     }
 
@@ -161,5 +166,13 @@ public class ContractJpaEntity extends BaseEntity {
 
     public void setExpiresAt(LocalDateTime expiresAt) {
         this.expiresAt = expiresAt;
+    }
+
+    public String getSignToken() {
+        return signToken;
+    }
+
+    public void setSignToken(String signToken) {
+        this.signToken = signToken;
     }
 }

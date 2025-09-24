@@ -3,6 +3,7 @@ package com.signly.contract.infrastructure.repository;
 import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.model.ContractId;
 import com.signly.contract.domain.model.ContractStatus;
+import com.signly.contract.domain.model.SignToken;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
@@ -108,5 +109,11 @@ public class ContractRepositoryImpl implements ContractRepository {
     @Override
     public long countByTemplateId(TemplateId templateId) {
         return jpaRepository.countByTemplateId(templateId.getValue());
+    }
+
+    @Override
+    public Optional<Contract> findBySignToken(SignToken signToken) {
+        ContractJpaEntity entity = jpaRepository.findBySignToken(signToken.value());
+        return entity != null ? Optional.of(entityMapper.toDomain(entity)) : Optional.empty();
     }
 }

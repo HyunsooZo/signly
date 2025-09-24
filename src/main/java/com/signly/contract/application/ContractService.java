@@ -230,6 +230,30 @@ public class ContractService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public ContractResponse getContractByToken(String token) {
+        SignToken signToken = SignToken.of(token);
+        Contract contract = contractRepository.findBySignToken(signToken)
+                .orElseThrow(() -> new NotFoundException("유효하지 않은 서명 링크입니다"));
+
+        if (contract.isExpired()) {
+            throw new ValidationException("만료된 계약서입니다");
+        }
+
+        return contractDtoMapper.toResponse(contract);
+    }
+
+    public ContractResponse processSignature(String token, String signerEmail, String signerName,
+                                           String signatureData, String ipAddress) {
+        SignToken signToken = SignToken.of(token);
+        Contract contract = contractRepository.findBySignToken(signToken)
+                .orElseThrow(() -> new NotFoundException("유효하지 않은 서명 링크입니다"));
+
+        contract.sign(signerEmail, signerName, signatureData, ipAddress);
+        Contract savedContract = contractRepository.save(contract);
+        return contractDtoMapper.toResponse(savedContract);
+    }
+
     public void expireContracts() {
         LocalDateTime now = LocalDateTime.now();
         List<Contract> expiredContracts = contractRepository.findExpiredContracts(now);
