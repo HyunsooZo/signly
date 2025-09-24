@@ -19,6 +19,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,6 +60,8 @@ public class TemplateService {
         return templateDtoMapper.toResponse(savedTemplate);
     }
 
+    @CachePut(value = "templates", key = "#templateId")
+    @CacheEvict(value = "activeTemplates", key = "#userId")
     public TemplateResponse updateTemplate(String userId, String templateId, UpdateTemplateCommand command) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
@@ -77,6 +82,7 @@ public class TemplateService {
         return templateDtoMapper.toResponse(updatedTemplate);
     }
 
+    @CacheEvict(value = {"templates", "activeTemplates"}, key = "#templateId")
     public void activateTemplate(String userId, String templateId) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
@@ -87,6 +93,7 @@ public class TemplateService {
         templateRepository.save(template);
     }
 
+    @CacheEvict(value = {"templates", "activeTemplates"}, key = "#templateId")
     public void archiveTemplate(String userId, String templateId) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
@@ -97,6 +104,7 @@ public class TemplateService {
         templateRepository.save(template);
     }
 
+    @CacheEvict(value = {"templates", "activeTemplates"}, key = "#templateId")
     public void deleteTemplate(String userId, String templateId) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
@@ -112,6 +120,7 @@ public class TemplateService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "templates", key = "#templateId")
     public TemplateResponse getTemplate(String userId, String templateId) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
@@ -136,6 +145,7 @@ public class TemplateService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "activeTemplates", key = "#userId")
     public List<TemplateResponse> getActiveTemplates(String userId) {
         UserId userIdObj = UserId.of(userId);
         List<ContractTemplate> activeTemplates = templateRepository.findActiveTemplatesByOwnerId(userIdObj);

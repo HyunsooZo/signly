@@ -17,6 +17,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -88,6 +91,8 @@ public class ContractService {
         return contractDtoMapper.toResponse(savedContract);
     }
 
+    @CachePut(value = "contracts", key = "#contractId")
+    @CacheEvict(value = {"contractTokens", "contractSigning"}, allEntries = true)
     public ContractResponse updateContract(String userId, String contractId, UpdateContractCommand command) {
         ContractId contractIdObj = ContractId.of(contractId);
         Contract contract = contractRepository.findById(contractIdObj)
@@ -112,6 +117,7 @@ public class ContractService {
         return contractDtoMapper.toResponse(updatedContract);
     }
 
+    @CacheEvict(value = {"contracts", "contractTokens"}, key = "#contractId")
     public void sendForSigning(String userId, String contractId) {
         ContractId contractIdObj = ContractId.of(contractId);
         Contract contract = contractRepository.findById(contractIdObj)
@@ -122,6 +128,8 @@ public class ContractService {
         contractRepository.save(contract);
     }
 
+    @CachePut(value = "contracts", key = "#contractId")
+    @CacheEvict(value = {"contractTokens", "contractSigning"}, allEntries = true)
     public ContractResponse signContract(String signerEmail, String contractId, SignContractCommand command) {
         ContractId contractIdObj = ContractId.of(contractId);
         Contract contract = contractRepository.findById(contractIdObj)
@@ -132,6 +140,7 @@ public class ContractService {
         return contractDtoMapper.toResponse(savedContract);
     }
 
+    @CacheEvict(value = {"contracts", "contractTokens", "contractSigning"}, allEntries = true)
     public void completeContract(String userId, String contractId) {
         ContractId contractIdObj = ContractId.of(contractId);
         Contract contract = contractRepository.findById(contractIdObj)
@@ -142,6 +151,7 @@ public class ContractService {
         contractRepository.save(contract);
     }
 
+    @CacheEvict(value = {"contracts", "contractTokens", "contractSigning"}, allEntries = true)
     public void cancelContract(String userId, String contractId) {
         ContractId contractIdObj = ContractId.of(contractId);
         Contract contract = contractRepository.findById(contractIdObj)
@@ -152,6 +162,7 @@ public class ContractService {
         contractRepository.save(contract);
     }
 
+    @CacheEvict(value = {"contracts", "contractTokens", "contractSigning"}, allEntries = true)
     public void deleteContract(String userId, String contractId) {
         ContractId contractIdObj = ContractId.of(contractId);
         Contract contract = contractRepository.findById(contractIdObj)
@@ -167,6 +178,7 @@ public class ContractService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "contracts", key = "#contractId")
     public ContractResponse getContract(String userId, String contractId) {
         ContractId contractIdObj = ContractId.of(contractId);
         Contract contract = contractRepository.findById(contractIdObj)
@@ -177,6 +189,7 @@ public class ContractService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "contractSigning", key = "#contractId + '_' + #signerEmail")
     public ContractResponse getContractForSigning(String signerEmail, String contractId) {
         ContractId contractIdObj = ContractId.of(contractId);
         Contract contract = contractRepository.findById(contractIdObj)
@@ -231,6 +244,7 @@ public class ContractService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "contractTokens", key = "#token")
     public ContractResponse getContractByToken(String token) {
         SignToken signToken = SignToken.of(token);
         Contract contract = contractRepository.findBySignToken(signToken)
@@ -243,6 +257,7 @@ public class ContractService {
         return contractDtoMapper.toResponse(contract);
     }
 
+    @CacheEvict(value = {"contracts", "contractTokens", "contractSigning"}, allEntries = true)
     public ContractResponse processSignature(String token, String signerEmail, String signerName,
                                            String signatureData, String ipAddress) {
         SignToken signToken = SignToken.of(token);
