@@ -37,7 +37,7 @@ public class TemplateWebController {
     public String templateList(@RequestParam(value = "page", defaultValue = "0") int page,
                               @RequestParam(value = "size", defaultValue = "10") int size,
                               @RequestParam(value = "status", required = false) TemplateStatus status,
-                              @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                              @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                               Model model) {
         try {
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -69,7 +69,7 @@ public class TemplateWebController {
     @PostMapping
     public String createTemplate(@Valid @ModelAttribute("template") TemplateForm form,
                                 BindingResult bindingResult,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         try {
@@ -107,7 +107,7 @@ public class TemplateWebController {
 
     @GetMapping("/{templateId}")
     public String templateDetail(@PathVariable String templateId,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                 Model model) {
         try {
             TemplateResponse template = templateService.getTemplate(userId, templateId);
@@ -125,7 +125,7 @@ public class TemplateWebController {
 
     @GetMapping("/{templateId}/edit")
     public String editTemplateForm(@PathVariable String templateId,
-                                  @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                  @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                   Model model) {
         try {
             TemplateResponse template = templateService.getTemplate(userId, templateId);
@@ -150,7 +150,7 @@ public class TemplateWebController {
     public String updateTemplate(@PathVariable String templateId,
                                 @Valid @ModelAttribute("template") TemplateForm form,
                                 BindingResult bindingResult,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         try {
@@ -192,7 +192,7 @@ public class TemplateWebController {
 
     @PostMapping("/{templateId}/activate")
     public String activateTemplate(@PathVariable String templateId,
-                                  @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                  @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                   RedirectAttributes redirectAttributes) {
         try {
             templateService.activateTemplate(userId, templateId);
@@ -207,7 +207,7 @@ public class TemplateWebController {
 
     @PostMapping("/{templateId}/archive")
     public String archiveTemplate(@PathVariable String templateId,
-                                 @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                 @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                  RedirectAttributes redirectAttributes) {
         try {
             templateService.archiveTemplate(userId, templateId);
@@ -222,7 +222,7 @@ public class TemplateWebController {
 
     @PostMapping("/{templateId}/delete")
     public String deleteTemplate(@PathVariable String templateId,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                 RedirectAttributes redirectAttributes) {
         try {
             templateService.deleteTemplate(userId, templateId);

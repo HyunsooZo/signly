@@ -37,7 +37,7 @@ public class HomeWebController {
     }
 
     @GetMapping("/home")
-    public String home(@RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+    public String home(@RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                        Model model) {
         try {
             // 대시보드 통계 데이터 수집

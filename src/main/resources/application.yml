@@ -84,7 +84,7 @@ app:
   description: 전자계약 서비스 API
 
   jwt:
-    secret: ${JWT_SECRET:mySecretKeyForJWT123456789012345678901234567890}
+    secret: ${JWT_SECRET:mySecretKeyForJWTSignatureServiceSecureKey123456789012345678901234567890SignlyESignatureService}
     access-token-validity-in-ms: ${ACCESS_TOKEN_VALIDITY:3600000} # 1시간
     refresh-token-validity-in-ms: ${REFRESH_TOKEN_VALIDITY:86400000} # 24시간
 
@@ -117,9 +117,14 @@ management:
 
 logging:
   level:
-    com.signly: ${LOG_LEVEL:INFO}
-    org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
-    org.springframework.web: ${WEB_LOG_LEVEL:WARN}
+    com.signly: ${LOG_LEVEL:DEBUG}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
+    org.springframework.web: ${WEB_LOG_LEVEL:DEBUG}
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
   pattern:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){blue} %clr([%thread]){magenta} %clr(%-5level){%highlight} %clr(%logger{36}){cyan} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

@@ -1,11 +1,16 @@
 package com.signly.common.domain;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@MappedSuperclass
 public abstract class BaseEntity {
 
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     protected BaseEntity() {

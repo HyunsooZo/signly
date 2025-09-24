@@ -41,7 +41,7 @@ public class ContractWebController {
     public String contractList(@RequestParam(value = "page", defaultValue = "0") int page,
                               @RequestParam(value = "size", defaultValue = "10") int size,
                               @RequestParam(value = "status", required = false) ContractStatus status,
-                              @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                              @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                               Model model) {
         try {
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -63,7 +63,7 @@ public class ContractWebController {
 
     @GetMapping("/new")
     public String newContractForm(@RequestParam(value = "templateId", required = false) String templateId,
-                                 @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                 @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                  Model model) {
         try {
             ContractForm form = new ContractForm();
@@ -96,7 +96,7 @@ public class ContractWebController {
     @PostMapping
     public String createContract(@Valid @ModelAttribute("contract") ContractForm form,
                                 BindingResult bindingResult,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         try {
@@ -146,7 +146,7 @@ public class ContractWebController {
 
     @GetMapping("/{contractId}")
     public String contractDetail(@PathVariable String contractId,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                 Model model) {
         try {
             ContractResponse contract = contractService.getContract(userId, contractId);
@@ -164,7 +164,7 @@ public class ContractWebController {
 
     @GetMapping("/{contractId}/edit")
     public String editContractForm(@PathVariable String contractId,
-                                  @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                  @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                   Model model) {
         try {
             ContractResponse contract = contractService.getContract(userId, contractId);
@@ -197,7 +197,7 @@ public class ContractWebController {
     public String updateContract(@PathVariable String contractId,
                                 @Valid @ModelAttribute("contract") ContractForm form,
                                 BindingResult bindingResult,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         try {
@@ -244,7 +244,7 @@ public class ContractWebController {
 
     @PostMapping("/{contractId}/send")
     public String sendForSigning(@PathVariable String contractId,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                 RedirectAttributes redirectAttributes) {
         try {
             contractService.sendForSigning(userId, contractId);
@@ -259,7 +259,7 @@ public class ContractWebController {
 
     @PostMapping("/{contractId}/cancel")
     public String cancelContract(@PathVariable String contractId,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                 RedirectAttributes redirectAttributes) {
         try {
             contractService.cancelContract(userId, contractId);
@@ -274,7 +274,7 @@ public class ContractWebController {
 
     @PostMapping("/{contractId}/delete")
     public String deleteContract(@PathVariable String contractId,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "demo-user") String userId,
+                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
                                 RedirectAttributes redirectAttributes) {
         try {
             contractService.deleteContract(userId, contractId);

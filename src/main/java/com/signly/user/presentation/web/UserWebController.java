@@ -28,23 +28,7 @@ public class UserWebController {
         this.userService = userService;
     }
 
-    @GetMapping("/login")
-    public String loginPage(@RequestParam(value = "error", required = false) String error,
-                           @RequestParam(value = "logout", required = false) String logout,
-                           Model model) {
-        if (error != null) {
-            model.addAttribute("errorMessage", "이메일 또는 비밀번호가 잘못되었습니다.");
-        }
-        if (logout != null) {
-            model.addAttribute("successMessage", "성공적으로 로그아웃되었습니다.");
-        }
-        return "auth/login";
-    }
 
-    @GetMapping("/register")
-    public String registerPage(Model model) {
-        return "auth/register";
-    }
 
     @PostMapping("/register")
     public String processRegistration(@RequestParam String email,
@@ -129,15 +113,7 @@ public class UserWebController {
         }
     }
 
-    @GetMapping("/logout")
-    public String logout() {
-        return "redirect:/login?logout";
-    }
 
-    @GetMapping("/forgot-password")
-    public String forgotPasswordPage() {
-        return "auth/forgot-password";
-    }
 
     private boolean isValidEmail(String email) {
         return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
