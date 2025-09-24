@@ -1,6 +1,6 @@
 package com.signly.common.security;
 
-import com.signly.security.jwt.JwtAuthenticationFilter;
+import com.signly.common.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
