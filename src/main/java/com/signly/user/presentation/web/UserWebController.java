@@ -1,19 +1,20 @@
 package com.signly.user.presentation.web;
 
+import com.signly.common.exception.BusinessException;
+import com.signly.common.exception.ValidationException;
 import com.signly.user.application.UserService;
 import com.signly.user.application.dto.RegisterUserCommand;
 import com.signly.user.domain.model.UserType;
-import com.signly.common.exception.BusinessException;
-import com.signly.common.exception.ValidationException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
