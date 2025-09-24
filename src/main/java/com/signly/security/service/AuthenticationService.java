@@ -31,13 +31,13 @@ public class AuthenticationService {
         UserResponse user = userService.authenticateUser(command);
 
         List<String> roles = List.of(user.userType().toString());
-        String accessToken = tokenProvider.createAccessToken(user.id(), user.email(), roles);
-        String refreshToken = tokenProvider.createRefreshToken(user.id());
+        String accessToken = tokenProvider.createAccessToken(user.userId(), user.email(), roles);
+        String refreshToken = tokenProvider.createRefreshToken(user.userId());
 
         return new LoginResponse(
                 accessToken,
                 refreshToken,
-                user.id(),
+                user.userId(),
                 user.email(),
                 user.name(),
                 user.userType()
@@ -55,8 +55,8 @@ public class AuthenticationService {
         UserResponse user = userService.getUserById(userId);
 
         List<String> roles = List.of(user.userType().toString());
-        String newAccessToken = tokenProvider.createAccessToken(user.id(), user.email(), roles);
-        String newRefreshToken = tokenProvider.createRefreshToken(user.id());
+        String newAccessToken = tokenProvider.createAccessToken(user.userId(), user.email(), roles);
+        String newRefreshToken = tokenProvider.createRefreshToken(user.userId());
 
         return new TokenResponse(newAccessToken, newRefreshToken);
     }

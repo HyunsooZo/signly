@@ -38,7 +38,7 @@ public class JwtTokenProvider {
                 .claim("roles", roles)
                 .claim("type", "access")
                 .setIssuedAt(now)
-                .setExpirationTime(validity)
+                .setExpiration(validity)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -51,7 +51,7 @@ public class JwtTokenProvider {
                 .setSubject(userId)
                 .claim("type", "refresh")
                 .setIssuedAt(now)
-                .setExpirationTime(validity)
+                .setExpiration(validity)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
