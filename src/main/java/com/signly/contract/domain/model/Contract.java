@@ -19,6 +19,7 @@ public class Contract extends AggregateRoot {
     private final PartyInfo secondParty;
     private ContractStatus status;
     private final List<Signature> signatures;
+    private final SignToken signToken;
     private LocalDateTime expiresAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -35,6 +36,7 @@ public class Contract extends AggregateRoot {
         this.secondParty = secondParty;
         this.status = ContractStatus.DRAFT;
         this.signatures = new ArrayList<>();
+        this.signToken = SignToken.generate();
         this.expiresAt = expiresAt;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
@@ -238,6 +240,10 @@ public class Contract extends AggregateRoot {
 
     public List<Signature> getSignatures() {
         return Collections.unmodifiableList(signatures);
+    }
+
+    public SignToken getSignToken() {
+        return signToken;
     }
 
     public LocalDateTime getExpiresAt() {

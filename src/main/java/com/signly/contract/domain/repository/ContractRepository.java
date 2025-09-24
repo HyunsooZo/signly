@@ -3,6 +3,7 @@ package com.signly.contract.domain.repository;
 import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.model.ContractId;
 import com.signly.contract.domain.model.ContractStatus;
+import com.signly.contract.domain.model.SignToken;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import java.util.Optional;
 public interface ContractRepository {
     Contract save(Contract contract);
     Optional<Contract> findById(ContractId contractId);
+    Optional<Contract> findBySignToken(SignToken signToken);
     void delete(Contract contract);
 
     Page<Contract> findByCreatorId(UserId creatorId, Pageable pageable);
