@@ -15,20 +15,25 @@ public class TemplateContent {
             throw new ValidationException("템플릿 내용은 null이거나 빈 값일 수 없습니다");
         }
 
-        validateJsonFormat(jsonContent);
-        this.jsonContent = jsonContent.trim();
+        this.jsonContent = ensureJsonFormat(jsonContent.trim());
     }
 
     public static TemplateContent of(String jsonContent) {
         return new TemplateContent(jsonContent);
     }
 
-    private void validateJsonFormat(String content) {
+    private String ensureJsonFormat(String content) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.readTree(content);
+            return content;
         } catch (JsonProcessingException e) {
-            throw new ValidationException("유효하지 않은 JSON 형식입니다");
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                return mapper.writeValueAsString(content);
+            } catch (JsonProcessingException ex) {
+                throw new ValidationException("유효하지 않은 JSON 형식입니다");
+            }
         }
     }
 
