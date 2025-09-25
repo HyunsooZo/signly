@@ -1,5 +1,7 @@
 package com.signly.home.presentation.web;
 
+import com.signly.common.security.CurrentUserProvider;
+import com.signly.common.security.SecurityUser;
 import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.ContractResponse;
 import com.signly.contract.domain.model.ContractStatus;
@@ -15,6 +17,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,10 +30,14 @@ public class HomeWebController {
     private static final Logger logger = LoggerFactory.getLogger(HomeWebController.class);
     private final TemplateService templateService;
     private final ContractService contractService;
+    private final CurrentUserProvider currentUserProvider;
 
-    public HomeWebController(TemplateService templateService, ContractService contractService) {
+    public HomeWebController(TemplateService templateService,
+                             ContractService contractService,
+                             CurrentUserProvider currentUserProvider) {
         this.templateService = templateService;
         this.contractService = contractService;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @GetMapping("/")
@@ -38,30 +47,33 @@ public class HomeWebController {
 
     @GetMapping("/home")
     public String home(@RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                       @AuthenticationPrincipal SecurityUser securityUser,
+                       HttpServletRequest request,
                        Model model) {
         try {
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
             // 대시보드 통계 데이터 수집
             PageRequest pageRequest = PageRequest.of(0, 5, Sort.by("createdAt").descending());
 
             // 최근 템플릿 목록
-            Page<TemplateResponse> recentTemplates = templateService.getTemplatesByOwner(userId, pageRequest);
+            Page<TemplateResponse> recentTemplates = templateService.getTemplatesByOwner(resolvedUserId, pageRequest);
 
             // 최근 계약서 목록
-            Page<ContractResponse> recentContracts = contractService.getContractsByCreator(userId, pageRequest);
+            Page<ContractResponse> recentContracts = contractService.getContractsByCreator(resolvedUserId, pageRequest);
 
             // 템플릿 통계
             Map<String, Long> templateStats = new HashMap<>();
-            templateStats.put("total", getTotalTemplateCount(userId));
-            templateStats.put("active", getTemplateCountByStatus(userId, TemplateStatus.ACTIVE));
-            templateStats.put("draft", getTemplateCountByStatus(userId, TemplateStatus.DRAFT));
+            templateStats.put("total", getTotalTemplateCount(resolvedUserId));
+            templateStats.put("active", getTemplateCountByStatus(resolvedUserId, TemplateStatus.ACTIVE));
+            templateStats.put("draft", getTemplateCountByStatus(resolvedUserId, TemplateStatus.DRAFT));
 
             // 계약서 통계
             Map<String, Long> contractStats = new HashMap<>();
-            contractStats.put("total", getTotalContractCount(userId));
-            contractStats.put("draft", getContractCountByStatus(userId, ContractStatus.DRAFT));
-            contractStats.put("pending", getContractCountByStatus(userId, ContractStatus.PENDING));
-            contractStats.put("signed", getContractCountByStatus(userId, ContractStatus.SIGNED));
-            contractStats.put("completed", getContractCountByStatus(userId, ContractStatus.COMPLETED));
+            contractStats.put("total", getTotalContractCount(resolvedUserId));
+            contractStats.put("draft", getContractCountByStatus(resolvedUserId, ContractStatus.DRAFT));
+            contractStats.put("pending", getContractCountByStatus(resolvedUserId, ContractStatus.PENDING));
+            contractStats.put("signed", getContractCountByStatus(resolvedUserId, ContractStatus.SIGNED));
+            contractStats.put("completed", getContractCountByStatus(resolvedUserId, ContractStatus.COMPLETED));
 
             model.addAttribute("pageTitle", "대시보드");
             model.addAttribute("recentTemplates", recentTemplates.getContent());

@@ -1,5 +1,7 @@
 package com.signly.template.presentation.web;
 
+import com.signly.common.security.CurrentUserProvider;
+import com.signly.common.security.SecurityUser;
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.dto.CreateTemplateCommand;
 import com.signly.template.application.dto.TemplateResponse;
@@ -17,6 +19,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import jakarta.validation.Valid;
 import java.util.HashMap;
@@ -28,23 +33,28 @@ public class TemplateWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(TemplateWebController.class);
     private final TemplateService templateService;
+    private final CurrentUserProvider currentUserProvider;
 
-    public TemplateWebController(TemplateService templateService) {
+    public TemplateWebController(TemplateService templateService, CurrentUserProvider currentUserProvider) {
         this.templateService = templateService;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @GetMapping
     public String templateList(@RequestParam(value = "page", defaultValue = "0") int page,
                               @RequestParam(value = "size", defaultValue = "10") int size,
                               @RequestParam(value = "status", required = false) TemplateStatus status,
-                              @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                              @RequestHeader(value = "X-User-Id", required = false) String userId,
+                              @AuthenticationPrincipal SecurityUser securityUser,
+                              HttpServletRequest request,
                               Model model) {
         try {
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
             Page<TemplateResponse> templates = status != null ?
-                    templateService.getTemplatesByOwnerAndStatus(userId, status, pageRequest) :
-                    templateService.getTemplatesByOwner(userId, pageRequest);
+                    templateService.getTemplatesByOwnerAndStatus(resolvedUserId, status, pageRequest) :
+                    templateService.getTemplatesByOwner(resolvedUserId, pageRequest);
 
             model.addAttribute("pageTitle", "템플릿 관리");
             model.addAttribute("templates", templates);
@@ -69,7 +79,9 @@ public class TemplateWebController {
     @PostMapping
     public String createTemplate(@Valid @ModelAttribute("template") TemplateForm form,
                                 BindingResult bindingResult,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                HttpServletRequest request,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         try {
@@ -78,8 +90,9 @@ public class TemplateWebController {
                 return "templates/form";
             }
 
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             CreateTemplateCommand command = new CreateTemplateCommand(form.getTitle(), form.getContent());
-            TemplateResponse response = templateService.createTemplate(userId, command);
+            TemplateResponse response = templateService.createTemplate(resolvedUserId, command);
 
             logger.info("템플릿 생성 성공: {} (ID: {})", response.title(), response.templateId());
             redirectAttributes.addFlashAttribute("successMessage", "템플릿이 성공적으로 생성되었습니다.");
@@ -107,10 +120,13 @@ public class TemplateWebController {
 
     @GetMapping("/{templateId}")
     public String templateDetail(@PathVariable String templateId,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                HttpServletRequest request,
                                 Model model) {
         try {
-            TemplateResponse template = templateService.getTemplate(userId, templateId);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            TemplateResponse template = templateService.getTemplate(resolvedUserId, templateId);
 
             model.addAttribute("pageTitle", "템플릿 상세보기");
             model.addAttribute("template", template);
@@ -125,10 +141,13 @@ public class TemplateWebController {
 
     @GetMapping("/{templateId}/edit")
     public String editTemplateForm(@PathVariable String templateId,
-                                  @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                  @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                  @AuthenticationPrincipal SecurityUser securityUser,
+                                  HttpServletRequest request,
                                   Model model) {
         try {
-            TemplateResponse template = templateService.getTemplate(userId, templateId);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            TemplateResponse template = templateService.getTemplate(resolvedUserId, templateId);
 
             TemplateForm form = new TemplateForm();
             form.setTitle(template.title());
@@ -150,7 +169,9 @@ public class TemplateWebController {
     public String updateTemplate(@PathVariable String templateId,
                                 @Valid @ModelAttribute("template") TemplateForm form,
                                 BindingResult bindingResult,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                HttpServletRequest request,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         try {
@@ -161,7 +182,8 @@ public class TemplateWebController {
             }
 
             UpdateTemplateCommand command = new UpdateTemplateCommand(form.getTitle(), form.getContent());
-            TemplateResponse response = templateService.updateTemplate(userId, templateId, command);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            TemplateResponse response = templateService.updateTemplate(resolvedUserId, templateId, command);
 
             logger.info("템플릿 수정 성공: {} (ID: {})", response.title(), response.templateId());
             redirectAttributes.addFlashAttribute("successMessage", "템플릿이 성공적으로 수정되었습니다.");
@@ -192,10 +214,13 @@ public class TemplateWebController {
 
     @PostMapping("/{templateId}/activate")
     public String activateTemplate(@PathVariable String templateId,
-                                  @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                  @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                  @AuthenticationPrincipal SecurityUser securityUser,
+                                  HttpServletRequest request,
                                   RedirectAttributes redirectAttributes) {
         try {
-            templateService.activateTemplate(userId, templateId);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            templateService.activateTemplate(resolvedUserId, templateId);
             logger.info("템플릿 활성화 성공: templateId={}", templateId);
             redirectAttributes.addFlashAttribute("successMessage", "템플릿이 활성화되었습니다.");
         } catch (Exception e) {
@@ -207,10 +232,13 @@ public class TemplateWebController {
 
     @PostMapping("/{templateId}/archive")
     public String archiveTemplate(@PathVariable String templateId,
-                                 @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                 @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                 @AuthenticationPrincipal SecurityUser securityUser,
+                                 HttpServletRequest request,
                                  RedirectAttributes redirectAttributes) {
         try {
-            templateService.archiveTemplate(userId, templateId);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            templateService.archiveTemplate(resolvedUserId, templateId);
             logger.info("템플릿 보관 성공: templateId={}", templateId);
             redirectAttributes.addFlashAttribute("successMessage", "템플릿이 보관되었습니다.");
         } catch (Exception e) {
@@ -222,10 +250,13 @@ public class TemplateWebController {
 
     @PostMapping("/{templateId}/delete")
     public String deleteTemplate(@PathVariable String templateId,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                HttpServletRequest request,
                                 RedirectAttributes redirectAttributes) {
         try {
-            templateService.deleteTemplate(userId, templateId);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            templateService.deleteTemplate(resolvedUserId, templateId);
             logger.info("템플릿 삭제 성공: templateId={}", templateId);
             redirectAttributes.addFlashAttribute("successMessage", "템플릿이 삭제되었습니다.");
         } catch (Exception e) {

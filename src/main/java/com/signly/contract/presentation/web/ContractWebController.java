@@ -1,5 +1,7 @@
 package com.signly.contract.presentation.web;
 
+import com.signly.common.security.CurrentUserProvider;
+import com.signly.common.security.SecurityUser;
 import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.ContractResponse;
 import com.signly.contract.application.dto.CreateContractCommand;
@@ -20,6 +22,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
@@ -31,22 +36,29 @@ public class ContractWebController {
     private static final Logger logger = LoggerFactory.getLogger(ContractWebController.class);
     private final ContractService contractService;
     private final TemplateService templateService;
+    private final CurrentUserProvider currentUserProvider;
 
-    public ContractWebController(ContractService contractService, TemplateService templateService) {
+    public ContractWebController(ContractService contractService,
+                                TemplateService templateService,
+                                CurrentUserProvider currentUserProvider) {
         this.contractService = contractService;
         this.templateService = templateService;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @GetMapping
     public String contractList(@RequestParam(value = "page", defaultValue = "0") int page,
                               @RequestParam(value = "size", defaultValue = "10") int size,
                               @RequestParam(value = "status", required = false) ContractStatus status,
-                              @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                              @RequestHeader(value = "X-User-Id", required = false) String userId,
+                              @AuthenticationPrincipal SecurityUser securityUser,
+                              HttpServletRequest request,
                               Model model) {
         try {
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-            Page<ContractResponse> contracts = contractService.getContractsByCreator(userId, pageRequest);
+            Page<ContractResponse> contracts = contractService.getContractsByCreator(resolvedUserId, pageRequest);
 
             model.addAttribute("pageTitle", "계약서 관리");
             model.addAttribute("contracts", contracts);
@@ -63,14 +75,17 @@ public class ContractWebController {
 
     @GetMapping("/new")
     public String newContractForm(@RequestParam(value = "templateId", required = false) String templateId,
-                                 @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                 @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                 @AuthenticationPrincipal SecurityUser securityUser,
+                                 HttpServletRequest request,
                                  Model model) {
         try {
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             ContractForm form = new ContractForm();
 
             // 템플릿이 지정된 경우 템플릿 정보 로드
             if (templateId != null && !templateId.isEmpty()) {
-                TemplateResponse template = templateService.getTemplate(userId, templateId);
+                TemplateResponse template = templateService.getTemplate(resolvedUserId, templateId);
                 form.setTemplateId(templateId);
                 form.setTitle(template.title());
                 form.setContent(template.content());
@@ -79,7 +94,7 @@ public class ContractWebController {
             // 활성 템플릿 목록 로드
             PageRequest templatePageRequest = PageRequest.of(0, 100, Sort.by("title"));
             Page<TemplateResponse> activeTemplates = templateService.getTemplatesByOwnerAndStatus(
-                    userId, TemplateStatus.ACTIVE, templatePageRequest);
+                    resolvedUserId, TemplateStatus.ACTIVE, templatePageRequest);
 
             model.addAttribute("pageTitle", "새 계약서 생성");
             model.addAttribute("contract", form);
@@ -96,7 +111,9 @@ public class ContractWebController {
     @PostMapping
     public String createContract(@Valid @ModelAttribute("contract") ContractForm form,
                                 BindingResult bindingResult,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                HttpServletRequest request,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         try {
@@ -105,6 +122,7 @@ public class ContractWebController {
                 return "contracts/form";
             }
 
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             CreateContractCommand command = new CreateContractCommand(
                     form.getTemplateId(),
                     form.getTitle(),
@@ -118,7 +136,7 @@ public class ContractWebController {
                     form.getExpiresAt()
             );
 
-            ContractResponse response = contractService.createContract(userId, command);
+            ContractResponse response = contractService.createContract(resolvedUserId, command);
 
             logger.info("계약서 생성 성공: {} (ID: {})", response.title(), response.id());
             redirectAttributes.addFlashAttribute("successMessage", "계약서가 성공적으로 생성되었습니다.");
@@ -146,10 +164,13 @@ public class ContractWebController {
 
     @GetMapping("/{contractId}")
     public String contractDetail(@PathVariable String contractId,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                HttpServletRequest request,
                                 Model model) {
         try {
-            ContractResponse contract = contractService.getContract(userId, contractId);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
 
             model.addAttribute("pageTitle", "계약서 상세보기");
             model.addAttribute("contract", contract);
@@ -164,10 +185,13 @@ public class ContractWebController {
 
     @GetMapping("/{contractId}/edit")
     public String editContractForm(@PathVariable String contractId,
-                                  @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                  @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                  @AuthenticationPrincipal SecurityUser securityUser,
+                                  HttpServletRequest request,
                                   Model model) {
         try {
-            ContractResponse contract = contractService.getContract(userId, contractId);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
 
             ContractForm form = new ContractForm();
             form.setTemplateId(contract.templateId());
@@ -197,7 +221,9 @@ public class ContractWebController {
     public String updateContract(@PathVariable String contractId,
                                 @Valid @ModelAttribute("contract") ContractForm form,
                                 BindingResult bindingResult,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                HttpServletRequest request,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         try {
@@ -213,7 +239,8 @@ public class ContractWebController {
                     form.getExpiresAt()
             );
 
-            ContractResponse response = contractService.updateContract(userId, contractId, command);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            ContractResponse response = contractService.updateContract(resolvedUserId, contractId, command);
 
             logger.info("계약서 수정 성공: {} (ID: {})", response.title(), response.id());
             redirectAttributes.addFlashAttribute("successMessage", "계약서가 성공적으로 수정되었습니다.");
@@ -244,10 +271,13 @@ public class ContractWebController {
 
     @PostMapping("/{contractId}/send")
     public String sendForSigning(@PathVariable String contractId,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                HttpServletRequest request,
                                 RedirectAttributes redirectAttributes) {
         try {
-            contractService.sendForSigning(userId, contractId);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            contractService.sendForSigning(resolvedUserId, contractId);
             logger.info("계약서 서명 요청 전송 성공: contractId={}", contractId);
             redirectAttributes.addFlashAttribute("successMessage", "계약서 서명 요청이 전송되었습니다.");
         } catch (Exception e) {
@@ -259,10 +289,13 @@ public class ContractWebController {
 
     @PostMapping("/{contractId}/cancel")
     public String cancelContract(@PathVariable String contractId,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                HttpServletRequest request,
                                 RedirectAttributes redirectAttributes) {
         try {
-            contractService.cancelContract(userId, contractId);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            contractService.cancelContract(resolvedUserId, contractId);
             logger.info("계약서 취소 성공: contractId={}", contractId);
             redirectAttributes.addFlashAttribute("successMessage", "계약서가 취소되었습니다.");
         } catch (Exception e) {
@@ -289,10 +322,13 @@ public class ContractWebController {
 
     @PostMapping("/{contractId}/delete")
     public String deleteContract(@PathVariable String contractId,
-                                @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                @AuthenticationPrincipal SecurityUser securityUser,
+                                HttpServletRequest request,
                                 RedirectAttributes redirectAttributes) {
         try {
-            contractService.deleteContract(userId, contractId);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            contractService.deleteContract(resolvedUserId, contractId);
             logger.info("계약서 삭제 성공: contractId={}", contractId);
             redirectAttributes.addFlashAttribute("successMessage", "계약서가 삭제되었습니다.");
         } catch (Exception e) {
