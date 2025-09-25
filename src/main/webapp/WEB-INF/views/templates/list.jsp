@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -149,10 +150,19 @@
                                                     </td>
                                                     <td class="text-center">
                                                         <div class="btn-group btn-group-sm" role="group">
+                                                            <button type="button"
+                                                                    class="btn btn-outline-info"
+                                                                    data-template-id="${template.templateId}"
+                                                                    data-template-title="${fn:escapeXml(template.title)}"
+                                                                    data-template-content="${fn:escapeXml(template.content)}"
+                                                                    onclick="previewTemplateButton(this)"
+                                                                    title="미리보기">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
                                                             <a href="/templates/${template.templateId}"
                                                                class="btn btn-outline-primary"
                                                                title="상세보기">
-                                                                <i class="bi bi-eye"></i>
+                                                                <i class="bi bi-box-arrow-up-right"></i>
                                                             </a>
                                                             <a href="/templates/${template.templateId}/edit"
                                                                class="btn btn-outline-secondary"
@@ -255,8 +265,74 @@
         </div>
     </div>
 
+    <!-- 미리보기 모달 -->
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="previewModalTitle">템플릿 미리보기</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        현재 템플릿에 입력된 내용을 기준으로 샘플 데이터를 이용해 미리보기를 제공합니다.
+                    </div>
+                    <div id="previewContent"
+                         class="border rounded p-4"
+                         style="background-color:#f8f9fa; min-height:400px; white-space:pre-wrap; font-family:'Times New Roman', serif;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        function previewTemplateButton(button) {
+            const templateId = button.getAttribute('data-template-id');
+            const title = button.getAttribute('data-template-title') || '템플릿 미리보기';
+            const encodedContent = button.getAttribute('data-template-content') || '';
+            previewTemplateModal(templateId, title, encodedContent);
+        }
+
+        function previewTemplateModal(templateId, title, encodedContent) {
+            const rawContent = decodeHtml(encodedContent).trim();
+            const previewContent = rawContent
+                ? buildPreviewContent(rawContent, title)
+                : '템플릿 내용이 비어있습니다.';
+
+            document.getElementById('previewModalTitle').textContent = title;
+            document.getElementById('previewContent').textContent = previewContent;
+            new bootstrap.Modal(document.getElementById('previewModal')).show();
+        }
+
+        function buildPreviewContent(content, title) {
+            return content
+                .replace(/\{PARTY_A_NAME\}/g, '홍길동')
+                .replace(/\{PARTY_A_EMAIL\}/g, 'hong@example.com')
+                .replace(/\{PARTY_A_ADDRESS\}/g, '서울특별시 강남구 테헤란로 123')
+                .replace(/\{PARTY_B_NAME\}/g, '김철수')
+                .replace(/\{PARTY_B_EMAIL\}/g, 'kim@example.com')
+                .replace(/\{PARTY_B_ADDRESS\}/g, '서울특별시 서초구 서초대로 456')
+                .replace(/\{CONTRACT_TITLE\}/g, title || '샘플 계약서')
+                .replace(/\{CONTRACT_DATE\}/g, new Date().toLocaleDateString('ko-KR'))
+                .replace(/\{CONTRACT_AMOUNT\}/g, '1,000,000원')
+                .replace(/\{START_DATE\}/g, new Date().toLocaleDateString('ko-KR'))
+                .replace(/\{END_DATE\}/g, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('ko-KR'))
+                .replace(/\{SIGNATURE_A\}/g, '[갑 서명]')
+                .replace(/\{SIGNATURE_B\}/g, '[을 서명]')
+                .replace(/\{SIGNATURE_DATE\}/g, new Date().toLocaleDateString('ko-KR'));
+        }
+
+        function decodeHtml(value) {
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = value;
+            return textarea.value;
+        }
+
         const csrfParam = '${_csrf.parameterName}';
         const csrfToken = '${_csrf.token}';
 
