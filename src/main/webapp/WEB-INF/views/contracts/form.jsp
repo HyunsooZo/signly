@@ -167,9 +167,9 @@
                                        placeholder="example@domain.com">
                             </div>
                             <div class="mb-4">
-                                <label for="firstPartyAddress" class="form-label">주소</label>
+                                <label for="firstPartyAddress" class="form-label">회사/조직명</label>
                                 <textarea class="form-control" id="firstPartyAddress" name="firstPartyAddress"
-                                          rows="3" maxlength="500" placeholder="주소를 입력하세요">${contract.firstPartyAddress}</textarea>
+                                          rows="3" maxlength="500" placeholder="회사 또는 조직명을 입력하세요">${contract.firstPartyAddress}</textarea>
                             </div>
 
                             <!-- 을 (두 번째 당사자) -->
@@ -187,9 +187,9 @@
                                        placeholder="example@domain.com">
                             </div>
                             <div class="mb-4">
-                                <label for="secondPartyAddress" class="form-label">주소</label>
+                                <label for="secondPartyAddress" class="form-label">회사/조직명</label>
                                 <textarea class="form-control" id="secondPartyAddress" name="secondPartyAddress"
-                                          rows="3" maxlength="500" placeholder="주소를 입력하세요">${contract.secondPartyAddress}</textarea>
+                                          rows="3" maxlength="500" placeholder="회사 또는 조직명을 입력하세요">${contract.secondPartyAddress}</textarea>
                             </div>
 
                             <!-- 액션 버튼 -->

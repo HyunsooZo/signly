@@ -309,10 +309,10 @@
                                         <span class="fw-medium">이메일:</span>
                                         <span class="text-muted">${contract.firstParty.email}</span>
                                     </div>
-                                    <c:if test="${not empty contract.firstParty.address}">
+                                    <c:if test="${not empty contract.firstParty.organizationName}">
                                         <div class="info-item">
-                                            <span class="fw-medium">주소:</span>
-                                            <span class="text-muted">${contract.firstParty.address}</span>
+                                            <span class="fw-medium">회사/조직:</span>
+                                            <span class="text-muted">${contract.firstParty.organizationName}</span>
                                         </div>
                                     </c:if>
                                 </div>
@@ -326,10 +326,10 @@
                                         <span class="fw-medium">이메일:</span>
                                         <span class="text-muted">${contract.secondParty.email}</span>
                                     </div>
-                                    <c:if test="${not empty contract.secondParty.address}">
+                                    <c:if test="${not empty contract.secondParty.organizationName}">
                                         <div class="info-item">
-                                            <span class="fw-medium">주소:</span>
-                                            <span class="text-muted">${contract.secondParty.address}</span>
+                                            <span class="fw-medium">회사/조직:</span>
+                                            <span class="text-muted">${contract.secondParty.organizationName}</span>
                                         </div>
                                     </c:if>
                                 </div>
@@ -417,10 +417,10 @@
             let previewContent = content
                 .replace(/\{FIRST_PARTY_NAME\}/g, '${contract.firstParty.name}')
                 .replace(/\{FIRST_PARTY_EMAIL\}/g, '${contract.firstParty.email}')
-                .replace(/\{FIRST_PARTY_ADDRESS\}/g, '${contract.firstParty.address}')
+                .replace(/\{FIRST_PARTY_ADDRESS\}/g, '${contract.firstParty.organizationName}')
                 .replace(/\{SECOND_PARTY_NAME\}/g, '${contract.secondParty.name}')
                 .replace(/\{SECOND_PARTY_EMAIL\}/g, '${contract.secondParty.email}')
-                .replace(/\{SECOND_PARTY_ADDRESS\}/g, '${contract.secondParty.address}')
+                .replace(/\{SECOND_PARTY_ADDRESS\}/g, '${contract.secondParty.organizationName}')
                 .replace(/\{CONTRACT_TITLE\}/g, '${contract.title}')
                 .replace(/\{CONTRACT_DATE\}/g, new Date().toLocaleDateString('ko-KR'))
                 .replace(/\{SIGNATURE_FIRST\}/g, '[갑 서명]')

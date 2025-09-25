@@ -272,6 +272,21 @@ public class ContractWebController {
         return "redirect:/contracts/" + contractId;
     }
 
+    @PostMapping("/{contractId}/complete")
+    public String completeContract(@PathVariable String contractId,
+                                  @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            contractService.completeContract(userId, contractId);
+            logger.info("계약서 완료 처리 성공: contractId={}", contractId);
+            redirectAttributes.addFlashAttribute("successMessage", "계약서가 완료되었습니다.");
+        } catch (Exception e) {
+            logger.error("계약서 완료 처리 중 오류 발생: contractId={}", contractId, e);
+            redirectAttributes.addFlashAttribute("errorMessage", "계약서 완료 처리 중 오류가 발생했습니다.");
+        }
+        return "redirect:/contracts/" + contractId;
+    }
+
     @PostMapping("/{contractId}/delete")
     public String deleteContract(@PathVariable String contractId,
                                 @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,

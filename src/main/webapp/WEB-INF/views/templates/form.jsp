@@ -91,24 +91,24 @@
                 <p class="small text-muted mb-2">아래 변수들을 클릭하면 템플릿 내용에 자동으로 추가됩니다:</p>
                 <div class="mb-2">
                     <strong>당사자 정보:</strong>
-                    <span class="variable-tag" onclick="insertVariable('{{PARTY_A_NAME}}')">{PARTY_A_NAME}</span>
-                    <span class="variable-tag" onclick="insertVariable('{{PARTY_A_ADDRESS}}')">{PARTY_A_ADDRESS}</span>
-                    <span class="variable-tag" onclick="insertVariable('{{PARTY_B_NAME}}')">{PARTY_B_NAME}</span>
-                    <span class="variable-tag" onclick="insertVariable('{{PARTY_B_ADDRESS}}')">{PARTY_B_ADDRESS}</span>
+                    <span class="variable-tag" onclick="insertVariable('{PARTY_A_NAME}')">{PARTY_A_NAME}</span>
+                    <span class="variable-tag" onclick="insertVariable('{PARTY_A_ADDRESS}')">{PARTY_A_ADDRESS}</span>
+                    <span class="variable-tag" onclick="insertVariable('{PARTY_B_NAME}')">{PARTY_B_NAME}</span>
+                    <span class="variable-tag" onclick="insertVariable('{PARTY_B_ADDRESS}')">{PARTY_B_ADDRESS}</span>
                 </div>
                 <div class="mb-2">
                     <strong>계약 정보:</strong>
-                    <span class="variable-tag" onclick="insertVariable('{{CONTRACT_TITLE}}')">{CONTRACT_TITLE}</span>
-                    <span class="variable-tag" onclick="insertVariable('{{CONTRACT_DATE}}')">{CONTRACT_DATE}</span>
-                    <span class="variable-tag" onclick="insertVariable('{{CONTRACT_AMOUNT}}')">{CONTRACT_AMOUNT}</span>
-                    <span class="variable-tag" onclick="insertVariable('{{START_DATE}}')">{START_DATE}</span>
-                    <span class="variable-tag" onclick="insertVariable('{{END_DATE}}')">{END_DATE}</span>
+                    <span class="variable-tag" onclick="insertVariable('{CONTRACT_TITLE}')">{CONTRACT_TITLE}</span>
+                    <span class="variable-tag" onclick="insertVariable('{CONTRACT_DATE}')">{CONTRACT_DATE}</span>
+                    <span class="variable-tag" onclick="insertVariable('{CONTRACT_AMOUNT}')">{CONTRACT_AMOUNT}</span>
+                    <span class="variable-tag" onclick="insertVariable('{START_DATE}')">{START_DATE}</span>
+                    <span class="variable-tag" onclick="insertVariable('{END_DATE}')">{END_DATE}</span>
                 </div>
                 <div>
                     <strong>서명 정보:</strong>
-                    <span class="variable-tag" onclick="insertVariable('{{SIGNATURE_A}}')">{SIGNATURE_A}</span>
-                    <span class="variable-tag" onclick="insertVariable('{{SIGNATURE_B}}')">{SIGNATURE_B}</span>
-                    <span class="variable-tag" onclick="insertVariable('{{SIGNATURE_DATE}}')">{SIGNATURE_DATE}</span>
+                    <span class="variable-tag" onclick="insertVariable('{SIGNATURE_A}')">{SIGNATURE_A}</span>
+                    <span class="variable-tag" onclick="insertVariable('{SIGNATURE_B}')">{SIGNATURE_B}</span>
+                    <span class="variable-tag" onclick="insertVariable('{SIGNATURE_DATE}')">{SIGNATURE_DATE}</span>
                 </div>
             </div>
 
