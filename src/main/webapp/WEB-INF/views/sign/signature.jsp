@@ -112,25 +112,25 @@
                 <div class="signer-detail">
                     <span class="signer-detail-label">서명자 이름</span>
                     <span class="signer-detail-value">
-                        <c:out value="${signerInfo.name}" />
+                        <c:out value="${contract.secondParty.name}" />
                     </span>
                 </div>
                 <div class="signer-detail">
                     <span class="signer-detail-label">이메일</span>
                     <span class="signer-detail-value">
-                        <c:out value="${signerInfo.email}" />
+                        <c:out value="${contract.secondParty.email}" />
                     </span>
                 </div>
                 <div class="signer-detail">
                     <span class="signer-detail-label">연락처</span>
                     <span class="signer-detail-value">
-                        <c:out value="${signerInfo.phone != null ? signerInfo.phone : '-'}" />
+                        -
                     </span>
                 </div>
                 <div class="signer-detail">
                     <span class="signer-detail-label">소속</span>
                     <span class="signer-detail-value">
-                        <c:out value="${signerInfo.company != null ? signerInfo.company : '-'}" />
+                        <c:out value="${empty contract.secondParty.organizationName ? '-' : contract.secondParty.organizationName}" />
                     </span>
                 </div>
             </div>
@@ -227,11 +227,14 @@
         // 계약서 정보
         const contractData = {
             id: '<c:out value="${contract.id}" />',
-            token: '<c:out value="${signToken}" />',
+            token: '<c:out value="${token}" />',
             title: '<c:out value="${contract.title}" />',
-            signerName: '<c:out value="${signerInfo.name}" />',
-            signerEmail: '<c:out value="${signerInfo.email}" />'
+            signerName: '<c:out value="${contract.secondParty.name}" />',
+            signerEmail: '<c:out value="${contract.secondParty.email}" />'
         };
+
+        const csrfParam = '${_csrf.parameterName}';
+        const csrfToken = '${_csrf.token}';
 
         // 서명 패드 초기화
         let signaturePad;
@@ -317,49 +320,50 @@
          */
         async function submitSignature() {
             const finalSignBtn = document.getElementById('finalSignBtn');
-            const spinner = finalSignBtn.querySelector('.spinner');
+            const originalHtml = finalSignBtn.innerHTML;
 
             try {
-                // 로딩 시작
                 finalSignBtn.disabled = true;
-                spinner.classList.remove('d-none');
                 finalSignBtn.innerHTML = '<span class="spinner"></span> 서명 처리중...';
 
                 const signatureData = signaturePad.getSignatureData();
+                const payload = new URLSearchParams();
+                payload.append('signatureData', signatureData);
+                payload.append('signerName', contractData.signerName);
+                payload.append('signerEmail', contractData.signerEmail);
 
-                // 서명 데이터 전송
-                const response = await Signly.sendRequest('/api/sign/' + contractData.token + '/sign', {
+                const headers = {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                };
+
+                if (csrfParam && csrfToken) {
+                    payload.append(csrfParam, csrfToken);
+                }
+
+                const response = await fetch('/sign/' + contractData.token + '/sign', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        signatureData: signatureData,
-                        signerName: contractData.signerName,
-                        signerEmail: contractData.signerEmail,
-                        clientInfo: {
-                            userAgent: navigator.userAgent,
-                            timestamp: new Date().toISOString(),
-                            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-                        }
-                    })
+                    headers,
+                    body: payload.toString()
                 });
 
-                if (response.success) {
-                    // 성공 시 완료 페이지로 이동
-                    window.location.href = '/sign/' + contractData.token + '/complete';
-                } else {
-                    throw new Error(response.message || '서명 처리 중 오류가 발생했습니다.');
+                if (!response.ok) {
+                    throw new Error('서명 처리 중 오류가 발생했습니다.');
                 }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    window.location.href = '/sign/' + contractData.token + '/complete';
+                    return;
+                }
+
+                throw new Error(result.message || '서명 처리 중 오류가 발생했습니다.');
 
             } catch (error) {
                 console.error('Signature submission error:', error);
                 Signly.showAlert(error.message || '서명 처리 중 오류가 발생했습니다.', 'danger');
-
-                // 로딩 종료
                 finalSignBtn.disabled = false;
-                spinner.classList.add('d-none');
-                finalSignBtn.textContent = '서명 완료';
+                finalSignBtn.innerHTML = originalHtml;
             }
         }
 

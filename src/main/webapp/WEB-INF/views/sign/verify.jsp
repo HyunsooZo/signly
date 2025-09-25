@@ -39,6 +39,9 @@
 
                         <!-- 인증 폼 -->
                         <form method="post" action="/sign/${token}/verify">
+                            <c:if test="${not empty _csrf}">
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                            </c:if>
                             <div class="mb-3">
                                 <label for="signerEmail" class="form-label">
                                     <i class="bi bi-envelope me-2"></i>이메일 주소

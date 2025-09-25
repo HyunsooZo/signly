@@ -61,6 +61,9 @@
         </div>
 
         <form method="post" action="${not empty contractId ? '/contracts/'.concat(contractId) : '/contracts'}" class="contract-form">
+            <c:if test="${not empty _csrf}">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+            </c:if>
             <div class="row">
                 <!-- 계약서 기본 정보 -->
                 <div class="col-lg-8">

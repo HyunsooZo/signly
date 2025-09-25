@@ -267,6 +267,9 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                     <form id="deleteForm" method="post" style="display: inline;">
+                        <c:if test="${not empty _csrf}">
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        </c:if>
                         <button type="submit" class="btn btn-danger">삭제</button>
                     </form>
                 </div>
@@ -292,6 +295,9 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">돌아가기</button>
                     <form id="cancelForm" method="post" style="display: inline;">
+                        <c:if test="${not empty _csrf}">
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        </c:if>
                         <button type="submit" class="btn btn-warning">취소</button>
                     </form>
                 </div>
@@ -301,11 +307,26 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const csrfParam = '${_csrf.parameterName}';
+        const csrfToken = '${_csrf.token}';
+
+        function appendCsrfField(form) {
+            if (!csrfParam || !csrfToken) {
+                return;
+            }
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = csrfParam;
+            input.value = csrfToken;
+            form.appendChild(input);
+        }
+
         function sendForSigning(contractId) {
             if (confirm('계약서 서명 요청을 보내시겠습니까?')) {
                 const form = document.createElement('form');
                 form.method = 'post';
                 form.action = '/contracts/' + contractId + '/send';
+                appendCsrfField(form);
                 document.body.appendChild(form);
                 form.submit();
             }

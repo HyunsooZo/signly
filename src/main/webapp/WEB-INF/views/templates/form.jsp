@@ -41,6 +41,10 @@
     </style>
 </head>
 <body>
+    <c:set var="formAction" value="/templates" />
+    <c:if test="${not empty templateId}">
+        <c:set var="formAction" value="/templates/${templateId}" />
+    </c:if>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/home">
@@ -110,7 +114,10 @@
 
             <div class="card">
                 <div class="card-body">
-                    <form method="post" action="${not empty templateId ? '/templates/' += templateId : '/templates'}">
+                    <form method="post" action="${formAction}">
+                        <c:if test="${not empty _csrf}">
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        </c:if>
                         <div class="mb-4">
                             <label for="title" class="form-label">
                                 <i class="bi bi-type me-2"></i>템플릿 제목 <span class="text-danger">*</span>
