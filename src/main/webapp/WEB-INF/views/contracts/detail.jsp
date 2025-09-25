@@ -394,8 +394,31 @@
         </div>
     </div>
 
+    <div id="contractPreviewData" hidden
+         data-first-party-name="<c:out value='${contract.firstParty.name}'/>"
+         data-first-party-email="<c:out value='${contract.firstParty.email}'/>"
+         data-first-party-org="<c:out value='${empty contract.firstParty.organizationName ? "-" : contract.firstParty.organizationName}'/>"
+         data-second-party-name="<c:out value='${contract.secondParty.name}'/>"
+         data-second-party-email="<c:out value='${contract.secondParty.email}'/>"
+         data-second-party-org="<c:out value='${empty contract.secondParty.organizationName ? "-" : contract.secondParty.organizationName}'/>"
+         data-contract-title="<c:out value='${contract.title}'/>">
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const previewDataElement = document.getElementById('contractPreviewData');
+        const previewData = previewDataElement ? previewDataElement.dataset : {};
+
+        const previewDefaults = {
+            firstPartyName: previewData.firstPartyName || '-',
+            firstPartyEmail: previewData.firstPartyEmail || '-',
+            firstPartyOrg: previewData.firstPartyOrg || '-',
+            secondPartyName: previewData.secondPartyName || '-',
+            secondPartyEmail: previewData.secondPartyEmail || '-',
+            secondPartyOrg: previewData.secondPartyOrg || '-',
+            contractTitle: previewData.contractTitle || '-'
+        };
+
         const csrfParam = '${_csrf.parameterName}';
         const csrfToken = '${_csrf.token}';
 
@@ -415,13 +438,13 @@
 
             // 실제 데이터로 변수 치환
             let previewContent = content
-                .replace(/\{FIRST_PARTY_NAME\}/g, '${contract.firstParty.name}')
-                .replace(/\{FIRST_PARTY_EMAIL\}/g, '${contract.firstParty.email}')
-                .replace(/\{FIRST_PARTY_ADDRESS\}/g, '${contract.firstParty.organizationName}')
-                .replace(/\{SECOND_PARTY_NAME\}/g, '${contract.secondParty.name}')
-                .replace(/\{SECOND_PARTY_EMAIL\}/g, '${contract.secondParty.email}')
-                .replace(/\{SECOND_PARTY_ADDRESS\}/g, '${contract.secondParty.organizationName}')
-                .replace(/\{CONTRACT_TITLE\}/g, '${contract.title}')
+                .replace(/\{FIRST_PARTY_NAME\}/g, previewDefaults.firstPartyName)
+                .replace(/\{FIRST_PARTY_EMAIL\}/g, previewDefaults.firstPartyEmail)
+                .replace(/\{FIRST_PARTY_ADDRESS\}/g, previewDefaults.firstPartyOrg)
+                .replace(/\{SECOND_PARTY_NAME\}/g, previewDefaults.secondPartyName)
+                .replace(/\{SECOND_PARTY_EMAIL\}/g, previewDefaults.secondPartyEmail)
+                .replace(/\{SECOND_PARTY_ADDRESS\}/g, previewDefaults.secondPartyOrg)
+                .replace(/\{CONTRACT_TITLE\}/g, previewDefaults.contractTitle)
                 .replace(/\{CONTRACT_DATE\}/g, new Date().toLocaleDateString('ko-KR'))
                 .replace(/\{SIGNATURE_FIRST\}/g, '[갑 서명]')
                 .replace(/\{SIGNATURE_SECOND\}/g, '[을 서명]');

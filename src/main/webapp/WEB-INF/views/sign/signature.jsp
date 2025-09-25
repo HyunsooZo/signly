@@ -219,18 +219,29 @@
         </div>
     </div>
 
+    <div id="signingData" hidden
+         data-contract-id="<c:out value='${contract.id}'/>"
+         data-token="<c:out value='${token}'/>"
+         data-contract-title="<c:out value='${contract.title}'/>"
+         data-signer-name="<c:out value='${contract.secondParty.name}'/>"
+         data-signer-email="<c:out value='${contract.secondParty.email}'/>">
+    </div>
+
     <!-- JavaScript -->
     <script src="<c:url value='/js/common.js' />"></script>
     <script src="<c:url value='/js/signature-canvas.js' />"></script>
 
     <script>
+        const signingDataElement = document.getElementById('signingData');
+        const signingDataset = signingDataElement ? signingDataElement.dataset : {};
+
         // 계약서 정보
         const contractData = {
-            id: '<c:out value="${contract.id}" />',
-            token: '<c:out value="${token}" />',
-            title: '<c:out value="${contract.title}" />',
-            signerName: '<c:out value="${contract.secondParty.name}" />',
-            signerEmail: '<c:out value="${contract.secondParty.email}" />'
+            id: signingDataset.contractId || '',
+            token: signingDataset.token || '',
+            title: signingDataset.contractTitle || '',
+            signerName: signingDataset.signerName || '',
+            signerEmail: signingDataset.signerEmail || ''
         };
 
         const csrfParam = '${_csrf.parameterName}';
