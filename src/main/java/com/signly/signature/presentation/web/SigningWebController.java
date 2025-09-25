@@ -32,8 +32,8 @@ public class SigningWebController {
             ContractResponse contract = contractService.getContractByToken(token);
 
             boolean alreadySigned = signatureService.isContractSigned(
-                    contract.id(),
-                    contract.secondParty().email()
+                    contract.getId(),
+                    contract.getSecondParty().getEmail()
             );
 
             if (alreadySigned) {
@@ -81,7 +81,7 @@ public class SigningWebController {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
-            if (!contract.secondParty().email().equals(signerEmail)) {
+            if (!contract.getSecondParty().getEmail().equals(signerEmail)) {
                 model.addAttribute("errorMessage", "서명자 정보가 일치하지 않습니다.");
                 model.addAttribute("contract", contract);
                 model.addAttribute("token", token);
@@ -112,7 +112,7 @@ public class SigningWebController {
             String userAgent = request.getHeader("User-Agent");
 
             CreateSignatureCommand command = new CreateSignatureCommand(
-                    contract.id(),
+                    contract.getId(),
                     signatureData,
                     signerEmail,
                     signerName,
@@ -122,11 +122,11 @@ public class SigningWebController {
 
             SignatureResponse signature = signatureService.createSignature(command);
 
-            contractService.processSignature(contract.id(), signerEmail, signerName,
+            contractService.processSignature(contract.getId(), signerEmail, signerName,
                                            signatureData, ipAddress);
 
             logger.info("서명 처리 완료: contractId={}, signatureId={}",
-                       contract.id(), signature.signatureId());
+                       contract.getId(), signature.signatureId());
 
             return "{\"success\": true, \"message\": \"서명이 완료되었습니다.\"}";
 

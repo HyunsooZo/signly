@@ -94,7 +94,7 @@ public class TemplateWebController {
             CreateTemplateCommand command = new CreateTemplateCommand(form.getTitle(), form.getContent());
             TemplateResponse response = templateService.createTemplate(resolvedUserId, command);
 
-            logger.info("템플릿 생성 성공: {} (ID: {})", response.title(), response.templateId());
+            logger.info("템플릿 생성 성공: {} (ID: {})", response.getTitle(), response.getTemplateId());
             redirectAttributes.addFlashAttribute("successMessage", "템플릿이 성공적으로 생성되었습니다.");
             return "redirect:/templates";
 
@@ -150,8 +150,8 @@ public class TemplateWebController {
             TemplateResponse template = templateService.getTemplate(resolvedUserId, templateId);
 
             TemplateForm form = new TemplateForm();
-            form.setTitle(template.title());
-            form.setContent(template.content());
+            form.setTitle(template.getTitle());
+            form.setContent(template.getContent());
 
             model.addAttribute("pageTitle", "템플릿 수정");
             model.addAttribute("template", form);
@@ -185,7 +185,7 @@ public class TemplateWebController {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             TemplateResponse response = templateService.updateTemplate(resolvedUserId, templateId, command);
 
-            logger.info("템플릿 수정 성공: {} (ID: {})", response.title(), response.templateId());
+            logger.info("템플릿 수정 성공: {} (ID: {})", response.getTitle(), response.getTemplateId());
             redirectAttributes.addFlashAttribute("successMessage", "템플릿이 성공적으로 수정되었습니다.");
             return "redirect:/templates/" + templateId;
 

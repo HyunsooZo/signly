@@ -117,7 +117,7 @@
                                             <c:forEach var="contract" items="${contracts.content}">
                                                 <tr>
                                                     <td>
-                                                        <a href="/contracts/${contract.contractId}" class="text-decoration-none">
+                                                        <a href="/contracts/${contract.id}" class="text-decoration-none">
                                                             <strong>${contract.title}</strong>
                                                         </a>
                                                         <c:if test="${not empty contract.content and contract.content.length() > 100}">
@@ -173,26 +173,26 @@
                                                     </td>
                                                     <td class="text-center">
                                                         <div class="btn-group btn-group-sm" role="group">
-                                                            <a href="/contracts/${contract.contractId}"
+                                                            <a href="/contracts/${contract.id}"
                                                                class="btn btn-outline-primary"
                                                                title="상세보기">
                                                                 <i class="bi bi-eye"></i>
                                                             </a>
                                                             <c:if test="${contract.status == 'DRAFT'}">
-                                                                <a href="/contracts/${contract.contractId}/edit"
+                                                                <a href="/contracts/${contract.id}/edit"
                                                                    class="btn btn-outline-secondary"
                                                                    title="수정">
                                                                     <i class="bi bi-pencil"></i>
                                                                 </a>
                                                                 <button type="button"
                                                                         class="btn btn-outline-success"
-                                                                        onclick="sendForSigning('${contract.contractId}')"
+                                                                        onclick="sendForSigning('${contract.id}')"
                                                                         title="서명 요청">
                                                                     <i class="bi bi-send"></i>
                                                                 </button>
                                                                 <button type="button"
                                                                         class="btn btn-outline-danger"
-                                                                        onclick="deleteContract('${contract.contractId}', '${contract.title}')"
+                                                                        onclick="deleteContract('${contract.id}', '${contract.title}')"
                                                                         title="삭제">
                                                                     <i class="bi bi-trash"></i>
                                                                 </button>
@@ -200,7 +200,7 @@
                                                             <c:if test="${contract.status == 'PENDING' or contract.status == 'SIGNED'}">
                                                                 <button type="button"
                                                                         class="btn btn-outline-warning"
-                                                                        onclick="cancelContract('${contract.contractId}')"
+                                                                        onclick="cancelContract('${contract.id}')"
                                                                         title="취소">
                                                                     <i class="bi bi-x-circle"></i>
                                                                 </button>

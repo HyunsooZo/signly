@@ -186,7 +186,7 @@
                         <div class="card-body">
                             <div class="d-grid gap-2">
                                 <c:if test="${contract.status == 'DRAFT'}">
-                                    <a href="/contracts/${contract.contractId}/edit" class="btn btn-primary">
+                                    <a href="/contracts/${contract.id}/edit" class="btn btn-primary">
                                         <i class="bi bi-pencil me-2"></i>수정
                                     </a>
                                     <button type="button" class="btn btn-success" onclick="sendForSigning()">
@@ -215,7 +215,7 @@
                                 </c:if>
 
                                 <c:if test="${contract.status == 'PENDING' or contract.status == 'SIGNED'}">
-                                    <a href="/sign/${contract.contractId}" class="btn btn-outline-success" target="_blank">
+                                    <a href="/sign/${contract.id}" class="btn btn-outline-success" target="_blank">
                                         <i class="bi bi-pen me-2"></i>서명 페이지 보기
                                     </a>
                                 </c:if>
@@ -234,7 +234,7 @@
                             <div class="contract-info">
                                 <div class="info-item">
                                     <span class="fw-medium">계약서 ID:</span>
-                                    <span class="text-muted">${contract.contractId}</span>
+                                    <span class="text-muted">${contract.id}</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="fw-medium">템플릿 ID:</span>
@@ -383,7 +383,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <form id="deleteForm" method="post" action="/contracts/${contract.contractId}/delete" style="display: inline;">
+                    <form id="deleteForm" method="post" action="/contracts/${contract.id}/delete" style="display: inline;">
                         <c:if test="${not empty _csrf}">
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         </c:if>
@@ -457,7 +457,7 @@
             if (confirm('계약서 서명 요청을 전송하시겠습니까?')) {
                 const form = document.createElement('form');
                 form.method = 'post';
-                form.action = '/contracts/${contract.contractId}/send';
+                form.action = '/contracts/${contract.id}/send';
                 appendCsrfField(form);
                 document.body.appendChild(form);
                 form.submit();
@@ -468,7 +468,7 @@
             if (confirm('계약서를 취소하시겠습니까? 취소된 계약서는 더 이상 서명할 수 없습니다.')) {
                 const form = document.createElement('form');
                 form.method = 'post';
-                form.action = '/contracts/${contract.contractId}/cancel';
+                form.action = '/contracts/${contract.id}/cancel';
                 appendCsrfField(form);
                 document.body.appendChild(form);
                 form.submit();
@@ -479,7 +479,7 @@
             if (confirm('계약을 완료하시겠습니까?')) {
                 const form = document.createElement('form');
                 form.method = 'post';
-                form.action = '/contracts/${contract.contractId}/complete';
+                form.action = '/contracts/${contract.id}/complete';
                 appendCsrfField(form);
                 document.body.appendChild(form);
                 form.submit();
