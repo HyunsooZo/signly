@@ -1,5 +1,7 @@
 package com.signly.contract.presentation.web;
 
+import com.signly.common.exception.BusinessException;
+import com.signly.common.exception.ValidationException;
 import com.signly.common.security.CurrentUserProvider;
 import com.signly.common.security.SecurityUser;
 import com.signly.contract.application.ContractService;
@@ -10,23 +12,20 @@ import com.signly.contract.domain.model.ContractStatus;
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.dto.TemplateResponse;
 import com.signly.template.domain.model.TemplateStatus;
-import com.signly.common.exception.BusinessException;
-import com.signly.common.exception.ValidationException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 
 @Controller
@@ -87,8 +86,8 @@ public class ContractWebController {
             if (templateId != null && !templateId.isEmpty()) {
                 TemplateResponse template = templateService.getTemplate(resolvedUserId, templateId);
                 form.setTemplateId(templateId);
-                form.setTitle(template.title());
-                form.setContent(template.content());
+                form.setTitle(template.getTitle());
+                form.setContent(template.getContent());
             }
 
             // 활성 템플릿 목록 로드
@@ -138,7 +137,7 @@ public class ContractWebController {
 
             ContractResponse response = contractService.createContract(resolvedUserId, command);
 
-            logger.info("계약서 생성 성공: {} (ID: {})", response.title(), response.id());
+            logger.info("계약서 생성 성공: {} (ID: {})", response.getTitle(), response.getId());
             redirectAttributes.addFlashAttribute("successMessage", "계약서가 성공적으로 생성되었습니다.");
             return "redirect:/contracts";
 
@@ -194,16 +193,16 @@ public class ContractWebController {
             ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
 
             ContractForm form = new ContractForm();
-            form.setTemplateId(contract.templateId());
-            form.setTitle(contract.title());
-            form.setContent(contract.content());
-            form.setFirstPartyName(contract.firstParty().name());
-            form.setFirstPartyEmail(contract.firstParty().email());
-            form.setFirstPartyAddress(contract.firstParty().organizationName());
-            form.setSecondPartyName(contract.secondParty().name());
-            form.setSecondPartyEmail(contract.secondParty().email());
-            form.setSecondPartyAddress(contract.secondParty().organizationName());
-            form.setExpiresAt(contract.expiresAt());
+            form.setTemplateId(contract.getTemplateId());
+            form.setTitle(contract.getTitle());
+            form.setContent(contract.getContent());
+            form.setFirstPartyName(contract.getFirstParty().getName());
+            form.setFirstPartyEmail(contract.getFirstParty().getEmail());
+            form.setFirstPartyAddress(contract.getFirstParty().getOrganizationName());
+            form.setSecondPartyName(contract.getSecondParty().getName());
+            form.setSecondPartyEmail(contract.getSecondParty().getEmail());
+            form.setSecondPartyAddress(contract.getSecondParty().getOrganizationName());
+            form.setExpiresAt(contract.getExpiresAtLocalDateTime());
 
             model.addAttribute("pageTitle", "계약서 수정");
             model.addAttribute("contract", form);
@@ -242,7 +241,7 @@ public class ContractWebController {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             ContractResponse response = contractService.updateContract(resolvedUserId, contractId, command);
 
-            logger.info("계약서 수정 성공: {} (ID: {})", response.title(), response.id());
+            logger.info("계약서 수정 성공: {} (ID: {})", response.getTitle(), response.getId());
             redirectAttributes.addFlashAttribute("successMessage", "계약서가 성공적으로 수정되었습니다.");
             return "redirect:/contracts/" + contractId;
 
