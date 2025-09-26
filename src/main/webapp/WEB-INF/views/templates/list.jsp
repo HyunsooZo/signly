@@ -170,20 +170,30 @@
                                                                 <i class="bi bi-pencil"></i>
                                                             </a>
                                                             <c:if test="${template.status == 'DRAFT'}">
-                                                                <button type="button"
-                                                                        class="btn btn-outline-success"
-                                                                        onclick="activateTemplate('${template.templateId}')"
-                                                                        title="활성화">
-                                                                    <i class="bi bi-check-circle"></i>
-                                                                </button>
+                                                                <form method="post" action="/templates/${template.templateId}/activate" class="d-inline">
+                                                                    <c:if test="${not empty _csrf}">
+                                                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                                                    </c:if>
+                                                                    <button type="submit"
+                                                                            class="btn btn-outline-success"
+                                                                            onclick="return confirm('템플릿을 활성화하시겠습니까?');"
+                                                                            title="활성화">
+                                                                        <i class="bi bi-check-circle"></i>
+                                                                    </button>
+                                                                </form>
                                                             </c:if>
                                                             <c:if test="${template.status == 'ACTIVE'}">
-                                                                <button type="button"
-                                                                        class="btn btn-outline-warning"
-                                                                        onclick="archiveTemplate('${template.templateId}')"
-                                                                        title="보관">
-                                                                    <i class="bi bi-archive"></i>
-                                                                </button>
+                                                                <form method="post" action="/templates/${template.templateId}/archive" class="d-inline">
+                                                                    <c:if test="${not empty _csrf}">
+                                                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                                                    </c:if>
+                                                                    <button type="submit"
+                                                                            class="btn btn-outline-warning"
+                                                                            onclick="return confirm('템플릿을 보관하시겠습니까?');"
+                                                                            title="보관">
+                                                                        <i class="bi bi-archive"></i>
+                                                                    </button>
+                                                                </form>
                                                             </c:if>
                                                             <c:if test="${template.status == 'DRAFT'}">
                                                                 <button type="button"
@@ -336,36 +346,32 @@
         const csrfParam = '${_csrf.parameterName}';
         const csrfToken = '${_csrf.token}';
 
-        function appendCsrfField(form) {
-            if (!csrfParam || !csrfToken) {
-                return;
+        function submitPost(action) {
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = action;
+
+            if (csrfParam && csrfToken) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = csrfParam;
+                input.value = csrfToken;
+                form.appendChild(input);
             }
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = csrfParam;
-            input.value = csrfToken;
-            form.appendChild(input);
+
+            document.body.appendChild(form);
+            form.submit();
         }
 
         function activateTemplate(templateId) {
             if (confirm('템플릿을 활성화하시겠습니까?')) {
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = '/templates/' + templateId + '/activate';
-                appendCsrfField(form);
-                document.body.appendChild(form);
-                form.submit();
+                submitPost('/templates/' + templateId + '/activate');
             }
         }
 
         function archiveTemplate(templateId) {
             if (confirm('템플릿을 보관하시겠습니까?')) {
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = '/templates/' + templateId + '/archive';
-                appendCsrfField(form);
-                document.body.appendChild(form);
-                form.submit();
+                submitPost('/templates/' + templateId + '/archive');
             }
         }
 

@@ -1,16 +1,11 @@
 package com.signly.template.application.dto;
 
 import com.signly.template.domain.model.TemplateStatus;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
-@Getter
-@AllArgsConstructor
 public class TemplateResponse {
     private final String templateId;
     private final String ownerId;
@@ -18,10 +13,54 @@ public class TemplateResponse {
     private final String content;
     private final int version;
     private final TemplateStatus status;
-    @Getter(AccessLevel.NONE)
     private final LocalDateTime createdAt;
-    @Getter(AccessLevel.NONE)
     private final LocalDateTime updatedAt;
+
+    public TemplateResponse(String templateId,
+                            String ownerId,
+                            String title,
+                            String content,
+                            int version,
+                            TemplateStatus status,
+                            LocalDateTime createdAt,
+                            LocalDateTime updatedAt) {
+        this.templateId = templateId;
+        this.ownerId = ownerId;
+        this.title = title;
+        this.content = content;
+        this.version = version;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public String getTemplateId() {
+        return templateId;
+    }
+
+    public String templateId() {
+        return templateId;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public TemplateStatus getStatus() {
+        return status;
+    }
 
     public Date getCreatedAt() {
         return toDate(createdAt);

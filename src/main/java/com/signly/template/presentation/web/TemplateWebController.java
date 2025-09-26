@@ -146,7 +146,7 @@ public class TemplateWebController {
                                   HttpServletRequest request,
                                   Model model) {
         try {
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
             TemplateResponse template = templateService.getTemplate(resolvedUserId, templateId);
 
             TemplateForm form = new TemplateForm();
