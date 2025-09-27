@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile({"dev", "test"})
+@Profile("mock-mail")
 public class ConsoleEmailSender implements EmailSender {
     private static final Logger logger = LoggerFactory.getLogger(ConsoleEmailSender.class);
 

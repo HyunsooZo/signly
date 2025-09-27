@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>계약서 완료 안내</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <h2>계약서가 완료되었습니다</h2>
+    <p><strong th:text="${firstPartyName}">갑</strong>님과 <strong th:text="${secondPartyName}">을</strong>님이 체결한
+        <strong th:text="${contractTitle}">계약서</strong>가 완료되었습니다.</p>
+    <p>완료 일시: <span th:text="${completedAt}">-</span></p>
+    <div th:if="${firstPartySignatureImage}">
+        <p>갑 서명:</p>
+        <img th:src="${firstPartySignatureImage}" alt="갑 서명" style="max-width: 220px; border: 1px solid #ddd; padding: 6px;"/>
+    </div>
+    <p>감사합니다.<br><span th:text="${companyName}">Signly</span></p>
+</body>
+</html>

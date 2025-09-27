@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>계약서 취소 안내</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <h2>계약서가 취소되었습니다</h2>
+    <p><strong th:text="${contractTitle}">계약서</strong>가 취소 처리되었습니다.</p>
+    <p>취소 일시: <span th:text="${cancelledAt}">-</span></p>
+    <p>감사합니다.<br><span th:text="${companyName}">Signly</span></p>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>계약서 만료 안내</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <h2>계약서가 만료되었습니다</h2>
+    <p><strong th:text="${contractTitle}">계약서</strong>의 서명 유효 기간이 만료되었습니다.</p>
+    <p>만료 일시: <span th:text="${expiredAt}">-</span></p>
+    <p>필요 시 새 계약서를 생성하여 다시 서명을 요청해 주세요.</p>
+    <p>감사합니다.<br><span th:text="${companyName}">Signly</span></p>
+</body>
+</html>
