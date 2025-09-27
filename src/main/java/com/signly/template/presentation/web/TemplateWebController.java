@@ -235,6 +235,12 @@ public class TemplateWebController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/presets")
+    @ResponseBody
+    public ResponseEntity<java.util.List<TemplatePresetSummary>> getPresets() {
+        return ResponseEntity.ok(templatePresetService.getSummaries());
+    }
+
     @PostMapping("/{templateId}/activate")
     public String activateTemplate(@PathVariable String templateId,
                                   @RequestHeader(value = "X-User-Id", required = false) String userId,
