@@ -10,6 +10,7 @@ import com.signly.template.application.dto.TemplateResponse;
 import com.signly.template.application.dto.UpdateTemplateCommand;
 import com.signly.template.application.preset.PresetSection;
 import com.signly.template.application.preset.TemplatePresetService;
+import com.signly.template.application.preset.TemplatePresetSummary;
 import com.signly.template.domain.model.TemplateStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
