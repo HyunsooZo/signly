@@ -138,6 +138,22 @@
                                    placeholder="예: 용역계약서, 임대차계약서, 매매계약서 등"
                                    required maxlength="255">
                         </div>
+                        <c:if test="${not empty presets}">
+                            <div class="mb-3">
+                                <label for="presetSelect" class="form-label">
+                                    <i class="bi bi-journal-richtext me-2"></i>표준 양식 불러오기
+                                </label>
+                                <select class="form-select" id="presetSelect">
+                                    <option value="">표준 양식을 선택하세요</option>
+                                    <c:forEach var="preset" items="${presets}">
+                                        <option value="${preset.id}" data-name="${preset.name}">
+                                            ${preset.name} - ${preset.description}
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                                <div class="form-text">선택하면 해당 양식이 본문 섹션에 자동으로 적용됩니다.</div>
+                            </div>
+                        </c:if>
                     </div>
                 </div>
 
@@ -260,7 +276,8 @@
         HEADER: { label: '머릿말', css: 'template-header', icon: 'bi bi-layout-text-sidebar-reverse' },
         PARAGRAPH: { label: '본문', css: 'template-paragraph', icon: 'bi bi-text-paragraph' },
         DOTTED_BOX: { label: '점선 박스', css: 'template-dotted', icon: 'bi bi-bounding-box' },
-        FOOTER: { label: '꼬릿말', css: 'template-footer', icon: 'bi bi-pen' }
+        FOOTER: { label: '꼬릿말', css: 'template-footer', icon: 'bi bi-pen' },
+        CUSTOM: { label: 'HTML 블록', css: 'template-custom', icon: 'bi bi-code-square' }
     };
 
     let sections = [];
@@ -268,13 +285,16 @@
 
     const sectionListEl = document.getElementById('sectionList');
     const previewEl = document.getElementById('previewSurface');
+    const presetSelect = document.getElementById('presetSelect');
+    const templateTitleInput = document.getElementById('title');
 
     function newSection(type) {
         return {
             sectionId: crypto.randomUUID ? crypto.randomUUID() : 'sec-' + Date.now(),
             type: type || 'PARAGRAPH',
             order: sections.length,
-            content: ''
+            content: '',
+            metadata: {}
         };
     }
 
@@ -286,7 +306,8 @@
                 sectionId: s.sectionId || (s.id || 'sec-' + idx),
                 type: s.type || 'PARAGRAPH',
                 order: idx,
-                content: s.content || ''
+                content: s.content || '',
+                metadata: s.metadata || {}
             })) : [];
         } catch (e) {
             sections = [];
@@ -374,15 +395,17 @@
             const select = document.createElement('select');
             select.className = 'form-select form-select-sm';
             select.dataset.field = 'type';
-            Object.keys(sectionTypes).forEach((key) => {
-                const option = document.createElement('option');
-                option.value = key;
-                option.textContent = sectionTypes[key].label;
-                if (key === section.type) {
-                    option.selected = true;
-                }
-                select.appendChild(option);
-            });
+            Object.keys(sectionTypes)
+                .filter((key) => key !== 'CUSTOM' || section.type === 'CUSTOM')
+                .forEach((key) => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = sectionTypes[key].label;
+                    if (key === section.type) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
             typeGroup.appendChild(typeLabel);
             typeGroup.appendChild(select);
 
@@ -397,8 +420,22 @@
             textarea.dataset.section = section.sectionId;
             textarea.placeholder = '내용을 입력하세요.';
             textarea.value = section.content || '';
+            const metadata = section.metadata || {};
+            const isRawHtml = metadata.rawHtml === true;
+            if (isRawHtml) {
+                select.setAttribute('disabled', 'disabled');
+                textarea.readOnly = true;
+                textarea.classList.add('font-monospace');
+                textarea.rows = 18;
+            }
             contentGroup.appendChild(contentLabel);
             contentGroup.appendChild(textarea);
+            if (isRawHtml) {
+                const helper = document.createElement('div');
+                helper.className = 'form-text mt-2';
+                helper.textContent = '이 섹션은 표준 양식 HTML로 구성되어 있으며 직접 수정 시 레이아웃이 깨질 수 있습니다.';
+                contentGroup.appendChild(helper);
+            }
 
             body.appendChild(typeGroup);
             body.appendChild(contentGroup);
@@ -443,6 +480,13 @@
             FOOTER: '꼬릿말을 입력하세요',
             PARAGRAPH: '본문 내용을 입력하세요'
         };
+        if (section.type === 'CUSTOM') {
+            const metadata = section.metadata || {};
+            if (metadata.rawHtml) {
+                return section.content || '';
+            }
+            return '<section class="template-custom">' + (safe || fallbacks.PARAGRAPH) + '</section>';
+        }
         if (section.type === 'HEADER') {
             return '<section class="template-header"><h2 class="mb-0">' + (safe || fallbacks.HEADER) + '</h2></section>';
         }
@@ -474,6 +518,10 @@
         if (!section) return;
         if (event.target.dataset.field === 'type') {
             section.type = event.target.value;
+            section.metadata = section.metadata || {};
+            if (section.metadata.rawHtml && section.type !== 'CUSTOM') {
+                delete section.metadata.rawHtml;
+            }
         }
         activeTextareaId = id;
         renderSections();
@@ -568,7 +616,8 @@
             sectionId: section.sectionId,
             type: section.type,
             order: idx,
-            content: section.content
+            content: section.content,
+            metadata: section.metadata || {}
         }));
         document.getElementById('sectionsJson').value = JSON.stringify(payload);
     });
@@ -579,6 +628,42 @@
         const modal = new bootstrap.Modal(document.getElementById('previewModal'));
         modal.show();
     });
+
+    if (presetSelect) {
+        presetSelect.addEventListener('change', async (event) => {
+            const presetId = event.target.value;
+            if (!presetId) {
+                return;
+            }
+            try {
+                const response = await fetch(`/templates/presets/${presetId}`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!response.ok) {
+                    alert('표준 양식을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+                    return;
+                }
+                const preset = await response.json();
+                sections = (preset.sections || []).map((section, idx) => ({
+                    sectionId: section.sectionId || ('preset-sec-' + idx),
+                    type: section.type || 'PARAGRAPH',
+                    order: idx,
+                    content: section.content || '',
+                    metadata: section.metadata || {}
+                }));
+                activeTextareaId = null;
+                renderSections();
+                renderPreview();
+                if (templateTitleInput && templateTitleInput.value.trim().length === 0 && preset.name) {
+                    templateTitleInput.value = preset.name;
+                }
+                document.getElementById('sectionsJson').value = JSON.stringify(sections);
+            } catch (error) {
+                console.error('Failed to load template preset', error);
+                alert('표준 양식을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+            }
+        });
+    }
 
     loadInitialSections();
 </script>

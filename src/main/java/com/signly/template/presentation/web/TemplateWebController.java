@@ -1,31 +1,31 @@
 package com.signly.template.presentation.web;
 
+import com.signly.common.exception.BusinessException;
+import com.signly.common.exception.ValidationException;
 import com.signly.common.security.CurrentUserProvider;
 import com.signly.common.security.SecurityUser;
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.dto.CreateTemplateCommand;
 import com.signly.template.application.dto.TemplateResponse;
 import com.signly.template.application.dto.UpdateTemplateCommand;
+import com.signly.template.application.preset.PresetSection;
+import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.domain.model.TemplateStatus;
-import com.signly.common.exception.BusinessException;
-import com.signly.common.exception.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-import jakarta.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/templates")
@@ -34,10 +34,14 @@ public class TemplateWebController {
     private static final Logger logger = LoggerFactory.getLogger(TemplateWebController.class);
     private final TemplateService templateService;
     private final CurrentUserProvider currentUserProvider;
+    private final TemplatePresetService templatePresetService;
 
-    public TemplateWebController(TemplateService templateService, CurrentUserProvider currentUserProvider) {
+    public TemplateWebController(TemplateService templateService,
+                                 CurrentUserProvider currentUserProvider,
+                                 TemplatePresetService templatePresetService) {
         this.templateService = templateService;
         this.currentUserProvider = currentUserProvider;
+        this.templatePresetService = templatePresetService;
     }
 
     @GetMapping
@@ -73,6 +77,7 @@ public class TemplateWebController {
     public String newTemplateForm(Model model) {
         model.addAttribute("pageTitle", "새 템플릿 생성");
         model.addAttribute("template", new TemplateForm());
+        model.addAttribute("presets", templatePresetService.getSummaries());
         return "templates/form";
     }
 
@@ -87,6 +92,7 @@ public class TemplateWebController {
         try {
             if (bindingResult.hasErrors()) {
                 model.addAttribute("pageTitle", "새 템플릿 생성");
+                model.addAttribute("presets", templatePresetService.getSummaries());
                 return "templates/form";
             }
 
@@ -101,6 +107,7 @@ public class TemplateWebController {
         } catch (ValidationException e) {
             logger.warn("템플릿 생성 유효성 검사 실패: {}", e.getMessage());
             model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("presets", templatePresetService.getSummaries());
             model.addAttribute("pageTitle", "새 템플릿 생성");
             return "templates/form";
 
@@ -113,6 +120,7 @@ public class TemplateWebController {
         } catch (Exception e) {
             logger.error("템플릿 생성 중 예상치 못한 오류 발생", e);
             model.addAttribute("errorMessage", "템플릿 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+            model.addAttribute("presets", templatePresetService.getSummaries());
             model.addAttribute("pageTitle", "새 템플릿 생성");
             return "templates/form";
         }
@@ -156,6 +164,7 @@ public class TemplateWebController {
             model.addAttribute("pageTitle", "템플릿 수정");
             model.addAttribute("template", form);
             model.addAttribute("templateId", templateId);
+            model.addAttribute("presets", templatePresetService.getSummaries());
             return "templates/form";
 
         } catch (Exception e) {
@@ -178,6 +187,7 @@ public class TemplateWebController {
             if (bindingResult.hasErrors()) {
                 model.addAttribute("pageTitle", "템플릿 수정");
                 model.addAttribute("templateId", templateId);
+                model.addAttribute("presets", templatePresetService.getSummaries());
                 return "templates/form";
             }
 
@@ -194,6 +204,7 @@ public class TemplateWebController {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("pageTitle", "템플릿 수정");
             model.addAttribute("templateId", templateId);
+            model.addAttribute("presets", templatePresetService.getSummaries());
             return "templates/form";
 
         } catch (BusinessException e) {
@@ -201,6 +212,7 @@ public class TemplateWebController {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("pageTitle", "템플릿 수정");
             model.addAttribute("templateId", templateId);
+            model.addAttribute("presets", templatePresetService.getSummaries());
             return "templates/form";
 
         } catch (Exception e) {
@@ -208,8 +220,19 @@ public class TemplateWebController {
             model.addAttribute("errorMessage", "템플릿 수정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
             model.addAttribute("pageTitle", "템플릿 수정");
             model.addAttribute("templateId", templateId);
+            model.addAttribute("presets", templatePresetService.getSummaries());
             return "templates/form";
         }
+    }
+
+    @GetMapping("/presets/{presetId}")
+    @ResponseBody
+    public ResponseEntity<TemplatePresetResponse> getPreset(@PathVariable String presetId) {
+        return templatePresetService.getPreset(presetId)
+                .map(preset -> ResponseEntity.ok(
+                        new TemplatePresetResponse(preset.id(), preset.name(), preset.sections())
+                ))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{templateId}/activate")
@@ -275,4 +298,6 @@ public class TemplateWebController {
         public String getSectionsJson() { return sectionsJson; }
         public void setSectionsJson(String sectionsJson) { this.sectionsJson = (sectionsJson == null || sectionsJson.isBlank()) ? "[]" : sectionsJson; }
     }
+
+    private record TemplatePresetResponse(String id, String name, java.util.List<PresetSection> sections) {}
 }
