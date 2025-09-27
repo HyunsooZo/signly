@@ -298,10 +298,17 @@
         };
     }
 
+    function decodeHtmlEntities(str) {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = str;
+        return textarea.value;
+    }
+
     function loadInitialSections() {
         try {
             const data = document.getElementById('initialSections').dataset.sections || '[]';
-            const parsed = JSON.parse(data);
+            const decoded = decodeHtmlEntities(data);
+            const parsed = JSON.parse(decoded);
             sections = Array.isArray(parsed) ? parsed.map((s, idx) => ({
                 sectionId: s.sectionId || (s.id || 'sec-' + idx),
                 type: s.type || 'PARAGRAPH',
