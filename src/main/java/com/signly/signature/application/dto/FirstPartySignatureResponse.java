@@ -17,7 +17,7 @@ public record FirstPartySignatureResponse(
         LocalDateTime updatedAt
 ) {
 
-    public Date updatedAtDate() {
+    public Date getUpdatedAtDate() {
         return updatedAt == null ? null : Date.from(updatedAt.atZone(ZoneId.systemDefault()).toInstant());
     }
 

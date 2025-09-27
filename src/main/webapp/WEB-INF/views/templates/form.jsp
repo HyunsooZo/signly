@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -122,7 +123,7 @@
                 <c:if test="${not empty _csrf}">
                     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                 </c:if>
-                <input type="hidden" name="sectionsJson" id="sectionsJson" value="${template.sectionsJson}">
+                <input type="hidden" name="sectionsJson" id="sectionsJson" value="${fn:escapeXml(template.sectionsJson)}">
                 <div class="card mb-4">
                     <div class="card-body">
                         <div class="mb-3">
@@ -251,7 +252,7 @@
     </div>
 </div>
 
-<div id="initialSections" data-sections='${template.sectionsJson}' hidden></div>
+<div id="initialSections" data-sections='${fn:escapeXml(template.sectionsJson)}' hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -302,40 +303,125 @@
         sectionListEl.innerHTML = '';
         sections.forEach((section, index) => {
             section.order = index;
+
             const card = document.createElement('div');
-            card.className = 'card mb-3 section-card ' + (section.type === 'DOTTED_BOX' ? 'dotted' : section.type === 'FOOTER' ? 'footer' : '');
+            card.className = 'card mb-3 section-card';
+            if (section.type === 'DOTTED_BOX') {
+                card.classList.add('dotted');
+            } else if (section.type === 'FOOTER') {
+                card.classList.add('footer');
+            }
             card.dataset.sectionId = section.sectionId;
-            card.innerHTML = `
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-primary-subtle text-primary">
-                            <i class="${sectionTypes[section.type].icon}"></i>
-                        </span>
-                        <strong>${sectionTypes[section.type].label}</strong>
-                    </div>
-                    <div class="section-actions btn-group btn-group-sm">
-                        <button type="button" class="btn btn-outline-secondary" data-action="moveUp" ${index === 0 ? 'disabled' : ''}><i class="bi bi-arrow-up"></i></button>
-                        <button type="button" class="btn btn-outline-secondary" data-action="moveDown" ${index === sections.length - 1 ? 'disabled' : ''}><i class="bi bi-arrow-down"></i></button>
-                        <button type="button" class="btn btn-outline-danger" data-action="remove"><i class="bi bi-x-lg"></i></button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label">섹션 종류</label>
-                        <select class="form-select form-select-sm" data-field="type">
-                            ${Object.keys(sectionTypes).map(key => `<option value="${key}" ${key === section.type ? 'selected' : ''}>${sectionTypes[key].label}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label">내용</label>
-                        <textarea class="form-control" rows="4" data-field="content" data-section="${section.sectionId}" placeholder="내용을 입력하세요.">${section.content || ''}</textarea>
-                    </div>
-                </div>
-            `;
+
+            const header = document.createElement('div');
+            header.className = 'card-header d-flex justify-content-between align-items-center';
+
+            const headerLeft = document.createElement('div');
+            headerLeft.className = 'd-flex align-items-center gap-2';
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary-subtle text-primary';
+            const icon = document.createElement('i');
+            const typeMeta = sectionTypes[section.type] || sectionTypes.PARAGRAPH;
+            icon.className = typeMeta.icon;
+            badge.appendChild(icon);
+            const title = document.createElement('strong');
+            title.textContent = typeMeta.label;
+            headerLeft.appendChild(badge);
+            headerLeft.appendChild(title);
+
+            const actionGroup = document.createElement('div');
+            actionGroup.className = 'section-actions btn-group btn-group-sm';
+
+            const moveUp = document.createElement('button');
+            moveUp.type = 'button';
+            moveUp.className = 'btn btn-outline-secondary';
+            moveUp.dataset.action = 'moveUp';
+            moveUp.innerHTML = '<i class="bi bi-arrow-up"></i>';
+            if (index === 0) {
+                moveUp.setAttribute('disabled', 'disabled');
+            }
+
+            const moveDown = document.createElement('button');
+            moveDown.type = 'button';
+            moveDown.className = 'btn btn-outline-secondary';
+            moveDown.dataset.action = 'moveDown';
+            moveDown.innerHTML = '<i class="bi bi-arrow-down"></i>';
+            if (index === sections.length - 1) {
+                moveDown.setAttribute('disabled', 'disabled');
+            }
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn btn-outline-danger';
+            removeBtn.dataset.action = 'remove';
+            removeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+
+            actionGroup.appendChild(moveUp);
+            actionGroup.appendChild(moveDown);
+            actionGroup.appendChild(removeBtn);
+
+            header.appendChild(headerLeft);
+            header.appendChild(actionGroup);
+
+            const body = document.createElement('div');
+            body.className = 'card-body';
+
+            const typeGroup = document.createElement('div');
+            typeGroup.className = 'mb-3';
+            const typeLabel = document.createElement('label');
+            typeLabel.className = 'form-label';
+            typeLabel.textContent = '섹션 종류';
+            const select = document.createElement('select');
+            select.className = 'form-select form-select-sm';
+            select.dataset.field = 'type';
+            Object.keys(sectionTypes).forEach((key) => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = sectionTypes[key].label;
+                if (key === section.type) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            typeGroup.appendChild(typeLabel);
+            typeGroup.appendChild(select);
+
+            const contentGroup = document.createElement('div');
+            const contentLabel = document.createElement('label');
+            contentLabel.className = 'form-label';
+            contentLabel.textContent = '내용';
+            const textarea = document.createElement('textarea');
+            textarea.className = 'form-control';
+            textarea.rows = 4;
+            textarea.dataset.field = 'content';
+            textarea.dataset.section = section.sectionId;
+            textarea.placeholder = '내용을 입력하세요.';
+            textarea.value = section.content || '';
+            contentGroup.appendChild(contentLabel);
+            contentGroup.appendChild(textarea);
+
+            body.appendChild(typeGroup);
+            body.appendChild(contentGroup);
+
+            card.appendChild(header);
+            card.appendChild(body);
+
             sectionListEl.appendChild(card);
         });
+
         if (sections.length === 0) {
             sectionListEl.innerHTML = '<div class="text-center text-muted py-5">섹션을 추가해 계약서를 구성하세요.</div>';
+        }
+
+        if (activeTextareaId) {
+            const activeField = sectionListEl.querySelector('textarea[data-section="' + activeTextareaId + '"]');
+            if (activeField) {
+                const caret = activeField.value.length;
+                activeField.focus();
+                if (typeof activeField.setSelectionRange === 'function') {
+                    activeField.setSelectionRange(caret, caret);
+                }
+            }
         }
     }
 
@@ -351,21 +437,33 @@
 
     function sectionToHtml(section) {
         const safe = escapeHtml(section.content || '').replace(/\n/g, '<br>');
-        switch (section.type) {
-            case 'HEADER':
-                return `<section class="template-header"><h2 class="mb-0">${safe || '머릿말을 입력하세요'}</h2></section>`;
-            case 'DOTTED_BOX':
-                return `<section class="template-dotted"><div>${safe || '점선 박스 내용을 입력하세요'}</div></section>`;
-            case 'FOOTER':
-                return `<section class="template-footer">${safe || '꼬릿말을 입력하세요'}</section>`;
-            default:
-                return `<section class="template-paragraph"><p>${safe || '본문 내용을 입력하세요'}</p></section>`;
+        const fallbacks = {
+            HEADER: '머릿말을 입력하세요',
+            DOTTED_BOX: '점선 박스 내용을 입력하세요',
+            FOOTER: '꼬릿말을 입력하세요',
+            PARAGRAPH: '본문 내용을 입력하세요'
+        };
+        if (section.type === 'HEADER') {
+            return '<section class="template-header"><h2 class="mb-0">' + (safe || fallbacks.HEADER) + '</h2></section>';
         }
+        if (section.type === 'DOTTED_BOX') {
+            return '<section class="template-dotted"><div>' + (safe || fallbacks.DOTTED_BOX) + '</div></section>';
+        }
+        if (section.type === 'FOOTER') {
+            return '<section class="template-footer">' + (safe || fallbacks.FOOTER) + '</section>';
+        }
+        return '<section class="template-paragraph"><p>' + (safe || fallbacks.PARAGRAPH) + '</p></section>';
     }
 
     function escapeHtml(text) {
-        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-        return String(text || '').replace(/[&<>"']/g, m => map[m]);
+        const map = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        };
+        return String(text || '').replace(/[&<>"']/g, (match) => map[match]);
     }
 
     sectionListEl.addEventListener('change', (event) => {
@@ -377,6 +475,7 @@
         if (event.target.dataset.field === 'type') {
             section.type = event.target.value;
         }
+        activeTextareaId = id;
         renderSections();
         renderPreview();
     });
@@ -410,10 +509,15 @@
 
         if (action === 'remove') {
             sections.splice(index, 1);
+            if (activeTextareaId === id) {
+                activeTextareaId = null;
+            }
         } else if (action === 'moveUp' && index > 0) {
             [sections[index - 1], sections[index]] = [sections[index], sections[index - 1]];
+            activeTextareaId = id;
         } else if (action === 'moveDown' && index < sections.length - 1) {
             [sections[index + 1], sections[index]] = [sections[index], sections[index + 1]];
+            activeTextareaId = id;
         }
         renderSections();
         renderPreview();
@@ -421,7 +525,9 @@
 
     document.querySelectorAll('[data-add]').forEach(button => {
         button.addEventListener('click', () => {
-            sections.push(newSection(button.dataset.add));
+            const newItem = newSection(button.dataset.add);
+            sections.push(newItem);
+            activeTextareaId = newItem.sectionId;
             renderSections();
             renderPreview();
         });
@@ -436,7 +542,8 @@
             alert('변수를 삽입할 섹션을 먼저 선택해주세요.');
             return;
         }
-        const textarea = sectionListEl.querySelector(`textarea[data-section="${activeTextareaId}"]`);
+        const textareaSelector = 'textarea[data-section="' + activeTextareaId + '"]';
+        const textarea = sectionListEl.querySelector(textareaSelector);
         if (!textarea) return;
         const start = textarea.selectionStart || 0;
         const end = textarea.selectionEnd || 0;
