@@ -547,8 +547,14 @@
     });
 
     sectionListEl.addEventListener('click', (event) => {
-        const action = event.target.closest('button')?.dataset.action;
-        if (!action) return;
+        const button = event.target.closest('button');
+        if (!button) {
+            return;
+        }
+        const action = button.dataset.action;
+        if (!action) {
+            return;
+        }
         const card = event.target.closest('.card');
         if (!card) return;
         const id = card.dataset.sectionId;
