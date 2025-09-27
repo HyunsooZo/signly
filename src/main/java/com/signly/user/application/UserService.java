@@ -9,9 +9,6 @@ import com.signly.user.domain.model.*;
 import com.signly.user.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 
 @Service
 @Transactional
@@ -66,8 +63,6 @@ public class UserService {
         return userDtoMapper.toResponse(user);
     }
 
-    @CachePut(value = "users", key = "#userId")
-    @CacheEvict(value = "usersByEmail", allEntries = true)
     public UserResponse updateProfile(String userId, UpdateProfileCommand command) {
         UserId userIdObj = UserId.of(userId);
         User user = userRepository.findById(userIdObj)
@@ -79,7 +74,6 @@ public class UserService {
         return userDtoMapper.toResponse(updatedUser);
     }
 
-    @CacheEvict(value = {"users", "usersByEmail"}, key = "#userId")
     public void changePassword(String userId, ChangePasswordCommand command) {
         UserId userIdObj = UserId.of(userId);
         User user = userRepository.findById(userIdObj)
@@ -93,7 +87,6 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "users", key = "#userId")
     public UserResponse getUserById(String userId) {
         UserId userIdObj = UserId.of(userId);
         User user = userRepository.findById(userIdObj)
@@ -103,7 +96,6 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "usersByEmail", key = "#email")
     public UserResponse getUserByEmail(String email) {
         Email emailObj = Email.of(email);
         User user = userRepository.findByEmail(emailObj)
