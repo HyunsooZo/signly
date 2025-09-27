@@ -268,7 +268,7 @@
     </div>
 </div>
 
-<div id="initialSections" data-sections='${fn:escapeXml(template.sectionsJson)}' hidden></div>
+<script id="initialSections" type="application/json">${fn:escapeXml(template.sectionsJson)}</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -306,9 +306,10 @@
 
     function loadInitialSections() {
         try {
-            const data = document.getElementById('initialSections').dataset.sections || '[]';
-            const decoded = decodeHtmlEntities(data);
-            const parsed = JSON.parse(decoded);
+            const scriptEl = document.getElementById('initialSections');
+            const raw = scriptEl ? scriptEl.textContent : '[]';
+            const decoded = decodeHtmlEntities(raw);
+            const parsed = JSON.parse(decoded || '[]');
             sections = Array.isArray(parsed) ? parsed.map((s, idx) => ({
                 sectionId: s.sectionId || (s.id || 'sec-' + idx),
                 type: s.type || 'PARAGRAPH',
