@@ -61,6 +61,7 @@
                 <a class="nav-link" href="/home">대시보드</a>
                 <a class="nav-link" href="/templates">템플릿</a>
                 <a class="nav-link active" href="/contracts">계약서</a>
+                <a class="nav-link" href="/profile/signature">서명 관리</a>
                 <a class="nav-link" href="/logout">로그아웃</a>
             </div>
         </div>
@@ -195,6 +196,12 @@
                                     <hr>
                                     <button type="button" class="btn btn-outline-danger" onclick="deleteContract()">
                                         <i class="bi bi-trash me-2"></i>삭제
+                                    </button>
+                                </c:if>
+
+                                <c:if test="${contract.status == 'PENDING'}">
+                                    <button type="button" class="btn btn-outline-info" onclick="resendSigningEmail()">
+                                        <i class="bi bi-arrow-repeat me-2"></i>서명 요청 재전송
                                     </button>
                                 </c:if>
 
@@ -458,6 +465,17 @@
                 const form = document.createElement('form');
                 form.method = 'post';
                 form.action = '/contracts/${contract.id}/send';
+                appendCsrfField(form);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function resendSigningEmail() {
+            if (confirm('서명 요청 이메일을 다시 전송하시겠습니까?')) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/contracts/${contract.id}/resend';
                 appendCsrfField(form);
                 document.body.appendChild(form);
                 form.submit();

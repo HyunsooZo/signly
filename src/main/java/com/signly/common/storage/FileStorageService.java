@@ -44,9 +44,23 @@ public class FileStorageService {
     }
 
     public StoredFile storeFile(MultipartFile file, String category) {
-        validateFile(file);
+        validateFile(file.getOriginalFilename(), file.getContentType(), file.getSize());
+        try {
+            return storeFile(file.getBytes(),
+                    file.getOriginalFilename(),
+                    file.getContentType(),
+                    category);
+        } catch (IOException e) {
+            throw new RuntimeException("파일 저장 중 오류가 발생했습니다", e);
+        }
+    }
 
-        String originalFilename = file.getOriginalFilename();
+    public StoredFile storeFile(byte[] data,
+                               String originalFilename,
+                               String contentType,
+                               String category) {
+        validateFile(originalFilename, contentType, data.length);
+
         String fileExtension = getFileExtension(originalFilename);
         String storedFilename = generateStoredFilename(fileExtension);
 
@@ -60,18 +74,18 @@ public class FileStorageService {
         Path targetLocation = categoryPath.resolve(storedFilename);
 
         try {
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+            Files.write(targetLocation, data);
         } catch (IOException e) {
             throw new RuntimeException("파일 저장 중 오류가 발생했습니다", e);
         }
 
         return new StoredFile(
-            storedFilename,
-            originalFilename,
-            category + "/" + storedFilename,
-            file.getContentType(),
-            file.getSize(),
-            LocalDateTime.now()
+                storedFilename,
+                originalFilename,
+                category + "/" + storedFilename,
+                contentType,
+                data.length,
+                LocalDateTime.now()
         );
     }
 
@@ -112,18 +126,21 @@ public class FileStorageService {
         return file.startsWith(uploadPath) && Files.exists(file);
     }
 
-    private void validateFile(MultipartFile file) {
-        if (file.isEmpty()) {
+    private void validateFile(String originalFilename, String contentType, long fileSize) {
+        if (fileSize <= 0) {
             throw new ValidationException("빈 파일은 업로드할 수 없습니다");
         }
 
-        if (file.getSize() > maxFileSize) {
+        if (fileSize > maxFileSize) {
             throw new ValidationException("파일 크기가 너무 큽니다. 최대 " + (maxFileSize / 1024 / 1024) + "MB까지 가능합니다");
         }
 
-        String contentType = file.getContentType();
         if (contentType == null || !allowedContentTypes.contains(contentType)) {
             throw new ValidationException("지원하지 않는 파일 형식입니다");
+        }
+
+        if (originalFilename == null || originalFilename.trim().isEmpty()) {
+            throw new ValidationException("파일명이 유효하지 않습니다");
         }
     }
 

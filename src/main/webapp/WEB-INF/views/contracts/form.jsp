@@ -22,6 +22,7 @@
                 <a class="nav-link" href="/home">대시보드</a>
                 <a class="nav-link" href="/templates">템플릿</a>
                 <a class="nav-link active" href="/contracts">계약서</a>
+                <a class="nav-link" href="/profile/signature">서명 관리</a>
                 <a class="nav-link" href="/logout">로그아웃</a>
             </div>
         </div>
@@ -110,7 +111,7 @@
                             <div class="mb-3">
                                 <label for="expiresAt" class="form-label">만료일</label>
                                 <input type="datetime-local" class="form-control" id="expiresAt" name="expiresAt"
-                                       value="<fmt:formatDate value='${contract.expiresAt}' pattern='yyyy-MM-ddTHH:mm'/>">
+                                       value="${contract.expiresAtInputValue}">
                                 <div class="form-text">계약서의 서명 만료일을 설정하세요 (선택사항).</div>
                             </div>
                         </div>

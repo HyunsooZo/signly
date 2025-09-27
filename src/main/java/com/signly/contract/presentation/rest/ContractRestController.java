@@ -50,6 +50,14 @@ public class ContractRestController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/{contractId}/resend")
+    public ResponseEntity<Void> resendSigningEmail(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable String contractId) {
+        contractService.resendSigningEmail(userId, contractId);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/{contractId}/sign")
     public ResponseEntity<ContractResponse> signContract(
             @RequestHeader("X-Signer-Email") String signerEmail,

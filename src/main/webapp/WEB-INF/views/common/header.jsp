@@ -44,6 +44,12 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a href="<c:url value='/profile/signature' />" class="dropdown-item">
+                                        <i class="bi bi-pencil"></i>
+                                        서명 관리
+                                    </a>
+                                </li>
+                                <li>
                                     <a href="<c:url value='/settings' />" class="dropdown-item">
                                         <i class="icon-settings"></i>
                                         설정

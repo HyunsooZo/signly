@@ -25,8 +25,10 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Controller
 @RequestMapping("/contracts")
@@ -286,6 +288,24 @@ public class ContractWebController {
         return "redirect:/contracts/" + contractId;
     }
 
+    @PostMapping("/{contractId}/resend")
+    public String resendSigningEmail(@PathVariable String contractId,
+                                    @RequestHeader(value = "X-User-Id", required = false) String userId,
+                                    @AuthenticationPrincipal SecurityUser securityUser,
+                                    HttpServletRequest request,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            contractService.resendSigningEmail(resolvedUserId, contractId);
+            logger.info("계약서 서명 요청 재전송 성공: contractId={}", contractId);
+            redirectAttributes.addFlashAttribute("successMessage", "서명 요청 이메일을 재전송했습니다.");
+        } catch (Exception e) {
+            logger.error("계약서 서명 요청 재전송 중 오류 발생: contractId={}", contractId, e);
+            redirectAttributes.addFlashAttribute("errorMessage", "서명 요청 재전송 중 오류가 발생했습니다.");
+        }
+        return "redirect:/contracts/" + contractId;
+    }
+
     @PostMapping("/{contractId}/cancel")
     public String cancelContract(@PathVariable String contractId,
                                 @RequestHeader(value = "X-User-Id", required = false) String userId,
@@ -347,7 +367,10 @@ public class ContractWebController {
         private String secondPartyName;
         private String secondPartyEmail;
         private String secondPartyAddress;
+        @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
         private LocalDateTime expiresAt;
+
+        private static final DateTimeFormatter EXPIRES_AT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
         public String getTemplateId() { return templateId; }
         public void setTemplateId(String templateId) { this.templateId = templateId; }
@@ -369,5 +392,9 @@ public class ContractWebController {
         public void setSecondPartyAddress(String secondPartyAddress) { this.secondPartyAddress = secondPartyAddress; }
         public LocalDateTime getExpiresAt() { return expiresAt; }
         public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
+
+        public String getExpiresAtInputValue() {
+            return expiresAt != null ? expiresAt.format(EXPIRES_AT_FORMATTER) : "";
+        }
     }
 }

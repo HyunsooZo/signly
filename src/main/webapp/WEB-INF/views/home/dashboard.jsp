@@ -22,6 +22,7 @@
                 <a class="nav-link active" href="/home">대시보드</a>
                 <a class="nav-link" href="/templates">템플릿</a>
                 <a class="nav-link" href="/contracts">계약서</a>
+                <a class="nav-link" href="/profile/signature">서명 관리</a>
                 <a class="nav-link" href="/logout">로그아웃</a>
             </div>
         </div>
