@@ -236,7 +236,7 @@ public class TemplateWebController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/presets")
+    @GetMapping({"/presets", "/presets/"})
     @ResponseBody
     public ResponseEntity<java.util.List<TemplatePresetSummary>> getPresets() {
         return ResponseEntity.ok(templatePresetService.getSummaries());
