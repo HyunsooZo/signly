@@ -3,6 +3,8 @@ package com.signly.signature.application.dto;
 import com.signly.signature.domain.model.FirstPartySignature;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 public record FirstPartySignatureResponse(
         String signatureId,
@@ -14,6 +16,10 @@ public record FirstPartySignatureResponse(
         String checksum,
         LocalDateTime updatedAt
 ) {
+
+    public Date updatedAtDate() {
+        return updatedAt == null ? null : Date.from(updatedAt.atZone(ZoneId.systemDefault()).toInstant());
+    }
 
     public static FirstPartySignatureResponse from(FirstPartySignature signature) {
         return new FirstPartySignatureResponse(

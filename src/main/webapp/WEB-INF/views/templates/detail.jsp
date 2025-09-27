@@ -86,10 +86,10 @@
                                 </c:otherwise>
                             </c:choose>
                             <small class="text-muted">
-                                생성일: <fmt:formatDate value="${template.createdAt}" pattern="yyyy-MM-dd HH:mm"/>
+                                생성일: <fmt:formatDate value="${template.createdAtDate}" pattern="yyyy-MM-dd HH:mm"/>
                             </small>
                             <small class="text-muted">
-                                수정일: <fmt:formatDate value="${template.updatedAt}" pattern="yyyy-MM-dd HH:mm"/>
+                                수정일: <fmt:formatDate value="${template.updatedAtDate}" pattern="yyyy-MM-dd HH:mm"/>
                             </small>
                         </div>
                     </div>
@@ -217,13 +217,13 @@
                                 <div class="info-item">
                                     <span class="fw-medium">생성일:</span>
                                     <span class="text-muted">
-                                        <fmt:formatDate value="${template.createdAt}" pattern="yyyy-MM-dd HH:mm"/>
+                                        <fmt:formatDate value="${template.createdAtDate}" pattern="yyyy-MM-dd HH:mm"/>
                                     </span>
                                 </div>
                                 <div class="info-item">
                                     <span class="fw-medium">수정일:</span>
                                     <span class="text-muted">
-                                        <fmt:formatDate value="${template.updatedAt}" pattern="yyyy-MM-dd HH:mm"/>
+                                        <fmt:formatDate value="${template.updatedAtDate}" pattern="yyyy-MM-dd HH:mm"/>
                                     </span>
                                 </div>
                                 <div class="info-item">

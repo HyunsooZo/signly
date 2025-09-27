@@ -231,7 +231,7 @@
                                                 </a>
                                             </h6>
                                             <small class="text-muted">
-                                                <fmt:formatDate value="${template.updatedAt}" pattern="yyyy-MM-dd HH:mm"/>
+                                                <fmt:formatDate value="${template.updatedAtDate}" pattern="yyyy-MM-dd HH:mm"/>
                                             </small>
                                         </div>
                                         <div class="recent-item-status">

@@ -68,7 +68,7 @@
                                     <div><strong>파일명:</strong> ${signature.originalFilename()}</div>
                                     <div><strong>형식:</strong> ${signature.mimeType()}</div>
                                     <div><strong>파일 크기:</strong> <fmt:formatNumber value="${signature.fileSize() / 1024}" maxFractionDigits="0"/> KB</div>
-                                    <div><strong>업로드일:</strong> <fmt:formatDate value="${signature.updatedAt()}" pattern="yyyy-MM-dd HH:mm"/></div>
+                                    <div><strong>업로드일:</strong> <fmt:formatDate value="${signature.updatedAtDate}" pattern="yyyy-MM-dd HH:mm"/></div>
                                 </div>
                             </c:when>
                             <c:otherwise>

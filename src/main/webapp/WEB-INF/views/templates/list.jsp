@@ -144,10 +144,10 @@
                                                         </c:choose>
                                                     </td>
                                                     <td>
-                                                        <fmt:formatDate value="${template.createdAt}" pattern="yyyy-MM-dd HH:mm"/>
+                                                        <fmt:formatDate value="${template.createdAtDate}" pattern="yyyy-MM-dd HH:mm"/>
                                                     </td>
                                                     <td>
-                                                        <fmt:formatDate value="${template.updatedAt}" pattern="yyyy-MM-dd HH:mm"/>
+                                                        <fmt:formatDate value="${template.updatedAtDate}" pattern="yyyy-MM-dd HH:mm"/>
                                                     </td>
                                                     <td class="text-center">
                                                         <div class="btn-group btn-group-sm" role="group">
