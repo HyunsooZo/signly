@@ -1,81 +1,73 @@
 package com.signly.template.application.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.signly.template.domain.model.TemplateStatus;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
+@Getter
 public class TemplateResponse {
     private final String templateId;
     private final String ownerId;
     private final String title;
-    private final String content;
+    private final String sectionsJson;
     private final int version;
     private final TemplateStatus status;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private final LocalDateTime createdAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private final LocalDateTime updatedAt;
+    private final List<TemplateSectionDto> sections;
+    private final String renderedHtml;
+    private final String previewText;
 
-    public TemplateResponse(String templateId,
-                            String ownerId,
-                            String title,
-                            String content,
-                            int version,
-                            TemplateStatus status,
-                            LocalDateTime createdAt,
-                            LocalDateTime updatedAt) {
+    @JsonCreator
+    public TemplateResponse(
+            @JsonProperty("templateId") String templateId,
+            @JsonProperty("ownerId") String ownerId,
+            @JsonProperty("title") String title,
+            @JsonProperty("sectionsJson") String sectionsJson,
+            @JsonProperty("version") int version,
+            @JsonProperty("status") TemplateStatus status,
+            @JsonProperty("createdAt") LocalDateTime createdAt,
+            @JsonProperty("updatedAt") LocalDateTime updatedAt,
+            @JsonProperty("sections") List<TemplateSectionDto> sections,
+            @JsonProperty("renderedHtml") String renderedHtml,
+            @JsonProperty("previewText") String previewText
+    ) {
         this.templateId = templateId;
         this.ownerId = ownerId;
         this.title = title;
-        this.content = content;
+        this.sectionsJson = sectionsJson;
         this.version = version;
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.sections = sections;
+        this.renderedHtml = renderedHtml;
+        this.previewText = previewText;
     }
 
-    public String getTemplateId() {
-        return templateId;
-    }
-
-    public String templateId() {
-        return templateId;
-    }
-
-    public String getOwnerId() {
-        return ownerId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
+    @JsonProperty("content")
     public String getContent() {
-        return content;
+        return sectionsJson;
     }
 
-    public int getVersion() {
-        return version;
-    }
-
-    public TemplateStatus getStatus() {
-        return status;
-    }
-
-    public Date getCreatedAt() {
+    @JsonIgnore
+    public Date getCreatedAtDate() {
         return toDate(createdAt);
     }
 
-    public Date getUpdatedAt() {
+    @JsonIgnore
+    public Date getUpdatedAtDate() {
         return toDate(updatedAt);
-    }
-
-    public LocalDateTime getCreatedAtLocalDateTime() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAtLocalDateTime() {
-        return updatedAt;
     }
 
     private Date toDate(LocalDateTime value) {

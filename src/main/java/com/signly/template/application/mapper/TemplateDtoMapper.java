@@ -1,22 +1,35 @@
 package com.signly.template.application.mapper;
 
 import com.signly.template.application.dto.TemplateResponse;
+import com.signly.template.application.dto.TemplateSectionDto;
 import com.signly.template.domain.model.ContractTemplate;
+import com.signly.template.domain.model.TemplateContent;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class TemplateDtoMapper {
 
     public TemplateResponse toResponse(ContractTemplate template) {
+        TemplateContent content = template.getContent();
+        List<TemplateSectionDto> sections = content.getSections().stream()
+                .map(TemplateSectionDto::from)
+                .collect(Collectors.toList());
+
         return new TemplateResponse(
                 template.getTemplateId().getValue(),
                 template.getOwnerId().getValue(),
                 template.getTitle(),
-                template.getContent().getJsonContent(),
+                content.getJsonContent(),
                 template.getVersion(),
                 template.getStatus(),
                 template.getCreatedAt(),
-                template.getUpdatedAt()
+                template.getUpdatedAt(),
+                sections,
+                content.renderHtml(),
+                content.toPlainText()
         );
     }
 }

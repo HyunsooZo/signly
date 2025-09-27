@@ -23,6 +23,7 @@
                 <a class="nav-link" href="/home">대시보드</a>
                 <a class="nav-link active" href="/templates">템플릿</a>
                 <a class="nav-link" href="/contracts">계약서</a>
+                <a class="nav-link" href="/profile/signature">서명 관리</a>
                 <a class="nav-link" href="/logout">로그아웃</a>
             </div>
         </div>
@@ -117,12 +118,12 @@
                                                         <a href="/templates/${template.templateId}" class="text-decoration-none">
                                                             <strong>${template.title}</strong>
                                                         </a>
-                                                        <c:if test="${not empty template.content}">
+                                                        <c:if test="${not empty template.previewText}">
                                                             <br>
                                                             <small class="text-muted">
-                                                                ${template.content.length() > 100 ?
-                                                                  template.content.substring(0, 100).concat('...') :
-                                                                  template.content}
+                                                                ${template.previewText.length() > 120 ?
+                                                                  template.previewText.substring(0, 120).concat('...') :
+                                                                  template.previewText}
                                                             </small>
                                                         </c:if>
                                                     </td>
@@ -154,7 +155,7 @@
                                                                     class="btn btn-outline-info"
                                                                     data-template-id="${template.templateId}"
                                                                     data-template-title="${fn:escapeXml(template.title)}"
-                                                                    data-template-content="${fn:escapeXml(template.content)}"
+                                                                    data-template-html="${fn:escapeXml(template.renderedHtml)}"
                                                                     onclick="previewTemplateButton(this)"
                                                                     title="미리보기">
                                                                 <i class="bi bi-eye"></i>
@@ -304,37 +305,17 @@
         function previewTemplateButton(button) {
             const templateId = button.getAttribute('data-template-id');
             const title = button.getAttribute('data-template-title') || '템플릿 미리보기';
-            const encodedContent = button.getAttribute('data-template-content') || '';
-            previewTemplateModal(templateId, title, encodedContent);
+            const htmlContent = button.getAttribute('data-template-html') || '';
+            previewTemplateModal(templateId, title, htmlContent);
         }
 
-        function previewTemplateModal(templateId, title, encodedContent) {
-            const rawContent = decodeHtml(encodedContent).trim();
-            const previewContent = rawContent
-                ? buildPreviewContent(rawContent, title)
-                : '템플릿 내용이 비어있습니다.';
+        function previewTemplateModal(templateId, title, htmlContent) {
+            const decoded = decodeHtml(htmlContent).trim();
+            const previewContent = decoded ? decoded : '<p class="text-muted">템플릿 내용이 비어있습니다.</p>';
 
             document.getElementById('previewModalTitle').textContent = title;
-            document.getElementById('previewContent').textContent = previewContent;
+            document.getElementById('previewContent').innerHTML = previewContent;
             new bootstrap.Modal(document.getElementById('previewModal')).show();
-        }
-
-        function buildPreviewContent(content, title) {
-            return content
-                .replace(/\{PARTY_A_NAME\}/g, '홍길동')
-                .replace(/\{PARTY_A_EMAIL\}/g, 'hong@example.com')
-                .replace(/\{PARTY_A_ADDRESS\}/g, '서울특별시 강남구 테헤란로 123')
-                .replace(/\{PARTY_B_NAME\}/g, '김철수')
-                .replace(/\{PARTY_B_EMAIL\}/g, 'kim@example.com')
-                .replace(/\{PARTY_B_ADDRESS\}/g, '서울특별시 서초구 서초대로 456')
-                .replace(/\{CONTRACT_TITLE\}/g, title || '샘플 계약서')
-                .replace(/\{CONTRACT_DATE\}/g, new Date().toLocaleDateString('ko-KR'))
-                .replace(/\{CONTRACT_AMOUNT\}/g, '1,000,000원')
-                .replace(/\{START_DATE\}/g, new Date().toLocaleDateString('ko-KR'))
-                .replace(/\{END_DATE\}/g, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('ko-KR'))
-                .replace(/\{SIGNATURE_A\}/g, '[갑 서명]')
-                .replace(/\{SIGNATURE_B\}/g, '[을 서명]')
-                .replace(/\{SIGNATURE_DATE\}/g, new Date().toLocaleDateString('ko-KR'));
         }
 
         function decodeHtml(value) {

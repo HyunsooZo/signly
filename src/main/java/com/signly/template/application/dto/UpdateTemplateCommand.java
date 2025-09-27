@@ -8,7 +8,7 @@ public record UpdateTemplateCommand(
         @Size(max = 255, message = "템플릿 제목은 255자를 초과할 수 없습니다")
         String title,
 
-        @NotBlank(message = "템플릿 내용은 필수입니다")
-        String content
+        @NotBlank(message = "템플릿 섹션 정보는 필수입니다")
+        String sectionsJson
 ) {
 }

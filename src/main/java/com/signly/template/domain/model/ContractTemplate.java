@@ -61,8 +61,12 @@ public class ContractTemplate extends AggregateRoot {
     }
 
     public void activate() {
-        if (this.status != TemplateStatus.DRAFT) {
-            throw new ValidationException("DRAFT 상태에서만 활성화할 수 있습니다");
+        if (this.status == TemplateStatus.ACTIVE) {
+            throw new ValidationException("이미 활성화된 템플릿입니다");
+        }
+
+        if (this.status != TemplateStatus.DRAFT && this.status != TemplateStatus.ARCHIVED) {
+            throw new ValidationException("활성화할 수 없는 상태입니다");
         }
 
         this.status = TemplateStatus.ACTIVE;

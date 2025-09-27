@@ -91,7 +91,7 @@ public class TemplateWebController {
             }
 
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
-            CreateTemplateCommand command = new CreateTemplateCommand(form.getTitle(), form.getContent());
+            CreateTemplateCommand command = new CreateTemplateCommand(form.getTitle(), form.getSectionsJson());
             TemplateResponse response = templateService.createTemplate(resolvedUserId, command);
 
             logger.info("템플릿 생성 성공: {} (ID: {})", response.getTitle(), response.getTemplateId());
@@ -151,7 +151,7 @@ public class TemplateWebController {
 
             TemplateForm form = new TemplateForm();
             form.setTitle(template.getTitle());
-            form.setContent(template.getContent());
+            form.setSectionsJson(template.getSectionsJson());
 
             model.addAttribute("pageTitle", "템플릿 수정");
             model.addAttribute("template", form);
@@ -181,7 +181,7 @@ public class TemplateWebController {
                 return "templates/form";
             }
 
-            UpdateTemplateCommand command = new UpdateTemplateCommand(form.getTitle(), form.getContent());
+            UpdateTemplateCommand command = new UpdateTemplateCommand(form.getTitle(), form.getSectionsJson());
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             TemplateResponse response = templateService.updateTemplate(resolvedUserId, templateId, command);
 
@@ -268,11 +268,11 @@ public class TemplateWebController {
 
     public static class TemplateForm {
         private String title;
-        private String content;
+        private String sectionsJson = "[]";
 
         public String getTitle() { return title; }
         public void setTitle(String title) { this.title = title; }
-        public String getContent() { return content; }
-        public void setContent(String content) { this.content = content; }
+        public String getSectionsJson() { return sectionsJson; }
+        public void setSectionsJson(String sectionsJson) { this.sectionsJson = (sectionsJson == null || sectionsJson.isBlank()) ? "[]" : sectionsJson; }
     }
 }

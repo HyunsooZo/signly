@@ -19,9 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,15 +50,13 @@ public class TemplateService {
             throw new ValidationException("이미 같은 제목의 템플릿이 존재합니다");
         }
 
-        TemplateContent content = TemplateContent.of(command.content());
+        TemplateContent content = TemplateContent.of(command.sectionsJson());
         ContractTemplate template = ContractTemplate.create(userIdObj, command.title(), content);
 
         ContractTemplate savedTemplate = templateRepository.save(template);
         return templateDtoMapper.toResponse(savedTemplate);
     }
 
-    @CachePut(value = "templates", key = "#templateId")
-    @CacheEvict(value = "activeTemplates", key = "#userId")
     public TemplateResponse updateTemplate(String userId, String templateId, UpdateTemplateCommand command) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
@@ -75,14 +70,13 @@ public class TemplateService {
         }
 
         template.updateTitle(command.title());
-        TemplateContent newContent = TemplateContent.of(command.content());
+        TemplateContent newContent = TemplateContent.of(command.sectionsJson());
         template.updateContent(newContent);
 
         ContractTemplate updatedTemplate = templateRepository.save(template);
         return templateDtoMapper.toResponse(updatedTemplate);
     }
 
-    @CacheEvict(value = {"templates", "activeTemplates"}, key = "#templateId")
     public void activateTemplate(String userId, String templateId) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
@@ -93,7 +87,6 @@ public class TemplateService {
         templateRepository.save(template);
     }
 
-    @CacheEvict(value = {"templates", "activeTemplates"}, key = "#templateId")
     public void archiveTemplate(String userId, String templateId) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
@@ -104,7 +97,6 @@ public class TemplateService {
         templateRepository.save(template);
     }
 
-    @CacheEvict(value = {"templates", "activeTemplates"}, key = "#templateId")
     public void deleteTemplate(String userId, String templateId) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
@@ -120,7 +112,6 @@ public class TemplateService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "templates", key = "#templateId")
     public TemplateResponse getTemplate(String userId, String templateId) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
@@ -145,7 +136,6 @@ public class TemplateService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "activeTemplates", key = "#userId")
     public List<TemplateResponse> getActiveTemplates(String userId) {
         UserId userIdObj = UserId.of(userId);
         List<ContractTemplate> activeTemplates = templateRepository.findActiveTemplatesByOwnerId(userIdObj);

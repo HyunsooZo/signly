@@ -55,6 +55,7 @@
                 <a class="nav-link" href="/home">대시보드</a>
                 <a class="nav-link active" href="/templates">템플릿</a>
                 <a class="nav-link" href="/contracts">계약서</a>
+                <a class="nav-link" href="/profile/signature">서명 관리</a>
                 <a class="nav-link" href="/logout">로그아웃</a>
             </div>
         </div>
@@ -124,7 +125,9 @@
                         </h5>
                     </div>
                     <div class="card-body p-0">
-                        <div class="template-content">${template.content}</div>
+                        <div class="template-content">
+                            <c:out value="${template.renderedHtml}" escapeXml="false" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -224,8 +227,8 @@
                                     </span>
                                 </div>
                                 <div class="info-item">
-                                    <span class="fw-medium">내용 길이:</span>
-                                    <span class="text-muted">${template.content.length()} 자</span>
+                                    <span class="fw-medium">섹션 수:</span>
+                                    <span class="text-muted">${template.sections.size()}</span>
                                 </div>
                             </div>
                         </div>
@@ -305,25 +308,15 @@
         }
 
         function previewTemplate() {
-            const content = `${template.content}`;
-
-            // 샘플 데이터로 변수 치환
-            let previewContent = content
-                .replace(/\{PARTY_A_NAME\}/g, '홍길동')
-                .replace(/\{PARTY_A_ADDRESS\}/g, '서울특별시 강남구 테헤란로 123')
-                .replace(/\{PARTY_B_NAME\}/g, '김철수')
-                .replace(/\{PARTY_B_ADDRESS\}/g, '서울특별시 서초구 서초대로 456')
-                .replace(/\{CONTRACT_TITLE\}/g, '${template.title}')
-                .replace(/\{CONTRACT_DATE\}/g, new Date().toLocaleDateString('ko-KR'))
-                .replace(/\{CONTRACT_AMOUNT\}/g, '1,000,000원')
-                .replace(/\{START_DATE\}/g, new Date().toLocaleDateString('ko-KR'))
-                .replace(/\{END_DATE\}/g, new Date(Date.now() + 365*24*60*60*1000).toLocaleDateString('ko-KR'))
-                .replace(/\{SIGNATURE_A\}/g, '[갑 서명]')
-                .replace(/\{SIGNATURE_B\}/g, '[을 서명]')
-                .replace(/\{SIGNATURE_DATE\}/g, new Date().toLocaleDateString('ko-KR'));
-
-            document.getElementById('previewContent').textContent = previewContent;
+            const html = decodeHtml(`${template.renderedHtml}`);
+            document.getElementById('previewContent').innerHTML = html || '<p class="text-muted">템플릿 내용이 비어있습니다.</p>';
             new bootstrap.Modal(document.getElementById('previewModal')).show();
+        }
+
+        function decodeHtml(value) {
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = value;
+            return textarea.value;
         }
 
         function activateTemplate() {
