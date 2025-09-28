@@ -12,6 +12,8 @@ import com.signly.template.application.preset.PresetSection;
 import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.application.preset.TemplatePresetSummary;
 import com.signly.template.domain.model.TemplateStatus;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -296,13 +298,12 @@ public class TemplateWebController {
         return "redirect:/templates";
     }
 
+    @Getter
     public static class TemplateForm {
+        @Setter
         private String title;
         private String sectionsJson = "[]";
 
-        public String getTitle() { return title; }
-        public void setTitle(String title) { this.title = title; }
-        public String getSectionsJson() { return sectionsJson; }
         public void setSectionsJson(String sectionsJson) { this.sectionsJson = (sectionsJson == null || sectionsJson.isBlank()) ? "[]" : sectionsJson; }
     }
 
