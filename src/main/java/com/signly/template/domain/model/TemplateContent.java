@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.signly.common.exception.ValidationException;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,6 +15,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Getter
 public class TemplateContent {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -44,14 +46,6 @@ public class TemplateContent {
                 .collect(Collectors.toCollection(ArrayList::new));
         String json = toJson(normalized);
         return new TemplateContent(json, normalized);
-    }
-
-    public List<TemplateSection> getSections() {
-        return sections;
-    }
-
-    public String getJsonContent() {
-        return jsonContent;
     }
 
     public String renderHtml() {

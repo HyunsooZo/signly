@@ -464,10 +464,11 @@
 
     function renderSections() {
         console.log('[DEBUG] renderSections 시작, sections 개수:', sections.length);
+        console.log('[DEBUG] renderSections 호출 스택:', new Error().stack);
         console.log('[DEBUG] sectionListEl:', sectionListEl);
 
-        // 기존 프리셋 폼 데이터 저장
-        savePresetFormData();
+        // 기존 프리셋 폼 데이터 저장 (임시로 주석처리 - 필드 초기화 문제 해결을 위해)
+        // savePresetFormData();
 
         sectionListEl.innerHTML = '';
         sections.forEach((section, index) => {
@@ -874,7 +875,7 @@
                         value = field.value || ''; // trim() 제거하고 빈 값도 허용
                     }
 
-                    console.log('[DEBUG] 필드 처리:', fieldName, '값:', value); // 디버깅용
+                    console.log('[DEBUG] 필드 처리:', fieldName, '타입:', field.type, '값:', value, '요소:', field.tagName); // 디버깅용
 
                     if (fieldName) { // value 조건 제거
                         switch(fieldName) {
@@ -887,30 +888,52 @@
                                 console.log('[DEBUG] employee 치환:', value);
                                 break;
                             case 'contractStartDate':
+                                console.log('[DEBUG] contractStartDate 처리 시작, 값:', value);
                                 if (value) {
+                                    console.log('[DEBUG] startDate 원본 value:', value, typeof value);
                                     const startDate = new Date(value);
+                                    console.log('[DEBUG] startDate Date 객체:', startDate);
+                                    console.log('[DEBUG] startDate Date 유효성:', !isNaN(startDate));
                                     if (!isNaN(startDate)) {
                                         const year = startDate.getFullYear();
                                         const month = String(startDate.getMonth() + 1).padStart(2, '0');
                                         const day = String(startDate.getDate()).padStart(2, '0');
-                                        const formattedDate = `${year}년 ${month}월 ${day}일`;
+                                        console.log('[DEBUG] startDate year:', year, 'month:', month, 'day:', day);
+                                        const formattedDate = year + '년 ' + month + '월 ' + day + '일';
+                                        console.log('[DEBUG] startDate 포맷된 날짜:', formattedDate);
+                                        console.log('[DEBUG] startDate 포맷된 날짜 길이:', formattedDate.length);
                                         updatedHtml = updatedHtml.replace(/\[CONTRACT_START_DATE\]/g, formattedDate);
                                         console.log('[DEBUG] contractStartDate 치환 성공:', formattedDate);
+                                    } else {
+                                        console.log('[DEBUG] startDate 잘못된 날짜 형식:', value);
                                     }
                                 } else {
                                     updatedHtml = updatedHtml.replace(/\[CONTRACT_START_DATE\]/g, '');
                                 }
                                 break;
                             case 'contractEndDate':
+                                console.log('[DEBUG] contractEndDate 처리 시작, 값:', value);
+                                console.log('[DEBUG] 치환 전 HTML에 [CONTRACT_END_DATE] 포함 여부:', updatedHtml.includes('[CONTRACT_END_DATE]'));
                                 if (value) {
+                                    console.log('[DEBUG] 원본 value:', value, typeof value);
                                     const endDate = new Date(value);
+                                    console.log('[DEBUG] Date 객체:', endDate);
+                                    console.log('[DEBUG] Date 유효성:', !isNaN(endDate));
                                     if (!isNaN(endDate)) {
                                         const year = endDate.getFullYear();
                                         const month = String(endDate.getMonth() + 1).padStart(2, '0');
                                         const day = String(endDate.getDate()).padStart(2, '0');
-                                        const formattedDate = `${year}년 ${month}월 ${day}일`;
+                                        console.log('[DEBUG] year:', year, 'month:', month, 'day:', day);
+                                        const formattedDate = year + '년 ' + month + '월 ' + day + '일';
+                                        console.log('[DEBUG] 포맷된 날짜:', formattedDate);
+                                        console.log('[DEBUG] 포맷된 날짜 길이:', formattedDate.length);
+                                        const beforeReplace = updatedHtml;
                                         updatedHtml = updatedHtml.replace(/\[CONTRACT_END_DATE\]/g, formattedDate);
+                                        console.log('[DEBUG] contractEndDate 치환 후 변경됨:', beforeReplace !== updatedHtml);
+                                        console.log('[DEBUG] 치환 후 HTML에 [CONTRACT_END_DATE] 포함 여부:', updatedHtml.includes('[CONTRACT_END_DATE]'));
                                         console.log('[DEBUG] contractEndDate 치환 성공:', formattedDate);
+                                    } else {
+                                        console.log('[DEBUG] 잘못된 날짜 형식:', value);
                                     }
                                 } else {
                                     updatedHtml = updatedHtml.replace(/\[CONTRACT_END_DATE\]/g, '');
@@ -927,7 +950,7 @@
                             case 'workStartTime':
                                 if (value && value.includes(':')) {
                                     const [startHour, startMin] = value.split(':');
-                                    const formattedTime = `${startHour}시 ${startMin}분`;
+                                    const formattedTime = startHour + '시 ' + startMin + '분';
                                     updatedHtml = updatedHtml.replace(/\[WORK_START_TIME\]/g, formattedTime);
                                 } else {
                                     updatedHtml = updatedHtml.replace(/\[WORK_START_TIME\]/g, '');
@@ -937,7 +960,7 @@
                             case 'workEndTime':
                                 if (value && value.includes(':')) {
                                     const [endHour, endMin] = value.split(':');
-                                    const formattedTime = `${endHour}시 ${endMin}분`;
+                                    const formattedTime = endHour + '시 ' + endMin + '분';
                                     updatedHtml = updatedHtml.replace(/\[WORK_END_TIME\]/g, formattedTime);
                                 } else {
                                     updatedHtml = updatedHtml.replace(/\[WORK_END_TIME\]/g, '');
@@ -947,7 +970,7 @@
                             case 'breakStartTime':
                                 if (value && value.includes(':')) {
                                     const [breakStartH, breakStartM] = value.split(':');
-                                    const formattedTime = `${breakStartH}시 ${breakStartM}분`;
+                                    const formattedTime = breakStartH + '시 ' + breakStartM + '분';
                                     updatedHtml = updatedHtml.replace(/\[BREAK_START_TIME\]/g, formattedTime);
                                 } else {
                                     updatedHtml = updatedHtml.replace(/\[BREAK_START_TIME\]/g, '');
@@ -957,7 +980,7 @@
                             case 'breakEndTime':
                                 if (value && value.includes(':')) {
                                     const [breakEndH, breakEndM] = value.split(':');
-                                    const formattedTime = `${breakEndH}시 ${breakEndM}분`;
+                                    const formattedTime = breakEndH + '시 ' + breakEndM + '분';
                                     updatedHtml = updatedHtml.replace(/\[BREAK_END_TIME\]/g, formattedTime);
                                 } else {
                                     updatedHtml = updatedHtml.replace(/\[BREAK_END_TIME\]/g, '');
@@ -973,10 +996,13 @@
                                 console.log('[DEBUG] holidays 치환:', value);
                                 break;
                             case 'monthlySalary':
+                                console.log('[DEBUG] monthlySalary 처리 시작, 값:', value, typeof value);
                                 if (value) {
                                     const monthlySalaryAmount = parseInt(value);
                                     if (!isNaN(monthlySalaryAmount) && monthlySalaryAmount > 0) {
-                                        updatedHtml = updatedHtml.replace(/\[MONTHLY_SALARY\]/g, `${monthlySalaryAmount.toLocaleString()}`);
+                                        const formattedSalary = monthlySalaryAmount.toLocaleString();
+                                        console.log('[DEBUG] 포맷된 월급:', formattedSalary);
+                                        updatedHtml = updatedHtml.replace(/\[MONTHLY_SALARY\]/g, formattedSalary);
                                     } else {
                                         updatedHtml = updatedHtml.replace(/\[MONTHLY_SALARY\]/g, '');
                                     }
@@ -989,7 +1015,7 @@
                                 if (value) {
                                     const bonusAmount = parseInt(value);
                                     if (!isNaN(bonusAmount) && bonusAmount > 0) {
-                                        updatedHtml = updatedHtml.replace(/\[BONUS\]/g, `있음 (${bonusAmount.toLocaleString()}원)`);
+                                        updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '있음 (' + bonusAmount.toLocaleString() + '원)');
                                     } else {
                                         updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '없음');
                                     }
@@ -1003,13 +1029,19 @@
                                 console.log('[DEBUG] paymentDay 치환:', value);
                                 break;
                             case 'paymentMethod':
+                                console.log('[DEBUG] paymentMethod 처리 시작, 값:', value, typeof value);
                                 let paymentMethodText = '';
                                 if (value === 'direct') {
                                     paymentMethodText = '근로자에게 직접 지급';
                                 } else if (value === 'bank') {
                                     paymentMethodText = '근로자 명의 예금통장에 입금';
+                                } else {
+                                    paymentMethodText = '';
                                 }
+                                console.log('[DEBUG] paymentMethodText:', paymentMethodText);
+                                console.log('[DEBUG] 치환 전 HTML에 [PAYMENT_METHOD] 포함 여부:', updatedHtml.includes('[PAYMENT_METHOD]'));
                                 updatedHtml = updatedHtml.replace(/\[PAYMENT_METHOD\]/g, paymentMethodText);
+                                console.log('[DEBUG] 치환 후 HTML에 [PAYMENT_METHOD] 포함 여부:', updatedHtml.includes('[PAYMENT_METHOD]'));
                                 console.log('[DEBUG] paymentMethod 치환:', value);
                                 break;
                             case 'contractDate':
@@ -1019,7 +1051,7 @@
                                         const year = contractDate.getFullYear();
                                         const month = String(contractDate.getMonth() + 1).padStart(2, '0');
                                         const day = String(contractDate.getDate()).padStart(2, '0');
-                                        const formattedDate = `${year}년 ${month}월 ${day}일`;
+                                        const formattedDate = year + '년 ' + month + '월 ' + day + '일';
                                         updatedHtml = updatedHtml.replace(/\[CONTRACT_DATE\]/g, formattedDate);
                                     }
                                 } else {
