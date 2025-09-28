@@ -856,7 +856,9 @@
 
                 // 폼 필드 값을 HTML에 반영
                 let updatedHtml = cleanedHtml;
-                console.log('[DEBUG] 원본 HTML 일부:', cleanedHtml.substring(0, 1000)); // 디버깅용
+                console.log('[DEBUG] 원본 HTML 전체:', cleanedHtml); // 전체 HTML 확인용
+                console.log('[DEBUG] 원본 HTML에서 [EMPLOYER] 찾기:', cleanedHtml.indexOf('[EMPLOYER]'));
+                console.log('[DEBUG] 원본 HTML에서 blank-line 찾기:', cleanedHtml.indexOf('blank-line'));
                 const formFields = document.querySelectorAll('.preset-form-fields input, .preset-form-fields select, .preset-form-fields textarea');
                 formFields.forEach(field => {
                     const fieldName = field.dataset.field;
@@ -877,164 +879,172 @@
                     if (fieldName) { // value 조건 제거
                         switch(fieldName) {
                             case 'employer':
-                                // 여러 패턴 시도
-                                const employerPatterns = [
-                                    /<span class="blank-line"><\/span>\(이하 '사업주'라 함\)/,
-                                    /<span class="blank-line">\s*<\/span>\s*\(이하 '사업주'라 함\)/,
-                                    /\s*<span class="blank-line">\s*<\/span>\s*\(이하 '사업주'라 함\)/
-                                ];
-                                let employerReplaced = false;
-                                for (const pattern of employerPatterns) {
-                                    if (pattern.test(updatedHtml)) {
-                                        updatedHtml = updatedHtml.replace(pattern, value + '(이하 \'사업주\'라 함)');
-                                        employerReplaced = true;
-                                        console.log('[DEBUG] employer 치환 성공 - 패턴:', pattern);
-                                        break;
-                                    }
-                                }
-                                if (!employerReplaced) {
-                                    console.log('[DEBUG] employer 치환 실패 - 값:', value);
-                                }
+                                updatedHtml = updatedHtml.replace(/\[EMPLOYER\]/g, value || '');
+                                console.log('[DEBUG] employer 치환:', value);
                                 break;
                             case 'employee':
-                                const employeePatterns = [
-                                    /\(이하 '사업주'라 함\)과\(와\)\s*<span class="blank-line"><\/span>\(이하 '근로자'라 함\)/,
-                                    /\(이하 '사업주'라 함\)과\(와\)\s*<span class="blank-line">\s*<\/span>\s*\(이하 '근로자'라 함\)/
-                                ];
-                                let employeeReplaced = false;
-                                for (const pattern of employeePatterns) {
-                                    if (pattern.test(updatedHtml)) {
-                                        updatedHtml = updatedHtml.replace(pattern, '(이하 \'사업주\'라 함)과(와) ' + value + '(이하 \'근로자\'라 함)');
-                                        employeeReplaced = true;
-                                        console.log('[DEBUG] employee 치환 성공 - 패턴:', pattern);
-                                        break;
-                                    }
-                                }
-                                if (!employeeReplaced) {
-                                    console.log('[DEBUG] employee 치환 실패 - 값:', value);
-                                }
+                                updatedHtml = updatedHtml.replace(/\[EMPLOYEE\]/g, value || '');
+                                console.log('[DEBUG] employee 치환:', value);
                                 break;
                             case 'contractStartDate':
-                                const startDate = new Date(value);
-                                if (!isNaN(startDate)) {
-                                    const year = startDate.getFullYear();
-                                    const month = startDate.getMonth() + 1;
-                                    const day = startDate.getDate();
-                                    // 실제 HTML 패턴에 맞게 수정 - 11개의 &nbsp; 뒤에 공백과 년/월/일
-                                    updatedHtml = updatedHtml.replace(/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\s*년\s*&nbsp;&nbsp;\s*월\s*&nbsp;&nbsp;\s*일부터/, `${year} 년 &nbsp;&nbsp; ${month} 월 &nbsp;&nbsp; ${day} 일부터`);
+                                if (value) {
+                                    const startDate = new Date(value);
+                                    if (!isNaN(startDate)) {
+                                        const year = startDate.getFullYear();
+                                        const month = String(startDate.getMonth() + 1).padStart(2, '0');
+                                        const day = String(startDate.getDate()).padStart(2, '0');
+                                        const formattedDate = `${year}년 ${month}월 ${day}일`;
+                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_START_DATE\]/g, formattedDate);
+                                        console.log('[DEBUG] contractStartDate 치환 성공:', formattedDate);
+                                    }
+                                } else {
+                                    updatedHtml = updatedHtml.replace(/\[CONTRACT_START_DATE\]/g, '');
                                 }
-                                console.log('[DEBUG] contractStartDate 치환:', value, '년:', startDate.getFullYear(), '월:', startDate.getMonth() + 1, '일:', startDate.getDate());
                                 break;
                             case 'contractEndDate':
-                                const endDate = new Date(value);
-                                if (!isNaN(endDate)) {
-                                    const year = endDate.getFullYear();
-                                    const month = endDate.getMonth() + 1;
-                                    const day = endDate.getDate();
-                                    // 실제 HTML 패턴에 맞게 수정 - 일부터 뒤에 11개의 &nbsp;와 년/월/일까지
-                                    updatedHtml = updatedHtml.replace(/일부터\s*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\s*년\s*&nbsp;&nbsp;\s*월\s*&nbsp;&nbsp;\s*일까지/, `일부터 ${year} 년 &nbsp;&nbsp; ${month} 월 &nbsp;&nbsp; ${day} 일까지`);
+                                if (value) {
+                                    const endDate = new Date(value);
+                                    if (!isNaN(endDate)) {
+                                        const year = endDate.getFullYear();
+                                        const month = String(endDate.getMonth() + 1).padStart(2, '0');
+                                        const day = String(endDate.getDate()).padStart(2, '0');
+                                        const formattedDate = `${year}년 ${month}월 ${day}일`;
+                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_END_DATE\]/g, formattedDate);
+                                        console.log('[DEBUG] contractEndDate 치환 성공:', formattedDate);
+                                    }
+                                } else {
+                                    updatedHtml = updatedHtml.replace(/\[CONTRACT_END_DATE\]/g, '');
                                 }
-                                console.log('[DEBUG] contractEndDate 치환:', value, '년:', endDate.getFullYear(), '월:', endDate.getMonth() + 1, '일:', endDate.getDate());
                                 break;
                             case 'workplace':
-                                if (value.trim()) {
-                                    updatedHtml = updatedHtml.replace(/(<span class="section-number">2\. 근 무 장 소:<\/span>)/, '$1 ' + value);
-                                }
+                                updatedHtml = updatedHtml.replace(/\[WORKPLACE\]/g, value || '');
                                 console.log('[DEBUG] workplace 치환:', value);
                                 break;
                             case 'jobDescription':
-                                if (value.trim()) {
-                                    updatedHtml = updatedHtml.replace(/(<span class="section-number">3\. 업무의 내용:<\/span>)/, '$1 ' + value);
-                                }
+                                updatedHtml = updatedHtml.replace(/\[JOB_DESCRIPTION\]/g, value || '');
                                 console.log('[DEBUG] jobDescription 치환:', value);
                                 break;
                             case 'workStartTime':
-                                if (value.includes(':')) {
+                                if (value && value.includes(':')) {
                                     const [startHour, startMin] = value.split(':');
-                                    updatedHtml = updatedHtml.replace(/<span class="blank-line"><\/span>시<span class="blank-line"><\/span>분부터/, `${startHour}시${startMin}분부터`);
+                                    const formattedTime = `${startHour}시 ${startMin}분`;
+                                    updatedHtml = updatedHtml.replace(/\[WORK_START_TIME\]/g, formattedTime);
+                                } else {
+                                    updatedHtml = updatedHtml.replace(/\[WORK_START_TIME\]/g, '');
                                 }
+                                console.log('[DEBUG] workStartTime 치환:', value);
                                 break;
                             case 'workEndTime':
-                                if (value.includes(':')) {
+                                if (value && value.includes(':')) {
                                     const [endHour, endMin] = value.split(':');
-                                    updatedHtml = updatedHtml.replace(/분부터<span class="blank-line"><\/span>시<span class="blank-line"><\/span>분까지/, `분부터${endHour}시${endMin}분까지`);
+                                    const formattedTime = `${endHour}시 ${endMin}분`;
+                                    updatedHtml = updatedHtml.replace(/\[WORK_END_TIME\]/g, formattedTime);
+                                } else {
+                                    updatedHtml = updatedHtml.replace(/\[WORK_END_TIME\]/g, '');
                                 }
+                                console.log('[DEBUG] workEndTime 치환:', value);
                                 break;
                             case 'breakStartTime':
-                                if (value.includes(':')) {
+                                if (value && value.includes(':')) {
                                     const [breakStartH, breakStartM] = value.split(':');
-                                    updatedHtml = updatedHtml.replace(/\(휴게시간:\s*&nbsp;&nbsp;\s*시\s*&nbsp;\s*분\s*~/, `(휴게시간: ${breakStartH} 시 ${breakStartM} 분 ~`);
+                                    const formattedTime = `${breakStartH}시 ${breakStartM}분`;
+                                    updatedHtml = updatedHtml.replace(/\[BREAK_START_TIME\]/g, formattedTime);
+                                } else {
+                                    updatedHtml = updatedHtml.replace(/\[BREAK_START_TIME\]/g, '');
                                 }
                                 console.log('[DEBUG] breakStartTime 치환:', value);
                                 break;
                             case 'breakEndTime':
-                                if (value.includes(':')) {
+                                if (value && value.includes(':')) {
                                     const [breakEndH, breakEndM] = value.split(':');
-                                    updatedHtml = updatedHtml.replace(/~\s*&nbsp;&nbsp;\s*시\s*&nbsp;\s*분\)/, `~ ${breakEndH} 시 ${breakEndM} 분)`);
+                                    const formattedTime = `${breakEndH}시 ${breakEndM}분`;
+                                    updatedHtml = updatedHtml.replace(/\[BREAK_END_TIME\]/g, formattedTime);
+                                } else {
+                                    updatedHtml = updatedHtml.replace(/\[BREAK_END_TIME\]/g, '');
                                 }
                                 console.log('[DEBUG] breakEndTime 치환:', value);
                                 break;
                             case 'workDays':
-                                updatedHtml = updatedHtml.replace(/매주\s*<span class="blank-line"><\/span>일\(또는 매일단위\)근무/, `매주 ${value}일(또는 매일단위)근무`);
+                                updatedHtml = updatedHtml.replace(/\[WORK_DAYS\]/g, value || '');
                                 console.log('[DEBUG] workDays 치환:', value);
                                 break;
                             case 'holidays':
-                                updatedHtml = updatedHtml.replace(/휴일은 매주\s*<span class="blank-line"><\/span>요일/, `휴일은 매주 ${value}요일`);
+                                updatedHtml = updatedHtml.replace(/\[HOLIDAYS\]/g, value || '');
                                 console.log('[DEBUG] holidays 치환:', value);
                                 break;
                             case 'monthlySalary':
-                                const monthlySalaryAmount = parseInt(value);
-                                if (!isNaN(monthlySalaryAmount) && monthlySalaryAmount > 0) {
-                                    updatedHtml = updatedHtml.replace(/월\(일,시간\)급:<span class="blank-line"><\/span>원/, `월(일,시간)급:${monthlySalaryAmount.toLocaleString()}원`);
+                                if (value) {
+                                    const monthlySalaryAmount = parseInt(value);
+                                    if (!isNaN(monthlySalaryAmount) && monthlySalaryAmount > 0) {
+                                        updatedHtml = updatedHtml.replace(/\[MONTHLY_SALARY\]/g, `${monthlySalaryAmount.toLocaleString()}`);
+                                    } else {
+                                        updatedHtml = updatedHtml.replace(/\[MONTHLY_SALARY\]/g, '');
+                                    }
                                 } else {
-                                    // 빈 값이거나 0일 때 원래대로 복원
-                                    updatedHtml = updatedHtml.replace(/월\(일,시간\)급:[^원]*원/, '월(일,시간)급:<span class="blank-line"></span>원');
+                                    updatedHtml = updatedHtml.replace(/\[MONTHLY_SALARY\]/g, '');
                                 }
-                                console.log('[DEBUG] monthlySalary 치환:', value, '=>', monthlySalaryAmount);
+                                console.log('[DEBUG] monthlySalary 치환:', value);
                                 break;
                             case 'bonus':
-                                const bonusAmount = parseInt(value);
-                                if (!isNaN(bonusAmount) && bonusAmount > 0) {
-                                    updatedHtml = updatedHtml.replace(/상여금: 있음 \(\s*\)<span class="blank-line"><\/span>원/, `상여금: 있음 (연 2회)${bonusAmount.toLocaleString()}원`);
+                                if (value) {
+                                    const bonusAmount = parseInt(value);
+                                    if (!isNaN(bonusAmount) && bonusAmount > 0) {
+                                        updatedHtml = updatedHtml.replace(/\[BONUS\]/g, `있음 (${bonusAmount.toLocaleString()}원)`);
+                                    } else {
+                                        updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '없음');
+                                    }
+                                } else {
+                                    updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '없음');
                                 }
+                                console.log('[DEBUG] bonus 치환:', value);
                                 break;
                             case 'paymentDay':
-                                updatedHtml = updatedHtml.replace(/임금지급일: 매월\(매주 또는 매일\)<span class="blank-line"><\/span>일/, `임금지급일: 매월(매주 또는 매일)${value}일`);
+                                updatedHtml = updatedHtml.replace(/\[PAYMENT_DAY\]/g, value || '');
+                                console.log('[DEBUG] paymentDay 치환:', value);
                                 break;
                             case 'paymentMethod':
+                                let paymentMethodText = '';
                                 if (value === 'direct') {
-                                    updatedHtml = updatedHtml.replace(/근로자에게 직접 지급 \(\s*\), 근로자 명의 예금통장에 입금\(\s*\)/, '근로자에게 직접 지급 ( ✓ ), 근로자 명의 예금통장에 입금(   )');
+                                    paymentMethodText = '근로자에게 직접 지급';
                                 } else if (value === 'bank') {
-                                    updatedHtml = updatedHtml.replace(/근로자에게 직접 지급 \(\s*\), 근로자 명의 예금통장에 입금\(\s*\)/, '근로자에게 직접 지급 (   ), 근로자 명의 예금통장에 입금( ✓ )');
+                                    paymentMethodText = '근로자 명의 예금통장에 입금';
                                 }
+                                updatedHtml = updatedHtml.replace(/\[PAYMENT_METHOD\]/g, paymentMethodText);
+                                console.log('[DEBUG] paymentMethod 치환:', value);
                                 break;
                             case 'contractDate':
-                                const contractDate = new Date(value);
-                                if (!isNaN(contractDate)) {
-                                    const year = contractDate.getFullYear();
-                                    const month = contractDate.getMonth() + 1;
-                                    const day = contractDate.getDate();
-                                    updatedHtml = updatedHtml.replace(/(&nbsp;){11}\s*년\s*&nbsp;&nbsp;&nbsp;&nbsp;\s*월\s*&nbsp;&nbsp;&nbsp;&nbsp;\s*일/, ` ${year} 년 &nbsp;&nbsp;&nbsp;&nbsp; ${month} 월 &nbsp;&nbsp;&nbsp;&nbsp; ${day} 일`);
+                                if (value) {
+                                    const contractDate = new Date(value);
+                                    if (!isNaN(contractDate)) {
+                                        const year = contractDate.getFullYear();
+                                        const month = String(contractDate.getMonth() + 1).padStart(2, '0');
+                                        const day = String(contractDate.getDate()).padStart(2, '0');
+                                        const formattedDate = `${year}년 ${month}월 ${day}일`;
+                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_DATE\]/g, formattedDate);
+                                    }
+                                } else {
+                                    updatedHtml = updatedHtml.replace(/\[CONTRACT_DATE\]/g, '');
                                 }
+                                console.log('[DEBUG] contractDate 치환:', value);
                                 break;
                             case 'companyName':
-                                updatedHtml = updatedHtml.replace(/\(사업주\)사업체명 :/, `(사업주)사업체명 : ${value}`);
+                                updatedHtml = updatedHtml.replace(/\[COMPANY_NAME\]/g, value || '');
                                 console.log('[DEBUG] companyName 치환:', value);
                                 break;
                             case 'employerAddress':
-                                updatedHtml = updatedHtml.replace(/주소 :/, `주소 : ${value}`);
+                                updatedHtml = updatedHtml.replace(/\[EMPLOYER_ADDRESS\]/g, value || '');
                                 console.log('[DEBUG] employerAddress 치환:', value);
                                 break;
                             case 'employerPhone':
-                                updatedHtml = updatedHtml.replace(/\(전화:\s*\)/, `(전화: ${value})`);
+                                updatedHtml = updatedHtml.replace(/\[EMPLOYER_PHONE\]/g, value || '');
                                 console.log('[DEBUG] employerPhone 치환:', value);
                                 break;
                             case 'employeeAddress':
-                                updatedHtml = updatedHtml.replace(/\(근로자\)주소 :/, `(근로자)주소 : ${value}`);
+                                updatedHtml = updatedHtml.replace(/\[EMPLOYEE_ADDRESS\]/g, value || '');
                                 console.log('[DEBUG] employeeAddress 치환:', value);
                                 break;
                             case 'employeePhone':
-                                updatedHtml = updatedHtml.replace(/연락처 :/, `연락처 : ${value}`);
+                                updatedHtml = updatedHtml.replace(/\[EMPLOYEE_PHONE\]/g, value || '');
                                 console.log('[DEBUG] employeePhone 치환:', value);
                                 break;
                             default:
@@ -1301,158 +1311,36 @@
                     return;
                 }
 
-                // 표준계약서 HTML 템플릿과 필드들 생성
-                const standardContractHtml = `<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>표준근로계약서</title>
-    <style>
-        body {
-            font-family: 'Malgun Gothic', sans-serif;
-            max-width: 210mm;
-            margin: 0 auto;
-            padding: 20mm;
-            line-height: 1.4;
-            font-size: 13px;
-            background: white;
-        }
-        .title {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 40px;
-            letter-spacing: 8px;
-        }
-        .contract-intro {
-            text-align: justify;
-            margin-bottom: 25px;
-        }
-        .blank-line {
-            display: inline-block;
-            border-bottom: 1px solid #000;
-            min-width: 80px;
-            height: 16px;
-            margin: 0 3px;
-        }
-        .section {
-            margin: 15px 0;
-        }
-        .section-number {
-            font-weight: bold;
-        }
-        .indent {
-            margin-left: 20px;
-        }
-        .note {
-            font-size: 11px;
-            margin-left: 40px;
-            margin-top: 5px;
-        }
-        .wage-section {
-            margin-left: 20px;
-        }
-        .wage-item {
-            margin: 8px 0;
-        }
-        .date-section {
-            text-align: center;
-            margin: 40px 0 30px 0;
-            font-size: 16px;
-        }
-        .signature-section {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-        .signature-block {
-            width: 200px;
-        }
-        .signature-line {
-            margin: 8px 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="title">표준근로계약서</div>
-    <div class="contract-intro">
-        <span class="blank-line"></span>(이하 '사업주'라 함)과(와) <span class="blank-line"></span>(이하 '근로자'라 함)은<br>
-        다음과 같이 근로 계약을 체결한다.
-    </div>
-    <div class="section">
-        <span class="section-number">1. 근로계약기간:</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 년 &nbsp;&nbsp; 월 &nbsp;&nbsp; 일부터 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 년 &nbsp;&nbsp; 월 &nbsp;&nbsp; 일까지
-        <div class="note">※ 근로계약기간을 정하지 않는 경우에는 "근로계약일"만 기재</div>
-    </div>
-    <div class="section">
-        <span class="section-number">2. 근 무 장 소:</span>
-    </div>
-    <div class="section">
-        <span class="section-number">3. 업무의 내용:</span>
-    </div>
-    <div class="section">
-        <span class="section-number">4. 소정근로시간:</span> <span class="blank-line"></span>시<span class="blank-line"></span>분부터<span class="blank-line"></span>시<span class="blank-line"></span>분까지 (휴게시간: &nbsp;&nbsp; 시 &nbsp; 분 ~ &nbsp;&nbsp; 시 &nbsp; 분)
-    </div>
-    <div class="section">
-        <span class="section-number">5. 근무일/휴일:</span> 매주 <span class="blank-line"></span>일(또는 매일단위)근무, 휴일은 매주 <span class="blank-line"></span>요일
-    </div>
-    <div class="section">
-        <span class="section-number">6. 임 금</span>
-        <div class="wage-section">
-            <div class="wage-item">・월(일,시간)급:<span class="blank-line"></span>원</div>
-            <div class="wage-item">・상여금: 있음 (      )<span class="blank-line"></span>원, 없음(                 )</div>
-            <div class="wage-item">・기타급여(제수당 등): 있음 (       ), 없음(    )</div>
-            <div style="margin: 15px 0;">
-                <span class="blank-line" style="min-width: 100px;"></span>원, <span class="blank-line" style="min-width: 100px;"></span>원
-            </div>
-            <div style="margin: 15px 0;">
-                <span class="blank-line" style="min-width: 100px;"></span>원, <span class="blank-line" style="min-width: 100px;"></span>원
-            </div>
-            <div class="wage-item">・임금지급일: 매월(매주 또는 매일)<span class="blank-line"></span>일(휴일의 경우는 전일 지급)</div>
-            <div class="wage-item">・지급방법: 근로자에게 직접 지급 (   ), 근로자 명의 예금통장에 입금(   )</div>
-        </div>
-    </div>
-    <div class="section">
-        <span class="section-number">7. 연차유급휴가</span>
-        <div class="indent">• 연차유급휴가는 근로기준법에서 정하는 바에 따라 부여함</div>
-    </div>
-    <div class="section">
-        <span class="section-number">8. 근로계약서 교부</span>
-        <div class="indent">・사업주는 근로계약을 체결함과 동시에 본 계약서를 사본하여 근로자의 교부요구와 관계없이 근로자에게 교부함(근로기준법 제17조 이행)</div>
-    </div>
-    <div class="section">
-        <span class="section-number">9. 기타</span>
-        <div class="indent">• 이 계약에 정함이 없는 사항은 근로기준법의 의함</div>
-    </div>
-    <div class="date-section">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 년 &nbsp;&nbsp;&nbsp;&nbsp; 월 &nbsp;&nbsp;&nbsp;&nbsp; 일</div>
-    <div class="signature-section">
-        <div class="signature-block">
-            <div class="signature-line">(사업주)사업체명 :</div>
-            <div class="signature-line" style="margin-left: 60px;">주소 :</div>
-            <div class="signature-line" style="margin-left: 60px;">대표자 : (서명)</div>
-        </div>
-        <div class="signature-block">
-            <div class="signature-line">(전화:           )</div>
-        </div>
-    </div>
-    <div style="margin-top: 30px;">
-        <div style="float: left;">
-            <div>(근로자)주소 :</div>
-            <div style="margin-left: 70px; margin-top: 15px;">연락처 :</div>
-            <div style="margin-left: 70px; margin-top: 15px;">성명 : (서명)</div>
-        </div>
-        <div style="clear: both;"></div>
-    </div>
-</body>
-</html>`;
+                // 백엔드 API에서 템플릿 HTML 가져오기
+                let templateHtml;
+                try {
+                    const response = await fetch('/templates/presets/standard-employment-contract');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const presetData = await response.json();
+                    console.log('[DEBUG] API 응답 데이터:', presetData);
+
+                    // 프리셋 데이터에서 HTML 템플릿 추출
+                    if (presetData.sections && presetData.sections.length > 0) {
+                        templateHtml = presetData.sections[0].content;
+                        console.log('[DEBUG] API에서 받은 템플릿 HTML:', templateHtml.substring(0, 200) + '...');
+                    } else {
+                        throw new Error('프리셋 데이터에 섹션이 없습니다.');
+                    }
+                } catch (error) {
+                    console.error('[ERROR] 템플릿 로딩 실패:', error);
+                    alert('템플릿을 불러오는 중 오류가 발생했습니다: ' + error.message);
+                    return;
+                }
 
                 sections = [
-                    // 표준계약서 HTML 템플릿과 모든 필드를 포함한 하나의 섹션
+                    // 백엔드에서 가져온 HTML 템플릿으로 섹션 생성
                     {
                         sectionId: 'standard-contract-template',
                         type: 'CUSTOM',
                         order: 0,
-                        content: standardContractHtml,
+                        content: templateHtml,
                         metadata: { rawHtml: true }
                     }
                 ];
