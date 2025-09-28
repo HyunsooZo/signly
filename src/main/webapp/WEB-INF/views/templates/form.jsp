@@ -920,8 +920,10 @@
                                     const year = startDate.getFullYear();
                                     const month = startDate.getMonth() + 1;
                                     const day = startDate.getDate();
-                                    updatedHtml = updatedHtml.replace(/(&nbsp;){11}\s*년\s*&nbsp;&nbsp;\s*월\s*&nbsp;&nbsp;\s*일부터/, ` ${year} 년 &nbsp;&nbsp; ${month} 월 &nbsp;&nbsp; ${day} 일부터`);
+                                    // 실제 HTML 패턴에 맞게 수정 - 11개의 &nbsp; 뒤에 공백과 년/월/일
+                                    updatedHtml = updatedHtml.replace(/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\s*년\s*&nbsp;&nbsp;\s*월\s*&nbsp;&nbsp;\s*일부터/, `${year} 년 &nbsp;&nbsp; ${month} 월 &nbsp;&nbsp; ${day} 일부터`);
                                 }
+                                console.log('[DEBUG] contractStartDate 치환:', value, '년:', startDate.getFullYear(), '월:', startDate.getMonth() + 1, '일:', startDate.getDate());
                                 break;
                             case 'contractEndDate':
                                 const endDate = new Date(value);
@@ -929,14 +931,22 @@
                                     const year = endDate.getFullYear();
                                     const month = endDate.getMonth() + 1;
                                     const day = endDate.getDate();
-                                    updatedHtml = updatedHtml.replace(/일부터\s*(&nbsp;){11}\s*년\s*&nbsp;&nbsp;\s*월\s*&nbsp;&nbsp;\s*일까지/, `일부터 ${year} 년 &nbsp;&nbsp; ${month} 월 &nbsp;&nbsp; ${day} 일까지`);
+                                    // 실제 HTML 패턴에 맞게 수정 - 일부터 뒤에 11개의 &nbsp;와 년/월/일까지
+                                    updatedHtml = updatedHtml.replace(/일부터\s*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\s*년\s*&nbsp;&nbsp;\s*월\s*&nbsp;&nbsp;\s*일까지/, `일부터 ${year} 년 &nbsp;&nbsp; ${month} 월 &nbsp;&nbsp; ${day} 일까지`);
                                 }
+                                console.log('[DEBUG] contractEndDate 치환:', value, '년:', endDate.getFullYear(), '월:', endDate.getMonth() + 1, '일:', endDate.getDate());
                                 break;
                             case 'workplace':
-                                updatedHtml = updatedHtml.replace(/(<span class="section-number">2\. 근 무 장 소:<\/span>)/, '$1 ' + value);
+                                if (value.trim()) {
+                                    updatedHtml = updatedHtml.replace(/(<span class="section-number">2\. 근 무 장 소:<\/span>)/, '$1 ' + value);
+                                }
+                                console.log('[DEBUG] workplace 치환:', value);
                                 break;
                             case 'jobDescription':
-                                updatedHtml = updatedHtml.replace(/(<span class="section-number">3\. 업무의 내용:<\/span>)/, '$1 ' + value);
+                                if (value.trim()) {
+                                    updatedHtml = updatedHtml.replace(/(<span class="section-number">3\. 업무의 내용:<\/span>)/, '$1 ' + value);
+                                }
+                                console.log('[DEBUG] jobDescription 치환:', value);
                                 break;
                             case 'workStartTime':
                                 if (value.includes(':')) {
@@ -955,12 +965,14 @@
                                     const [breakStartH, breakStartM] = value.split(':');
                                     updatedHtml = updatedHtml.replace(/\(휴게시간:\s*&nbsp;&nbsp;\s*시\s*&nbsp;\s*분\s*~/, `(휴게시간: ${breakStartH} 시 ${breakStartM} 분 ~`);
                                 }
+                                console.log('[DEBUG] breakStartTime 치환:', value);
                                 break;
                             case 'breakEndTime':
                                 if (value.includes(':')) {
                                     const [breakEndH, breakEndM] = value.split(':');
                                     updatedHtml = updatedHtml.replace(/~\s*&nbsp;&nbsp;\s*시\s*&nbsp;\s*분\)/, `~ ${breakEndH} 시 ${breakEndM} 분)`);
                                 }
+                                console.log('[DEBUG] breakEndTime 치환:', value);
                                 break;
                             case 'workDays':
                                 updatedHtml = updatedHtml.replace(/매주\s*<span class="blank-line"><\/span>일\(또는 매일단위\)근무/, `매주 ${value}일(또는 매일단위)근무`);
@@ -1007,43 +1019,26 @@
                                 break;
                             case 'companyName':
                                 updatedHtml = updatedHtml.replace(/\(사업주\)사업체명 :/, `(사업주)사업체명 : ${value}`);
+                                console.log('[DEBUG] companyName 치환:', value);
                                 break;
                             case 'employerAddress':
                                 updatedHtml = updatedHtml.replace(/주소 :/, `주소 : ${value}`);
+                                console.log('[DEBUG] employerAddress 치환:', value);
                                 break;
                             case 'employerPhone':
                                 updatedHtml = updatedHtml.replace(/\(전화:\s*\)/, `(전화: ${value})`);
+                                console.log('[DEBUG] employerPhone 치환:', value);
                                 break;
                             case 'employeeAddress':
                                 updatedHtml = updatedHtml.replace(/\(근로자\)주소 :/, `(근로자)주소 : ${value}`);
+                                console.log('[DEBUG] employeeAddress 치환:', value);
                                 break;
                             case 'employeePhone':
                                 updatedHtml = updatedHtml.replace(/연락처 :/, `연락처 : ${value}`);
+                                console.log('[DEBUG] employeePhone 치환:', value);
                                 break;
-                            case 'workStartTime':
-                                if (value.includes(':')) {
-                                    const [startHour, startMin] = value.split(':');
-                                    updatedHtml = updatedHtml.replace(/<span class="blank-line"><\/span>시<span class="blank-line"><\/span>분부터/, `${startHour}시${startMin}분부터`);
-                                }
-                                break;
-                            case 'workEndTime':
-                                if (value.includes(':')) {
-                                    const [endHour, endMin] = value.split(':');
-                                    updatedHtml = updatedHtml.replace(/분부터<span class="blank-line"><\/span>시<span class="blank-line"><\/span>분까지/, `분부터${endHour}시${endMin}분까지`);
-                                }
-                                break;
-                            case 'breakStartTime':
-                                if (value.includes(':')) {
-                                    const [breakStartH, breakStartM] = value.split(':');
-                                    updatedHtml = updatedHtml.replace(/\(휴게시간:\s+시\s+분\s+~/, `(휴게시간: ${breakStartH} 시 ${breakStartM} 분 ~`);
-                                }
-                                break;
-                            case 'breakEndTime':
-                                if (value.includes(':')) {
-                                    const [breakEndH, breakEndM] = value.split(':');
-                                    updatedHtml = updatedHtml.replace(/~\s+시\s+분\)/, `~ ${breakEndH} 시 ${breakEndM} 분)`);
-                                }
-                                break;
+                            default:
+                                console.log('[DEBUG] 처리되지 않은 필드:', fieldName, '값:', value);
                         }
                     }
                 });
@@ -1665,9 +1660,42 @@
         });
     }
 
+    // 프리셋 폼 필드 이벤트 리스너 초기화
+    function initPresetFormListeners() {
+        const presetFormContainer = document.querySelector('.preset-form-fields');
+        if (presetFormContainer) {
+            // 이벤트 위임을 사용하여 모든 프리셋 폼 필드의 변경사항을 감지
+            presetFormContainer.addEventListener('input', function(event) {
+                const field = event.target;
+                if (field.dataset.field) {
+                    console.log('[DEBUG] 프리셋 필드 변경:', field.dataset.field, '값:', field.value);
+                    // 디바운싱을 위한 타이머 설정
+                    clearTimeout(field.updateTimer);
+                    field.updateTimer = setTimeout(() => {
+                        savePresetFormData();
+                        renderPreview();
+                    }, 300); // 300ms 후에 미리보기 업데이트
+                }
+            });
+
+            // change 이벤트도 처리 (select, radio 등을 위해)
+            presetFormContainer.addEventListener('change', function(event) {
+                const field = event.target;
+                if (field.dataset.field) {
+                    console.log('[DEBUG] 프리셋 필드 변경(change):', field.dataset.field, '값:', field.value);
+                    savePresetFormData();
+                    renderPreview();
+                }
+            });
+
+            console.log('[SUCCESS] 프리셋 폼 필드 이벤트 리스너 초기화 완료');
+        }
+    }
+
     loadInitialSections();
     initPreviewZoom();
     initFloatingPreview();
+    initPresetFormListeners();
 </script>
 
 
