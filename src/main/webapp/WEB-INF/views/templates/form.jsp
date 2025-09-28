@@ -31,17 +31,24 @@
         .section-card.footer {
             border-left-color: #0d6efd;
         }
+        .preview-container {
+            position: sticky;
+            top: 20px;
+            align-self: flex-start;
+            transition: transform 0.2s ease;
+            z-index: 10;
+        }
         .preview-surface {
-            border: 1px solid #dfe3eb;
-            border-radius: 12px;
             background: #fff;
             padding: 1.5rem;
-            max-height: 80vh;
+            max-height: calc(100vh - 120px);
             overflow: auto;
             min-height: 500px;
             word-wrap: break-word;
             word-break: break-word;
             font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border-radius: 0 0 12px 12px;
         }
         .preview-surface .title {
             font-size: 1.1rem !important;
@@ -81,11 +88,6 @@
         /* 미리보기 확대 기능 스타일 */
         .preview-surface {
             cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        .preview-surface:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         /* 확대 모달 스타일 */
@@ -310,20 +312,22 @@
         </div>
 
         <div>
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-display me-2"></i>실시간 미리보기
-                        <small class="text-muted ms-2">
-                            <i class="bi bi-zoom-in me-1"></i>클릭하여 확대보기
-                        </small>
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="preview-surface" id="previewSurface">
-                        <div class="text-muted text-center py-5">
-                            <i class="bi bi-eye display-6 d-block mb-3"></i>
-                            좌측에서 섹션을 추가하면 즉시 미리보기가 표시됩니다.
+            <div class="preview-container">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-display me-2"></i>실시간 미리보기
+                            <small class="text-muted ms-2">
+                                <i class="bi bi-zoom-in me-1"></i>클릭하여 확대보기
+                            </small>
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="preview-surface" id="previewSurface">
+                            <div class="text-muted text-center py-5">
+                                <i class="bi bi-eye display-6 d-block mb-3"></i>
+                                좌측에서 섹션을 추가하면 즉시 미리보기가 표시됩니다.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -730,10 +734,50 @@
                 // 폼 필드 변경 시 HTML 업데이트
                 const formFields = formFieldsContainer.querySelectorAll('[data-field]');
                 formFields.forEach(field => {
-                    const eventType = field.type === 'radio' ? 'change' : 'input';
-                    field.addEventListener(eventType, () => {
-                        renderPreview();
+                    // 다양한 입력 타입에 대한 이벤트 설정
+                    const events = [];
+
+                    if (field.type === 'radio' || field.type === 'checkbox') {
+                        events.push('change');
+                    } else if (field.type === 'number' || field.type === 'date' || field.type === 'time') {
+                        events.push('input', 'change');
+                    } else if (field.tagName === 'SELECT') {
+                        events.push('change');
+                    } else {
+                        events.push('input', 'change', 'blur');
+                    }
+
+                    events.forEach(eventType => {
+                        field.addEventListener(eventType, () => {
+                            // 약간의 지연을 두어 입력 완료 후 업데이트
+                            clearTimeout(field.updateTimer);
+                            field.updateTimer = setTimeout(() => {
+                                savePresetFormData(); // 데이터 저장
+                                renderPreview(); // 미리보기 업데이트
+                            }, field.type === 'number' || field.type === 'date' || field.type === 'time' ? 100 : 0);
+                        });
                     });
+
+                    // 숫자, 날짜, 시간 필드에 대한 추가 키보드 이벤트
+                    if (field.type === 'number' || field.type === 'date' || field.type === 'time') {
+                        field.addEventListener('keyup', () => {
+                            clearTimeout(field.updateTimer);
+                            field.updateTimer = setTimeout(() => {
+                                savePresetFormData();
+                                renderPreview();
+                            }, 200);
+                        });
+
+                        // 마우스 휠로 숫자 변경 시에도 반응
+                        if (field.type === 'number') {
+                            field.addEventListener('wheel', () => {
+                                setTimeout(() => {
+                                    savePresetFormData();
+                                    renderPreview();
+                                }, 100);
+                            });
+                        }
+                    }
                 });
 
                 // 저장된 데이터 복원 후 미리보기 업데이트
@@ -812,6 +856,7 @@
 
                 // 폼 필드 값을 HTML에 반영
                 let updatedHtml = cleanedHtml;
+                console.log('[DEBUG] 원본 HTML 일부:', cleanedHtml.substring(0, 1000)); // 디버깅용
                 const formFields = document.querySelectorAll('.preset-form-fields input, .preset-form-fields select, .preset-form-fields textarea');
                 formFields.forEach(field => {
                     const fieldName = field.dataset.field;
@@ -824,16 +869,50 @@
                             return; // 체크되지 않은 라디오 버튼은 건너뛰기
                         }
                     } else {
-                        value = field.value.trim();
+                        value = field.value || ''; // trim() 제거하고 빈 값도 허용
                     }
 
-                    if (fieldName && value) {
+                    console.log('[DEBUG] 필드 처리:', fieldName, '값:', value); // 디버깅용
+
+                    if (fieldName) { // value 조건 제거
                         switch(fieldName) {
                             case 'employer':
-                                updatedHtml = updatedHtml.replace(/(<span class="blank-line"><\/span>)\(이하 '사업주'라 함\)/, value + '(이하 \'사업주\'라 함)');
+                                // 여러 패턴 시도
+                                const employerPatterns = [
+                                    /<span class="blank-line"><\/span>\(이하 '사업주'라 함\)/,
+                                    /<span class="blank-line">\s*<\/span>\s*\(이하 '사업주'라 함\)/,
+                                    /\s*<span class="blank-line">\s*<\/span>\s*\(이하 '사업주'라 함\)/
+                                ];
+                                let employerReplaced = false;
+                                for (const pattern of employerPatterns) {
+                                    if (pattern.test(updatedHtml)) {
+                                        updatedHtml = updatedHtml.replace(pattern, value + '(이하 \'사업주\'라 함)');
+                                        employerReplaced = true;
+                                        console.log('[DEBUG] employer 치환 성공 - 패턴:', pattern);
+                                        break;
+                                    }
+                                }
+                                if (!employerReplaced) {
+                                    console.log('[DEBUG] employer 치환 실패 - 값:', value);
+                                }
                                 break;
                             case 'employee':
-                                updatedHtml = updatedHtml.replace(/\(이하 '사업주'라 함\)과\(와\) (<span class="blank-line"><\/span>)\(이하 '근로자'라 함\)/, '(이하 \'사업주\'라 함)과(와) ' + value + '(이하 \'근로자\'라 함)');
+                                const employeePatterns = [
+                                    /\(이하 '사업주'라 함\)과\(와\)\s*<span class="blank-line"><\/span>\(이하 '근로자'라 함\)/,
+                                    /\(이하 '사업주'라 함\)과\(와\)\s*<span class="blank-line">\s*<\/span>\s*\(이하 '근로자'라 함\)/
+                                ];
+                                let employeeReplaced = false;
+                                for (const pattern of employeePatterns) {
+                                    if (pattern.test(updatedHtml)) {
+                                        updatedHtml = updatedHtml.replace(pattern, '(이하 \'사업주\'라 함)과(와) ' + value + '(이하 \'근로자\'라 함)');
+                                        employeeReplaced = true;
+                                        console.log('[DEBUG] employee 치환 성공 - 패턴:', pattern);
+                                        break;
+                                    }
+                                }
+                                if (!employeeReplaced) {
+                                    console.log('[DEBUG] employee 치환 실패 - 값:', value);
+                                }
                                 break;
                             case 'contractStartDate':
                                 const startDate = new Date(value);
@@ -885,19 +964,25 @@
                                 break;
                             case 'workDays':
                                 updatedHtml = updatedHtml.replace(/매주\s*<span class="blank-line"><\/span>일\(또는 매일단위\)근무/, `매주 ${value}일(또는 매일단위)근무`);
+                                console.log('[DEBUG] workDays 치환:', value);
                                 break;
                             case 'holidays':
                                 updatedHtml = updatedHtml.replace(/휴일은 매주\s*<span class="blank-line"><\/span>요일/, `휴일은 매주 ${value}요일`);
+                                console.log('[DEBUG] holidays 치환:', value);
                                 break;
                             case 'monthlySalary':
                                 const monthlySalaryAmount = parseInt(value);
-                                if (!isNaN(monthlySalaryAmount)) {
+                                if (!isNaN(monthlySalaryAmount) && monthlySalaryAmount > 0) {
                                     updatedHtml = updatedHtml.replace(/월\(일,시간\)급:<span class="blank-line"><\/span>원/, `월(일,시간)급:${monthlySalaryAmount.toLocaleString()}원`);
+                                } else {
+                                    // 빈 값이거나 0일 때 원래대로 복원
+                                    updatedHtml = updatedHtml.replace(/월\(일,시간\)급:[^원]*원/, '월(일,시간)급:<span class="blank-line"></span>원');
                                 }
+                                console.log('[DEBUG] monthlySalary 치환:', value, '=>', monthlySalaryAmount);
                                 break;
                             case 'bonus':
                                 const bonusAmount = parseInt(value);
-                                if (!isNaN(bonusAmount)) {
+                                if (!isNaN(bonusAmount) && bonusAmount > 0) {
                                     updatedHtml = updatedHtml.replace(/상여금: 있음 \(\s*\)<span class="blank-line"><\/span>원/, `상여금: 있음 (연 2회)${bonusAmount.toLocaleString()}원`);
                                 }
                                 break;
@@ -990,6 +1075,7 @@
                     document.head.appendChild(styleTag);
                 }
 
+                console.log('[DEBUG] 최종 HTML 일부:', updatedHtml.substring(0, 500)); // 디버깅용
                 previewEl.innerHTML = updatedHtml;
             }
         } else {
@@ -1424,63 +1510,166 @@
 
     // 미리보기 확대 기능
     function initPreviewZoom() {
-        const previewSurface = document.getElementById('previewSurface');
-        const modal = document.getElementById('previewModal');
-        const modalContent = document.getElementById('previewModalContent');
-        const closeBtn = document.getElementById('previewModalClose');
+        // DOM 로드 대기
+        setTimeout(() => {
+            try {
+                const previewSurface = document.getElementById('previewSurface');
+                const modalElement = document.getElementById('previewModal');
+                const modalPreview = document.getElementById('modalPreview');
 
-        if (previewSurface && modal) {
-            // 미리보기 클릭 시 확대
-            previewSurface.addEventListener('click', () => {
-                if (sections.length > 0) {
-                    modalContent.innerHTML = previewSurface.innerHTML;
-                    modal.style.display = 'block';
-                    document.body.style.overflow = 'hidden';
+                console.log('[DEBUG] initPreviewZoom 요소 확인:');
+                console.log('- previewSurface:', previewSurface);
+                console.log('- modalElement:', modalElement);
+                console.log('- modalPreview:', modalPreview);
+
+                if (!previewSurface) {
+                    console.warn('[WARNING] previewSurface 요소를 찾을 수 없습니다');
+                    return;
                 }
-            });
 
-            // 모달 닫기
-            const closeModal = () => {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            };
-
-            closeBtn.addEventListener('click', closeModal);
-
-            // 모달 배경 클릭 시 닫기
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    closeModal();
+                if (!modalElement) {
+                    console.warn('[WARNING] previewModal 요소를 찾을 수 없습니다');
+                    return;
                 }
-            });
 
-            // ESC 키로 닫기
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && modal.style.display === 'block') {
-                    closeModal();
+                if (!modalPreview) {
+                    console.warn('[WARNING] modalPreview 요소를 찾을 수 없습니다');
+                    return;
                 }
-            });
-        }
+
+                // Bootstrap 모달 확인
+                if (typeof bootstrap !== 'undefined') {
+                    // Bootstrap 모달 인스턴스 생성
+                    const modal = new bootstrap.Modal(modalElement);
+
+                    // 미리보기 클릭 시 확대
+                    previewSurface.addEventListener('click', () => {
+                        try {
+                            if (sections && sections.length > 0) {
+                                modalPreview.innerHTML = previewSurface.innerHTML;
+                                modal.show();
+                                console.log('[DEBUG] Bootstrap 모달 열기 성공');
+                            }
+                        } catch (err) {
+                            console.error('[ERROR] Bootstrap 모달 표시 중 오류:', err);
+                        }
+                    });
+                } else {
+                    // Bootstrap이 없는 경우 간단한 모달 로직
+                    let isModalOpen = false;
+
+                    // 미리보기 클릭 시 확대
+                    previewSurface.addEventListener('click', () => {
+                        try {
+                            if (!isModalOpen && sections && sections.length > 0) {
+                                modalPreview.innerHTML = previewSurface.innerHTML;
+                                modalElement.style.display = 'block';
+                                modalElement.classList.add('show');
+                                isModalOpen = true;
+                                console.log('[DEBUG] 간단한 모달 열기 성공');
+                            }
+                        } catch (err) {
+                            console.error('[ERROR] 간단한 모달 표시 중 오류:', err);
+                        }
+                    });
+
+                    // 모달 닫기 이벤트
+                    const closeButton = modalElement.querySelector('.btn-close');
+                    if (closeButton) {
+                        closeButton.addEventListener('click', () => {
+                            modalElement.style.display = 'none';
+                            modalElement.classList.remove('show');
+                            isModalOpen = false;
+                        });
+                    }
+
+                    // ESC 키로 모달 닫기
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && isModalOpen) {
+                            modalElement.style.display = 'none';
+                            modalElement.classList.remove('show');
+                            isModalOpen = false;
+                        }
+                    });
+                }
+
+                console.log('[SUCCESS] 미리보기 확대 기능 초기화 완료');
+
+            } catch (error) {
+                console.error('[ERROR] initPreviewZoom 전체 실패:', error);
+            }
+        }, 500); // 500ms 후 실행으로 DOM 로드 보장
+    }
+
+    // 플로팅 미리보기 효과 초기화
+    function initFloatingPreview() {
+        const previewContainer = document.querySelector('.preview-container');
+        const previewSurface = document.querySelector('.preview-surface');
+
+        if (!previewContainer || !previewSurface) return;
+
+        let isMouseNear = false;
+        let mouseX = 0;
+        let mouseY = 0;
+
+        // 마우스 움직임 추적
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+
+            const previewRect = previewSurface.getBoundingClientRect();
+            const distance = Math.sqrt(
+                Math.pow(mouseX - (previewRect.left + previewRect.width / 2), 2) +
+                Math.pow(mouseY - (previewRect.top + previewRect.height / 2), 2)
+            );
+
+            const threshold = 200; // 200px 이내에서 반응
+            const wasMouseNear = isMouseNear;
+            isMouseNear = distance < threshold;
+
+            if (isMouseNear !== wasMouseNear) {
+                if (isMouseNear) {
+                    previewSurface.style.transform = 'scale(1.02)';
+                    previewSurface.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                } else {
+                    previewSurface.style.transform = 'scale(1)';
+                    previewSurface.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                }
+            }
+        });
+
+        // 스크롤 이벤트로 sticky 효과 강화
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollDirection = scrollTop > lastScrollTop ? 'down' : 'up';
+
+            // 스크롤 방향에 따라 약간의 애니메이션 효과
+            if (scrollDirection === 'down') {
+                previewContainer.style.transform = 'translateY(2px)';
+            } else {
+                previewContainer.style.transform = 'translateY(-2px)';
+            }
+
+            // 0.1초 후 원래대로
+            setTimeout(() => {
+                previewContainer.style.transform = 'translateY(0)';
+            }, 100);
+
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }, { passive: true });
+
+        // 창 크기 변경 시 위치 재조정
+        window.addEventListener('resize', () => {
+            previewContainer.style.top = '20px';
+        });
     }
 
     loadInitialSections();
     initPreviewZoom();
+    initFloatingPreview();
 </script>
 
-<!-- 미리보기 확대 모달 -->
-<div id="previewModal" class="preview-modal">
-    <div class="preview-modal-content">
-        <span id="previewModalClose" class="preview-modal-close">&times;</span>
-        <div class="preview-modal-header">
-            <h3 class="preview-modal-title">
-                <i class="bi bi-zoom-in me-2"></i>미리보기 확대
-            </h3>
-        </div>
-        <div id="previewModalContent">
-            <!-- 미리보기 내용이 여기에 복사됩니다 -->
-        </div>
-    </div>
-</div>
 
 </body>
 </html>
