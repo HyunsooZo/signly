@@ -887,11 +887,11 @@
                     if (fieldName) { // value 조건 제거
                         switch(fieldName) {
                             case 'employer':
-                                updatedHtml = updatedHtml.replace(/\[EMPLOYER\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[EMPLOYER\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] employer 치환:', value);
                                 break;
                             case 'employee':
-                                updatedHtml = updatedHtml.replace(/\[EMPLOYEE\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[EMPLOYEE\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] employee 치환:', value);
                                 break;
                             case 'contractStartDate':
@@ -905,8 +905,9 @@
                                         const day = parts[2];
                                         console.log('[DEBUG] contractStartDate 파싱된 값들:', 'year:', year, 'month:', month, 'day:', day);
                                         const formattedDate = year + '년 ' + parseInt(month, 10) + '월 ' + parseInt(day, 10) + '일';
+                                        const boldFormattedDate = '<strong>' + formattedDate + '</strong>';
                                         console.log('[DEBUG] contractStartDate 포맷팅 완료:', formattedDate);
-                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_START_DATE\]/g, formattedDate);
+                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_START_DATE\]/g, boldFormattedDate);
                                         console.log('[DEBUG] contractStartDate 치환 완료:', formattedDate);
                                     } else {
                                         console.log('[DEBUG] contractStartDate parts 길이가 3이 아님:', parts.length);
@@ -926,8 +927,9 @@
                                         const month = parts[1];
                                         const day = parts[2];
                                         const formattedDate = year + '년 ' + parseInt(month, 10) + '월 ' + parseInt(day, 10) + '일';
+                                        const boldFormattedDate = '<strong>' + formattedDate + '</strong>';
                                         console.log('[DEBUG] contractEndDate 포맷팅:', parts[0] + '-' + parts[1] + '-' + parts[2] + ' -> ' + formattedDate);
-                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_END_DATE\]/g, formattedDate);
+                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_END_DATE\]/g, boldFormattedDate);
                                         console.log('[DEBUG] contractEndDate 치환 완료:', formattedDate);
                                     }
                                 } else {
@@ -945,8 +947,9 @@
                                         const month = parts[1];
                                         const day = parts[2];
                                         const formattedDate = year + '년 ' + parseInt(month, 10) + '월 ' + parseInt(day, 10) + '일';
+                                        const boldFormattedDate = '<strong>' + formattedDate + '</strong>';
                                         console.log('[DEBUG] contractDate 포맷팅:', parts[0] + '-' + parts[1] + '-' + parts[2] + ' -> ' + formattedDate);
-                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_DATE\]/g, formattedDate);
+                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_DATE\]/g, boldFormattedDate);
                                         console.log('[DEBUG] contractDate 치환 완료:', formattedDate);
                                     }
                                 } else {
@@ -955,17 +958,17 @@
                                 }
                                 break;
                             case 'workplace':
-                                updatedHtml = updatedHtml.replace(/\[WORKPLACE\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[WORKPLACE\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] workplace 치환:', value);
                                 break;
                             case 'jobDescription':
-                                updatedHtml = updatedHtml.replace(/\[JOB_DESCRIPTION\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[JOB_DESCRIPTION\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] jobDescription 치환:', value);
                                 break;
                             case 'workStartTime':
                                 if (value && value.includes(':')) {
                                     const [startHour, startMin] = value.split(':');
-                                    const formattedTime = startHour + '시 ' + startMin + '분';
+                                    const formattedTime = '<strong>' + startHour + '시 ' + startMin + '분' + '</strong>';
                                     updatedHtml = updatedHtml.replace(/\[WORK_START_TIME\]/g, formattedTime);
                                 } else {
                                     updatedHtml = updatedHtml.replace(/\[WORK_START_TIME\]/g, '');
@@ -975,7 +978,7 @@
                             case 'workEndTime':
                                 if (value && value.includes(':')) {
                                     const [endHour, endMin] = value.split(':');
-                                    const formattedTime = endHour + '시 ' + endMin + '분';
+                                    const formattedTime = '<strong>' + endHour + '시 ' + endMin + '분' + '</strong>';
                                     updatedHtml = updatedHtml.replace(/\[WORK_END_TIME\]/g, formattedTime);
                                 } else {
                                     updatedHtml = updatedHtml.replace(/\[WORK_END_TIME\]/g, '');
@@ -985,7 +988,7 @@
                             case 'breakStartTime':
                                 if (value && value.includes(':')) {
                                     const [breakStartH, breakStartM] = value.split(':');
-                                    const formattedTime = breakStartH + '시 ' + breakStartM + '분';
+                                    const formattedTime = '<strong>' + breakStartH + '시 ' + breakStartM + '분' + '</strong>';
                                     updatedHtml = updatedHtml.replace(/\[BREAK_START_TIME\]/g, formattedTime);
                                 } else {
                                     updatedHtml = updatedHtml.replace(/\[BREAK_START_TIME\]/g, '');
@@ -995,7 +998,7 @@
                             case 'breakEndTime':
                                 if (value && value.includes(':')) {
                                     const [breakEndH, breakEndM] = value.split(':');
-                                    const formattedTime = breakEndH + '시 ' + breakEndM + '분';
+                                    const formattedTime = '<strong>' + breakEndH + '시 ' + breakEndM + '분' + '</strong>';
                                     updatedHtml = updatedHtml.replace(/\[BREAK_END_TIME\]/g, formattedTime);
                                 } else {
                                     updatedHtml = updatedHtml.replace(/\[BREAK_END_TIME\]/g, '');
@@ -1003,11 +1006,11 @@
                                 console.log('[DEBUG] breakEndTime 치환:', value);
                                 break;
                             case 'workDays':
-                                updatedHtml = updatedHtml.replace(/\[WORK_DAYS\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[WORK_DAYS\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] workDays 치환:', value);
                                 break;
                             case 'holidays':
-                                updatedHtml = updatedHtml.replace(/\[HOLIDAYS\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[HOLIDAYS\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] holidays 치환:', value);
                                 break;
                             case 'monthlySalary':
@@ -1015,7 +1018,7 @@
                                 if (value) {
                                     const monthlySalaryAmount = parseInt(value);
                                     if (!isNaN(monthlySalaryAmount) && monthlySalaryAmount > 0) {
-                                        const formattedSalary = monthlySalaryAmount.toLocaleString();
+                                        const formattedSalary = '<strong>' + monthlySalaryAmount.toLocaleString() + '</strong>';
                                         console.log('[DEBUG] 포맷된 월급:', formattedSalary);
                                         updatedHtml = updatedHtml.replace(/\[MONTHLY_SALARY\]/g, formattedSalary);
                                     } else {
@@ -1030,26 +1033,26 @@
                                 if (value) {
                                     const bonusAmount = parseInt(value);
                                     if (!isNaN(bonusAmount) && bonusAmount > 0) {
-                                        updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '있음 (' + bonusAmount.toLocaleString() + '원)');
+                                        updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '<strong>있음 (' + bonusAmount.toLocaleString() + '원)</strong>');
                                     } else {
-                                        updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '없음');
+                                        updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '<strong>없음</strong>');
                                     }
                                 } else {
-                                    updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '없음');
+                                    updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '<strong>없음</strong>');
                                 }
                                 console.log('[DEBUG] bonus 치환:', value);
                                 break;
                             case 'paymentDay':
-                                updatedHtml = updatedHtml.replace(/\[PAYMENT_DAY\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[PAYMENT_DAY\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] paymentDay 치환:', value);
                                 break;
                             case 'paymentMethod':
                                 console.log('[DEBUG] paymentMethod 처리 시작, 값:', value, typeof value);
                                 let paymentMethodText = '';
                                 if (value === 'direct') {
-                                    paymentMethodText = '근로자에게 직접 지급';
+                                    paymentMethodText = '<strong>근로자에게 직접 지급</strong>';
                                 } else if (value === 'bank') {
-                                    paymentMethodText = '근로자 명의 예금통장에 입금';
+                                    paymentMethodText = '<strong>근로자 명의 예금통장에 입금</strong>';
                                 } else {
                                     paymentMethodText = '';
                                 }
@@ -1075,27 +1078,27 @@
                                 console.log('[DEBUG] contractDate 치환:', value);
                                 break;
                             case 'companyName':
-                                updatedHtml = updatedHtml.replace(/\[COMPANY_NAME\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[COMPANY_NAME\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] companyName 치환:', value);
                                 break;
                             case 'employerAddress':
-                                updatedHtml = updatedHtml.replace(/\[EMPLOYER_ADDRESS\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[EMPLOYER_ADDRESS\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] employerAddress 치환:', value);
                                 break;
                             case 'employerPhone':
-                                updatedHtml = updatedHtml.replace(/\[EMPLOYER_PHONE\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[EMPLOYER_PHONE\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] employerPhone 치환:', value);
                                 break;
                             case 'employeeAddress':
-                                updatedHtml = updatedHtml.replace(/\[EMPLOYEE_ADDRESS\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[EMPLOYEE_ADDRESS\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] employeeAddress 치환:', value);
                                 break;
                             case 'employeePhone':
-                                updatedHtml = updatedHtml.replace(/\[EMPLOYEE_PHONE\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[EMPLOYEE_PHONE\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] employeePhone 치환:', value);
                                 break;
                             case 'otherAllowances':
-                                updatedHtml = updatedHtml.replace(/\[OTHER_ALLOWANCES\]/g, value || '');
+                                updatedHtml = updatedHtml.replace(/\[OTHER_ALLOWANCES\]/g, value ? '<strong>' + value + '</strong>' : '');
                                 console.log('[DEBUG] otherAllowances 치환:', value);
                                 break;
                             default:
@@ -1114,8 +1117,8 @@
                     console.log('[DEBUG] 종료일 존재 - "부터 ~ 까지" 형태 유지');
                 } else {
                     // 종료일이 없으면 "부터 ~ 까지"에서 "까지" 부분 제거
-                    updatedHtml = updatedHtml.replace(/(\[CONTRACT_START_DATE\]|\d{4}년 \d{1,2}월 \d{1,2}일) 부터\s+까지/g, '$1 부터');
-                    updatedHtml = updatedHtml.replace(/(\[CONTRACT_START_DATE\]|\d{4}년 \d{1,2}월 \d{1,2}일) 부터\s+\[CONTRACT_END_DATE\]\s+까지/g, '$1 부터');
+                    updatedHtml = updatedHtml.replace(/(\[CONTRACT_START_DATE\]|<strong>\d{4}년 \d{1,2}월 \d{1,2}일<\/strong>) 부터\s+까지/g, '$1 부터');
+                    updatedHtml = updatedHtml.replace(/(\[CONTRACT_START_DATE\]|<strong>\d{4}년 \d{1,2}월 \d{1,2}일<\/strong>) 부터\s+\[CONTRACT_END_DATE\]\s+까지/g, '$1 부터');
                     console.log('[DEBUG] 종료일 없음 - "까지" 텍스트 제거 완료');
                 }
 
