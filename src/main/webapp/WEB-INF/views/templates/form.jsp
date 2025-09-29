@@ -1104,6 +1104,21 @@
                     }
                 });
 
+                // 계약 기간 텍스트 조건부 처리 (모든 필드 처리 완료 후)
+                const startDateFieldValue = document.querySelector('input[data-field="contractStartDate"]')?.value || '';
+                const endDateFieldValue = document.querySelector('input[data-field="contractEndDate"]')?.value || '';
+                console.log('[DEBUG] 계약 기간 처리 - 시작일:', startDateFieldValue, '종료일:', endDateFieldValue);
+
+                if (endDateFieldValue && endDateFieldValue.trim()) {
+                    // 종료일이 있으면 "부터 ~ 까지" 형태 유지
+                    console.log('[DEBUG] 종료일 존재 - "부터 ~ 까지" 형태 유지');
+                } else {
+                    // 종료일이 없으면 "부터 ~ 까지"에서 "까지" 부분 제거
+                    updatedHtml = updatedHtml.replace(/(\[CONTRACT_START_DATE\]|\d{4}년 \d{1,2}월 \d{1,2}일) 부터\s+까지/g, '$1 부터');
+                    updatedHtml = updatedHtml.replace(/(\[CONTRACT_START_DATE\]|\d{4}년 \d{1,2}월 \d{1,2}일) 부터\s+\[CONTRACT_END_DATE\]\s+까지/g, '$1 부터');
+                    console.log('[DEBUG] 종료일 없음 - "까지" 텍스트 제거 완료');
+                }
+
                 // 기존 스타일 태그 제거
                 const existingStyleId = 'preset-styles';
                 const existingStyle = document.getElementById(existingStyleId);
