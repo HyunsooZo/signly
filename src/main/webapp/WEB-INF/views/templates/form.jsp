@@ -228,7 +228,7 @@
                                     <option value="">표준 양식을 선택하세요</option>
                                     <c:forEach var="preset" items="${presets}">
                                         <option value="${preset.id}" data-name="${preset.name}">
-                                            ${preset.name} - ${preset.description}
+                                                ${preset.name} - ${preset.description}
                                         </option>
                                     </c:forEach>
                                 </select>
@@ -259,7 +259,6 @@
                         </div>
                     </div>
                     <div class="card-body" id="sectionList">
-                        <!-- 섹션 카드 렌더링 영역 -->
                     </div>
                 </div>
 
@@ -336,7 +335,6 @@
     </div>
 </div>
 
-<!-- 미리보기 모달 -->
 <div class="modal fade" id="previewModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -400,18 +398,22 @@
     // 프리셋 폼 데이터 저장
     function savePresetFormData() {
         const formFields = document.querySelectorAll('.preset-form-fields input, .preset-form-fields select, .preset-form-fields textarea');
+        console.log('[DEBUG] savePresetFormData 호출, 필드 수:', formFields.length);
         formFields.forEach(field => {
             const fieldName = field.dataset.field;
             if (fieldName) {
                 if (field.type === 'radio') {
                     if (field.checked) {
                         presetFormData[fieldName] = field.value;
+                        console.log('[DEBUG] 라디오 필드 저장:', fieldName, field.value);
                     }
                 } else {
                     presetFormData[fieldName] = field.value;
+                    console.log('[DEBUG] 필드 저장:', fieldName, field.value, 'type:', field.type);
                 }
             }
         });
+        console.log('[DEBUG] 저장된 presetFormData:', presetFormData);
     }
 
     // 프리셋 폼 데이터 복원
@@ -693,6 +695,10 @@
                             <input type="number" class="form-control" data-field="bonus" placeholder="0" min="0">
                         </div>
                         <div class="col-md-6">
+                            <label class="form-label">기타급여 (제수당 등)</label>
+                            <input type="text" class="form-control" data-field="otherAllowances" placeholder="예: 교통비, 식비 등">
+                        </div>
+                        <div class="col-md-6">
                             <label class="form-label">급여 지급일</label>
                             <input type="number" class="form-control" data-field="paymentDay" placeholder="25" min="1" max="31">
                         </div>
@@ -750,6 +756,7 @@
 
                     events.forEach(eventType => {
                         field.addEventListener(eventType, () => {
+                            console.log('[DEBUG] 필드 이벤트 발생:', eventType, field.dataset.field, '값:', field.value);
                             // 약간의 지연을 두어 입력 완료 후 업데이트
                             clearTimeout(field.updateTimer);
                             field.updateTimer = setTimeout(() => {
@@ -888,55 +895,63 @@
                                 console.log('[DEBUG] employee 치환:', value);
                                 break;
                             case 'contractStartDate':
-                                console.log('[DEBUG] contractStartDate 처리 시작, 값:', value);
-                                if (value) {
-                                    console.log('[DEBUG] startDate 원본 value:', value, typeof value);
-                                    const startDate = new Date(value);
-                                    console.log('[DEBUG] startDate Date 객체:', startDate);
-                                    console.log('[DEBUG] startDate Date 유효성:', !isNaN(startDate));
-                                    if (!isNaN(startDate)) {
-                                        const year = startDate.getFullYear();
-                                        const month = String(startDate.getMonth() + 1).padStart(2, '0');
-                                        const day = String(startDate.getDate()).padStart(2, '0');
-                                        console.log('[DEBUG] startDate year:', year, 'month:', month, 'day:', day);
-                                        const formattedDate = year + '년 ' + month + '월 ' + day + '일';
-                                        console.log('[DEBUG] startDate 포맷된 날짜:', formattedDate);
-                                        console.log('[DEBUG] startDate 포맷된 날짜 길이:', formattedDate.length);
+                                console.log('[DEBUG] contractStartDate 처리:', value, typeof value, '길이:', value ? value.length : 'null');
+                                if (value && value.trim()) {
+                                    const parts = value.split('-');
+                                    console.log('[DEBUG] contractStartDate split 결과:', parts, '개수:', parts.length);
+                                    if (parts.length === 3) {
+                                        const year = parts[0];
+                                        const month = parts[1];
+                                        const day = parts[2];
+                                        console.log('[DEBUG] contractStartDate 파싱된 값들:', 'year:', year, 'month:', month, 'day:', day);
+                                        const formattedDate = year + '년 ' + parseInt(month, 10) + '월 ' + parseInt(day, 10) + '일';
+                                        console.log('[DEBUG] contractStartDate 포맷팅 완료:', formattedDate);
                                         updatedHtml = updatedHtml.replace(/\[CONTRACT_START_DATE\]/g, formattedDate);
-                                        console.log('[DEBUG] contractStartDate 치환 성공:', formattedDate);
+                                        console.log('[DEBUG] contractStartDate 치환 완료:', formattedDate);
                                     } else {
-                                        console.log('[DEBUG] startDate 잘못된 날짜 형식:', value);
+                                        console.log('[DEBUG] contractStartDate parts 길이가 3이 아님:', parts.length);
                                     }
                                 } else {
                                     updatedHtml = updatedHtml.replace(/\[CONTRACT_START_DATE\]/g, '');
+                                    console.log('[DEBUG] contractStartDate 빈값으로 치환');
                                 }
                                 break;
+
                             case 'contractEndDate':
-                                console.log('[DEBUG] contractEndDate 처리 시작, 값:', value);
-                                console.log('[DEBUG] 치환 전 HTML에 [CONTRACT_END_DATE] 포함 여부:', updatedHtml.includes('[CONTRACT_END_DATE]'));
-                                if (value) {
-                                    console.log('[DEBUG] 원본 value:', value, typeof value);
-                                    const endDate = new Date(value);
-                                    console.log('[DEBUG] Date 객체:', endDate);
-                                    console.log('[DEBUG] Date 유효성:', !isNaN(endDate));
-                                    if (!isNaN(endDate)) {
-                                        const year = endDate.getFullYear();
-                                        const month = String(endDate.getMonth() + 1).padStart(2, '0');
-                                        const day = String(endDate.getDate()).padStart(2, '0');
-                                        console.log('[DEBUG] year:', year, 'month:', month, 'day:', day);
-                                        const formattedDate = year + '년 ' + month + '월 ' + day + '일';
-                                        console.log('[DEBUG] 포맷된 날짜:', formattedDate);
-                                        console.log('[DEBUG] 포맷된 날짜 길이:', formattedDate.length);
-                                        const beforeReplace = updatedHtml;
+                                console.log('[DEBUG] contractEndDate 처리:', value, typeof value);
+                                if (value && value.trim()) {
+                                    const parts = value.split('-');
+                                    if (parts.length === 3) {
+                                        const year = parts[0];
+                                        const month = parts[1];
+                                        const day = parts[2];
+                                        const formattedDate = year + '년 ' + parseInt(month, 10) + '월 ' + parseInt(day, 10) + '일';
+                                        console.log('[DEBUG] contractEndDate 포맷팅:', parts[0] + '-' + parts[1] + '-' + parts[2] + ' -> ' + formattedDate);
                                         updatedHtml = updatedHtml.replace(/\[CONTRACT_END_DATE\]/g, formattedDate);
-                                        console.log('[DEBUG] contractEndDate 치환 후 변경됨:', beforeReplace !== updatedHtml);
-                                        console.log('[DEBUG] 치환 후 HTML에 [CONTRACT_END_DATE] 포함 여부:', updatedHtml.includes('[CONTRACT_END_DATE]'));
-                                        console.log('[DEBUG] contractEndDate 치환 성공:', formattedDate);
-                                    } else {
-                                        console.log('[DEBUG] 잘못된 날짜 형식:', value);
+                                        console.log('[DEBUG] contractEndDate 치환 완료:', formattedDate);
                                     }
                                 } else {
                                     updatedHtml = updatedHtml.replace(/\[CONTRACT_END_DATE\]/g, '');
+                                    console.log('[DEBUG] contractEndDate 빈값으로 치환');
+                                }
+                                break;
+
+                            case 'contractDate':
+                                console.log('[DEBUG] contractDate 처리:', value, typeof value);
+                                if (value && value.trim()) {
+                                    const parts = value.split('-');
+                                    if (parts.length === 3) {
+                                        const year = parts[0];
+                                        const month = parts[1];
+                                        const day = parts[2];
+                                        const formattedDate = year + '년 ' + parseInt(month, 10) + '월 ' + parseInt(day, 10) + '일';
+                                        console.log('[DEBUG] contractDate 포맷팅:', parts[0] + '-' + parts[1] + '-' + parts[2] + ' -> ' + formattedDate);
+                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_DATE\]/g, formattedDate);
+                                        console.log('[DEBUG] contractDate 치환 완료:', formattedDate);
+                                    }
+                                } else {
+                                    updatedHtml = updatedHtml.replace(/\[CONTRACT_DATE\]/g, '');
+                                    console.log('[DEBUG] contractDate 빈값으로 치환');
                                 }
                                 break;
                             case 'workplace':
@@ -1079,6 +1094,10 @@
                                 updatedHtml = updatedHtml.replace(/\[EMPLOYEE_PHONE\]/g, value || '');
                                 console.log('[DEBUG] employeePhone 치환:', value);
                                 break;
+                            case 'otherAllowances':
+                                updatedHtml = updatedHtml.replace(/\[OTHER_ALLOWANCES\]/g, value || '');
+                                console.log('[DEBUG] otherAllowances 치환:', value);
+                                break;
                             default:
                                 console.log('[DEBUG] 처리되지 않은 필드:', fieldName, '값:', value);
                         }
@@ -1095,16 +1114,16 @@
                 // 새 스타일 적용 (미리보기 영역에만 적용)
                 if (extractedStyles) {
                     const scopedStyles = extractedStyles.replace(/body\s*\{/g, '.preview-surface {')
-                                                      .replace(/\.title/g, '.preview-surface .title')
-                                                      .replace(/\.section/g, '.preview-surface .section')
-                                                      .replace(/\.blank-line/g, '.preview-surface .blank-line')
-                                                      .replace(/\.section-number/g, '.preview-surface .section-number')
-                                                      .replace(/\.contract-intro/g, '.preview-surface .contract-intro')
-                                                      .replace(/\.wage-section/g, '.preview-surface .wage-section')
-                                                      .replace(/\.wage-item/g, '.preview-surface .wage-item')
-                                                      .replace(/\.indent/g, '.preview-surface .indent')
-                                                      .replace(/\.note/g, '.preview-surface .note')
-                                                      .replace(/\.signature-section/g, '.preview-surface .signature-section');
+                        .replace(/\.title/g, '.preview-surface .title')
+                        .replace(/\.section/g, '.preview-surface .section')
+                        .replace(/\.blank-line/g, '.preview-surface .blank-line')
+                        .replace(/\.section-number/g, '.preview-surface .section-number')
+                        .replace(/\.contract-intro/g, '.preview-surface .contract-intro')
+                        .replace(/\.wage-section/g, '.preview-surface .wage-section')
+                        .replace(/\.wage-item/g, '.preview-surface .wage-item')
+                        .replace(/\.indent/g, '.preview-surface .indent')
+                        .replace(/\.note/g, '.preview-surface .note')
+                        .replace(/\.signature-section/g, '.preview-surface .signature-section');
 
                     const styleTag = document.createElement('style');
                     styleTag.id = existingStyleId;
@@ -1135,20 +1154,20 @@
                 const content = section.content || '';
                 // style 태그 제거해서 CSS 영향 차단
                 const cleanContent = content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-                                          .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '')
-                                          .replace(/<!DOCTYPE[^>]*>/gi, '')
-                                          .replace(/<html[^>]*>/gi, '')
-                                          .replace(/<\/html>/gi, '')
-                                          .replace(/<body[^>]*>/gi, '')
-                                          .replace(/<\/body>/gi, '');
+                    .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '')
+                    .replace(/<!DOCTYPE[^>]*>/gi, '')
+                    .replace(/<html[^>]*>/gi, '')
+                    .replace(/<\/html>/gi, '')
+                    .replace(/<body[^>]*>/gi, '')
+                    .replace(/<\/body>/gi, '');
 
                 return
-                    '<div class="alert alert-info mb-3" style="font-size: 0.9rem;">' +
-                        '<strong>📄 표준 근로계약서</strong> - 좌측 폼을 작성하면 실제 값이 반영됩니다.' +
-                    '</div>' +
-                    '<div style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; background: #fafafa; font-size: 0.8rem; max-height: 300px; overflow-y: auto;">' +
-                        cleanContent +
-                    '</div>';
+                '<div class="alert alert-info mb-3" style="font-size: 0.9rem;">' +
+                '<strong>📄 표준 근로계약서</strong> - 좌측 폼을 작성하면 실제 값이 반영됩니다.' +
+                '</div>' +
+                '<div style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; background: #fafafa; font-size: 0.8rem; max-height: 300px; overflow-y: auto;">' +
+                cleanContent +
+                '</div>';
             }
             return '<section class="template-custom">' + (safe || fallbacks.PARAGRAPH) + '</section>';
         }
@@ -1175,24 +1194,38 @@
         return String(text || '').replace(/[&<>"']/g, (match) => map[match]);
     }
 
-
+    // =================================================================
+    // =========== THIS IS THE CORRECTED CODE BLOCK ====================
+    // =================================================================
     sectionListEl.addEventListener('change', (event) => {
         const card = event.target.closest('.card');
         if (!card) return;
-        const id = card.dataset.sectionId;
-        const section = sections.find(s => s.sectionId === id);
-        if (!section) return;
+
+        // 이 리스너는 UI 재빌드가 필요한 '섹션 타입' 변경만 처리해야 합니다.
+        // 날짜, 드롭다운 등 다른 폼 필드 변경은 다른 리스너가 처리하도록 하여
+        // 불필요한 UI 리셋을 방지합니다.
         if (event.target.dataset.field === 'type') {
-            section.type = event.target.value;
-            section.metadata = section.metadata || {};
-            if (section.metadata.rawHtml && section.type !== 'CUSTOM') {
-                delete section.metadata.rawHtml;
+            const id = card.dataset.sectionId;
+            const section = sections.find(s => s.sectionId === id);
+            if (section) {
+                section.type = event.target.value;
+                section.metadata = section.metadata || {};
+
+                // 만약 프리셋 양식이었다가 다른 타입으로 변경되면, 프리셋 관련 메타데이터를 제거합니다.
+                if (section.metadata.rawHtml && section.type !== 'CUSTOM') {
+                    delete section.metadata.rawHtml;
+                }
+
+                activeTextareaId = id;
+                // 섹션의 구조 자체가 바뀌었으므로 이 때만 renderSections()를 호출합니다.
+                renderSections();
+                renderPreview();
             }
         }
-        activeTextareaId = id;
-        renderSections();
-        renderPreview();
     });
+    // =================================================================
+    // ================= END OF CORRECTED CODE BLOCK ===================
+    // =================================================================
 
     sectionListEl.addEventListener('input', (event) => {
         if (event.target.dataset.field === 'content') {
