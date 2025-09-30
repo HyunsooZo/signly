@@ -11,6 +11,7 @@ import com.signly.contract.application.dto.UpdateContractCommand;
 import com.signly.contract.domain.model.ContractStatus;
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.dto.TemplateResponse;
+import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.domain.model.TemplateStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -37,13 +38,16 @@ public class ContractWebController {
     private static final Logger logger = LoggerFactory.getLogger(ContractWebController.class);
     private final ContractService contractService;
     private final TemplateService templateService;
+    private final TemplatePresetService templatePresetService;
     private final CurrentUserProvider currentUserProvider;
 
     public ContractWebController(ContractService contractService,
                                 TemplateService templateService,
+                                TemplatePresetService templatePresetService,
                                 CurrentUserProvider currentUserProvider) {
         this.contractService = contractService;
         this.templateService = templateService;
+        this.templatePresetService = templatePresetService;
         this.currentUserProvider = currentUserProvider;
     }
 
@@ -100,6 +104,7 @@ public class ContractWebController {
             model.addAttribute("pageTitle", "새 계약서 생성");
             model.addAttribute("contract", form);
             model.addAttribute("templates", activeTemplates.getContent());
+            model.addAttribute("presets", templatePresetService.getSummaries());
             return "contracts/form";
 
         } catch (Exception e) {
