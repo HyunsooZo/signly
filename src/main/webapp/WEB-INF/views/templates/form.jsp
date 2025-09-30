@@ -219,22 +219,6 @@
                                    placeholder="예: 용역계약서, 임대차계약서, 매매계약서 등"
                                    required maxlength="255">
                         </div>
-                        <c:if test="${not empty presets}">
-                            <div class="mb-3">
-                                <label for="presetSelect" class="form-label">
-                                    <i class="bi bi-journal-richtext me-2"></i>표준 양식 불러오기
-                                </label>
-                                <select class="form-select" id="presetSelect">
-                                    <option value="">표준 양식을 선택하세요</option>
-                                    <c:forEach var="preset" items="${presets}">
-                                        <option value="${preset.id}" data-name="${preset.name}">
-                                                ${preset.name} - ${preset.description}
-                                        </option>
-                                    </c:forEach>
-                                </select>
-                                <div class="form-text">선택하면 해당 양식이 본문 섹션에 자동으로 적용됩니다.</div>
-                            </div>
-                        </c:if>
                     </div>
                 </div>
 
@@ -372,12 +356,9 @@
 
     let sections = [];
     let activeTextareaId = null;
-    let presetFormData = {}; // 프리셋 폼 데이터 보존용
 
     const sectionListEl = document.getElementById('sectionList');
     const previewEl = document.getElementById('previewSurface');
-    const presetSelect = document.getElementById('presetSelect');
-    const templateTitleInput = document.getElementById('title');
 
     function newSection(type) {
         return {
@@ -393,42 +374,6 @@
         const textarea = document.createElement('textarea');
         textarea.innerHTML = str;
         return textarea.value;
-    }
-
-    // 프리셋 폼 데이터 저장
-    function savePresetFormData() {
-        const formFields = document.querySelectorAll('.preset-form-fields input, .preset-form-fields select, .preset-form-fields textarea');
-        console.log('[DEBUG] savePresetFormData 호출, 필드 수:', formFields.length);
-        formFields.forEach(field => {
-            const fieldName = field.dataset.field;
-            if (fieldName) {
-                if (field.type === 'radio') {
-                    if (field.checked) {
-                        presetFormData[fieldName] = field.value;
-                        console.log('[DEBUG] 라디오 필드 저장:', fieldName, field.value);
-                    }
-                } else {
-                    presetFormData[fieldName] = field.value;
-                    console.log('[DEBUG] 필드 저장:', fieldName, field.value, 'type:', field.type);
-                }
-            }
-        });
-        console.log('[DEBUG] 저장된 presetFormData:', presetFormData);
-    }
-
-    // 프리셋 폼 데이터 복원
-    function restorePresetFormData() {
-        const formFields = document.querySelectorAll('.preset-form-fields input, .preset-form-fields select, .preset-form-fields textarea');
-        formFields.forEach(field => {
-            const fieldName = field.dataset.field;
-            if (fieldName && presetFormData[fieldName] !== undefined) {
-                if (field.type === 'radio') {
-                    field.checked = field.value === presetFormData[fieldName];
-                } else {
-                    field.value = presetFormData[fieldName];
-                }
-            }
-        });
     }
 
     function loadInitialSections() {
@@ -453,28 +398,11 @@
         }
         renderSections();
         renderPreview();
-
-        // 변수 패널 표시/숨김 처리
-        const variablePanel = document.getElementById('variablePanel');
-        const hasPresetSections = sections.some(s => s.metadata?.rawHtml);
-        if (hasPresetSections && variablePanel) {
-            variablePanel.style.display = 'none';
-        } else if (variablePanel) {
-            variablePanel.style.display = 'block';
-        }
     }
 
     function renderSections() {
-        console.log('[DEBUG] renderSections 시작, sections 개수:', sections.length);
-        console.log('[DEBUG] renderSections 호출 스택:', new Error().stack);
-        console.log('[DEBUG] sectionListEl:', sectionListEl);
-
-        // 기존 프리셋 폼 데이터 저장 (임시로 주석처리 - 필드 초기화 문제 해결을 위해)
-        // savePresetFormData();
-
         sectionListEl.innerHTML = '';
         sections.forEach((section, index) => {
-            console.log('[DEBUG] 섹션 렌더링:', index, section);
             section.order = index;
 
             const card = document.createElement('div');
@@ -623,187 +551,9 @@
             inputElement.dataset.field = 'content';
             inputElement.dataset.section = section.sectionId;
             inputElement.value = section.content || '';
-            const textarea = inputElement; // 기존 코드와의 호환성을 위해
-            const isRawHtml = metadata.rawHtml === true;
-            if (isRawHtml) {
-                select.setAttribute('disabled', 'disabled');
-                textarea.style.display = 'none'; // HTML 코드 숨기기
 
-                // 사용자 친화적 폼 필드들을 만들 예정
-                const formFieldsContainer = document.createElement('div');
-                formFieldsContainer.className = 'preset-form-fields';
-                formFieldsContainer.innerHTML = `
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        표준 근로계약서 양식이 로드되었습니다. 아래 필드들을 채워주세요.
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">사업주명</label>
-                            <input type="text" class="form-control" data-field="employer" placeholder="회사명 또는 사업주명">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">근로자명</label>
-                            <input type="text" class="form-control" data-field="employee" placeholder="근로자 성명">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">계약 시작일</label>
-                            <input type="date" class="form-control" data-field="contractStartDate">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">계약 종료일 (선택사항)</label>
-                            <input type="date" class="form-control" data-field="contractEndDate">
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label">근무장소</label>
-                            <input type="text" class="form-control" data-field="workplace" placeholder="근무지를 입력하세요">
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label">업무내용</label>
-                            <textarea class="form-control" data-field="jobDescription" rows="3" placeholder="담당 업무를 입력하세요"></textarea>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">근무 시작시간</label>
-                            <input type="time" class="form-control" data-field="workStartTime">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">근무 종료시간</label>
-                            <input type="time" class="form-control" data-field="workEndTime">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">휴게 시작시간</label>
-                            <input type="time" class="form-control" data-field="breakStartTime">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">휴게 종료시간</label>
-                            <input type="time" class="form-control" data-field="breakEndTime">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">주 근무일수</label>
-                            <input type="number" class="form-control" data-field="workDays" placeholder="5" min="1" max="7">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">휴일</label>
-                            <input type="text" class="form-control" data-field="holidays" placeholder="토, 일">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">월급 (원)</label>
-                            <input type="number" class="form-control" data-field="monthlySalary" placeholder="3000000" min="0">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">상여금 (원)</label>
-                            <input type="number" class="form-control" data-field="bonus" placeholder="0" min="0">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">기타급여 (제수당 등)</label>
-                            <input type="text" class="form-control" data-field="otherAllowances" placeholder="예: 교통비, 식비 등">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">급여 지급일</label>
-                            <input type="number" class="form-control" data-field="paymentDay" placeholder="25" min="1" max="31">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">지급방법</label>
-                            <select class="form-select" data-field="paymentMethod">
-                                <option value="">선택하세요</option>
-                                <option value="direct">직접 지급</option>
-                                <option value="bank">계좌 입금</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">계약일</label>
-                            <input type="date" class="form-control" data-field="contractDate">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">사업체명</label>
-                            <input type="text" class="form-control" data-field="companyName" placeholder="회사명">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">사업주 주소</label>
-                            <input type="text" class="form-control" data-field="employerAddress" placeholder="주소를 입력하세요">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">사업주 전화번호</label>
-                            <input type="tel" class="form-control" data-field="employerPhone" placeholder="010-0000-0000">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">근로자 주소</label>
-                            <input type="text" class="form-control" data-field="employeeAddress" placeholder="주소를 입력하세요">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">근로자 연락처</label>
-                            <input type="tel" class="form-control" data-field="employeePhone" placeholder="010-0000-0000">
-                        </div>
-                    </div>
-                `;
-                contentGroup.appendChild(formFieldsContainer);
-
-                // 폼 필드 변경 시 HTML 업데이트
-                const formFields = formFieldsContainer.querySelectorAll('[data-field]');
-                formFields.forEach(field => {
-                    // 다양한 입력 타입에 대한 이벤트 설정
-                    const events = [];
-
-                    if (field.type === 'radio' || field.type === 'checkbox') {
-                        events.push('change');
-                    } else if (field.type === 'number' || field.type === 'date' || field.type === 'time') {
-                        events.push('input', 'change');
-                    } else if (field.tagName === 'SELECT') {
-                        events.push('change');
-                    } else {
-                        events.push('input', 'change', 'blur');
-                    }
-
-                    events.forEach(eventType => {
-                        field.addEventListener(eventType, () => {
-                            console.log('[DEBUG] 필드 이벤트 발생:', eventType, field.dataset.field, '값:', field.value);
-                            // 약간의 지연을 두어 입력 완료 후 업데이트
-                            clearTimeout(field.updateTimer);
-                            field.updateTimer = setTimeout(() => {
-                                savePresetFormData(); // 데이터 저장
-                                renderPreview(); // 미리보기 업데이트
-                            }, field.type === 'number' || field.type === 'date' || field.type === 'time' ? 100 : 0);
-                        });
-                    });
-
-                    // 숫자, 날짜, 시간 필드에 대한 추가 키보드 이벤트
-                    if (field.type === 'number' || field.type === 'date' || field.type === 'time') {
-                        field.addEventListener('keyup', () => {
-                            clearTimeout(field.updateTimer);
-                            field.updateTimer = setTimeout(() => {
-                                savePresetFormData();
-                                renderPreview();
-                            }, 200);
-                        });
-
-                        // 마우스 휠로 숫자 변경 시에도 반응
-                        if (field.type === 'number') {
-                            field.addEventListener('wheel', () => {
-                                setTimeout(() => {
-                                    savePresetFormData();
-                                    renderPreview();
-                                }, 100);
-                            });
-                        }
-                    }
-                });
-
-                // 저장된 데이터 복원 후 미리보기 업데이트
-                setTimeout(() => {
-                    restorePresetFormData();
-                    renderPreview(); // 복원 후 미리보기 업데이트
-                }, 0);
-            }
-            if (!isRawHtml) {
-                contentGroup.appendChild(contentLabel);
-                contentGroup.appendChild(inputElement);
-            } else {
-                // HTML 프리셋일 때는 원본 텍스트 영역을 완전히 숨김
-                const helper = document.createElement('div');
-                helper.className = 'form-text mt-2';
-                helper.innerHTML = '<small class="text-muted">💡 위 필드들을 채우면 표준 양식이 자동 완성됩니다.</small>';
-                contentGroup.appendChild(helper);
-            }
+            contentGroup.appendChild(contentLabel);
+            contentGroup.appendChild(inputElement);
 
             body.appendChild(typeGroup);
             body.appendChild(contentGroup);
@@ -812,14 +562,11 @@
             card.appendChild(body);
 
             sectionListEl.appendChild(card);
-            console.log('[DEBUG] 섹션 카드 추가됨:', index);
         });
 
         if (sections.length === 0) {
-            console.log('[DEBUG] 섹션이 없어서 빈 메시지 표시');
             sectionListEl.innerHTML = '<div class="text-center text-muted py-5">섹션을 추가해 계약서를 구성하세요.</div>';
         }
-        console.log('[DEBUG] renderSections 완료, DOM 상태:', sectionListEl.children.length);
 
         if (activeTextareaId) {
             const activeField = sectionListEl.querySelector('textarea[data-section="' + activeTextareaId + '"]');
@@ -839,322 +586,7 @@
             return;
         }
 
-        const hasRawHtml = sections.some(s => s.metadata?.rawHtml);
-        if (hasRawHtml) {
-            const rawSection = sections.find(s => s.metadata?.rawHtml);
-            if (rawSection && rawSection.content) {
-                // CSS 스타일 추출
-                const styleMatches = rawSection.content.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
-                let extractedStyles = '';
-                if (styleMatches) {
-                    extractedStyles = styleMatches.map(match =>
-                        match.replace(/<\/?style[^>]*>/gi, '')
-                    ).join('\n');
-                }
-
-                // HTML 정리 (스타일은 보존)
-                let cleanedHtml = rawSection.content.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
-                cleanedHtml = cleanedHtml.replace(/<!DOCTYPE[^>]*>/gi, '');
-                cleanedHtml = cleanedHtml.replace(/<html[^>]*>/gi, '');
-                cleanedHtml = cleanedHtml.replace(/<\/html>/gi, '');
-                cleanedHtml = cleanedHtml.replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '');
-                cleanedHtml = cleanedHtml.replace(/<body[^>]*>/gi, '');
-                cleanedHtml = cleanedHtml.replace(/<\/body>/gi, '');
-                cleanedHtml = cleanedHtml.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-
-                // 폼 필드 값을 HTML에 반영
-                let updatedHtml = cleanedHtml;
-                console.log('[DEBUG] 원본 HTML 전체:', cleanedHtml); // 전체 HTML 확인용
-                console.log('[DEBUG] 원본 HTML에서 [EMPLOYER] 찾기:', cleanedHtml.indexOf('[EMPLOYER]'));
-                console.log('[DEBUG] 원본 HTML에서 blank-line 찾기:', cleanedHtml.indexOf('blank-line'));
-                const formFields = document.querySelectorAll('.preset-form-fields input, .preset-form-fields select, .preset-form-fields textarea');
-                formFields.forEach(field => {
-                    const fieldName = field.dataset.field;
-                    let value = '';
-
-                    if (field.type === 'radio') {
-                        if (field.checked) {
-                            value = field.value;
-                        } else {
-                            return; // 체크되지 않은 라디오 버튼은 건너뛰기
-                        }
-                    } else {
-                        value = field.value || ''; // trim() 제거하고 빈 값도 허용
-                    }
-
-                    console.log('[DEBUG] 필드 처리:', fieldName, '타입:', field.type, '값:', value, '요소:', field.tagName); // 디버깅용
-
-                    if (fieldName) { // value 조건 제거
-                        switch(fieldName) {
-                            case 'employer':
-                                updatedHtml = updatedHtml.replace(/\[EMPLOYER\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] employer 치환:', value);
-                                break;
-                            case 'employee':
-                                updatedHtml = updatedHtml.replace(/\[EMPLOYEE\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] employee 치환:', value);
-                                break;
-                            case 'contractStartDate':
-                                console.log('[DEBUG] contractStartDate 처리:', value, typeof value, '길이:', value ? value.length : 'null');
-                                if (value && value.trim()) {
-                                    const parts = value.split('-');
-                                    console.log('[DEBUG] contractStartDate split 결과:', parts, '개수:', parts.length);
-                                    if (parts.length === 3) {
-                                        const year = parts[0];
-                                        const month = parts[1];
-                                        const day = parts[2];
-                                        console.log('[DEBUG] contractStartDate 파싱된 값들:', 'year:', year, 'month:', month, 'day:', day);
-                                        const formattedDate = year + '년 ' + parseInt(month, 10) + '월 ' + parseInt(day, 10) + '일';
-                                        const boldFormattedDate = '<strong>' + formattedDate + '</strong>';
-                                        console.log('[DEBUG] contractStartDate 포맷팅 완료:', formattedDate);
-                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_START_DATE\]/g, boldFormattedDate);
-                                        console.log('[DEBUG] contractStartDate 치환 완료:', formattedDate);
-                                    } else {
-                                        console.log('[DEBUG] contractStartDate parts 길이가 3이 아님:', parts.length);
-                                    }
-                                } else {
-                                    updatedHtml = updatedHtml.replace(/\[CONTRACT_START_DATE\]/g, '');
-                                    console.log('[DEBUG] contractStartDate 빈값으로 치환');
-                                }
-                                break;
-
-                            case 'contractEndDate':
-                                console.log('[DEBUG] contractEndDate 처리:', value, typeof value);
-                                if (value && value.trim()) {
-                                    const parts = value.split('-');
-                                    if (parts.length === 3) {
-                                        const year = parts[0];
-                                        const month = parts[1];
-                                        const day = parts[2];
-                                        const formattedDate = year + '년 ' + parseInt(month, 10) + '월 ' + parseInt(day, 10) + '일';
-                                        const boldFormattedDate = '<strong>' + formattedDate + '</strong>';
-                                        console.log('[DEBUG] contractEndDate 포맷팅:', parts[0] + '-' + parts[1] + '-' + parts[2] + ' -> ' + formattedDate);
-                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_END_DATE\]/g, boldFormattedDate);
-                                        console.log('[DEBUG] contractEndDate 치환 완료:', formattedDate);
-                                    }
-                                } else {
-                                    updatedHtml = updatedHtml.replace(/\[CONTRACT_END_DATE\]/g, '');
-                                    console.log('[DEBUG] contractEndDate 빈값으로 치환');
-                                }
-                                break;
-
-                            case 'contractDate':
-                                console.log('[DEBUG] contractDate 처리:', value, typeof value);
-                                if (value && value.trim()) {
-                                    const parts = value.split('-');
-                                    if (parts.length === 3) {
-                                        const year = parts[0];
-                                        const month = parts[1];
-                                        const day = parts[2];
-                                        const formattedDate = year + '년 ' + parseInt(month, 10) + '월 ' + parseInt(day, 10) + '일';
-                                        const boldFormattedDate = '<strong>' + formattedDate + '</strong>';
-                                        console.log('[DEBUG] contractDate 포맷팅:', parts[0] + '-' + parts[1] + '-' + parts[2] + ' -> ' + formattedDate);
-                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_DATE\]/g, boldFormattedDate);
-                                        console.log('[DEBUG] contractDate 치환 완료:', formattedDate);
-                                    }
-                                } else {
-                                    updatedHtml = updatedHtml.replace(/\[CONTRACT_DATE\]/g, '');
-                                    console.log('[DEBUG] contractDate 빈값으로 치환');
-                                }
-                                break;
-                            case 'workplace':
-                                updatedHtml = updatedHtml.replace(/\[WORKPLACE\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] workplace 치환:', value);
-                                break;
-                            case 'jobDescription':
-                                updatedHtml = updatedHtml.replace(/\[JOB_DESCRIPTION\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] jobDescription 치환:', value);
-                                break;
-                            case 'workStartTime':
-                                if (value && value.includes(':')) {
-                                    const [startHour, startMin] = value.split(':');
-                                    const formattedTime = '<strong>' + startHour + '시 ' + startMin + '분' + '</strong>';
-                                    updatedHtml = updatedHtml.replace(/\[WORK_START_TIME\]/g, formattedTime);
-                                } else {
-                                    updatedHtml = updatedHtml.replace(/\[WORK_START_TIME\]/g, '');
-                                }
-                                console.log('[DEBUG] workStartTime 치환:', value);
-                                break;
-                            case 'workEndTime':
-                                if (value && value.includes(':')) {
-                                    const [endHour, endMin] = value.split(':');
-                                    const formattedTime = '<strong>' + endHour + '시 ' + endMin + '분' + '</strong>';
-                                    updatedHtml = updatedHtml.replace(/\[WORK_END_TIME\]/g, formattedTime);
-                                } else {
-                                    updatedHtml = updatedHtml.replace(/\[WORK_END_TIME\]/g, '');
-                                }
-                                console.log('[DEBUG] workEndTime 치환:', value);
-                                break;
-                            case 'breakStartTime':
-                                if (value && value.includes(':')) {
-                                    const [breakStartH, breakStartM] = value.split(':');
-                                    const formattedTime = '<strong>' + breakStartH + '시 ' + breakStartM + '분' + '</strong>';
-                                    updatedHtml = updatedHtml.replace(/\[BREAK_START_TIME\]/g, formattedTime);
-                                } else {
-                                    updatedHtml = updatedHtml.replace(/\[BREAK_START_TIME\]/g, '');
-                                }
-                                console.log('[DEBUG] breakStartTime 치환:', value);
-                                break;
-                            case 'breakEndTime':
-                                if (value && value.includes(':')) {
-                                    const [breakEndH, breakEndM] = value.split(':');
-                                    const formattedTime = '<strong>' + breakEndH + '시 ' + breakEndM + '분' + '</strong>';
-                                    updatedHtml = updatedHtml.replace(/\[BREAK_END_TIME\]/g, formattedTime);
-                                } else {
-                                    updatedHtml = updatedHtml.replace(/\[BREAK_END_TIME\]/g, '');
-                                }
-                                console.log('[DEBUG] breakEndTime 치환:', value);
-                                break;
-                            case 'workDays':
-                                updatedHtml = updatedHtml.replace(/\[WORK_DAYS\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] workDays 치환:', value);
-                                break;
-                            case 'holidays':
-                                updatedHtml = updatedHtml.replace(/\[HOLIDAYS\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] holidays 치환:', value);
-                                break;
-                            case 'monthlySalary':
-                                console.log('[DEBUG] monthlySalary 처리 시작, 값:', value, typeof value);
-                                if (value) {
-                                    const monthlySalaryAmount = parseInt(value);
-                                    if (!isNaN(monthlySalaryAmount) && monthlySalaryAmount > 0) {
-                                        const formattedSalary = '<strong>' + monthlySalaryAmount.toLocaleString() + '</strong>';
-                                        console.log('[DEBUG] 포맷된 월급:', formattedSalary);
-                                        updatedHtml = updatedHtml.replace(/\[MONTHLY_SALARY\]/g, formattedSalary);
-                                    } else {
-                                        updatedHtml = updatedHtml.replace(/\[MONTHLY_SALARY\]/g, '');
-                                    }
-                                } else {
-                                    updatedHtml = updatedHtml.replace(/\[MONTHLY_SALARY\]/g, '');
-                                }
-                                console.log('[DEBUG] monthlySalary 치환:', value);
-                                break;
-                            case 'bonus':
-                                if (value) {
-                                    const bonusAmount = parseInt(value);
-                                    if (!isNaN(bonusAmount) && bonusAmount > 0) {
-                                        updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '<strong>있음 (' + bonusAmount.toLocaleString() + '원)</strong>');
-                                    } else {
-                                        updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '<strong>없음</strong>');
-                                    }
-                                } else {
-                                    updatedHtml = updatedHtml.replace(/\[BONUS\]/g, '<strong>없음</strong>');
-                                }
-                                console.log('[DEBUG] bonus 치환:', value);
-                                break;
-                            case 'paymentDay':
-                                updatedHtml = updatedHtml.replace(/\[PAYMENT_DAY\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] paymentDay 치환:', value);
-                                break;
-                            case 'paymentMethod':
-                                console.log('[DEBUG] paymentMethod 처리 시작, 값:', value, typeof value);
-                                let paymentMethodText = '';
-                                if (value === 'direct') {
-                                    paymentMethodText = '<strong>근로자에게 직접 지급</strong>';
-                                } else if (value === 'bank') {
-                                    paymentMethodText = '<strong>근로자 명의 예금통장에 입금</strong>';
-                                } else {
-                                    paymentMethodText = '';
-                                }
-                                console.log('[DEBUG] paymentMethodText:', paymentMethodText);
-                                console.log('[DEBUG] 치환 전 HTML에 [PAYMENT_METHOD] 포함 여부:', updatedHtml.includes('[PAYMENT_METHOD]'));
-                                updatedHtml = updatedHtml.replace(/\[PAYMENT_METHOD\]/g, paymentMethodText);
-                                console.log('[DEBUG] 치환 후 HTML에 [PAYMENT_METHOD] 포함 여부:', updatedHtml.includes('[PAYMENT_METHOD]'));
-                                console.log('[DEBUG] paymentMethod 치환:', value);
-                                break;
-                            case 'contractDate':
-                                if (value) {
-                                    const contractDate = new Date(value);
-                                    if (!isNaN(contractDate)) {
-                                        const year = contractDate.getFullYear();
-                                        const month = String(contractDate.getMonth() + 1).padStart(2, '0');
-                                        const day = String(contractDate.getDate()).padStart(2, '0');
-                                        const formattedDate = year + '년 ' + month + '월 ' + day + '일';
-                                        updatedHtml = updatedHtml.replace(/\[CONTRACT_DATE\]/g, formattedDate);
-                                    }
-                                } else {
-                                    updatedHtml = updatedHtml.replace(/\[CONTRACT_DATE\]/g, '');
-                                }
-                                console.log('[DEBUG] contractDate 치환:', value);
-                                break;
-                            case 'companyName':
-                                updatedHtml = updatedHtml.replace(/\[COMPANY_NAME\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] companyName 치환:', value);
-                                break;
-                            case 'employerAddress':
-                                updatedHtml = updatedHtml.replace(/\[EMPLOYER_ADDRESS\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] employerAddress 치환:', value);
-                                break;
-                            case 'employerPhone':
-                                updatedHtml = updatedHtml.replace(/\[EMPLOYER_PHONE\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] employerPhone 치환:', value);
-                                break;
-                            case 'employeeAddress':
-                                updatedHtml = updatedHtml.replace(/\[EMPLOYEE_ADDRESS\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] employeeAddress 치환:', value);
-                                break;
-                            case 'employeePhone':
-                                updatedHtml = updatedHtml.replace(/\[EMPLOYEE_PHONE\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] employeePhone 치환:', value);
-                                break;
-                            case 'otherAllowances':
-                                updatedHtml = updatedHtml.replace(/\[OTHER_ALLOWANCES\]/g, value ? '<strong>' + value + '</strong>' : '');
-                                console.log('[DEBUG] otherAllowances 치환:', value);
-                                break;
-                            default:
-                                console.log('[DEBUG] 처리되지 않은 필드:', fieldName, '값:', value);
-                        }
-                    }
-                });
-
-                // 계약 기간 텍스트 조건부 처리 (모든 필드 처리 완료 후)
-                const startDateFieldValue = document.querySelector('input[data-field="contractStartDate"]')?.value || '';
-                const endDateFieldValue = document.querySelector('input[data-field="contractEndDate"]')?.value || '';
-                console.log('[DEBUG] 계약 기간 처리 - 시작일:', startDateFieldValue, '종료일:', endDateFieldValue);
-
-                if (endDateFieldValue && endDateFieldValue.trim()) {
-                    // 종료일이 있으면 "부터 ~ 까지" 형태 유지
-                    console.log('[DEBUG] 종료일 존재 - "부터 ~ 까지" 형태 유지');
-                } else {
-                    // 종료일이 없으면 "부터 ~ 까지"에서 "까지" 부분 제거
-                    updatedHtml = updatedHtml.replace(/(\[CONTRACT_START_DATE\]|<strong>\d{4}년 \d{1,2}월 \d{1,2}일<\/strong>) 부터\s+까지/g, '$1 부터');
-                    updatedHtml = updatedHtml.replace(/(\[CONTRACT_START_DATE\]|<strong>\d{4}년 \d{1,2}월 \d{1,2}일<\/strong>) 부터\s+\[CONTRACT_END_DATE\]\s+까지/g, '$1 부터');
-                    console.log('[DEBUG] 종료일 없음 - "까지" 텍스트 제거 완료');
-                }
-
-                // 기존 스타일 태그 제거
-                const existingStyleId = 'preset-styles';
-                const existingStyle = document.getElementById(existingStyleId);
-                if (existingStyle) {
-                    existingStyle.remove();
-                }
-
-                // 새 스타일 적용 (미리보기 영역에만 적용)
-                if (extractedStyles) {
-                    const scopedStyles = extractedStyles.replace(/body\s*\{/g, '.preview-surface {')
-                        .replace(/\.title/g, '.preview-surface .title')
-                        .replace(/\.section/g, '.preview-surface .section')
-                        .replace(/\.blank-line/g, '.preview-surface .blank-line')
-                        .replace(/\.section-number/g, '.preview-surface .section-number')
-                        .replace(/\.contract-intro/g, '.preview-surface .contract-intro')
-                        .replace(/\.wage-section/g, '.preview-surface .wage-section')
-                        .replace(/\.wage-item/g, '.preview-surface .wage-item')
-                        .replace(/\.indent/g, '.preview-surface .indent')
-                        .replace(/\.note/g, '.preview-surface .note')
-                        .replace(/\.signature-section/g, '.preview-surface .signature-section');
-
-                    const styleTag = document.createElement('style');
-                    styleTag.id = existingStyleId;
-                    styleTag.textContent = scopedStyles;
-                    document.head.appendChild(styleTag);
-                }
-
-                console.log('[DEBUG] 최종 HTML 일부:', updatedHtml.substring(0, 500)); // 디버깅용
-                previewEl.innerHTML = updatedHtml;
-            }
-        } else {
-            previewEl.innerHTML = sections.map(sectionToHtml).join('');
-        }
+        previewEl.innerHTML = sections.map(sectionToHtml).join('');
     }
 
     function sectionToHtml(section) {
@@ -1165,30 +597,6 @@
             FOOTER: '꼬릿말을 입력하세요',
             PARAGRAPH: '본문 내용을 입력하세요'
         };
-        if (section.type === 'CUSTOM') {
-            const metadata = section.metadata || {};
-            if (metadata.rawHtml) {
-                // 표준 양식 HTML을 iframe으로 격리해서 렌더링
-                const content = section.content || '';
-                // style 태그 제거해서 CSS 영향 차단
-                const cleanContent = content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-                    .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '')
-                    .replace(/<!DOCTYPE[^>]*>/gi, '')
-                    .replace(/<html[^>]*>/gi, '')
-                    .replace(/<\/html>/gi, '')
-                    .replace(/<body[^>]*>/gi, '')
-                    .replace(/<\/body>/gi, '');
-
-                return
-                '<div class="alert alert-info mb-3" style="font-size: 0.9rem;">' +
-                '<strong>📄 표준 근로계약서</strong> - 좌측 폼을 작성하면 실제 값이 반영됩니다.' +
-                '</div>' +
-                '<div style="border: 1px solid #ddd; border-radius: 8px; padding: 1rem; background: #fafafa; font-size: 0.8rem; max-height: 300px; overflow-y: auto;">' +
-                cleanContent +
-                '</div>';
-            }
-            return '<section class="template-custom">' + (safe || fallbacks.PARAGRAPH) + '</section>';
-        }
         if (section.type === 'HEADER') {
             return '<section class="template-header"><h2 class="mb-0">' + (safe || fallbacks.HEADER) + '</h2></section>';
         }
@@ -1352,127 +760,6 @@
         modal.show();
     });
 
-    if (presetSelect) {
-        presetSelect.addEventListener('change', async (event) => {
-            const presetId = event.target.value;
-            console.log('[DEBUG] 프리셋 선택됨:', presetId);
-            console.log('[DEBUG] presetId 타입:', typeof presetId);
-            console.log('[DEBUG] presetId 길이:', presetId ? presetId.length : 'null');
-            if (!presetId) {
-                console.log('[DEBUG] 빈 프리셋 ID, 리턴');
-                return;
-            }
-            try {
-                const apiUrl = '/templates/presets/' + presetId;
-                console.log('[DEBUG] 구성된 API URL:', apiUrl);
-                const response = await fetch(apiUrl, {
-                    headers: { 'Accept': 'application/json' }
-                });
-                console.log('[DEBUG] API 응답 상태:', response.status, response.ok);
-                if (!response.ok) {
-                    alert('표준 양식을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
-                    return;
-                }
-                const preset = await response.json();
-                console.log('[DEBUG] 프리셋 데이터:', preset);
-                console.log('[DEBUG] 기존 sections:', sections);
-
-                // 응답이 배열이면 프리셋 목록 API를 잘못 호출한 것
-                if (Array.isArray(preset)) {
-                    console.error('[ERROR] 잘못된 API 응답: 배열이 반환됨. 개별 프리셋이 아닌 목록 API가 호출됨');
-                    alert('프리셋 로딩 중 오류가 발생했습니다.');
-                    return;
-                }
-
-                // 안전하게 섹션 배열 추출
-                const presetSections = preset.sections || [];
-                console.log('[DEBUG] 프리셋 섹션들:', presetSections);
-
-                if (presetSections.length === 0) {
-                    console.warn('[WARN] 프리셋에 섹션이 없습니다');
-                    alert('이 프리셋은 섹션 데이터가 없습니다.');
-                    return;
-                }
-
-                // 백엔드 API에서 템플릿 HTML 가져오기
-                let templateHtml;
-                try {
-                    const response = await fetch('/templates/presets/standard-employment-contract');
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const presetData = await response.json();
-                    console.log('[DEBUG] API 응답 데이터:', presetData);
-
-                    // 프리셋 데이터에서 HTML 템플릿 추출
-                    if (presetData.sections && presetData.sections.length > 0) {
-                        templateHtml = presetData.sections[0].content;
-                        console.log('[DEBUG] API에서 받은 템플릿 HTML:', templateHtml.substring(0, 200) + '...');
-                    } else {
-                        throw new Error('프리셋 데이터에 섹션이 없습니다.');
-                    }
-                } catch (error) {
-                    console.error('[ERROR] 템플릿 로딩 실패:', error);
-                    alert('템플릿을 불러오는 중 오류가 발생했습니다: ' + error.message);
-                    return;
-                }
-
-                sections = [
-                    // 백엔드에서 가져온 HTML 템플릿으로 섹션 생성
-                    {
-                        sectionId: 'standard-contract-template',
-                        type: 'CUSTOM',
-                        order: 0,
-                        content: templateHtml,
-                        metadata: { rawHtml: true }
-                    }
-                ];
-
-                console.log('[DEBUG] 테스트 sections 생성:', sections);
-                console.log('[DEBUG] 새 sections:', sections);
-                activeTextareaId = null;
-                console.log('[DEBUG] renderSections 호출 전');
-                try {
-                    renderSections();
-                    console.log('[DEBUG] renderSections 호출 후');
-                } catch (error) {
-                    console.error('[ERROR] renderSections 실패:', error);
-                    alert('렌더링 중 오류가 발생했습니다: ' + error.message);
-                    return;
-                }
-
-                console.log('[DEBUG] renderPreview 호출 전');
-                try {
-                    renderPreview();
-                    console.log('[DEBUG] renderPreview 호출 후');
-                } catch (error) {
-                    console.error('[ERROR] renderPreview 실패:', error);
-                    alert('미리보기 렌더링 중 오류가 발생했습니다: ' + error.message);
-                    return;
-                }
-                if (templateTitleInput && templateTitleInput.value.trim().length === 0 && preset.name) {
-                    templateTitleInput.value = preset.name;
-                }
-
-                // 표준 양식일 때는 변수 패널 숨기기
-                const variablePanel = document.getElementById('variablePanel');
-                const hasPresetSections = sections.some(s => s.metadata?.rawHtml);
-                if (hasPresetSections && variablePanel) {
-                    variablePanel.style.display = 'none';
-                    console.log('[DEBUG] 변수 패널 숨김');
-                } else if (variablePanel) {
-                    variablePanel.style.display = 'block';
-                }
-
-                document.getElementById('sectionsJson').value = JSON.stringify(sections);
-                presetSelect.value = '';
-                console.log('[DEBUG] 프리셋 로딩 완료');
-            } catch (error) {
-                console.error('[ERROR] 프리셋 로딩 실패:', error);
-                alert('표준 양식을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
-            }
-        });
-    }
 
     // 미리보기 확대 기능
     function initPreviewZoom() {
@@ -1631,42 +918,9 @@
         });
     }
 
-    // 프리셋 폼 필드 이벤트 리스너 초기화
-    function initPresetFormListeners() {
-        const presetFormContainer = document.querySelector('.preset-form-fields');
-        if (presetFormContainer) {
-            // 이벤트 위임을 사용하여 모든 프리셋 폼 필드의 변경사항을 감지
-            presetFormContainer.addEventListener('input', function(event) {
-                const field = event.target;
-                if (field.dataset.field) {
-                    console.log('[DEBUG] 프리셋 필드 변경:', field.dataset.field, '값:', field.value);
-                    // 디바운싱을 위한 타이머 설정
-                    clearTimeout(field.updateTimer);
-                    field.updateTimer = setTimeout(() => {
-                        savePresetFormData();
-                        renderPreview();
-                    }, 300); // 300ms 후에 미리보기 업데이트
-                }
-            });
-
-            // change 이벤트도 처리 (select, radio 등을 위해)
-            presetFormContainer.addEventListener('change', function(event) {
-                const field = event.target;
-                if (field.dataset.field) {
-                    console.log('[DEBUG] 프리셋 필드 변경(change):', field.dataset.field, '값:', field.value);
-                    savePresetFormData();
-                    renderPreview();
-                }
-            });
-
-            console.log('[SUCCESS] 프리셋 폼 필드 이벤트 리스너 초기화 완료');
-        }
-    }
-
     loadInitialSections();
     initPreviewZoom();
     initFloatingPreview();
-    initPresetFormListeners();
 </script>
 
 
