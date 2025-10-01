@@ -357,10 +357,12 @@
                     normalLayout.style.display = 'none';
                     presetLayout.style.display = 'grid';
 
-                    // normalLayout의 모든 required 필드 disabled 처리
-                    const normalRequiredFields = normalLayout.querySelectorAll('[required]');
-                    normalRequiredFields.forEach(field => {
-                        field.disabled = true;
+                    // normalLayout의 모든 input/select/textarea disabled 처리 (content, title 제외)
+                    const normalInputs = normalLayout.querySelectorAll('input, select, textarea');
+                    normalInputs.forEach(field => {
+                        if (field.id !== 'content' && field.id !== 'title') {
+                            field.disabled = true;
+                        }
                     });
 
                     // container를 container-fluid로 변경
@@ -726,6 +728,15 @@
             if (livePreview) {
                 livePreview.innerHTML = updatedHtml;
             }
+
+            // content textarea에도 최종 HTML 저장 (폼 제출용)
+            const contentTextarea = document.getElementById('content');
+            if (contentTextarea) {
+                contentTextarea.value = updatedHtml;
+                console.log('[DEBUG] updateLivePreview에서 content 저장됨, 길이:', updatedHtml.length);
+            } else {
+                console.error('[ERROR] content textarea를 찾을 수 없음!');
+            }
         }
 
         // 프리셋 필드 값으로 HTML 업데이트
@@ -945,8 +956,54 @@
                 var forms = document.getElementsByClassName('contract-form');
                 var validation = Array.prototype.filter.call(forms, function(form) {
                     form.addEventListener('submit', function(event) {
-                        const firstEmail = document.getElementById('firstPartyEmail').value;
-                        const secondEmail = document.getElementById('secondPartyEmail').value;
+                        // 프리셋 사용 중이면 최신 내용 업데이트
+                        const presetLayout = document.getElementById('presetLayout');
+                        if (presetLayout && presetLayout.style.display === 'grid') {
+                            updateLivePreview();
+
+                            // normalLayout의 모든 required 필드를 required = false로 변경
+                            const normalLayout = document.getElementById('normalLayout');
+                            const normalRequiredFields = normalLayout.querySelectorAll('[required]');
+                            console.log('[DEBUG] normalLayout required 필드 개수:', normalRequiredFields.length);
+                            normalRequiredFields.forEach(field => {
+                                if (field.id !== 'content' && field.id !== 'title') {
+                                    field.required = false;
+                                    console.log('[DEBUG] required 해제:', field.id || field.name);
+                                }
+                            });
+
+                            // employee 필드 값을 secondPartyName에 동기화
+                            const employeeField = document.querySelector('[data-field="employee"]');
+                            if (employeeField && employeeField.value) {
+                                const allSecondPartyNames = document.querySelectorAll('[name="secondPartyName"]');
+                                allSecondPartyNames.forEach(field => {
+                                    field.value = employeeField.value;
+                                    console.log('[DEBUG] secondPartyName 설정:', field.id, 'value:', field.value);
+                                });
+                            }
+
+                            // employer 필드 값을 firstPartyName에 동기화
+                            const employerField = document.querySelector('[data-field="employer"]');
+                            if (employerField && employerField.value) {
+                                const firstPartyNameField = document.querySelector('[name="firstPartyName"]');
+                                if (firstPartyNameField) {
+                                    firstPartyNameField.value = employerField.value;
+                                    console.log('[DEBUG] firstPartyName 설정:', firstPartyNameField.value);
+                                }
+                            }
+
+                            // presetSecondPartyEmail 값을 모든 이메일 필드에 동기화
+                            const presetEmailField = document.getElementById('presetSecondPartyEmail');
+                            if (presetEmailField && presetEmailField.value) {
+                                // normalLayout의 secondPartyEmail은 비활성화되어 있으니 무시
+                                console.log('[DEBUG] secondPartyEmail 설정:', presetEmailField.value);
+                            }
+
+                            console.log('[DEBUG] 폼 제출 전 content 값:', document.getElementById('content').value.substring(0, 100));
+                        }
+
+                        const firstEmail = document.getElementById('firstPartyEmail')?.value;
+                        const secondEmail = document.getElementById('secondPartyEmail')?.value;
 
                         if (firstEmail && secondEmail && firstEmail === secondEmail) {
                             event.preventDefault();
