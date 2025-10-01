@@ -1,6 +1,7 @@
 package com.signly.contract.application.dto;
 
 import com.signly.contract.domain.model.ContractStatus;
+import com.signly.contract.domain.model.PresetType;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class ContractResponse {
     private final List<String> pendingSigners;
     @Getter(AccessLevel.NONE)
     private final LocalDateTime expiresAt;
+    private final PresetType presetType;
     @Getter(AccessLevel.NONE)
     private final LocalDateTime createdAt;
     @Getter(AccessLevel.NONE)

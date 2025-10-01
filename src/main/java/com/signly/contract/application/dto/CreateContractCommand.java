@@ -1,5 +1,7 @@
 package com.signly.contract.application.dto;
 
+import com.signly.contract.domain.model.PresetType;
+
 import java.time.LocalDateTime;
 
 public record CreateContractCommand(
@@ -12,5 +14,6 @@ public record CreateContractCommand(
     String secondPartyName,
     String secondPartyEmail,
     String secondPartyOrganization,
-    LocalDateTime expiresAt
+    LocalDateTime expiresAt,
+    PresetType presetType
 ) {}

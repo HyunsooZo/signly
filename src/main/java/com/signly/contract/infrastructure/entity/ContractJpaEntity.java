@@ -2,6 +2,7 @@ package com.signly.contract.infrastructure.entity;
 
 import com.signly.common.domain.BaseEntity;
 import com.signly.contract.domain.model.ContractStatus;
+import com.signly.contract.domain.model.PresetType;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -68,13 +69,18 @@ public class ContractJpaEntity extends BaseEntity {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "preset_type", length = 50, nullable = false)
+    private PresetType presetType = PresetType.NONE;
+
     protected ContractJpaEntity() {}
 
     public ContractJpaEntity(String id, String creatorId, String templateId, String title,
                            String content, String firstPartyName, String firstPartyEmail,
                            String firstPartyOrganization, String secondPartyName,
                            String secondPartyEmail, String secondPartyOrganization,
-                           ContractStatus status, String signToken, LocalDateTime expiresAt) {
+                           ContractStatus status, String signToken, LocalDateTime expiresAt,
+                           PresetType presetType) {
         this.id = id;
         this.creatorId = creatorId;
         this.templateId = templateId;
@@ -89,6 +95,7 @@ public class ContractJpaEntity extends BaseEntity {
         this.status = status;
         this.signToken = signToken;
         this.expiresAt = expiresAt;
+        this.presetType = presetType != null ? presetType : PresetType.NONE;
     }
 
     public String getId() {
@@ -174,5 +181,13 @@ public class ContractJpaEntity extends BaseEntity {
 
     public void setSignToken(String signToken) {
         this.signToken = signToken;
+    }
+
+    public PresetType getPresetType() {
+        return presetType;
+    }
+
+    public void setPresetType(PresetType presetType) {
+        this.presetType = presetType != null ? presetType : PresetType.NONE;
     }
 }

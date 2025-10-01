@@ -28,7 +28,8 @@ public class ContractEntityMapper {
             contract.getSecondParty().getOrganizationName(),
             contract.getStatus(),
             contract.getSignToken().value(),
-            contract.getExpiresAt()
+            contract.getExpiresAt(),
+            contract.getPresetType()
         );
 
 
@@ -77,6 +78,7 @@ public class ContractEntityMapper {
             signatures,
             signToken,
             entity.getExpiresAt(),
+            entity.getPresetType(),
             entity.getCreatedAt(),
             entity.getUpdatedAt()
         );

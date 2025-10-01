@@ -350,7 +350,7 @@
 
     <!-- 미리보기 모달 -->
     <div class="modal fade" id="previewModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-fullscreen-lg-down" style="max-width: 90vw;">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
@@ -358,13 +358,21 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="padding: 2rem;">
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle me-2"></i>
                         아래는 현재 계약서 내용의 미리보기입니다.
                     </div>
-                    <div class="border rounded p-3" style="background-color: #f8f9fa; min-height: 400px; white-space: pre-wrap; font-family: 'Times New Roman', serif;" id="previewContent">
+                    <div class="border rounded p-4" style="background-color: #fff; min-height: 500px; width: 100%; overflow: visible;" id="previewContent">
                     </div>
+                    <style id="previewOverrideStyle">
+                        #previewContent body {
+                            max-width: none !important;
+                            width: 100% !important;
+                            margin: 0 !important;
+                            padding: 20px !important;
+                        }
+                    </style>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
@@ -408,7 +416,8 @@
          data-second-party-name="<c:out value='${contract.secondParty.name}'/>"
          data-second-party-email="<c:out value='${contract.secondParty.email}'/>"
          data-second-party-org="<c:out value='${empty contract.secondParty.organizationName ? "-" : contract.secondParty.organizationName}'/>"
-         data-contract-title="<c:out value='${contract.title}'/>">
+         data-contract-title="<c:out value='${contract.title}'/>"
+         data-preset-type="${contract.presetType}">
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -442,23 +451,58 @@
 
         function previewContract() {
             const content = `${contract.content}`;
+            const presetType = previewData.presetType || 'NONE';
+            const previewContentEl = document.getElementById('previewContent');
 
-            // 실제 데이터로 변수 치환
-            let previewContent = content
-                .replace(/\{FIRST_PARTY_NAME\}/g, previewDefaults.firstPartyName)
-                .replace(/\{FIRST_PARTY_EMAIL\}/g, previewDefaults.firstPartyEmail)
-                .replace(/\{FIRST_PARTY_ADDRESS\}/g, previewDefaults.firstPartyOrg)
-                .replace(/\{SECOND_PARTY_NAME\}/g, previewDefaults.secondPartyName)
-                .replace(/\{SECOND_PARTY_EMAIL\}/g, previewDefaults.secondPartyEmail)
-                .replace(/\{SECOND_PARTY_ADDRESS\}/g, previewDefaults.secondPartyOrg)
-                .replace(/\{CONTRACT_TITLE\}/g, previewDefaults.contractTitle)
-                .replace(/\{CONTRACT_DATE\}/g, new Date().toLocaleDateString('ko-KR'))
-                .replace(/\{SIGNATURE_FIRST\}/g, '[갑 서명]')
-                .replace(/\{SIGNATURE_SECOND\}/g, '[을 서명]');
+            // 프리셋인 경우 HTML로 렌더링, 아니면 텍스트로 표시
+            if (presetType !== 'NONE' && presetType !== '') {
+                // 임시 DOM에서 style 태그 제거
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = content;
 
-            document.getElementById('previewContent').textContent = previewContent;
+                // 모든 style 태그 제거
+                const styleTags = tempDiv.querySelectorAll('style');
+                styleTags.forEach(tag => tag.remove());
+
+                // body 태그를 div로 변경
+                const bodyTags = tempDiv.querySelectorAll('body');
+                bodyTags.forEach(tag => {
+                    const div = document.createElement('div');
+                    div.innerHTML = tag.innerHTML;
+                    tag.parentNode.replaceChild(div, tag);
+                });
+
+                previewContentEl.innerHTML = tempDiv.innerHTML;
+                previewContentEl.style.whiteSpace = 'normal';
+                previewContentEl.style.fontFamily = 'inherit';
+            } else {
+                // 일반 계약서는 변수 치환 후 텍스트로 표시
+                let previewContent = content
+                    .replace(/\{FIRST_PARTY_NAME\}/g, previewDefaults.firstPartyName)
+                    .replace(/\{FIRST_PARTY_EMAIL\}/g, previewDefaults.firstPartyEmail)
+                    .replace(/\{FIRST_PARTY_ADDRESS\}/g, previewDefaults.firstPartyOrg)
+                    .replace(/\{SECOND_PARTY_NAME\}/g, previewDefaults.secondPartyName)
+                    .replace(/\{SECOND_PARTY_EMAIL\}/g, previewDefaults.secondPartyEmail)
+                    .replace(/\{SECOND_PARTY_ADDRESS\}/g, previewDefaults.secondPartyOrg)
+                    .replace(/\{CONTRACT_TITLE\}/g, previewDefaults.contractTitle)
+                    .replace(/\{CONTRACT_DATE\}/g, new Date().toLocaleDateString('ko-KR'))
+                    .replace(/\{SIGNATURE_FIRST\}/g, '[갑 서명]')
+                    .replace(/\{SIGNATURE_SECOND\}/g, '[을 서명]');
+
+                previewContentEl.textContent = previewContent;
+                previewContentEl.style.whiteSpace = 'pre-wrap';
+                previewContentEl.style.fontFamily = "'Times New Roman', serif";
+            }
+
             new bootstrap.Modal(document.getElementById('previewModal')).show();
         }
+
+        // 모달 닫을 때 혹시 삽입된 style 정리
+        document.getElementById('previewModal').addEventListener('hidden.bs.modal', function () {
+            // 모달 내부의 모든 style 태그 제거
+            const modalStyles = this.querySelectorAll('style');
+            modalStyles.forEach(style => style.remove());
+        });
 
         function sendForSigning() {
             if (confirm('계약서 서명 요청을 전송하시겠습니까?')) {

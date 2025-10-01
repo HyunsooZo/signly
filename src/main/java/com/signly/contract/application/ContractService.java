@@ -102,7 +102,8 @@ public class ContractService {
                 content,
                 firstParty,
                 secondParty,
-                command.expiresAt()
+                command.expiresAt(),
+                command.presetType()
         );
 
         Contract savedContract = contractRepository.save(contract);

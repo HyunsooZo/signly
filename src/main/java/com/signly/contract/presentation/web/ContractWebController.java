@@ -9,6 +9,7 @@ import com.signly.contract.application.dto.ContractResponse;
 import com.signly.contract.application.dto.CreateContractCommand;
 import com.signly.contract.application.dto.UpdateContractCommand;
 import com.signly.contract.domain.model.ContractStatus;
+import com.signly.contract.domain.model.PresetType;
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.dto.TemplateResponse;
 import com.signly.template.application.preset.TemplatePresetService;
@@ -142,6 +143,7 @@ public class ContractWebController {
                 logger.warn("계약서 폼 검증 실패: {}", bindingResult.getAllErrors());
                 return handleFormError("입력값을 확인해주세요.", model, form, resolvedUserId);
             }
+            PresetType presetType = PresetType.fromString(form.getSelectedPreset());
             CreateContractCommand command = new CreateContractCommand(
                     form.getTemplateId(),
                     form.getTitle(),
@@ -152,7 +154,8 @@ public class ContractWebController {
                     form.getSecondPartyName(),
                     form.getSecondPartyEmail(),
                     form.getSecondPartyAddress(),
-                    form.getExpiresAt()
+                    form.getExpiresAt(),
+                    presetType
             );
 
             ContractResponse response = contractService.createContract(resolvedUserId, command);
@@ -189,6 +192,11 @@ public class ContractWebController {
         model.addAttribute("pageTitle", "새 계약서 생성");
         model.addAttribute("contract", form);
         model.addAttribute("presets", templatePresetService.getSummaries());
+
+        // 프리셋 정보 유지
+        if (form.getSelectedPreset() != null) {
+            model.addAttribute("selectedPreset", form.getSelectedPreset());
+        }
 
         // 템플릿 목록도 다시 로드
         try {
@@ -247,9 +255,18 @@ public class ContractWebController {
             form.setSecondPartyAddress(contract.getSecondParty().getOrganizationName());
             form.setExpiresAt(contract.getExpiresAtLocalDateTime());
 
+            // 프리셋 타입 확인 및 설정
+            if (contract.getPresetType() != null && contract.getPresetType() != PresetType.NONE) {
+                String presetValue = contract.getPresetType().toDisplayString();
+                form.setSelectedPreset(presetValue);
+                model.addAttribute("selectedPreset", presetValue);
+            }
+
             model.addAttribute("pageTitle", "계약서 수정");
             model.addAttribute("contract", form);
             model.addAttribute("contractId", contractId);
+            model.addAttribute("templates", java.util.Collections.emptyList());
+            model.addAttribute("presets", templatePresetService.getSummaries());
             return "contracts/form";
 
         } catch (Exception e) {
@@ -410,6 +427,7 @@ public class ContractWebController {
         private String secondPartyAddress;
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
         private LocalDateTime expiresAt;
+        private String selectedPreset;
 
         private static final DateTimeFormatter EXPIRES_AT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
@@ -437,5 +455,8 @@ public class ContractWebController {
         public String getExpiresAtInputValue() {
             return expiresAt != null ? expiresAt.format(EXPIRES_AT_FORMATTER) : "";
         }
+
+        public String getSelectedPreset() { return selectedPreset; }
+        public void setSelectedPreset(String selectedPreset) { this.selectedPreset = selectedPreset; }
     }
 }

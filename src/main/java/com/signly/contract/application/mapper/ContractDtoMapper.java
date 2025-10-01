@@ -27,6 +27,7 @@ public class ContractDtoMapper {
             toSignatureResponses(contract.getSignatures()),
             contract.getPendingSigners(),
             contract.getExpiresAt(),
+            contract.getPresetType(),
             contract.getCreatedAt(),
             contract.getUpdatedAt()
         );

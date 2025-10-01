@@ -21,12 +21,13 @@ public class Contract extends AggregateRoot {
     private final List<Signature> signatures;
     private SignToken signToken;
     private LocalDateTime expiresAt;
+    private PresetType presetType;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public Contract(ContractId id, UserId creatorId, TemplateId templateId,
                     String title, ContractContent content, PartyInfo firstParty,
-                    PartyInfo secondParty, LocalDateTime expiresAt) {
+                    PartyInfo secondParty, LocalDateTime expiresAt, PresetType presetType) {
         this.id = id;
         this.creatorId = creatorId;
         this.templateId = templateId;
@@ -38,29 +39,30 @@ public class Contract extends AggregateRoot {
         this.signatures = new ArrayList<>();
         this.signToken = SignToken.generate();
         this.expiresAt = expiresAt;
+        this.presetType = presetType != null ? presetType : PresetType.NONE;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
     public static Contract create(UserId creatorId, TemplateId templateId, String title,
                                 ContractContent content, PartyInfo firstParty,
-                                PartyInfo secondParty, LocalDateTime expiresAt) {
+                                PartyInfo secondParty, LocalDateTime expiresAt, PresetType presetType) {
         validateTitle(title);
         validateExpirationDate(expiresAt);
         validateParties(firstParty, secondParty);
 
         return new Contract(ContractId.generate(), creatorId, templateId,
-                          title.trim(), content, firstParty, secondParty, expiresAt);
+                          title.trim(), content, firstParty, secondParty, expiresAt, presetType);
     }
 
     public static Contract restore(ContractId id, UserId creatorId, TemplateId templateId,
                                  String title, ContractContent content, PartyInfo firstParty,
                                  PartyInfo secondParty, ContractStatus status,
                                  List<Signature> signatures, SignToken signToken,
-                                 LocalDateTime expiresAt, LocalDateTime createdAt,
-                                 LocalDateTime updatedAt) {
+                                 LocalDateTime expiresAt, PresetType presetType,
+                                 LocalDateTime createdAt, LocalDateTime updatedAt) {
         Contract contract = new Contract(id, creatorId, templateId, title, content,
-                                       firstParty, secondParty, expiresAt);
+                                       firstParty, secondParty, expiresAt, presetType);
         contract.status = status;
         contract.signatures.addAll(signatures);
         contract.signToken = signToken;
@@ -258,5 +260,9 @@ public class Contract extends AggregateRoot {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public PresetType getPresetType() {
+        return presetType;
     }
 }

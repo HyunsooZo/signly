@@ -96,6 +96,9 @@
             <c:if test="${not empty _csrf}">
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
             </c:if>
+            <c:if test="${not empty selectedPreset}">
+                <input type="hidden" name="selectedPreset" value="${selectedPreset}" />
+            </c:if>
 
             <div id="normalLayout">
                 <div class="row">
@@ -392,7 +395,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">근로자명 <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" data-field="employee" placeholder="근로자 성명" required>
+                                <input type="text" class="form-control" data-field="employee" name="secondPartyName" placeholder="근로자 성명" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">계약 시작일 <span class="text-danger">*</span></label>
@@ -495,37 +498,43 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <label for="presetSecondPartyEmail" class="form-label">이메일 <span class="text-danger">*</span></label>
+                                    <label for="presetSecondPartyEmail" class="form-label">근로자 이메일 <span class="text-danger">*</span></label>
                                     <input type="email" class="form-control" id="presetSecondPartyEmail" name="secondPartyEmail" required maxlength="200" placeholder="example@domain.com">
                                 </div>
-                                <!-- hidden field for secondPartyName -->
-                                <input type="hidden" id="presetSecondPartyName" name="secondPartyName">
                             </div>
                         </div>
+
+                        <!-- 사업주(갑) 정보 hidden fields -->
+                        <input type="hidden" id="presetFirstPartyName" name="firstPartyName">
+                        <input type="hidden" id="presetFirstPartyEmail" name="firstPartyEmail">
+                        <input type="hidden" id="presetFirstPartyAddress" name="firstPartyAddress">
                     `;
+
+                    // localStorage에서 사용자 정보 가져와서 사업주 필드 자동 입력
+                    try {
+                        const userInfo = JSON.parse(localStorage.getItem('signly_user_info') || '{}');
+                        if (userInfo.name) {
+                            document.getElementById('presetFirstPartyName').value = userInfo.name;
+                        }
+                        if (userInfo.email) {
+                            document.getElementById('presetFirstPartyEmail').value = userInfo.email;
+                        }
+                        if (userInfo.companyName) {
+                            document.getElementById('presetFirstPartyAddress').value = userInfo.companyName;
+                        }
+                        console.log('[INFO] localStorage에서 사업주 정보 자동 입력:', userInfo);
+                    } catch (e) {
+                        console.warn('[WARN] localStorage에서 사용자 정보 로드 실패:', e);
+                    }
 
                     // 폼 필드 변경 시 미리보기 업데이트
                     const formFields = presetFormArea.querySelectorAll('[data-field]');
                     formFields.forEach(field => {
                         field.addEventListener('input', () => {
-                            // employee 필드 값을 presetSecondPartyName hidden 필드에 동기화
-                            if (field.dataset.field === 'employee') {
-                                const secondPartyNameInput = document.getElementById('presetSecondPartyName');
-                                if (secondPartyNameInput) {
-                                    secondPartyNameInput.value = field.value;
-                                }
-                            }
                             updatePresetContent();
                             updateLivePreview();
                         });
                         field.addEventListener('change', () => {
-                            // employee 필드 값을 presetSecondPartyName hidden 필드에 동기화
-                            if (field.dataset.field === 'employee') {
-                                const secondPartyNameInput = document.getElementById('presetSecondPartyName');
-                                if (secondPartyNameInput) {
-                                    secondPartyNameInput.value = field.value;
-                                }
-                            }
                             updatePresetContent();
                             updateLivePreview();
                         });
@@ -963,38 +972,6 @@
                                     console.log('[DEBUG] required 해제:', field.id || field.name);
                                 }
                             });
-
-                            // employee 필드 값을 secondPartyName에 동기화
-                            const employeeField = document.querySelector('[data-field="employee"]');
-                            if (employeeField && employeeField.value) {
-                                const allSecondPartyNames = document.querySelectorAll('[name="secondPartyName"]');
-                                allSecondPartyNames.forEach(field => {
-                                    field.value = employeeField.value;
-                                    console.log('[DEBUG] secondPartyName 설정:', field.id, 'value:', field.value);
-                                });
-                            }
-
-                            // employer 필드 값을 firstPartyName에 동기화
-                            const employerField = document.querySelector('[data-field="employer"]');
-                            if (employerField && employerField.value) {
-                                const firstPartyNameField = document.querySelector('[name="firstPartyName"]');
-                                if (firstPartyNameField) {
-                                    firstPartyNameField.value = employerField.value;
-                                }
-                            }
-
-                            // 로컬스토리지에서 사용자 정보 가져와서 firstPartyEmail 설정
-                            try {
-                                const userInfo = JSON.parse(localStorage.getItem('signly_user_info') || '{}');
-                                if (userInfo.email) {
-                                    const firstPartyEmailField = document.querySelector('[name="firstPartyEmail"]');
-                                    if (firstPartyEmailField && !firstPartyEmailField.value) {
-                                        firstPartyEmailField.value = userInfo.email;
-                                    }
-                                }
-                            } catch (e) {
-                                console.warn('사용자 정보 로드 실패:', e);
-                            }
                         }
 
                         const firstEmail = document.getElementById('firstPartyEmail')?.value;
@@ -1059,16 +1036,24 @@
         // 페이지 로드 시 selectedPreset이 있으면 자동으로 로드
         <c:if test="${not empty selectedPreset}">
         (function() {
+            console.log('[INFO] selectedPreset 감지:', '${selectedPreset}');
+            const isEditMode = ${not empty contractId};
+            console.log('[INFO] 수정 모드:', isEditMode);
+
             // DOM이 로드되면 즉시 실행
             document.addEventListener('DOMContentLoaded', function() {
+                console.log('[INFO] DOMContentLoaded - 프리셋 로드 시작');
+
                 // normalLayout의 모든 필드를 미리 비활성화
                 const normalLayout = document.getElementById('normalLayout');
                 if (normalLayout) {
                     const allInputs = normalLayout.querySelectorAll('input, select, textarea');
+                    console.log('[INFO] normalLayout 필드 개수:', allInputs.length);
                     allInputs.forEach(field => {
                         if (field.id !== 'content' && field.id !== 'title') {
                             field.required = false;
                             field.disabled = true;
+                            console.log('[INFO] 필드 비활성화:', field.id || field.name);
                         }
                     });
                 }
@@ -1076,13 +1061,49 @@
                 // 프리셋 로드
                 const presetSelect = document.getElementById('presetSelect');
                 if (presetSelect) {
+                    console.log('[INFO] presetSelect 찾음, 값 설정 중...');
                     presetSelect.value = '${selectedPreset}';
                     const event = new Event('change');
                     presetSelect.dispatchEvent(event);
+
+                    // 수정 모드인 경우 기존 값들을 복원
+                    if (isEditMode) {
+                        console.log('[INFO] 수정 모드 - 기존 값 복원 대기');
+                        // presetSelect change 이벤트 처리 후 값 복원을 위해 약간 지연
+                        setTimeout(function() {
+                            const secondPartyEmailInput = document.getElementById('presetSecondPartyEmail');
+                            if (secondPartyEmailInput) {
+                                const existingSecondEmail = '${contract.secondPartyEmail}';
+                                if (existingSecondEmail) {
+                                    secondPartyEmailInput.value = existingSecondEmail;
+                                    console.log('[INFO] 근로자 이메일 복원:', existingSecondEmail);
+                                }
+                            }
+                        }, 100);
+                    }
+                } else {
+                    console.error('[ERROR] presetSelect를 찾을 수 없음!');
                 }
             });
         })();
         </c:if>
+
+        // 폼 제출 직전 상태 확인
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.contract-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    console.log('[SUBMIT] 폼 제출 시작');
+
+                    // 모든 required 필드 확인
+                    const requiredFields = document.querySelectorAll('[required]');
+                    console.log('[SUBMIT] required 필드 개수:', requiredFields.length);
+                    requiredFields.forEach(field => {
+                        console.log('[SUBMIT] required 필드:', field.id || field.name, 'value:', field.value, 'disabled:', field.disabled);
+                    });
+                }, true); // capture phase에서 먼저 실행
+            }
+        });
     </script>
 </body>
 </html>
