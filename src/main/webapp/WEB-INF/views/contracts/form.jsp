@@ -125,25 +125,17 @@
                                     </select>
                                     <div class="form-text">기존 템플릿을 선택하거나 직접 작성하세요.</div>
                                 </div>
-
-                                <!-- 표준 양식 선택 -->
-                                <c:if test="${not empty presets}">
-                                    <div class="mb-3">
-                                        <label for="presetSelect" class="form-label">
-                                            <i class="bi bi-journal-richtext me-2"></i>표준 양식 불러오기
-                                        </label>
-                                        <select class="form-select" id="presetSelect">
-                                            <option value="">표준 양식을 선택하세요</option>
-                                            <c:forEach var="preset" items="${presets}">
-                                                <option value="${preset.id}" data-name="${preset.name}">
-                                                    ${preset.name} - ${preset.description}
-                                                </option>
-                                            </c:forEach>
-                                        </select>
-                                        <div class="form-text">선택하면 해당 양식이 자동으로 적용됩니다.</div>
-                                    </div>
-                                </c:if>
                             </c:if>
+
+                            <!-- 숨겨진 프리셋 select (selectedPreset으로 넘어온 경우를 위해) -->
+                            <select id="presetSelect" style="display: none;">
+                                <option value="">표준 양식을 선택하세요</option>
+                                <c:forEach var="preset" items="${presets}">
+                                    <option value="${preset.id}" data-name="${preset.name}">
+                                        ${preset.name} - ${preset.description}
+                                    </option>
+                                </c:forEach>
+                            </select>
 
                             <div class="mb-3">
                                 <label for="title" class="form-label">계약서 제목 <span class="text-danger">*</span></label>
