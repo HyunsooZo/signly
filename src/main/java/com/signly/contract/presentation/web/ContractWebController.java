@@ -162,22 +162,38 @@ public class ContractWebController {
 
         } catch (ValidationException e) {
             logger.warn("계약서 생성 유효성 검사 실패: {}", e.getMessage());
-            model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("pageTitle", "새 계약서 생성");
-            return "contracts/form";
+            return handleFormError(e.getMessage(), model, form, resolvedUserId);
 
         } catch (BusinessException e) {
             logger.warn("계약서 생성 비즈니스 로직 실패: {}", e.getMessage());
-            model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("pageTitle", "새 계약서 생성");
-            return "contracts/form";
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            return handleFormError(e.getMessage(), model, form, resolvedUserId);
 
         } catch (Exception e) {
             logger.error("계약서 생성 중 예상치 못한 오류 발생", e);
-            model.addAttribute("errorMessage", "계약서 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-            model.addAttribute("pageTitle", "새 계약서 생성");
-            return "contracts/form";
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            return handleFormError("계약서 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", model, form, resolvedUserId);
         }
+    }
+
+    private String handleFormError(String errorMessage, Model model, ContractForm form, String userId) {
+        model.addAttribute("errorMessage", errorMessage);
+        model.addAttribute("pageTitle", "새 계약서 생성");
+        model.addAttribute("contract", form);
+        model.addAttribute("presets", templatePresetService.getSummaries());
+
+        // 템플릿 목록도 다시 로드
+        try {
+            PageRequest templatePageRequest = PageRequest.of(0, 100, Sort.by("title"));
+            Page<TemplateResponse> activeTemplates = templateService.getTemplatesByOwnerAndStatus(
+                    userId, TemplateStatus.ACTIVE, templatePageRequest);
+            model.addAttribute("templates", activeTemplates.getContent());
+        } catch (Exception e) {
+            logger.warn("템플릿 목록 로드 실패", e);
+            model.addAttribute("templates", java.util.Collections.emptyList());
+        }
+
+        return "contracts/form";
     }
 
     @GetMapping("/{contractId}")

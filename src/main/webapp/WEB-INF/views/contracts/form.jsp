@@ -980,18 +980,21 @@
                                 const firstPartyNameField = document.querySelector('[name="firstPartyName"]');
                                 if (firstPartyNameField) {
                                     firstPartyNameField.value = employerField.value;
-                                    console.log('[DEBUG] firstPartyName 설정:', firstPartyNameField.value);
                                 }
                             }
 
-                            // presetSecondPartyEmail 값을 모든 이메일 필드에 동기화
-                            const presetEmailField = document.getElementById('presetSecondPartyEmail');
-                            if (presetEmailField && presetEmailField.value) {
-                                // normalLayout의 secondPartyEmail은 비활성화되어 있으니 무시
-                                console.log('[DEBUG] secondPartyEmail 설정:', presetEmailField.value);
+                            // 로컬스토리지에서 사용자 정보 가져와서 firstPartyEmail 설정
+                            try {
+                                const userInfo = JSON.parse(localStorage.getItem('signly_user_info') || '{}');
+                                if (userInfo.email) {
+                                    const firstPartyEmailField = document.querySelector('[name="firstPartyEmail"]');
+                                    if (firstPartyEmailField && !firstPartyEmailField.value) {
+                                        firstPartyEmailField.value = userInfo.email;
+                                    }
+                                }
+                            } catch (e) {
+                                console.warn('사용자 정보 로드 실패:', e);
                             }
-
-                            console.log('[DEBUG] 폼 제출 전 content 값:', document.getElementById('content').value.substring(0, 100));
                         }
 
                         const firstEmail = document.getElementById('firstPartyEmail')?.value;
