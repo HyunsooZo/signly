@@ -134,13 +134,14 @@ public class ContractWebController {
                                 HttpServletRequest request,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
+        String resolvedUserId = null;
         try {
             if (bindingResult.hasErrors()) {
                 model.addAttribute("pageTitle", "새 계약서 생성");
                 return "contracts/form";
             }
 
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             CreateContractCommand command = new CreateContractCommand(
                     form.getTemplateId(),
                     form.getTitle(),
@@ -162,16 +163,23 @@ public class ContractWebController {
 
         } catch (ValidationException e) {
             logger.warn("계약서 생성 유효성 검사 실패: {}", e.getMessage());
+            if (resolvedUserId == null) {
+                resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            }
             return handleFormError(e.getMessage(), model, form, resolvedUserId);
 
         } catch (BusinessException e) {
             logger.warn("계약서 생성 비즈니스 로직 실패: {}", e.getMessage());
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            if (resolvedUserId == null) {
+                resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            }
             return handleFormError(e.getMessage(), model, form, resolvedUserId);
 
         } catch (Exception e) {
             logger.error("계약서 생성 중 예상치 못한 오류 발생", e);
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            if (resolvedUserId == null) {
+                resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            }
             return handleFormError("계약서 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", model, form, resolvedUserId);
         }
     }
