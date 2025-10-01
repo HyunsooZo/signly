@@ -73,4 +73,8 @@ public class SecurityUser implements UserDetails {
     public String getUserType() {
         return user.getUserType().name();
     }
+
+    public String getCompanyName() {
+        return user.getCompanyName();
+    }
 }

@@ -328,5 +328,21 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 로그인 시 사용자 정보를 로컬스토리지에 저장
+        <c:if test="${not empty currentUserName}">
+        (function() {
+            const userInfo = {
+                name: '${currentUserName}',
+                email: '${currentUserEmail}',
+                userId: '${currentUserId}',
+                companyName: '${currentUserCompany}' || '',
+                updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem('signly_user_info', JSON.stringify(userInfo));
+            console.log('[INFO] 사용자 정보 로컬스토리지 저장:', userInfo);
+        })();
+        </c:if>
+    </script>
 </body>
 </html>

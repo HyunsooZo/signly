@@ -81,6 +81,13 @@ public class HomeWebController {
             model.addAttribute("templateStats", templateStats);
             model.addAttribute("contractStats", contractStats);
 
+            if (securityUser != null) {
+                model.addAttribute("currentUserName", securityUser.getName());
+                model.addAttribute("currentUserEmail", securityUser.getEmail());
+                model.addAttribute("currentUserId", securityUser.getUserId());
+                model.addAttribute("currentUserCompany", securityUser.getCompanyName());
+            }
+
             return "home/dashboard";
 
         } catch (Exception e) {
