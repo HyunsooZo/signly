@@ -136,12 +136,12 @@ public class ContractWebController {
                                 RedirectAttributes redirectAttributes) {
         String resolvedUserId = null;
         try {
-            if (bindingResult.hasErrors()) {
-                model.addAttribute("pageTitle", "새 계약서 생성");
-                return "contracts/form";
-            }
-
             resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+
+            if (bindingResult.hasErrors()) {
+                logger.warn("계약서 폼 검증 실패: {}", bindingResult.getAllErrors());
+                return handleFormError("입력값을 확인해주세요.", model, form, resolvedUserId);
+            }
             CreateContractCommand command = new CreateContractCommand(
                     form.getTemplateId(),
                     form.getTitle(),

@@ -1058,15 +1058,30 @@
 
         // 페이지 로드 시 selectedPreset이 있으면 자동으로 로드
         <c:if test="${not empty selectedPreset}">
-        window.addEventListener('load', function() {
-            const presetSelect = document.getElementById('presetSelect');
-            if (presetSelect) {
-                presetSelect.value = '${selectedPreset}';
-                // change 이벤트 트리거
-                const event = new Event('change');
-                presetSelect.dispatchEvent(event);
-            }
-        });
+        (function() {
+            // DOM이 로드되면 즉시 실행
+            document.addEventListener('DOMContentLoaded', function() {
+                // normalLayout의 모든 필드를 미리 비활성화
+                const normalLayout = document.getElementById('normalLayout');
+                if (normalLayout) {
+                    const allInputs = normalLayout.querySelectorAll('input, select, textarea');
+                    allInputs.forEach(field => {
+                        if (field.id !== 'content' && field.id !== 'title') {
+                            field.required = false;
+                            field.disabled = true;
+                        }
+                    });
+                }
+
+                // 프리셋 로드
+                const presetSelect = document.getElementById('presetSelect');
+                if (presetSelect) {
+                    presetSelect.value = '${selectedPreset}';
+                    const event = new Event('change');
+                    presetSelect.dispatchEvent(event);
+                }
+            });
+        })();
         </c:if>
     </script>
 </body>
