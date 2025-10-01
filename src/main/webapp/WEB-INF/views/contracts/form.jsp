@@ -1060,6 +1060,19 @@
         // 스크롤 이벤트 리스너 등록
         window.addEventListener('scroll', handleStickyPreview);
         window.addEventListener('resize', handleStickyPreview);
+
+        // 페이지 로드 시 selectedPreset이 있으면 자동으로 로드
+        <c:if test="${not empty selectedPreset}">
+        window.addEventListener('load', function() {
+            const presetSelect = document.getElementById('presetSelect');
+            if (presetSelect) {
+                presetSelect.value = '${selectedPreset}';
+                // change 이벤트 트리거
+                const event = new Event('change');
+                presetSelect.dispatchEvent(event);
+            }
+        });
+        </c:if>
     </script>
 </body>
 </html>

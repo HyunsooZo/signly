@@ -80,12 +80,23 @@ public class ContractWebController {
 
     @GetMapping("/new")
     public String newContractForm(@RequestParam(value = "templateId", required = false) String templateId,
+                                 @RequestParam(value = "preset", required = false) String preset,
+                                 @RequestParam(value = "direct", required = false) Boolean direct,
                                  @RequestHeader(value = "X-User-Id", required = false) String userId,
                                  @AuthenticationPrincipal SecurityUser securityUser,
                                  HttpServletRequest request,
                                  Model model) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+
+            // preset이나 direct 파라미터가 없으면 선택 화면으로
+            if (preset == null && direct == null && templateId == null) {
+                model.addAttribute("pageTitle", "계약서 유형 선택");
+                model.addAttribute("presets", templatePresetService.getSummaries());
+                return "contracts/select-type";
+            }
+
+            // 폼 화면으로 진행
             ContractForm form = new ContractForm();
 
             // 템플릿이 지정된 경우 템플릿 정보 로드
@@ -105,6 +116,7 @@ public class ContractWebController {
             model.addAttribute("contract", form);
             model.addAttribute("templates", activeTemplates.getContent());
             model.addAttribute("presets", templatePresetService.getSummaries());
+            model.addAttribute("selectedPreset", preset);
             return "contracts/form";
 
         } catch (Exception e) {
