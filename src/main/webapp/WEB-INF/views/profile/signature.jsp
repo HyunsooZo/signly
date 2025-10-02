@@ -138,7 +138,7 @@
     <script>
         const canvas = document.getElementById('signatureCanvas');
         const signaturePad = new SignaturePad(canvas, {
-            backgroundColor: '#ffffff',
+            backgroundColor: 'rgba(0, 0, 0, 0)',
             penColor: '#1d4ed8',
         });
 
