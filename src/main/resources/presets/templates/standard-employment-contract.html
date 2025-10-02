@@ -78,16 +78,18 @@
         }
         .signature-line--seal {
             position: relative;
-            padding-right: 110px;
             min-height: 80px;
         }
         .signature-stamp-label {
             margin-left: 8px;
+            position: relative;
+            display: inline-block;
+            padding-right: 100px;
         }
         .signature-stamp-wrapper {
             position: absolute;
             right: 0;
-            top: -10px;
+            top: -45px;
             width: 90px;
             height: 90px;
             display: flex;
@@ -174,8 +176,9 @@
         <div class="signature-line" style="margin-left: 60px;">주소: [EMPLOYER_ADDRESS]</div>
         <div class="signature-line signature-line--seal" style="margin-left: 60px;">
             대표자: [EMPLOYER]
-            <span class="signature-stamp-label">(인)</span>
-            <span class="signature-stamp-wrapper">[EMPLOYER_SIGNATURE_IMAGE]</span>
+            <span class="signature-stamp-label">(인)
+                <span class="signature-stamp-wrapper">[EMPLOYER_SIGNATURE_IMAGE]</span>
+            </span>
         </div>
     </div>
     <div class="signature-block">
