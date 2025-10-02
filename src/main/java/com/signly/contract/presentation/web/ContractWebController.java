@@ -89,6 +89,7 @@ public class ContractWebController {
                                  Model model) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            model.addAttribute("currentUserId", resolvedUserId);
 
             // preset이나 direct 파라미터가 없으면 선택 화면으로
             if (preset == null && direct == null && templateId == null) {
@@ -192,6 +193,9 @@ public class ContractWebController {
         model.addAttribute("pageTitle", "새 계약서 생성");
         model.addAttribute("contract", form);
         model.addAttribute("presets", templatePresetService.getSummaries());
+        if (userId != null) {
+            model.addAttribute("currentUserId", userId);
+        }
 
         // 프리셋 정보 유지
         if (form.getSelectedPreset() != null) {
@@ -199,13 +203,17 @@ public class ContractWebController {
         }
 
         // 템플릿 목록도 다시 로드
-        try {
-            PageRequest templatePageRequest = PageRequest.of(0, 100, Sort.by("title"));
-            Page<TemplateResponse> activeTemplates = templateService.getTemplatesByOwnerAndStatus(
-                    userId, TemplateStatus.ACTIVE, templatePageRequest);
-            model.addAttribute("templates", activeTemplates.getContent());
-        } catch (Exception e) {
-            logger.warn("템플릿 목록 로드 실패", e);
+        if (userId != null) {
+            try {
+                PageRequest templatePageRequest = PageRequest.of(0, 100, Sort.by("title"));
+                Page<TemplateResponse> activeTemplates = templateService.getTemplatesByOwnerAndStatus(
+                        userId, TemplateStatus.ACTIVE, templatePageRequest);
+                model.addAttribute("templates", activeTemplates.getContent());
+            } catch (Exception e) {
+                logger.warn("템플릿 목록 로드 실패", e);
+                model.addAttribute("templates", java.util.Collections.emptyList());
+            }
+        } else {
             model.addAttribute("templates", java.util.Collections.emptyList());
         }
 
@@ -242,6 +250,8 @@ public class ContractWebController {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
+
+            model.addAttribute("currentUserId", resolvedUserId);
 
             ContractForm form = new ContractForm();
             form.setTemplateId(contract.getTemplateId());
@@ -286,9 +296,12 @@ public class ContractWebController {
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         try {
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+
             if (bindingResult.hasErrors()) {
                 model.addAttribute("pageTitle", "계약서 수정");
                 model.addAttribute("contractId", contractId);
+                model.addAttribute("currentUserId", resolvedUserId);
                 return "contracts/form";
             }
 
@@ -298,7 +311,7 @@ public class ContractWebController {
                     form.getExpiresAt()
             );
 
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            model.addAttribute("currentUserId", resolvedUserId);
             ContractResponse response = contractService.updateContract(resolvedUserId, contractId, command);
 
             logger.info("계약서 수정 성공: {} (ID: {})", response.getTitle(), response.getId());
@@ -310,6 +323,10 @@ public class ContractWebController {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("pageTitle", "계약서 수정");
             model.addAttribute("contractId", contractId);
+            if (securityUser != null) {
+                String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+                model.addAttribute("currentUserId", resolvedUserId);
+            }
             return "contracts/form";
 
         } catch (BusinessException e) {
@@ -317,6 +334,10 @@ public class ContractWebController {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("pageTitle", "계약서 수정");
             model.addAttribute("contractId", contractId);
+            if (securityUser != null) {
+                String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+                model.addAttribute("currentUserId", resolvedUserId);
+            }
             return "contracts/form";
 
         } catch (Exception e) {
@@ -324,6 +345,10 @@ public class ContractWebController {
             model.addAttribute("errorMessage", "계약서 수정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
             model.addAttribute("pageTitle", "계약서 수정");
             model.addAttribute("contractId", contractId);
+            if (securityUser != null) {
+                String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+                model.addAttribute("currentUserId", resolvedUserId);
+            }
             return "contracts/form";
         }
     }

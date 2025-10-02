@@ -341,6 +341,37 @@
             };
             localStorage.setItem('signly_user_info', JSON.stringify(userInfo));
             console.log('[INFO] 사용자 정보 로컬스토리지 저장:', userInfo);
+
+            if (userInfo.userId) {
+                fetch('/api/first-party-signature/me', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-User-Id': userInfo.userId
+                    }
+                }).then(response => {
+                    if (response.status === 204) {
+                        localStorage.removeItem('signly_owner_signature');
+                        return null;
+                    }
+                    if (!response.ok) {
+                        throw new Error('status ' + response.status);
+                    }
+                    return response.json();
+                }).then(payload => {
+                    if (!payload) {
+                        return;
+                    }
+                    const signaturePayload = {
+                        dataUrl: payload.dataUrl,
+                        updatedAt: payload.updatedAt || new Date().toISOString()
+                    };
+                    localStorage.setItem('signly_owner_signature', JSON.stringify(signaturePayload));
+                    console.log('[INFO] 사업주 서명 정보를 로컬스토리지에 동기화했습니다.');
+                }).catch(error => {
+                    console.warn('[WARN] 사업주 서명 정보를 가져오지 못했습니다:', error);
+                });
+            }
         })();
         </c:if>
     </script>

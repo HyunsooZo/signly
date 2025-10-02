@@ -43,7 +43,7 @@
         }
     </style>
 </head>
-<body>
+<body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/home">
@@ -302,8 +302,12 @@
         let presetFormData = {}; // 프리셋 폼 데이터 저장용
         let currentPresetHtml = ''; // 현재 프리셋 HTML 템플릿
         const contractContentTextarea = document.getElementById('content');
+        const currentUserId = document.body?.dataset?.currentUserId || '';
         const ownerSignatureInfo = readOwnerSignature();
-        const ownerSignatureDataUrl = ownerSignatureInfo.dataUrl || '';
+        let ownerSignatureDataUrl = ownerSignatureInfo.dataUrl || '';
+        let ownerSignatureUpdatedAt = ownerSignatureInfo.updatedAt || '';
+
+        initializeOwnerSignature();
 
         function loadTemplate() {
             const select = document.getElementById('templateId');
@@ -941,6 +945,71 @@
                 : '';
 
             return html.replace(/\[EMPLOYER_SIGNATURE_IMAGE\]/g, signatureMarkup);
+        }
+
+        async function initializeOwnerSignature() {
+            if (ownerSignatureDataUrl) {
+                return;
+            }
+
+            if (!currentUserId) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/first-party-signature/me', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-User-Id': currentUserId
+                    }
+                });
+
+                if (response.status === 204) {
+                    localStorage.removeItem('signly_owner_signature');
+                    return;
+                }
+
+                if (!response.ok) {
+                    console.warn('[WARN] 사업주 서명 정보를 불러오지 못했습니다. 상태:', response.status);
+                    return;
+                }
+
+                const payload = await response.json();
+                if (payload && typeof payload === 'object' && payload.dataUrl) {
+                    ownerSignatureDataUrl = payload.dataUrl;
+                    ownerSignatureUpdatedAt = payload.updatedAt || '';
+                    persistOwnerSignature(ownerSignatureDataUrl, ownerSignatureUpdatedAt);
+                    reapplyOwnerSignature();
+                }
+            } catch (error) {
+                console.warn('[WARN] 사업주 서명 정보를 가져오는 중 오류 발생:', error);
+            }
+        }
+
+        function persistOwnerSignature(dataUrl, updatedAt) {
+            if (!dataUrl) {
+                localStorage.removeItem('signly_owner_signature');
+                return;
+            }
+
+            try {
+                const payload = {
+                    dataUrl: dataUrl,
+                    updatedAt: updatedAt || new Date().toISOString()
+                };
+                localStorage.setItem('signly_owner_signature', JSON.stringify(payload));
+            } catch (error) {
+                console.warn('[WARN] 사업주 서명 정보를 localStorage에 저장할 수 없습니다:', error);
+            }
+        }
+
+        function reapplyOwnerSignature() {
+            if (currentPresetHtml) {
+                updateLivePreview();
+            } else if (contractContentTextarea && contractContentTextarea.value) {
+                contractContentTextarea.value = applyOwnerSignature(contractContentTextarea.value);
+            }
         }
 
         function insertVariable(variable) {

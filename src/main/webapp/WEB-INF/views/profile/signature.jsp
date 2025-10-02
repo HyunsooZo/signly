@@ -124,9 +124,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+    <c:if test="${hasSignature}">
+        <fmt:formatDate value="${signature.updatedAtDate}" pattern="yyyy-MM-dd'T'HH:mm:ssXXX" var="ownerSignatureUpdatedAt" />
+    </c:if>
     <c:choose>
         <c:when test="${hasSignature}">
-            <script type="application/json" id="ownerSignatureDataJson">{"dataUrl":"${fn:escapeXml(signatureDataUrl)}","updatedAt":"${signature.updatedAt}"}</script>
+            <script type="application/json" id="ownerSignatureDataJson">{"dataUrl":"${fn:escapeXml(signatureDataUrl)}","updatedAt":"${ownerSignatureUpdatedAt}"}</script>
         </c:when>
         <c:otherwise>
             <script type="application/json" id="ownerSignatureDataJson">null</script>
