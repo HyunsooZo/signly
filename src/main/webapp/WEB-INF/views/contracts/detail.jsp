@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -21,6 +22,31 @@
             line-height: 1.6;
             white-space: pre-wrap;
             min-height: 400px;
+        }
+        .contract-content--html {
+            background-color: #fff;
+            border: none;
+            padding: 2rem;
+            white-space: normal;
+            min-height: 600px;
+            line-height: 1.6;
+        }
+        .contract-content--html * {
+            max-width: 100%;
+        }
+        .contract-content--html img {
+            display: block;
+            margin: 1rem auto;
+            height: auto;
+        }
+        .contract-content--html table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .contract-content--html table th,
+        .contract-content--html table td {
+            border: 1px solid #dee2e6;
+            padding: 0.75rem;
         }
         .contract-info {
             background-color: #fff;
@@ -140,7 +166,14 @@
                         </h5>
                     </div>
                     <div class="card-body p-0">
-                        <div class="contract-content">${contract.content}</div>
+                        <c:choose>
+                            <c:when test="${contract.presetType ne null and contract.presetType ne 'NONE'}">
+                                <div class="contract-content contract-content--html" id="contractContentHtmlContainer"></div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="contract-content">${contract.content}</div>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </div>
 
@@ -417,13 +450,25 @@
          data-second-party-email="<c:out value='${contract.secondParty.email}'/>"
          data-second-party-org="<c:out value='${empty contract.secondParty.organizationName ? "-" : contract.secondParty.organizationName}'/>"
          data-contract-title="<c:out value='${contract.title}'/>"
-         data-preset-type="${contract.presetType}">
+         data-preset-type="<c:out value='${contract.presetType}'/>">
     </div>
+
+    <textarea id="contractContentHtml" hidden style="display: none;">${fn:escapeXml(contract.content)}</textarea>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const previewDataElement = document.getElementById('contractPreviewData');
         const previewData = previewDataElement ? previewDataElement.dataset : {};
+        const contractContentTextarea = document.getElementById('contractContentHtml');
+        const contractRawContent = contractContentTextarea ? contractContentTextarea.value : '';
+        const presetTypeValue = (previewData.presetType || '').toUpperCase();
+        const isHtmlPreset = presetTypeValue && presetTypeValue !== 'NONE';
+
+        if (isHtmlPreset) {
+            renderHtmlContract(contractRawContent);
+        } else {
+            ensurePlainTextContract();
+        }
 
         const previewDefaults = {
             firstPartyName: previewData.firstPartyName || '-',
@@ -438,6 +483,173 @@
         const csrfParam = '${_csrf.parameterName}';
         const csrfToken = '${_csrf.token}';
 
+        function ensurePlainTextContract() {
+            const contentEl = document.querySelector('.contract-content');
+            if (!contentEl) {
+                return;
+            }
+            contentEl.style.whiteSpace = 'pre-wrap';
+            contentEl.style.fontFamily = "'Times New Roman', serif";
+        }
+
+        function scopeCssText(cssText, scopeSelector) {
+            if (!cssText || !cssText.trim()) {
+                return '';
+            }
+
+            let tempStyle;
+            try {
+                tempStyle = document.createElement('style');
+                tempStyle.textContent = cssText;
+                document.head.appendChild(tempStyle);
+
+                const sheet = tempStyle.sheet;
+                if (!sheet || !sheet.cssRules) {
+                    return naiveScopeCss(cssText, scopeSelector);
+                }
+
+                const processRules = rules => {
+                    const output = [];
+                    Array.from(rules).forEach(rule => {
+                        const ruleType = rule.type;
+                        const CSSRuleRef = window.CSSRule || {};
+
+                        if (CSSRuleRef.STYLE_RULE !== undefined && ruleType === CSSRuleRef.STYLE_RULE) {
+                            const scopedSelectors = rule.selectorText
+                                .split(',')
+                                .map(selector => scopeSelector + ' ' + selector.trim())
+                                .join(', ');
+                            output.push(scopedSelectors + ' { ' + rule.style.cssText + ' }');
+                        } else if (CSSRuleRef.MEDIA_RULE !== undefined && ruleType === CSSRuleRef.MEDIA_RULE) {
+                            const inner = processRules(rule.cssRules);
+                            if (inner.length) {
+                                output.push('@media ' + rule.conditionText + ' {\n' + inner.join('\n') + '\n}');
+                            }
+                        } else if (CSSRuleRef.SUPPORTS_RULE !== undefined && ruleType === CSSRuleRef.SUPPORTS_RULE) {
+                            const inner = processRules(rule.cssRules);
+                            if (inner.length) {
+                                output.push('@supports ' + rule.conditionText + ' {\n' + inner.join('\n') + '\n}');
+                            }
+                        } else {
+                            output.push(rule.cssText);
+                        }
+                    });
+                    return output;
+                };
+
+                const scopedRules = processRules(sheet.cssRules);
+                return scopedRules.join('\n');
+            } catch (error) {
+                return naiveScopeCss(cssText, scopeSelector);
+            } finally {
+                if (tempStyle && tempStyle.parentNode) {
+                    tempStyle.parentNode.removeChild(tempStyle);
+                }
+            }
+        }
+
+        function naiveScopeCss(cssText, scopeSelector) {
+            return cssText
+                .split('}')
+                .map(ruleText => {
+                    const index = ruleText.indexOf('{');
+                    if (index === -1) {
+                        return '';
+                    }
+                    const selectorPart = ruleText.slice(0, index).trim();
+                    const declarationPart = ruleText.slice(index + 1).trim();
+                    if (!selectorPart || !declarationPart) {
+                        return '';
+                    }
+                    if (selectorPart.startsWith('@')) {
+                        return selectorPart + ' { ' + declarationPart + ' }';
+                    }
+                    const scopedSelectors = selectorPart
+                        .split(',')
+                        .map(selector => scopeSelector + ' ' + selector.trim())
+                        .join(', ');
+                    return scopedSelectors + ' { ' + declarationPart + ' }';
+                })
+                .filter(Boolean)
+                .join('\n');
+        }
+
+        function renderHtmlContract(rawHtml) {
+            const container = document.getElementById('contractContentHtmlContainer');
+            if (!container) {
+                return;
+            }
+
+            const working = document.createElement('div');
+            working.innerHTML = rawHtml || '';
+
+            const scopedStyles = [];
+            const collectedLinks = [];
+
+            working.querySelectorAll('script').forEach(node => node.remove());
+
+            working.querySelectorAll('style').forEach(node => {
+                const scoped = scopeCssText(node.textContent || '', '#contractContentHtmlContainer');
+                if (scoped) {
+                    scopedStyles.push(scoped);
+                }
+                node.remove();
+            });
+
+            working.querySelectorAll('link[rel="stylesheet"]').forEach(node => {
+                const href = node.getAttribute('href');
+                if (href && href.trim()) {
+                    collectedLinks.push(href.trim());
+                }
+                node.remove();
+            });
+
+            const styleElementId = 'contractContentHtmlScopedStyles';
+            const existingScopedStyle = document.getElementById(styleElementId);
+            if (existingScopedStyle) {
+                existingScopedStyle.remove();
+            }
+
+            document.querySelectorAll('link[data-contract-content-style="true"]').forEach(linkEl => linkEl.remove());
+
+            const bodyTag = working.querySelector('body');
+            const htmlTag = working.querySelector('html');
+
+            let htmlToRender = '';
+            if (bodyTag && bodyTag.innerHTML.trim()) {
+                htmlToRender = bodyTag.innerHTML;
+            } else if (htmlTag && htmlTag.innerHTML.trim()) {
+                htmlToRender = htmlTag.innerHTML;
+            } else {
+                htmlToRender = working.innerHTML;
+            }
+
+            container.innerHTML = htmlToRender;
+            container.style.whiteSpace = 'normal';
+            container.style.fontFamily = "'Times New Roman', serif";
+
+            container.querySelectorAll('table').forEach(table => {
+                table.classList.add('table', 'table-bordered');
+                table.style.width = '100%';
+            });
+
+            if (scopedStyles.length) {
+                const scopedStyleEl = document.createElement('style');
+                scopedStyleEl.id = styleElementId;
+                scopedStyleEl.textContent = scopedStyles.join('\n');
+                document.head.appendChild(scopedStyleEl);
+            }
+
+            collectedLinks.forEach((href, index) => {
+                const linkEl = document.createElement('link');
+                linkEl.rel = 'stylesheet';
+                linkEl.href = href;
+                linkEl.setAttribute('data-contract-content-style', 'true');
+                linkEl.setAttribute('data-contract-style-index', String(index));
+                document.head.appendChild(linkEl);
+            });
+        }
+
         function appendCsrfField(form) {
             if (!csrfParam || !csrfToken) {
                 return;
@@ -450,8 +662,8 @@
         }
 
         function previewContract() {
-            const content = `${contract.content}`;
-            const presetType = previewData.presetType || 'NONE';
+            const content = contractRawContent;
+            const presetType = presetTypeValue || 'NONE';
             const previewContentEl = document.getElementById('previewContent');
 
             // 프리셋인 경우 HTML로 렌더링, 아니면 텍스트로 표시
