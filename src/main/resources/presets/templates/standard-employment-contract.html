@@ -76,6 +76,35 @@
         .signature-line {
             margin: 8px 0;
         }
+        .signature-line--seal {
+            position: relative;
+            padding-right: 110px;
+            min-height: 80px;
+        }
+        .signature-stamp-label {
+            margin-left: 8px;
+        }
+        .signature-stamp-wrapper {
+            position: absolute;
+            right: 0;
+            top: -10px;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .signature-stamp-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            opacity: 0.9;
+        }
+        .signature-stamp-image-element {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+        }
     </style>
 </head>
 <body>
@@ -143,7 +172,11 @@
     <div class="signature-block">
         <div class="signature-line">(사업주) 사업체명: [COMPANY_NAME]</div>
         <div class="signature-line" style="margin-left: 60px;">주소: [EMPLOYER_ADDRESS]</div>
-        <div class="signature-line" style="margin-left: 60px;">대표자: [EMPLOYER] (인)</div>
+        <div class="signature-line signature-line--seal" style="margin-left: 60px;">
+            대표자: [EMPLOYER]
+            <span class="signature-stamp-label">(인)</span>
+            <span class="signature-stamp-wrapper">[EMPLOYER_SIGNATURE_IMAGE]</span>
+        </div>
     </div>
     <div class="signature-block">
         <div class="signature-line">(전화: [EMPLOYER_PHONE])</div>

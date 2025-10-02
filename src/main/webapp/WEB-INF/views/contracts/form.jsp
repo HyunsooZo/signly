@@ -301,6 +301,9 @@
     <script>
         let presetFormData = {}; // 프리셋 폼 데이터 저장용
         let currentPresetHtml = ''; // 현재 프리셋 HTML 템플릿
+        const contractContentTextarea = document.getElementById('content');
+        const ownerSignatureInfo = readOwnerSignature();
+        const ownerSignatureDataUrl = ownerSignatureInfo.dataUrl || '';
 
         function loadTemplate() {
             const select = document.getElementById('templateId');
@@ -724,17 +727,16 @@
                 updatedHtml = updatedHtml.replace(/(\[CONTRACT_START_DATE\]|<strong>\d{4}년 \d{1,2}월 \d{1,2}일<\/strong>) 부터\s+\[CONTRACT_END_DATE\]\s+까지/g, '$1 부터');
             }
 
+            updatedHtml = applyOwnerSignature(updatedHtml);
+
             // 실시간 미리보기 영역에 표시
             const livePreview = document.getElementById('livePreview');
             if (livePreview) {
                 livePreview.innerHTML = updatedHtml;
             }
 
-            // content textarea에도 최종 HTML 저장 (폼 제출용)
-            const contentTextarea = document.getElementById('content');
-            if (contentTextarea) {
-                contentTextarea.value = updatedHtml;
-                console.log('[DEBUG] updateLivePreview에서 content 저장됨, 길이:', updatedHtml.length);
+            if (contractContentTextarea) {
+                contractContentTextarea.value = updatedHtml;
             } else {
                 console.error('[ERROR] content textarea를 찾을 수 없음!');
             }
@@ -899,8 +901,46 @@
                 updatedHtml = updatedHtml.replace(/(\[CONTRACT_START_DATE\]|<strong>\d{4}년 \d{1,2}월 \d{1,2}일<\/strong>) 부터\s+\[CONTRACT_END_DATE\]\s+까지/g, '$1 부터');
             }
 
-            // content textarea에 최종 HTML 저장
-            document.getElementById('content').value = updatedHtml;
+            updatedHtml = applyOwnerSignature(updatedHtml);
+
+            if (contractContentTextarea) {
+                contractContentTextarea.value = updatedHtml;
+            }
+        }
+
+        function readOwnerSignature() {
+            try {
+                const raw = localStorage.getItem('signly_owner_signature');
+                if (!raw) {
+                    return {};
+                }
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') {
+                    return {};
+                }
+                return {
+                    dataUrl: typeof parsed.dataUrl === 'string' ? parsed.dataUrl : '',
+                    updatedAt: typeof parsed.updatedAt === 'string' ? parsed.updatedAt : ''
+                };
+            } catch (error) {
+                console.warn('[WARN] 사업주 서명 데이터를 불러올 수 없습니다:', error);
+                return {};
+            }
+        }
+
+        function applyOwnerSignature(html) {
+            if (!html || typeof html !== 'string') {
+                return html;
+            }
+            if (!html.includes('[EMPLOYER_SIGNATURE_IMAGE]')) {
+                return html;
+            }
+
+            const signatureMarkup = ownerSignatureDataUrl
+                ? '<img src="' + ownerSignatureDataUrl + '" alt="사업주 서명" class="signature-stamp-image-element">'
+                : '';
+
+            return html.replace(/\[EMPLOYER_SIGNATURE_IMAGE\]/g, signatureMarkup);
         }
 
         function insertVariable(variable) {

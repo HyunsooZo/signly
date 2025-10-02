@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -123,6 +124,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+    <c:choose>
+        <c:when test="${hasSignature}">
+            <script type="application/json" id="ownerSignatureDataJson">{"dataUrl":"${fn:escapeXml(signatureDataUrl)}","updatedAt":"${signature.updatedAt}"}</script>
+        </c:when>
+        <c:otherwise>
+            <script type="application/json" id="ownerSignatureDataJson">null</script>
+        </c:otherwise>
+    </c:choose>
     <script>
         const canvas = document.getElementById('signatureCanvas');
         const signaturePad = new SignaturePad(canvas, {
@@ -161,6 +170,31 @@
             const dataUrl = signaturePad.toDataURL('image/png');
             document.getElementById('signatureData').value = dataUrl;
         });
+
+        (function syncOwnerSignatureToStorage() {
+            try {
+                const signatureJsonElement = document.getElementById('ownerSignatureDataJson');
+                if (!signatureJsonElement) {
+                    localStorage.removeItem('signly_owner_signature');
+                    return;
+                }
+
+                const raw = (signatureJsonElement.textContent || '').trim();
+                if (!raw || raw === 'null') {
+                    localStorage.removeItem('signly_owner_signature');
+                    return;
+                }
+
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === 'object' && parsed.dataUrl) {
+                    localStorage.setItem('signly_owner_signature', JSON.stringify(parsed));
+                } else {
+                    localStorage.removeItem('signly_owner_signature');
+                }
+            } catch (error) {
+                console.warn('[WARN] 사업주 서명 정보를 localStorage에 저장하는 중 오류 발생:', error);
+            }
+        })();
     </script>
 
     <style>
