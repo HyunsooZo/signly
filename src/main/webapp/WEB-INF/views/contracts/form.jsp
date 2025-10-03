@@ -130,6 +130,49 @@
                 <input type="hidden" name="selectedPreset" value="${selectedPreset}" />
             </c:if>
 
+            <!-- 프리셋 레이아웃 -->
+            <div id="presetLayout" style="display: none;">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-file-earmark-text me-2"></i><span id="presetLayoutTitle">표준 근로계약서</span>
+                                </h5>
+                            </div>
+                            <div class="card-body" style="background-color: #fff; padding: 3rem;">
+                                <!-- HTML 렌더링 영역 (변수는 입력 필드로 교체됨) -->
+                                <div id="presetHtmlContainer"></div>
+                            </div>
+                        </div>
+
+                        <!-- 근로자 정보 카드 -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-people me-2"></i>근로자 정보
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="presetSecondPartyEmail" class="form-label">근로자 이메일 <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="presetSecondPartyEmail" name="secondPartyEmail" required maxlength="200" placeholder="example@domain.com">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden fields -->
+                        <textarea id="presetContentHidden" name="content" style="display: none;" required></textarea>
+                        <input type="hidden" id="presetTitleHidden" name="title" required>
+                        <input type="hidden" id="presetFirstPartyName" name="firstPartyName" required>
+                        <input type="hidden" id="presetFirstPartyEmail" name="firstPartyEmail" required>
+                        <input type="hidden" id="presetFirstPartyAddress" name="firstPartyAddress">
+                        <input type="hidden" id="presetSecondPartyName" name="secondPartyName" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 일반 레이아웃 -->
             <div id="normalLayout">
                 <div class="row">
                     <!-- 계약서 기본 정보 -->
@@ -435,6 +478,178 @@
             }
         }
 
+        // 프리셋 모드로 전환
+        function switchToPresetMode() {
+            document.getElementById('normalLayout').style.display = 'none';
+            document.getElementById('presetLayout').style.display = 'block';
+        }
+
+        // 일반 모드로 전환
+        function switchToNormalMode() {
+            document.getElementById('normalLayout').style.display = 'block';
+            document.getElementById('presetLayout').style.display = 'none';
+        }
+
+        // 프리셋 HTML 렌더링 및 변수를 입력 필드로 교체
+        function renderPresetHtml(html, presetName) {
+            const container = document.getElementById('presetHtmlContainer');
+            if (!container) return;
+
+            // <style> 태그 제거
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            tempDiv.querySelectorAll('style, script').forEach(el => el.remove());
+
+            // body 태그 내용만 추출
+            const bodyTag = tempDiv.querySelector('body');
+            const contentHtml = bodyTag ? bodyTag.innerHTML : tempDiv.innerHTML;
+
+            // 컨테이너에 HTML 삽입
+            container.innerHTML = contentHtml;
+
+            // 변수를 입력 필드로 교체
+            replaceVariablesWithInputs(container);
+
+            // 제목 설정
+            document.getElementById('presetLayoutTitle').textContent = presetName || '표준 근로계약서';
+            document.getElementById('presetTitleHidden').value = presetName || '표준 근로계약서';
+        }
+
+        // 변수를 입력 필드로 교체하는 함수
+        function replaceVariablesWithInputs(container) {
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+            const textNodes = [];
+
+            while (walker.nextNode()) {
+                const node = walker.currentNode;
+                if (node.nodeValue && (node.nodeValue.includes('[') || node.nodeValue.includes('{'))) {
+                    textNodes.push(node);
+                }
+            }
+
+            textNodes.forEach(node => {
+                const text = node.nodeValue;
+                const parent = node.parentNode;
+                if (!parent) return;
+
+                const fragment = document.createDocumentFragment();
+                let lastIndex = 0;
+                const regex = /\[([^\]]+)\]|\{([^}]+)\}/g;
+                let match;
+
+                while ((match = regex.exec(text)) !== null) {
+                    // 매치 전 텍스트 추가
+                    if (match.index > lastIndex) {
+                        fragment.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
+                    }
+
+                    const varName = match[1] || match[2];
+
+                    // 서명 이미지는 제외
+                    if (varName === 'EMPLOYER_SIGNATURE_IMAGE') {
+                        fragment.appendChild(document.createTextNode(match[0]));
+                    } else {
+                        // 입력 필드 생성
+                        const input = createVariableInput(varName);
+                        fragment.appendChild(input);
+                    }
+
+                    lastIndex = regex.lastIndex;
+                }
+
+                // 나머지 텍스트 추가
+                if (lastIndex < text.length) {
+                    fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+                }
+
+                parent.replaceChild(fragment, node);
+            });
+
+            // 사업주 정보 자동 입력
+            applyOwnerInfoToPresetForm();
+        }
+
+        // 변수 입력 필드 생성
+        function createVariableInput(varName) {
+            const wrapper = document.createElement('span');
+            wrapper.style.cssText = 'display: inline-block; border-bottom: 1px solid #dee2e6; min-width: 100px; padding: 0 4px;';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control-plaintext d-inline';
+            input.style.cssText = 'border: none; padding: 0; margin: 0; height: auto; width: auto; min-width: 80px; display: inline;';
+            input.setAttribute('data-variable-name', varName);
+            input.placeholder = `[${varName}]`;
+
+            // 자동 값 설정
+            const value = getDefaultValueForVariable(varName);
+            if (value) {
+                input.value = value;
+            }
+
+            input.addEventListener('input', updatePresetContent);
+
+            wrapper.appendChild(input);
+            return wrapper;
+        }
+
+        // 변수의 기본값 가져오기
+        function getDefaultValueForVariable(varName) {
+            if (!ownerInfo) return '';
+
+            const upper = varName.toUpperCase();
+            if (upper === 'EMPLOYER' || upper === 'EMPLOYER_NAME') {
+                return ownerInfo.name || '';
+            }
+            if (upper === 'EMPLOYER_EMAIL') {
+                return ownerInfo.email || '';
+            }
+            if (upper === 'COMPANY' || upper === 'COMPANY_NAME') {
+                return ownerInfo.companyName || '';
+            }
+            if (upper === 'EMPLOYEE' || upper === 'EMPLOYEE_NAME') {
+                return '';
+            }
+            if (upper === 'START_DATE' || upper === 'CONTRACT_START_DATE') {
+                return new Date().toISOString().split('T')[0];
+            }
+            return '';
+        }
+
+        // 프리셋 폼에 사업주 정보 적용
+        function applyOwnerInfoToPresetForm() {
+            if (!ownerInfo) return;
+
+            document.getElementById('presetFirstPartyName').value = ownerInfo.name || '';
+            document.getElementById('presetFirstPartyEmail').value = ownerInfo.email || '';
+            document.getElementById('presetFirstPartyAddress').value = ownerInfo.companyName || '';
+        }
+
+        // 프리셋 내용 업데이트 (폼 제출용)
+        function updatePresetContent() {
+            const container = document.getElementById('presetHtmlContainer');
+            if (!container) return;
+
+            // 모든 입력 필드의 값을 변수로 치환한 HTML 생성
+            const clone = container.cloneNode(true);
+            const inputs = clone.querySelectorAll('input[data-variable-name]');
+
+            inputs.forEach(input => {
+                const varName = input.getAttribute('data-variable-name');
+                const value = input.value || '';
+                const textNode = document.createTextNode(value);
+                input.parentNode.replaceChild(textNode, input);
+
+                // secondPartyName hidden 필드 업데이트
+                if (varName.toUpperCase() === 'EMPLOYEE' || varName.toUpperCase() === 'EMPLOYEE_NAME') {
+                    document.getElementById('presetSecondPartyName').value = value;
+                }
+            });
+
+            // Hidden textarea에 HTML 저장
+            document.getElementById('presetContentHidden').value = clone.innerHTML;
+        }
+
         // 프리셋 선택 이벤트 핸들러
         async function loadPresetById(presetId) {
             try {
@@ -453,17 +668,12 @@
                     : '';
                 const rendered = decodeHtmlEntities(preset.renderedHtml || sectionHtml || '');
 
-                if (contractContentTextarea) {
-                    contractContentTextarea.value = rendered;
-                }
+                // 프리셋 모드로 전환
+                switchToPresetMode();
 
-                const titleInput = document.getElementById('title');
-                if (titleInput && (!titleInput.value || !titleInput.value.trim()) && preset.name) {
-                    titleInput.value = preset.name;
-                }
+                // HTML 렌더링
+                renderPresetHtml(rendered, preset.name);
 
-                detectCustomVariables();
-                updateDirectPreview();
             } catch (error) {
                 console.error('프리셋 로딩 실패:', error);
                 alert('표준 양식을 불러오지 못했습니다.');
@@ -858,13 +1068,40 @@
                 var forms = document.getElementsByClassName('contract-form');
                 var validation = Array.prototype.filter.call(forms, function(form) {
                     form.addEventListener('submit', function(event) {
-                        if (contractContentTextarea) {
-                            const resolvedContent = applyOwnerSignature(applyCustomVariablesToContent(contractContentTextarea.value || ''));
-                            contractContentTextarea.value = resolvedContent;
+                        // 프리셋 모드인 경우
+                        const presetLayout = document.getElementById('presetLayout');
+                        if (presetLayout && presetLayout.style.display !== 'none') {
+                            // 프리셋 콘텐츠 업데이트
+                            updatePresetContent();
+
+                            // normalLayout의 필드 비활성화
+                            const normalLayout = document.getElementById('normalLayout');
+                            if (normalLayout) {
+                                const normalInputs = normalLayout.querySelectorAll('input, textarea, select');
+                                normalInputs.forEach(field => {
+                                    field.disabled = true;
+                                    field.required = false;
+                                });
+                            }
+                        } else {
+                            // 일반 모드인 경우
+                            if (contractContentTextarea) {
+                                const resolvedContent = applyOwnerSignature(applyCustomVariablesToContent(contractContentTextarea.value || ''));
+                                contractContentTextarea.value = resolvedContent;
+                            }
+
+                            // 프리셋 레이아웃의 필드 비활성화
+                            const presetInputs = presetLayout.querySelectorAll('input, textarea, select');
+                            presetInputs.forEach(field => {
+                                field.disabled = true;
+                                field.required = false;
+                            });
                         }
 
-                        const firstEmail = document.getElementById('firstPartyEmail')?.value;
-                        const secondEmail = document.getElementById('secondPartyEmail')?.value;
+                        const firstEmail = document.getElementById('firstPartyEmail')?.value ||
+                                          document.getElementById('presetFirstPartyEmail')?.value;
+                        const secondEmail = document.getElementById('secondPartyEmail')?.value ||
+                                           document.getElementById('presetSecondPartyEmail')?.value;
 
                         if (firstEmail && secondEmail && firstEmail === secondEmail) {
                             event.preventDefault();
