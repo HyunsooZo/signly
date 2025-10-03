@@ -45,14 +45,20 @@ public class Contract extends AggregateRoot {
     }
 
     public static Contract create(UserId creatorId, TemplateId templateId, String title,
-                                ContractContent content, PartyInfo firstParty,
-                                PartyInfo secondParty, LocalDateTime expiresAt, PresetType presetType) {
+                                  ContractContent content, PartyInfo firstParty,
+                                  PartyInfo secondParty, LocalDateTime expiresAt) {
+        return create(creatorId, templateId, title, content, firstParty, secondParty, expiresAt, PresetType.NONE);
+    }
+
+    public static Contract create(UserId creatorId, TemplateId templateId, String title,
+                                  ContractContent content, PartyInfo firstParty,
+                                  PartyInfo secondParty, LocalDateTime expiresAt, PresetType presetType) {
         validateTitle(title);
         validateExpirationDate(expiresAt);
         validateParties(firstParty, secondParty);
 
         return new Contract(ContractId.generate(), creatorId, templateId,
-                          title.trim(), content, firstParty, secondParty, expiresAt, presetType);
+                title.trim(), content, firstParty, secondParty, expiresAt, presetType);
     }
 
     public static Contract restore(ContractId id, UserId creatorId, TemplateId templateId,
