@@ -153,6 +153,14 @@
                                           rows="15" required placeholder="계약서 내용을 입력하세요...">${contract.content}</textarea>
                                 <div class="form-text">계약서의 전체 내용을 입력하세요. 변수를 사용하여 동적 값을 설정할 수 있습니다.</div>
 
+                                <div class="mt-3" id="customVariablesContainer" style="display: none;">
+                                    <label class="form-label d-flex align-items-center gap-2">
+                                        <i class="bi bi-sliders2-vertical"></i> 변수 값 입력
+                                    </label>
+                                    <div class="row g-2" id="customVariableFields"></div>
+                                    <div class="form-text">`{변수명}` 형식의 변수가 감지되면 해당 값을 아래에서 입력할 수 있습니다.</div>
+                                </div>
+
                                 <!-- 프리셋 폼 필드 컨테이너 (동적으로 생성됨) -->
                                 <div id="presetFormFields" style="display: none;"></div>
                             </div>
@@ -308,8 +316,21 @@
         let ownerSignatureDataUrl = ownerSignatureInfo.dataUrl || '';
         let ownerSignatureUpdatedAt = ownerSignatureInfo.updatedAt || '';
 
+        const CUSTOM_VARIABLE_REGEX = /\{([^{}]+)\}/g;
+        const customVariableContainer = document.getElementById('customVariablesContainer');
+        const customVariableFieldsWrapper = document.getElementById('customVariableFields');
+        const customVariableValues = {};
+        let customVariables = [];
+
         applyOwnerInfoToNormalForm();
         initializeOwnerSignature();
+        detectCustomVariables();
+
+        if (contractContentTextarea) {
+            contractContentTextarea.addEventListener('input', () => {
+                detectCustomVariables();
+            });
+        }
 
         function loadTemplate() {
             const select = document.getElementById('templateId');
@@ -318,6 +339,7 @@
             if (selectedOption.value) {
                 document.getElementById('title').value = selectedOption.dataset.title || '';
                 document.getElementById('content').value = selectedOption.dataset.content || '';
+                detectCustomVariables();
             }
         }
 
@@ -368,6 +390,10 @@
                             field.disabled = true;
                         }
                     });
+
+                    if (customVariableContainer) {
+                        customVariableContainer.style.display = 'none';
+                    }
 
                     // container를 container-fluid로 변경
                     const containerEl = document.querySelector('.container.mt-4');
@@ -974,6 +1000,88 @@
 
         }
 
+        function detectCustomVariables() {
+            if (!contractContentTextarea) {
+                return;
+            }
+
+            const content = contractContentTextarea.value || '';
+            const found = new Set();
+            let match;
+            CUSTOM_VARIABLE_REGEX.lastIndex = 0;
+            while ((match = CUSTOM_VARIABLE_REGEX.exec(content)) !== null) {
+                const varName = match[1] ? match[1].trim() : '';
+                if (!varName) {
+                    continue;
+                }
+                found.add(varName);
+            }
+            customVariables = Array.from(found);
+            renderCustomVariableInputs();
+        }
+
+        function renderCustomVariableInputs() {
+            if (!customVariableContainer || !customVariableFieldsWrapper) {
+                return;
+            }
+
+            customVariableFieldsWrapper.innerHTML = '';
+
+            if (!customVariables.length) {
+                customVariableContainer.style.display = 'none';
+                return;
+            }
+
+            customVariableContainer.style.display = '';
+
+            customVariables.forEach(variableName => {
+                if (!(variableName in customVariableValues)) {
+                    customVariableValues[variableName] = suggestDefaultValue(variableName) || '';
+                }
+
+                const sanitizedId = 'variable-' + variableName.replace(/[^a-zA-Z0-9_-]+/g, '-');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'col-md-6';
+
+                const label = document.createElement('label');
+                label.className = 'form-label';
+                label.setAttribute('for', sanitizedId);
+                label.textContent = variableName;
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'form-control';
+                input.id = sanitizedId;
+                input.value = customVariableValues[variableName] || '';
+                input.placeholder = variableName;
+
+                input.addEventListener('input', (event) => {
+                    customVariableValues[variableName] = event.target.value;
+                });
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                customVariableFieldsWrapper.appendChild(wrapper);
+            });
+        }
+
+        function suggestDefaultValue(variableName) {
+            if (!ownerInfo) {
+                return '';
+            }
+            const upper = variableName.toUpperCase();
+            if (upper === 'EMPLOYER' || upper === 'EMPLOYER_NAME' || upper === 'OWNER_NAME' || upper === 'BUSINESS_OWNER') {
+                return ownerInfo.name || '';
+            }
+            if (upper === 'EMPLOYER_EMAIL' || upper === 'OWNER_EMAIL') {
+                return ownerInfo.email || '';
+            }
+            if (upper === 'COMPANY' || upper === 'COMPANY_NAME' || upper === 'ORGANIZATION') {
+                return ownerInfo.companyName || '';
+            }
+            return '';
+        }
+
         function readOwnerSignature() {
             try {
                 const raw = localStorage.getItem('signly_owner_signature');
@@ -1007,6 +1115,24 @@
                 : '';
 
             return html.replace(/\[EMPLOYER_SIGNATURE_IMAGE\]/g, signatureMarkup);
+        }
+
+        function applyCustomVariablesToContent(rawContent) {
+            if (!rawContent || typeof rawContent !== 'string' || !customVariables.length) {
+                return rawContent;
+            }
+
+            let resolved = rawContent;
+            customVariables.forEach(variableName => {
+                const value = customVariableValues[variableName] || '';
+                const regex = new RegExp(escapeRegExp('{' + variableName + '}'), 'g');
+                resolved = resolved.replace(regex, value);
+            });
+            return resolved;
+        }
+
+        function escapeRegExp(text) {
+            return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
         async function initializeOwnerSignature() {
@@ -1096,7 +1222,8 @@
             } else {
                 // 프리셋이 아닌 경우 기존 로직
                 const title = document.getElementById('title').value || '제목 없음';
-                const content = document.getElementById('content').value || '내용 없음';
+                const contentRaw = document.getElementById('content').value || '내용 없음';
+                const contentWithVariables = applyCustomVariablesToContent(contentRaw);
                 const firstPartyName = document.getElementById('firstPartyName')?.value || '[갑 이름]';
                 const firstPartyEmail = document.getElementById('firstPartyEmail')?.value || '[갑 이메일]';
                 const firstPartyAddress = document.getElementById('firstPartyAddress')?.value || '[갑 주소]';
@@ -1104,7 +1231,7 @@
                 const secondPartyEmail = document.getElementById('secondPartyEmail')?.value || '[을 이메일]';
                 const secondPartyAddress = document.getElementById('secondPartyAddress')?.value || '[을 주소]';
 
-                let previewText = content
+                let previewText = contentWithVariables
                     .replace(/\{FIRST_PARTY_NAME\}/g, firstPartyName)
                     .replace(/\{FIRST_PARTY_EMAIL\}/g, firstPartyEmail)
                     .replace(/\{FIRST_PARTY_ADDRESS\}/g, firstPartyAddress)
@@ -1143,6 +1270,11 @@
                                     console.log('[DEBUG] required 해제:', field.id || field.name);
                                 }
                             });
+                        }
+
+                        if (contractContentTextarea) {
+                            const resolvedContent = applyOwnerSignature(applyCustomVariablesToContent(contractContentTextarea.value || ''));
+                            contractContentTextarea.value = resolvedContent;
                         }
 
                         const firstEmail = document.getElementById('firstPartyEmail')?.value;
