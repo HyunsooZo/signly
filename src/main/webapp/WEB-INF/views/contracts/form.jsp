@@ -391,8 +391,7 @@
 
                 const preset = await response.json();
                 const sectionHtml = Array.isArray(preset.sections)
-                    ? preset.sections.map(section => section.content || '').join('
-')
+                    ? preset.sections.map(section => section.content || '').join('\n')
                     : '';
                 const rendered = decodeHtmlEntities(preset.renderedHtml || sectionHtml || '');
 
