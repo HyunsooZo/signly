@@ -323,6 +323,29 @@
     <script>
         const contractContentTextarea = document.getElementById('content');
         const currentUserId = document.body?.dataset?.currentUserId || '';
+
+        function readOwnerInfo() {
+            try {
+                const raw = localStorage.getItem('signly_user_info');
+                if (!raw) {
+                    return null;
+                }
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') {
+                    return null;
+                }
+                return {
+                    name: parsed.name || '',
+                    email: parsed.email || '',
+                    userId: parsed.userId || '',
+                    companyName: parsed.companyName || ''
+                };
+            } catch (error) {
+                console.warn('[WARN] 사용자 정보를 불러올 수 없습니다:', error);
+                return null;
+            }
+        }
+
         const ownerInfo = readOwnerInfo();
         const ownerSignatureInfo = readOwnerSignature();
         let ownerSignatureDataUrl = ownerSignatureInfo.dataUrl || '';
@@ -351,6 +374,41 @@
         const customContentPreview = document.getElementById('customContentPreview');
         const customVariableValues = {};
         let customVariables = [];
+
+        function applyOwnerInfoToNormalForm() {
+            if (!ownerInfo) {
+                return;
+            }
+            // 일반 폼에 사업주 정보 자동 입력
+            const firstPartyNameField = document.getElementById('firstPartyName');
+            const firstPartyEmailField = document.getElementById('firstPartyEmail');
+            const firstPartyAddressField = document.getElementById('firstPartyAddress');
+
+            if (firstPartyNameField && !firstPartyNameField.value && ownerInfo.name) {
+                firstPartyNameField.value = ownerInfo.name;
+            }
+            if (firstPartyEmailField && !firstPartyEmailField.value && ownerInfo.email) {
+                firstPartyEmailField.value = ownerInfo.email;
+            }
+            if (firstPartyAddressField && !firstPartyAddressField.value && ownerInfo.companyName) {
+                firstPartyAddressField.value = ownerInfo.companyName;
+            }
+        }
+
+        function detectCustomVariables() {
+            if (!contractContentTextarea) {
+                return;
+            }
+            const content = contractContentTextarea.value || '';
+            const detected = new Set();
+            forEachPlaceholder(content, (name) => {
+                if (!IGNORED_PLACEHOLDERS.has(name)) {
+                    detected.add(name);
+                }
+            });
+            customVariables = Array.from(detected);
+            renderCustomVariableInputs();
+        }
 
         applyOwnerInfoToNormalForm();
         initializeOwnerSignature();
