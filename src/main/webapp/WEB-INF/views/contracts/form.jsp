@@ -495,10 +495,37 @@
             const container = document.getElementById('presetHtmlContainer');
             if (!container) return;
 
-            // <style> 태그 제거
+            // <style> 태그 추출 및 스코프 적용
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
-            tempDiv.querySelectorAll('style, script').forEach(el => el.remove());
+
+            // 기존 프리셋 스타일 제거
+            const oldPresetStyle = document.getElementById('presetCustomStyle');
+            if (oldPresetStyle) {
+                oldPresetStyle.remove();
+            }
+
+            // style 태그 추출
+            const styleTags = tempDiv.querySelectorAll('style');
+            let combinedCss = '';
+            styleTags.forEach(styleTag => {
+                const cssText = styleTag.textContent || '';
+                // #presetHtmlContainer 스코프로 제한
+                const scopedCss = scopeCssToContainer(cssText, '#presetHtmlContainer');
+                combinedCss += scopedCss + '\n';
+                styleTag.remove();
+            });
+
+            // 스코프 적용된 스타일을 head에 추가
+            if (combinedCss.trim()) {
+                const styleElement = document.createElement('style');
+                styleElement.id = 'presetCustomStyle';
+                styleElement.textContent = combinedCss;
+                document.head.appendChild(styleElement);
+            }
+
+            // script 태그 제거
+            tempDiv.querySelectorAll('script').forEach(el => el.remove());
 
             // body 태그 내용만 추출
             const bodyTag = tempDiv.querySelector('body');
@@ -513,6 +540,50 @@
             // 제목 설정
             document.getElementById('presetLayoutTitle').textContent = presetName || '표준 근로계약서';
             document.getElementById('presetTitleHidden').value = presetName || '표준 근로계약서';
+        }
+
+        // CSS를 컨테이너 스코프로 제한
+        function scopeCssToContainer(cssText, scopeSelector) {
+            if (!cssText || !cssText.trim()) return '';
+
+            // body 선택자를 컨테이너로 교체
+            cssText = cssText.replace(/\bbody\b/g, scopeSelector);
+
+            // 각 CSS 규칙에 스코프 추가
+            const lines = cssText.split('}').filter(line => line.trim());
+            const scopedRules = lines.map(rule => {
+                if (!rule.trim()) return '';
+
+                const parts = rule.split('{');
+                if (parts.length < 2) return rule + '}';
+
+                let selectors = parts[0].trim();
+                const declarations = parts[1].trim();
+
+                // @-rules는 그대로 유지
+                if (selectors.startsWith('@')) {
+                    return rule + '}';
+                }
+
+                // 이미 스코프가 있는 경우 건너뛰기
+                if (selectors.includes(scopeSelector)) {
+                    return rule + '}';
+                }
+
+                // 여러 선택자 처리
+                const selectorList = selectors.split(',').map(s => s.trim());
+                const scopedSelectors = selectorList.map(selector => {
+                    // 이미 #presetHtmlContainer로 시작하면 그대로
+                    if (selector.startsWith(scopeSelector)) {
+                        return selector;
+                    }
+                    return `${scopeSelector} ${selector}`;
+                }).join(', ');
+
+                return `${scopedSelectors} { ${declarations} }`;
+            });
+
+            return scopedRules.join('\n');
         }
 
         // 변수를 입력 필드로 교체하는 함수
