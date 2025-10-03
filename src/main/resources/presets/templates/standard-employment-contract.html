@@ -78,19 +78,20 @@
         }
         .signature-line--seal {
             position: relative;
-            min-height: 80px;
+            min-height: 90px;
             white-space: nowrap;
         }
         .signature-stamp-label {
             margin-left: 8px;
             position: relative;
             display: inline-block;
-            padding-right: 100px;
+            z-index: 1;
         }
         .signature-stamp-wrapper {
             position: absolute;
-            right: 0;
-            top: -35px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 160px;
             height: 70px;
             display: flex;
