@@ -42,6 +42,35 @@
             transition: all 0.3s ease;
             border-radius: 0 0 12px 12px;
         }
+        .custom-variable-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background-color: rgba(255, 243, 205, 0.8);
+            border: 1px dashed #f0ad4e;
+            border-radius: 6px;
+            padding: 2px 6px;
+            margin: 0 2px;
+        }
+        .custom-variable-inline-label {
+            font-size: 0.75rem;
+            color: #b58105;
+            font-weight: 600;
+        }
+        .custom-variable-inline-input {
+            width: auto;
+            min-width: 60px;
+            border: none;
+            background: transparent;
+            border-bottom: 1px solid #f0ad4e;
+            padding: 0 2px;
+            font-size: 0.85rem;
+        }
+        .custom-variable-inline-input:focus {
+            outline: none;
+            border-bottom: 2px solid #f0ad4e;
+            background-color: rgba(255, 243, 205, 0.4);
+        }
     </style>
 </head>
 <body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
@@ -1047,6 +1076,7 @@
 
             if (!customVariables.length) {
                 customVariableContainer.style.display = 'none';
+                updateDirectPreview();
                 return;
             }
 
@@ -1070,12 +1100,13 @@
                 input.type = 'text';
                 input.className = 'form-control';
                 input.id = sanitizedId;
+                input.setAttribute('data-variable-field', variableName);
                 input.value = customVariableValues[variableName] || '';
                 input.placeholder = variableName;
 
                 input.addEventListener('input', (event) => {
                     customVariableValues[variableName] = event.target.value;
-                    updateDirectPreview();
+                    updateInlineVariableDisplays(variableName, event.target.value);
                 });
 
                 wrapper.appendChild(label);
@@ -1198,7 +1229,12 @@
             const raw = contractContentTextarea.value || '';
             const withVariables = applyCustomVariablesToContent(raw);
             const withSignature = applyOwnerSignature(withVariables);
-            customContentPreview.innerHTML = sanitizeHtml(withSignature);
+            const sanitized = sanitizeHtml(withSignature);
+            const template = document.createElement('template');
+            template.innerHTML = sanitized;
+            transformPlaceholdersForInlineEditing(template.content);
+            customContentPreview.innerHTML = '';
+            customContentPreview.appendChild(template.content);
         }
 
         async function initializeOwnerSignature() {
@@ -1263,7 +1299,114 @@
                 updateLivePreview();
             } else if (contractContentTextarea && contractContentTextarea.value) {
                 contractContentTextarea.value = applyOwnerSignature(contractContentTextarea.value);
+                updateInlineVariableDisplays(null, null);
                 updateDirectPreview();
+            }
+        }
+
+        function transformPlaceholdersForInlineEditing(root) {
+            if (!root) {
+                return;
+            }
+
+            const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+            const textNodes = [];
+            while (walker.nextNode()) {
+                const node = walker.currentNode;
+                if (node.nodeValue && node.nodeValue.includes('{')) {
+                    textNodes.push(node);
+                }
+            }
+
+            textNodes.forEach(node => replaceTextNodeWithInputs(node));
+        }
+
+        function replaceTextNodeWithInputs(textNode) {
+            const text = textNode.nodeValue;
+            CUSTOM_VARIABLE_REGEX.lastIndex = 0;
+            if (!CUSTOM_VARIABLE_REGEX.test(text)) {
+                return;
+            }
+            CUSTOM_VARIABLE_REGEX.lastIndex = 0;
+            const parent = textNode.parentNode;
+            if (!parent) {
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            let lastIndex = 0;
+            let match;
+            while ((match = CUSTOM_VARIABLE_REGEX.exec(text)) !== null) {
+                const varName = match[1] ? match[1].trim() : '';
+                if (match.index > lastIndex) {
+                    fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+                }
+                if (varName) {
+                    fragment.appendChild(createInlineVariableElement(varName));
+                }
+                lastIndex = CUSTOM_VARIABLE_REGEX.lastIndex;
+            }
+
+            if (lastIndex < text.length) {
+                fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+            }
+
+            parent.replaceChild(fragment, textNode);
+        }
+
+        function createInlineVariableElement(variableName) {
+            const wrapper = document.createElement('span');
+            wrapper.className = 'custom-variable-inline';
+
+            const label = document.createElement('span');
+            label.className = 'custom-variable-inline-label';
+            label.textContent = `{${variableName}}`;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'custom-variable-inline-input';
+            input.setAttribute('data-variable-name', variableName);
+            if (!(variableName in customVariableValues)) {
+                customVariableValues[variableName] = suggestDefaultValue(variableName) || '';
+            }
+            input.value = customVariableValues[variableName] || '';
+
+            input.addEventListener('input', (event) => {
+                const newValue = event.target.value;
+                customVariableValues[variableName] = newValue;
+                updateVariablePanelField(variableName, newValue, event.target);
+                updateInlineVariableDisplays(variableName, newValue, event.target);
+            });
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(input);
+            return wrapper;
+        }
+
+        function updateInlineVariableDisplays(variableName, value, sourceElement) {
+            if (!variableName) {
+                return;
+            }
+            const selector = `.custom-variable-inline-input[data-variable-name="${variableName}"]`;
+            const inputs = customContentPreview?.querySelectorAll(selector) || [];
+            inputs.forEach(input => {
+                if (input === sourceElement) {
+                    return;
+                }
+                if (input.value !== value) {
+                    input.value = value || '';
+                }
+            });
+        }
+
+        function updateVariablePanelField(variableName, value, sourceElement) {
+            if (!customVariableFieldsWrapper) {
+                return;
+            }
+            const selector = `[data-variable-field="${variableName}"]`;
+            const field = customVariableFieldsWrapper.querySelector(selector);
+            if (field && field !== sourceElement && field.value !== value) {
+                field.value = value || '';
             }
         }
 
