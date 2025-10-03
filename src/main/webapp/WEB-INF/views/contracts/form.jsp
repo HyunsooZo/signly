@@ -495,9 +495,8 @@
             const container = document.getElementById('presetHtmlContainer');
             if (!container) return;
 
-            // <style> 태그 추출 및 스코프 적용
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
+            console.log('[DEBUG] renderPresetHtml - Input HTML length:', html.length);
+            console.log('[DEBUG] renderPresetHtml - First 500 chars:', html.substring(0, 500));
 
             // 기존 프리셋 스타일 제거
             const oldPresetStyle = document.getElementById('presetCustomStyle');
@@ -505,16 +504,21 @@
                 oldPresetStyle.remove();
             }
 
-            // style 태그 추출
-            const styleTags = tempDiv.querySelectorAll('style');
+            // <style> 태그를 정규식으로 추출 (innerHTML로는 head 안의 style을 못 찾음)
+            const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
             let combinedCss = '';
-            styleTags.forEach(styleTag => {
-                const cssText = styleTag.textContent || '';
-                // #presetHtmlContainer 스코프로 제한
-                const scopedCss = scopeCssToContainer(cssText, '#presetHtmlContainer');
-                combinedCss += scopedCss + '\n';
-                styleTag.remove();
-            });
+            let match;
+
+            while ((match = styleRegex.exec(html)) !== null) {
+                const cssText = match[1];
+                console.log('[DEBUG] Found style tag, CSS length:', cssText.length);
+
+                // 가장 간단한 방법: body만 교체하고 나머지는 .preset-document 안에서 작동하도록
+                let modifiedCss = cssText.replace(/\bbody\b/g, '.preset-document');
+
+                console.log('[DEBUG] Modified CSS preview:', modifiedCss.substring(0, 500));
+                combinedCss += modifiedCss + '\n';
+            }
 
             // 스코프 적용된 스타일을 head에 추가
             if (combinedCss.trim()) {
@@ -522,17 +526,42 @@
                 styleElement.id = 'presetCustomStyle';
                 styleElement.textContent = combinedCss;
                 document.head.appendChild(styleElement);
+                console.log('[DEBUG] Added CSS, total length:', combinedCss.length);
+
+                // 실제로 적용되었는지 확인
+                setTimeout(() => {
+                    const sectionNumber = document.querySelector('.preset-document .section-number');
+                    if (sectionNumber) {
+                        const computedStyle = window.getComputedStyle(sectionNumber);
+                        console.log('[DEBUG] .section-number font-weight:', computedStyle.fontWeight);
+                        console.log('[DEBUG] .section-number element:', sectionNumber);
+                    } else {
+                        console.log('[DEBUG] .section-number not found');
+                    }
+                }, 100);
+            } else {
+                console.log('[DEBUG] No CSS found!');
             }
 
-            // script 태그 제거
-            tempDiv.querySelectorAll('script').forEach(el => el.remove());
-
             // body 태그 내용만 추출
-            const bodyTag = tempDiv.querySelector('body');
-            const contentHtml = bodyTag ? bodyTag.innerHTML : tempDiv.innerHTML;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
 
-            // 컨테이너에 HTML 삽입
+            const bodyTag = tempDiv.querySelector('body');
+            let contentHtml = bodyTag ? bodyTag.innerHTML : tempDiv.innerHTML;
+
+            // body 안에 있는 style 태그 제거
+            contentHtml = contentHtml.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+
+            console.log('[DEBUG] Content HTML length:', contentHtml.length);
+            console.log('[DEBUG] Content HTML first 500 chars:', contentHtml.substring(0, 500));
+
+            // 컨테이너에 preset-document 클래스 추가하고 HTML 삽입
+            container.className = 'preset-document';
             container.innerHTML = contentHtml;
+
+            console.log('[DEBUG] After innerHTML - container has', container.children.length, 'children');
+            console.log('[DEBUG] Container HTML:', container.innerHTML.substring(0, 500));
 
             // 변수를 입력 필드로 교체
             replaceVariablesWithInputs(container);
@@ -540,50 +569,6 @@
             // 제목 설정
             document.getElementById('presetLayoutTitle').textContent = presetName || '표준 근로계약서';
             document.getElementById('presetTitleHidden').value = presetName || '표준 근로계약서';
-        }
-
-        // CSS를 컨테이너 스코프로 제한
-        function scopeCssToContainer(cssText, scopeSelector) {
-            if (!cssText || !cssText.trim()) return '';
-
-            // body 선택자를 컨테이너로 교체
-            cssText = cssText.replace(/\bbody\b/g, scopeSelector);
-
-            // 각 CSS 규칙에 스코프 추가
-            const lines = cssText.split('}').filter(line => line.trim());
-            const scopedRules = lines.map(rule => {
-                if (!rule.trim()) return '';
-
-                const parts = rule.split('{');
-                if (parts.length < 2) return rule + '}';
-
-                let selectors = parts[0].trim();
-                const declarations = parts[1].trim();
-
-                // @-rules는 그대로 유지
-                if (selectors.startsWith('@')) {
-                    return rule + '}';
-                }
-
-                // 이미 스코프가 있는 경우 건너뛰기
-                if (selectors.includes(scopeSelector)) {
-                    return rule + '}';
-                }
-
-                // 여러 선택자 처리
-                const selectorList = selectors.split(',').map(s => s.trim());
-                const scopedSelectors = selectorList.map(selector => {
-                    // 이미 #presetHtmlContainer로 시작하면 그대로
-                    if (selector.startsWith(scopeSelector)) {
-                        return selector;
-                    }
-                    return `${scopeSelector} ${selector}`;
-                }).join(', ');
-
-                return `${scopedSelectors} { ${declarations} }`;
-            });
-
-            return scopedRules.join('\n');
         }
 
         // 변수를 입력 필드로 교체하는 함수
@@ -642,15 +627,71 @@
 
         // 변수 입력 필드 생성
         function createVariableInput(varName) {
+            const upper = varName.toUpperCase();
+
+            // 변수 타입에 따라 적절한 문자 수 결정 (size 속성)
+            let inputSize = 10;
+            let maxLength = null;
+
+            // 이름 관련 (최대 6자)
+            if (upper.includes('NAME') || upper === 'EMPLOYER' || upper === 'EMPLOYEE') {
+                inputSize = 6;
+                maxLength = 10;
+            }
+            // 날짜 관련 (yyyy-mm-dd = 10자)
+            else if (upper.includes('DATE')) {
+                inputSize = 11;
+                maxLength = 10;
+            }
+            // 시간 관련 (hh:mm = 5자)
+            else if (upper.includes('TIME')) {
+                inputSize = 6;
+                maxLength = 5;
+            }
+            // 요일, 숫자 등 짧은 값
+            else if (upper.includes('DAY') || upper.includes('DAYS') || upper.includes('HOLIDAYS')) {
+                inputSize = 4;
+                maxLength = 10;
+            }
+            // 주소, 장소, 업무 등 긴 값 (최대 20자)
+            else if (upper.includes('ADDRESS') || upper.includes('WORKPLACE') || upper.includes('DESCRIPTION')) {
+                inputSize = 20;
+                maxLength = 50;
+            }
+            // 급여, 금액 관련
+            else if (upper.includes('SALARY') || upper.includes('BONUS') || upper.includes('ALLOWANCE') || upper.includes('PAYMENT') || upper.includes('METHOD')) {
+                inputSize = 12;
+                maxLength = 30;
+            }
+            // 전화번호
+            else if (upper.includes('PHONE')) {
+                inputSize = 13;
+                maxLength = 15;
+            }
+            // 이메일
+            else if (upper.includes('EMAIL')) {
+                inputSize = 20;
+                maxLength = 50;
+            }
+            // 회사명
+            else if (upper.includes('COMPANY')) {
+                inputSize = 15;
+                maxLength = 30;
+            }
+
             const wrapper = document.createElement('span');
-            wrapper.style.cssText = 'display: inline-block; border-bottom: 1px solid #dee2e6; min-width: 100px; padding: 0 4px;';
+            wrapper.style.cssText = 'display: inline-block; border-bottom: 1px solid #dee2e6; padding: 0 2px;';
 
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'form-control-plaintext d-inline';
-            input.style.cssText = 'border: none; padding: 0; margin: 0; height: auto; width: auto; min-width: 80px; display: inline;';
+            input.style.cssText = 'border: none; padding: 0; margin: 0; height: auto; display: inline; font-size: 13px; font-family: inherit;';
+            input.size = inputSize;
+            if (maxLength) {
+                input.maxLength = maxLength;
+            }
             input.setAttribute('data-variable-name', varName);
-            input.placeholder = `[${varName}]`;
+            input.placeholder = '';
 
             // 자동 값 설정
             const value = getDefaultValueForVariable(varName);
@@ -734,10 +775,31 @@
                 }
 
                 const preset = await response.json();
+                console.log('[DEBUG] Preset data:', preset);
+
                 const sectionHtml = Array.isArray(preset.sections)
                     ? preset.sections.map(section => section.content || '').join('\n')
                     : '';
-                const rendered = decodeHtmlEntities(preset.renderedHtml || sectionHtml || '');
+
+                // renderedHtml이 이미 HTML이면 그대로 사용, 아니면 디코딩
+                let rendered = preset.renderedHtml || sectionHtml || '';
+
+                console.log('[DEBUG] Initial HTML length:', rendered.length);
+                console.log('[DEBUG] Has <br> tags:', rendered.includes('<br'));
+                console.log('[DEBUG] Has <span> tags:', rendered.includes('<span'));
+                console.log('[DEBUG] Has &lt; entities:', rendered.includes('&lt;'));
+                console.log('[DEBUG] Has &gt; entities:', rendered.includes('&gt;'));
+
+                // HTML 엔티티가 인코딩되어 있는지 확인
+                if (rendered.includes('&lt;') || rendered.includes('&gt;')) {
+                    console.log('[DEBUG] Decoding HTML entities...');
+                    rendered = decodeHtmlEntities(rendered);
+                    console.log('[DEBUG] After decode - Has <br> tags:', rendered.includes('<br'));
+                }
+
+                console.log('[DEBUG] Final HTML length:', rendered.length);
+                console.log('[DEBUG] HTML preview (first 500):', rendered.substring(0, 500));
+                console.log('[DEBUG] HTML contains "section-number":', rendered.includes('section-number'));
 
                 // 프리셋 모드로 전환
                 switchToPresetMode();

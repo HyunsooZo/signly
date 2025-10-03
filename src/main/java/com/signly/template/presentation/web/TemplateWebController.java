@@ -232,9 +232,14 @@ public class TemplateWebController {
     @ResponseBody
     public ResponseEntity<TemplatePresetResponse> getPreset(@PathVariable String presetId) {
         return templatePresetService.getPreset(presetId)
-                .map(preset -> ResponseEntity.ok(
-                        new TemplatePresetResponse(preset.id(), preset.name(), preset.sections())
-                ))
+                    .map(preset -> {
+                    String renderedHtml = preset.sections().stream()
+                            .map(section -> section.content() != null ? section.content() : "")
+                            .collect(java.util.stream.Collectors.joining("\n"));
+                    return ResponseEntity.ok(
+                            new TemplatePresetResponse(preset.id(), preset.name(), preset.sections(), renderedHtml)
+                    );
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -307,5 +312,5 @@ public class TemplateWebController {
         public void setSectionsJson(String sectionsJson) { this.sectionsJson = (sectionsJson == null || sectionsJson.isBlank()) ? "[]" : sectionsJson; }
     }
 
-    private record TemplatePresetResponse(String id, String name, java.util.List<PresetSection> sections) {}
+    private record TemplatePresetResponse(String id, String name, java.util.List<PresetSection> sections, String renderedHtml) {}
 }
