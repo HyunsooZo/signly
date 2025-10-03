@@ -162,6 +162,17 @@
                                     <div class="form-text">`{변수명}` 형식의 변수가 감지되면 해당 값을 아래에서 입력할 수 있습니다.</div>
                                 </div>
 
+                                <div class="mt-3" id="customContentPreviewWrapper" style="display: none;">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="card-title mb-0">
+                                                <i class="bi bi-eye"></i> 실시간 미리보기
+                                            </h5>
+                                        </div>
+                                        <div class="card-body" id="customContentPreview" style="min-height: 200px; background-color: #f8f9fa; overflow-x: auto;"></div>
+                                    </div>
+                                </div>
+
                                 <!-- 프리셋 폼 필드 컨테이너 (동적으로 생성됨) -->
                                 <div id="presetFormFields" style="display: none;"></div>
                             </div>
@@ -320,6 +331,8 @@
         const CUSTOM_VARIABLE_REGEX = /\{([^{}]+)\}/g;
         const customVariableContainer = document.getElementById('customVariablesContainer');
         const customVariableFieldsWrapper = document.getElementById('customVariableFields');
+        const customContentPreviewWrapper = document.getElementById('customContentPreviewWrapper');
+        const customContentPreview = document.getElementById('customContentPreview');
         const customVariableValues = {};
         let customVariables = [];
 
@@ -330,6 +343,7 @@
         if (contractContentTextarea) {
             contractContentTextarea.addEventListener('input', () => {
                 detectCustomVariables();
+                updateDirectPreview();
             });
         }
 
@@ -1021,6 +1035,7 @@
             }
             customVariables = Array.from(found);
             renderCustomVariableInputs();
+            updateDirectPreview();
         }
 
         function renderCustomVariableInputs() {
@@ -1060,12 +1075,15 @@
 
                 input.addEventListener('input', (event) => {
                     customVariableValues[variableName] = event.target.value;
+                    updateDirectPreview();
                 });
 
                 wrapper.appendChild(label);
                 wrapper.appendChild(input);
                 customVariableFieldsWrapper.appendChild(wrapper);
             });
+
+            updateDirectPreview();
         }
 
         function suggestDefaultValue(variableName) {
@@ -1147,6 +1165,42 @@
             return textarea.value;
         }
 
+        function sanitizeHtml(html) {
+            if (!html) {
+                return '';
+            }
+            const template = document.createElement('template');
+            template.innerHTML = html;
+            template.content.querySelectorAll('script').forEach(node => node.remove());
+            return template.innerHTML;
+        }
+
+        function updateDirectPreview() {
+            if (!customContentPreviewWrapper || !customContentPreview) {
+                return;
+            }
+
+            const presetLayout = document.getElementById('presetLayout');
+            const usingPreset = presetLayout && presetLayout.style.display === 'grid';
+
+            if (usingPreset) {
+                customContentPreviewWrapper.style.display = 'none';
+                customContentPreview.innerHTML = '';
+                return;
+            }
+
+            if (!contractContentTextarea) {
+                customContentPreviewWrapper.style.display = 'none';
+                return;
+            }
+
+            customContentPreviewWrapper.style.display = '';
+            const raw = contractContentTextarea.value || '';
+            const withVariables = applyCustomVariablesToContent(raw);
+            const withSignature = applyOwnerSignature(withVariables);
+            customContentPreview.innerHTML = sanitizeHtml(withSignature);
+        }
+
         async function initializeOwnerSignature() {
             if (ownerSignatureDataUrl) {
                 return;
@@ -1209,6 +1263,7 @@
                 updateLivePreview();
             } else if (contractContentTextarea && contractContentTextarea.value) {
                 contractContentTextarea.value = applyOwnerSignature(contractContentTextarea.value);
+                updateDirectPreview();
             }
         }
 
