@@ -378,6 +378,41 @@
         }
 
         // 프리셋 선택 이벤트 핸들러
+        async function loadPresetById(presetId) {
+            try {
+                const response = await fetch('/templates/presets/' + presetId, {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    alert('표준 양식을 불러오지 못했습니다.');
+                    return;
+                }
+
+                const preset = await response.json();
+                const sectionHtml = Array.isArray(preset.sections)
+                    ? preset.sections.map(section => section.content || '').join('
+')
+                    : '';
+                const rendered = decodeHtmlEntities(preset.renderedHtml || sectionHtml || '');
+
+                if (contractContentTextarea) {
+                    contractContentTextarea.value = rendered;
+                }
+
+                const titleInput = document.getElementById('title');
+                if (titleInput && (!titleInput.value || !titleInput.value.trim()) && preset.name) {
+                    titleInput.value = preset.name;
+                }
+
+                detectCustomVariables();
+                updateDirectPreview();
+            } catch (error) {
+                console.error('프리셋 로딩 실패:', error);
+                alert('표준 양식을 불러오지 못했습니다.');
+            }
+        }
+
         const presetSelect = document.getElementById('presetSelect');
         if (presetSelect && contractContentTextarea) {
             presetSelect.addEventListener('change', async (event) => {
@@ -385,41 +420,8 @@
                 if (!presetId) {
                     return;
                 }
-
-                try {
-                    const response = await fetch('/templates/presets/' + presetId, {
-                        headers: { 'Accept': 'application/json' }
-                    });
-
-                    if (!response.ok) {
-                        alert('표준 양식을 불러오지 못했습니다.');
-                        return;
-                    }
-
-                    const preset = await response.json();
-
-                    const sectionHtml = Array.isArray(preset.sections)
-                        ? preset.sections.map(section => section.content || '').join('\n')
-                        : '';
-                    const rendered = decodeHtmlEntities(preset.renderedHtml || sectionHtml || '');
-
-                    contractContentTextarea.style.display = 'none';
-                    contractContentTextarea.required = false;
-                    contractContentTextarea.value = rendered;
-
-                    const titleInput = document.getElementById('title');
-                    if (titleInput && (!titleInput.value || !titleInput.value.trim()) && preset.name) {
-                        titleInput.value = preset.name;
-                    }
-
-                    detectCustomVariables();
-                    updateDirectPreview();
-                } catch (error) {
-                    console.error('프리셋 로딩 실패:', error);
-                    alert('표준 양식을 불러오지 못했습니다.');
-                } finally {
-                    presetSelect.value = '';
-                }
+                await loadPresetById(presetId);
+                presetSelect.value = '';
             });
         }
 
@@ -829,62 +831,14 @@
 
         // 스크롤 이벤트 리스너 등록
                 
-        // 페이지 로드 시 selectedPreset이 있으면 자동으로 로드
+                // 페이지 로드 시 selectedPreset이 있으면 자동으로 로드
         <c:if test="${not empty selectedPreset}">
-        (function() {
-            console.log('[INFO] selectedPreset 감지:', '${selectedPreset}');
-            const isEditMode = ${not empty contractId};
-            console.log('[INFO] 수정 모드:', isEditMode);
-
-            // DOM이 로드되면 즉시 실행
-            document.addEventListener('DOMContentLoaded', function() {
-                console.log('[INFO] DOMContentLoaded - 프리셋 로드 시작');
-
-                // normalLayout의 모든 필드를 미리 비활성화
-                const normalLayout = document.getElementById('normalLayout');
-                if (normalLayout) {
-                    const allInputs = normalLayout.querySelectorAll('input, select, textarea');
-                    console.log('[INFO] normalLayout 필드 개수:', allInputs.length);
-                    allInputs.forEach(field => {
-                        if (field.id !== 'content' && field.id !== 'title') {
-                            field.required = false;
-                            field.disabled = true;
-                            console.log('[INFO] 필드 비활성화:', field.id || field.name);
-                        }
-                    });
-                }
-
-                // 프리셋 로드
-                const presetSelect = document.getElementById('presetSelect');
-                if (presetSelect) {
-                    console.log('[INFO] presetSelect 찾음, 값 설정 중...');
-                    presetSelect.value = '${selectedPreset}';
-                    const event = new Event('change');
-                    presetSelect.dispatchEvent(event);
-
-                    // 수정 모드인 경우 기존 값들을 복원
-                    if (isEditMode) {
-                        console.log('[INFO] 수정 모드 - 기존 값 복원 대기');
-                        // presetSelect change 이벤트 처리 후 값 복원을 위해 약간 지연
-                        setTimeout(function() {
-                            const secondPartyEmailInput = document.getElementById('presetSecondPartyEmail');
-                            if (secondPartyEmailInput) {
-                                const existingSecondEmail = '${contract.secondPartyEmail}';
-                                if (existingSecondEmail) {
-                                    secondPartyEmailInput.value = existingSecondEmail;
-                                    console.log('[INFO] 근로자 이메일 복원:', existingSecondEmail);
-                                }
-                            }
-                        }, 100);
-                    }
-                } else {
-                    console.error('[ERROR] presetSelect를 찾을 수 없음!');
-                }
-            });
-        })();
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPresetById('${selectedPreset}');
+        });
         </c:if>
 
-        // 폼 제출 직전 상태 확인
+// 폼 제출 직전 상태 확인
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.querySelector('.contract-form');
             if (form) {
