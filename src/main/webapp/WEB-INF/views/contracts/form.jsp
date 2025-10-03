@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -120,7 +121,7 @@
                                         <c:forEach var="template" items="${templates}">
                                             <option value="${template.templateId}"
                                                     data-title="${template.title}"
-                                                    data-content="${template.content}"
+                                                    data-content="${fn:escapeXml(template.renderedHtml)}"
                                                     <c:if test="${contract.templateId == template.templateId}">selected</c:if>>
                                                 ${template.title}
                                             </option>
@@ -338,7 +339,9 @@
 
             if (selectedOption.value) {
                 document.getElementById('title').value = selectedOption.dataset.title || '';
-                document.getElementById('content').value = selectedOption.dataset.content || '';
+                const raw = selectedOption.getAttribute('data-content') || '';
+                const decoded = decodeHtmlEntities(raw);
+                document.getElementById('content').value = decoded;
                 detectCustomVariables();
             }
         }
@@ -1133,6 +1136,15 @@
 
         function escapeRegExp(text) {
             return text.replace(/[.*+?^$()|[\]{}\\]/g, '\\$&');
+        }
+
+        function decodeHtmlEntities(value) {
+            if (!value) {
+                return '';
+            }
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = value;
+            return textarea.value;
         }
 
         async function initializeOwnerSignature() {
