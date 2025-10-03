@@ -80,6 +80,9 @@ server:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
     min-response-size: 1024
+  tomcat:
+    max-http-header-size: 65536  # 64KB (기본값 8KB)
+    max-http-post-size: 20971520  # 20MB
 
 app:
   name: Signly E-Signature Service

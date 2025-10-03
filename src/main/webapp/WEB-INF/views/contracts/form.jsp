@@ -601,9 +601,10 @@
 
                     const varName = match[1] || match[2];
 
-                    // 서명 이미지는 제외
+                    // 서명 이미지는 localStorage에서 가져와서 img 태그로 교체
                     if (varName === 'EMPLOYER_SIGNATURE_IMAGE') {
-                        fragment.appendChild(document.createTextNode(match[0]));
+                        const signatureImg = createSignatureImage();
+                        fragment.appendChild(signatureImg);
                     } else {
                         // 입력 필드 생성
                         const input = createVariableInput(varName);
@@ -628,53 +629,62 @@
         // 변수 입력 필드 생성
         function createVariableInput(varName) {
             const upper = varName.toUpperCase();
+            const normalized = upper.replace(/[-_\s]/g, '');
 
             // 변수 타입에 따라 적절한 문자 수 결정 (size 속성)
             let inputSize = 10;
             let maxLength = null;
 
-            // 이름 관련 (최대 6자)
-            if (upper.includes('NAME') || upper === 'EMPLOYER' || upper === 'EMPLOYEE') {
+            // 이름 관련 (최대 6자) - 한글과 영문 모두 지원
+            if (normalized.includes('NAME') || upper === 'EMPLOYER' || upper === 'EMPLOYEE' ||
+                upper.includes('이름') || upper === '사업주' || upper === '근로자' || upper === '직원' ||
+                upper === '갑' || upper === '을') {
                 inputSize = 6;
                 maxLength = 10;
             }
             // 날짜 관련 (yyyy-mm-dd = 10자)
-            else if (upper.includes('DATE')) {
+            else if (normalized.includes('DATE') || upper.includes('날짜') || upper.includes('일자') ||
+                     upper.includes('계약일') || upper.includes('시작일') || upper.includes('종료일')) {
                 inputSize = 11;
                 maxLength = 10;
             }
             // 시간 관련 (hh:mm = 5자)
-            else if (upper.includes('TIME')) {
+            else if (normalized.includes('TIME') || upper.includes('시간') || upper.includes('시각')) {
                 inputSize = 6;
                 maxLength = 5;
             }
             // 요일, 숫자 등 짧은 값
-            else if (upper.includes('DAY') || upper.includes('DAYS') || upper.includes('HOLIDAYS')) {
+            else if (normalized.includes('DAY') || normalized.includes('DAYS') || normalized.includes('HOLIDAYS') ||
+                     upper.includes('요일') || upper.includes('휴일')) {
                 inputSize = 4;
                 maxLength = 10;
             }
             // 주소, 장소, 업무 등 긴 값 (최대 20자)
-            else if (upper.includes('ADDRESS') || upper.includes('WORKPLACE') || upper.includes('DESCRIPTION')) {
+            else if (normalized.includes('ADDRESS') || normalized.includes('WORKPLACE') || normalized.includes('DESCRIPTION') ||
+                     upper.includes('주소') || upper.includes('장소') || upper.includes('업무') || upper.includes('내용')) {
                 inputSize = 20;
                 maxLength = 50;
             }
             // 급여, 금액 관련
-            else if (upper.includes('SALARY') || upper.includes('BONUS') || upper.includes('ALLOWANCE') || upper.includes('PAYMENT') || upper.includes('METHOD')) {
+            else if (normalized.includes('SALARY') || normalized.includes('BONUS') || normalized.includes('ALLOWANCE') ||
+                     normalized.includes('PAYMENT') || normalized.includes('METHOD') ||
+                     upper.includes('급여') || upper.includes('임금') || upper.includes('금액') || upper.includes('지급') || upper.includes('방법')) {
                 inputSize = 12;
                 maxLength = 30;
             }
             // 전화번호
-            else if (upper.includes('PHONE')) {
+            else if (normalized.includes('PHONE') || normalized.includes('TEL') || upper.includes('전화') || upper.includes('연락처')) {
                 inputSize = 13;
                 maxLength = 15;
             }
             // 이메일
-            else if (upper.includes('EMAIL')) {
+            else if (normalized.includes('EMAIL') || normalized.includes('MAIL') || upper.includes('이메일') || upper.includes('메일')) {
                 inputSize = 20;
                 maxLength = 50;
             }
-            // 회사명
-            else if (upper.includes('COMPANY')) {
+            // 회사명/조직명
+            else if (normalized.includes('COMPANY') || normalized.includes('ORGANIZATION') ||
+                     upper.includes('회사') || upper.includes('조직')) {
                 inputSize = 15;
                 maxLength = 30;
             }
@@ -691,7 +701,9 @@
                 input.maxLength = maxLength;
             }
             input.setAttribute('data-variable-name', varName);
-            input.placeholder = '';
+
+            // 적절한 플레이스홀더 설정
+            input.placeholder = getPlaceholderExample(varName, upper, normalized);
 
             // 자동 값 설정
             const value = getDefaultValueForVariable(varName);
@@ -705,26 +717,165 @@
             return wrapper;
         }
 
-        // 변수의 기본값 가져오기
+        // 변수명에 따른 플레이스홀더 예시 생성
+        function getPlaceholderExample(varName, upper, normalized) {
+            // 이름 관련
+            if (normalized.includes('NAME') || upper === 'EMPLOYER' || upper === 'EMPLOYEE' ||
+                upper.includes('이름') || upper === '사업주' || upper === '근로자' || upper === '직원' ||
+                upper === '갑' || upper === '을') {
+                if (upper.includes('EMPLOYEE') || upper.includes('근로자') || upper.includes('직원') || upper === '을') {
+                    return '예) 홍길동';
+                }
+                return '예) 김철수';
+            }
+            // 날짜 관련
+            if (normalized.includes('DATE') || upper.includes('날짜') || upper.includes('일자') ||
+                upper.includes('계약일') || upper.includes('시작일') || upper.includes('종료일')) {
+                return '예) 2025-01-01';
+            }
+            // 시간 관련
+            if (normalized.includes('TIME') || upper.includes('시간') || upper.includes('시각')) {
+                return '예) 09:00';
+            }
+            // 요일
+            if (normalized.includes('DAY') || normalized.includes('DAYS') || upper.includes('요일')) {
+                return '예) 월~금';
+            }
+            // 휴일
+            if (normalized.includes('HOLIDAYS') || upper.includes('휴일')) {
+                return '예) 토, 일요일';
+            }
+            // 주소
+            if (normalized.includes('ADDRESS') || upper.includes('주소')) {
+                return '예) 서울시 강남구';
+            }
+            // 장소
+            if (normalized.includes('WORKPLACE') || upper.includes('장소')) {
+                return '예) 본사 사무실';
+            }
+            // 업무 내용
+            if (normalized.includes('DESCRIPTION') || normalized.includes('JOB') || upper.includes('업무') || upper.includes('내용')) {
+                return '예) 소프트웨어 개발';
+            }
+            // 급여
+            if (normalized.includes('SALARY') || upper.includes('급여') || upper.includes('임금')) {
+                return '예) 3,000,000';
+            }
+            // 상여금
+            if (normalized.includes('BONUS') || upper.includes('상여')) {
+                return '예) 연 500만원';
+            }
+            // 수당
+            if (normalized.includes('ALLOWANCE') || upper.includes('수당')) {
+                return '예) 식대 10만원';
+            }
+            // 지급일
+            if (normalized.includes('PAYMENT') && normalized.includes('DAY') || upper.includes('지급일')) {
+                return '예) 25';
+            }
+            // 지급방법
+            if (normalized.includes('METHOD') || upper.includes('방법')) {
+                return '예) 계좌이체';
+            }
+            // 전화번호
+            if (normalized.includes('PHONE') || normalized.includes('TEL') || upper.includes('전화') || upper.includes('연락처')) {
+                return '예) 010-1234-5678';
+            }
+            // 이메일
+            if (normalized.includes('EMAIL') || normalized.includes('MAIL') || upper.includes('이메일') || upper.includes('메일')) {
+                return '예) hong@example.com';
+            }
+            // 회사명
+            if (normalized.includes('COMPANY') || normalized.includes('ORGANIZATION') || upper.includes('회사') || upper.includes('조직')) {
+                return '예) (주)테크컴퍼니';
+            }
+
+            // 기본값
+            return '';
+        }
+
+        // 서명 이미지 엘리먼트 생성
+        function createSignatureImage() {
+            // localStorage에서 서명 이미지 가져오기
+            const signatureRaw = localStorage.getItem('signly_owner_signature');
+
+            if (!signatureRaw) {
+                // 서명이 없으면 빈 span 반환
+                const span = document.createElement('span');
+                span.textContent = '(서명 없음)';
+                span.style.cssText = 'color: #999; font-size: 11px;';
+                return span;
+            }
+
+            try {
+                const signatureData = JSON.parse(signatureRaw);
+                const imgSrc = signatureData.dataUrl || signatureData.imageData || signatureData.signatureData || signatureData;
+
+                if (!imgSrc) {
+                    console.warn('[WARN] 서명 이미지 데이터가 없습니다:', signatureData);
+                    const span = document.createElement('span');
+                    span.textContent = '(서명 없음)';
+                    span.style.cssText = 'color: #999; font-size: 11px;';
+                    return span;
+                }
+
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.className = 'signature-stamp-image-element';
+                img.style.cssText = 'display: inline-block; max-width: 90px; max-height: 40px; vertical-align: middle;';
+                img.alt = '사업주 서명';
+
+                return img;
+            } catch (error) {
+                console.error('[ERROR] 서명 이미지 파싱 실패:', error);
+                const span = document.createElement('span');
+                span.textContent = '(서명 오류)';
+                span.style.cssText = 'color: #f00; font-size: 11px;';
+                return span;
+            }
+        }
+
+        // 변수의 기본값 가져오기 (프리셋 + 커스텀 템플릿 모두 지원)
         function getDefaultValueForVariable(varName) {
-            if (!ownerInfo) return '';
+            if (!varName) return '';
 
             const upper = varName.toUpperCase();
-            if (upper === 'EMPLOYER' || upper === 'EMPLOYER_NAME') {
-                return ownerInfo.name || '';
+            const normalized = upper.replace(/[-_\s]/g, '');
+
+            // 사업주/고용주 이름
+            if (normalized.includes('EMPLOYER') && normalized.includes('NAME') ||
+                upper === 'EMPLOYER' ||
+                normalized.includes('OWNER') && normalized.includes('NAME') ||
+                upper === '사업주' || upper === '사업주명' || upper === '갑') {
+                return ownerInfo?.name || '';
             }
-            if (upper === 'EMPLOYER_EMAIL') {
-                return ownerInfo.email || '';
+
+            // 사업주/고용주 이메일
+            if (normalized.includes('EMPLOYER') && normalized.includes('EMAIL') ||
+                normalized.includes('OWNER') && normalized.includes('EMAIL') ||
+                upper === '사업주이메일') {
+                return ownerInfo?.email || '';
             }
-            if (upper === 'COMPANY' || upper === 'COMPANY_NAME') {
-                return ownerInfo.companyName || '';
+
+            // 회사명/조직명
+            if (normalized.includes('COMPANY') || normalized.includes('ORGANIZATION') ||
+                upper === '회사' || upper === '회사명' || upper === '조직' || upper === '조직명') {
+                return ownerInfo?.companyName || '';
             }
-            if (upper === 'EMPLOYEE' || upper === 'EMPLOYEE_NAME') {
+
+            // 근로자/직원 이름
+            if (normalized.includes('EMPLOYEE') && normalized.includes('NAME') ||
+                upper === 'EMPLOYEE' ||
+                upper === '근로자' || upper === '근로자명' || upper === '직원' || upper === '직원명' || upper === '을') {
                 return '';
             }
-            if (upper === 'START_DATE' || upper === 'CONTRACT_START_DATE') {
+
+            // 날짜 관련
+            if (normalized.includes('DATE') || normalized.includes('START') ||
+                upper === '날짜' || upper === '계약일' || upper === '시작일') {
                 return new Date().toISOString().split('T')[0];
             }
+
             return '';
         }
 
@@ -755,6 +906,18 @@
                 // secondPartyName hidden 필드 업데이트
                 if (varName.toUpperCase() === 'EMPLOYEE' || varName.toUpperCase() === 'EMPLOYEE_NAME') {
                     document.getElementById('presetSecondPartyName').value = value;
+                }
+            });
+
+            // 서명 이미지를 img src에서 실제 이미지 데이터로 교체
+            const signatureImgs = clone.querySelectorAll('img.signature-stamp-image-element');
+            signatureImgs.forEach(img => {
+                // 이미 src가 있으면 그대로 유지 (Base64 데이터)
+                if (img.src) {
+                    // img 태그를 그대로 유지
+                } else {
+                    // 없으면 제거
+                    img.remove();
                 }
             });
 
@@ -876,20 +1039,8 @@
         }
 
         function suggestDefaultValue(variableName) {
-            if (!ownerInfo) {
-                return '';
-            }
-            const upper = variableName.toUpperCase();
-            if (upper === 'EMPLOYER' || upper === 'EMPLOYER_NAME' || upper === 'OWNER_NAME' || upper === 'BUSINESS_OWNER') {
-                return ownerInfo.name || '';
-            }
-            if (upper === 'EMPLOYER_EMAIL' || upper === 'OWNER_EMAIL') {
-                return ownerInfo.email || '';
-            }
-            if (upper === 'COMPANY' || upper === 'COMPANY_NAME' || upper === 'ORGANIZATION') {
-                return ownerInfo.companyName || '';
-            }
-            return '';
+            // getDefaultValueForVariable과 동일한 로직 사용
+            return getDefaultValueForVariable(variableName);
         }
 
         function readOwnerSignature() {
