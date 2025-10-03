@@ -18,7 +18,7 @@
     <meta name="description" content="계약서 전자서명 페이지">
     <meta name="robots" content="noindex, nofollow">
 </head>
-<body>
+<body class="signature-view">
     <!-- 간단한 헤더 (서명 페이지용) -->
     <header class="header">
         <div class="header-container">
@@ -411,92 +411,5 @@
         });
     </script>
 
-    <style>
-        /* 간단한 모달 스타일 (Bootstrap 대신) */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1050;
-            display: none;
-        }
-
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-dialog {
-            max-width: 500px;
-            width: 90%;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--box-shadow-lg);
-            overflow: hidden;
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .modal-title {
-            font-size: var(--font-size-lg);
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .modal-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--gray-200);
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-        }
-
-        .info-item {
-            margin-bottom: 1rem;
-        }
-
-        .info-label {
-            display: block;
-            font-size: var(--font-size-sm);
-            color: var(--gray-600);
-            margin-bottom: 0.25rem;
-        }
-
-        .info-value {
-            font-weight: 500;
-            color: var(--gray-800);
-        }
-
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            margin: -0.5rem;
-        }
-
-        .col-md-6 {
-            flex: 0 0 50%;
-            padding: 0.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .col-md-6 {
-                flex: 0 0 100%;
-            }
-        }
-    </style>
 </body>
 </html>

@@ -11,8 +11,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
+    <link href="/css/signature.css" rel="stylesheet">
 </head>
-<body>
+<body class="signature-management-page">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/home">
@@ -64,7 +65,7 @@
                     <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
                         <c:choose>
                             <c:when test="${hasSignature}">
-                                <img src="${signatureDataUrl}" alt="등록된 서명" class="img-fluid border rounded" style="max-width: 320px; background-color: #fff; padding: 12px;">
+                                <img src="${signatureDataUrl}" alt="등록된 서명" class="img-fluid border rounded signature-image-display">
                                 <div class="mt-3 text-muted small">
                                     <div><strong>파일명:</strong> ${signature.originalFilename()}</div>
                                     <div><strong>형식:</strong> ${signature.mimeType()}</div>
@@ -200,21 +201,5 @@
         })();
     </script>
 
-    <style>
-        .canvas-wrapper {
-            border: 2px dashed #cbd5f5;
-            border-radius: 12px;
-            background-color: #f8fafc;
-            height: 260px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #signatureCanvas {
-            width: 100%;
-            height: 100%;
-        }
-    </style>
 </body>
 </html>

@@ -12,70 +12,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
     <link href="/css/contracts.css" rel="stylesheet">
-    <style>
-        .contract-content {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 2rem;
-            font-family: 'Times New Roman', serif;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            min-height: 400px;
-        }
-        .contract-content--html {
-            background-color: #fff;
-            border: none;
-            padding: 2rem;
-            white-space: normal;
-            min-height: 600px;
-            line-height: 1.6;
-        }
-        .contract-content--html * {
-            max-width: 100%;
-        }
-        .contract-content--html img {
-            display: block;
-            margin: 1rem auto;
-            height: auto;
-        }
-        .contract-content--html table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .contract-content--html table th,
-        .contract-content--html table td {
-            border: 1px solid #dee2e6;
-            padding: 0.75rem;
-        }
-        .contract-info {
-            background-color: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 1.5rem;
-        }
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .info-item:last-child {
-            border-bottom: none;
-        }
-        .action-buttons {
-            position: sticky;
-            top: 1rem;
-            z-index: 1000;
-        }
-        .signature-info {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -382,8 +318,8 @@
     </div>
 
     <!-- 미리보기 모달 -->
-    <div class="modal fade" id="previewModal" tabindex="-1">
-        <div class="modal-dialog modal-fullscreen-lg-down" style="max-width: 90vw;">
+    <div class="modal fade contract-preview-modal" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen-lg-down">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
@@ -391,21 +327,13 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" style="padding: 2rem;">
+                <div class="modal-body p-4">
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle me-2"></i>
                         아래는 현재 계약서 내용의 미리보기입니다.
                     </div>
-                    <div class="border rounded p-4" style="background-color: #fff; min-height: 500px; width: 100%; overflow: visible;" id="previewContent">
+                    <div class="border rounded p-4 contract-preview-modal-content" id="previewContent">
                     </div>
-                    <style id="previewOverrideStyle">
-                        #previewContent body {
-                            max-width: none !important;
-                            width: 100% !important;
-                            margin: 0 !important;
-                            padding: 20px !important;
-                        }
-                    </style>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
@@ -431,7 +359,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <form id="deleteForm" method="post" action="/contracts/${contract.id}/delete" style="display: inline;">
+                    <form id="deleteForm" method="post" action="/contracts/${contract.id}/delete" class="d-inline">
                         <c:if test="${not empty _csrf}">
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         </c:if>
@@ -453,7 +381,7 @@
          data-preset-type="<c:out value='${contract.presetType}'/>">
     </div>
 
-    <textarea id="contractContentHtml" hidden style="display: none;">${fn:escapeXml(contract.content)}</textarea>
+    <textarea id="contractContentHtml" hidden>${fn:escapeXml(contract.content)}</textarea>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>

@@ -12,66 +12,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
     <link href="/css/contracts.css" rel="stylesheet">
-    <style>
-        .contract-builder-wrap {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-            gap: 1.5rem;
-        }
-        @media (max-width: 992px) {
-            .contract-builder-wrap {
-                grid-template-columns: minmax(0, 1fr);
-            }
-        }
-        .preview-container {
-            position: sticky;
-            top: 20px;
-            align-self: flex-start;
-            transition: transform 0.2s ease;
-            z-index: 10;
-        }
-        .preview-surface {
-            background: #fff;
-            padding: 1.5rem;
-            max-height: calc(100vh - 120px);
-            overflow: auto;
-            min-height: 500px;
-            word-wrap: break-word;
-            word-break: break-word;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            border-radius: 0 0 12px 12px;
-        }
-        .custom-variable-inline {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background-color: rgba(255, 243, 205, 0.8);
-            border: 1px dashed #f0ad4e;
-            border-radius: 6px;
-            padding: 2px 6px;
-            margin: 0 2px;
-        }
-        .custom-variable-inline-label {
-            font-size: 0.75rem;
-            color: #b58105;
-            font-weight: 600;
-        }
-        .custom-variable-inline-input {
-            width: auto;
-            min-width: 60px;
-            border: none;
-            background: transparent;
-            border-bottom: 1px solid #f0ad4e;
-            padding: 0 2px;
-            font-size: 0.85rem;
-        }
-        .custom-variable-inline-input:focus {
-            outline: none;
-            border-bottom: 2px solid #f0ad4e;
-            background-color: rgba(255, 243, 205, 0.4);
-        }
-    </style>
 </head>
 <body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -131,7 +71,7 @@
             </c:if>
 
             <!-- 프리셋 레이아웃 -->
-            <div id="presetLayout" style="display: none;">
+            <div id="presetLayout">
                 <div class="row">
                     <div class="col-12">
                         <div class="card mb-4">
@@ -140,7 +80,7 @@
                                     <i class="bi bi-file-earmark-text me-2"></i><span id="presetLayoutTitle">표준 근로계약서</span>
                                 </h5>
                             </div>
-                            <div class="card-body" style="background-color: #fff; padding: 3rem;">
+                            <div class="card-body preset-preview-body">
                                 <!-- HTML 렌더링 영역 (변수는 입력 필드로 교체됨) -->
                                 <div id="presetHtmlContainer"></div>
                             </div>
@@ -162,7 +102,7 @@
                         </div>
 
                         <!-- Hidden fields -->
-                        <textarea id="presetContentHidden" name="content" style="display: none;" required></textarea>
+                        <textarea id="presetContentHidden" name="content" hidden required></textarea>
                         <input type="hidden" id="presetTitleHidden" name="title" required>
                         <input type="hidden" id="presetFirstPartyName" name="firstPartyName" required>
                         <input type="hidden" id="presetFirstPartyEmail" name="firstPartyEmail" required>
@@ -204,7 +144,7 @@
                             </c:if>
 
                             <!-- 숨겨진 프리셋 select (selectedPreset으로 넘어온 경우를 위해) -->
-                            <select id="presetSelect" style="display: none;">
+                            <select id="presetSelect">
                                 <option value="">표준 양식을 선택하세요</option>
                                 <c:forEach var="preset" items="${presets}">
                                     <option value="${preset.id}" data-name="${preset.name}">
@@ -226,7 +166,7 @@
                                           rows="15" required placeholder="계약서 내용을 입력하세요...">${contract.content}</textarea>
                                 <div class="form-text">계약서의 전체 내용을 입력하세요. 변수를 사용하여 동적 값을 설정할 수 있습니다.</div>
 
-                                <div class="mt-3" id="customVariablesContainer" style="display: none;">
+                                <div class="mt-3" id="customVariablesContainer">
                                     <label class="form-label d-flex align-items-center gap-2">
                                         <i class="bi bi-sliders2-vertical"></i> 변수 값 입력
                                     </label>
@@ -234,19 +174,19 @@
                                     <div class="form-text">`{변수명}` 형식의 변수가 감지되면 해당 값을 아래에서 입력할 수 있습니다.</div>
                                 </div>
 
-                                <div class="mt-3" id="customContentPreviewWrapper" style="display: none;">
+                                <div class="mt-3" id="customContentPreviewWrapper">
                                     <div class="card">
                                         <div class="card-header">
                                             <h5 class="card-title mb-0">
                                                 <i class="bi bi-eye"></i> 실시간 미리보기
                                             </h5>
                                         </div>
-                                        <div class="card-body" id="customContentPreview" style="min-height: 200px; background-color: #f8f9fa; overflow-x: auto;"></div>
+                                        <div class="card-body custom-content-preview" id="customContentPreview"></div>
                                     </div>
                                 </div>
 
                                 <!-- 프리셋 폼 필드 컨테이너 (동적으로 생성됨) -->
-                                <div id="presetFormFields" style="display: none;"></div>
+                                <div id="presetFormFields"></div>
                             </div>
 
                             <div class="mb-3">
@@ -352,7 +292,7 @@
                         <i class="bi bi-info-circle me-2"></i>
                         아래는 현재 입력된 정보로 생성될 계약서의 미리보기입니다.
                     </div>
-                    <div class="contract-preview border rounded p-4" style="background-color: #f8f9fa; min-height: 400px; white-space: pre-wrap; font-family: 'Malgun Gothic', sans-serif; line-height: 1.4; font-size: 13px;" id="previewContent">
+                    <div class="border rounded p-4 contract-preview-panel" id="previewContent">
                     </div>
                 </div>
                 <div class="modal-footer">

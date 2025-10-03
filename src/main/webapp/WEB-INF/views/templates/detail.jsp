@@ -11,39 +11,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
     <link href="/css/templates.css" rel="stylesheet">
-    <style>
-        .template-content {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 2rem;
-            font-family: 'Times New Roman', serif;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            min-height: 400px;
-        }
-        .template-info {
-            background-color: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 1.5rem;
-        }
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .info-item:last-child {
-            border-bottom: none;
-        }
-        .action-buttons {
-            position: sticky;
-            top: 1rem;
-            z-index: 1000;
-        }
-    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -253,7 +220,7 @@
                         <i class="bi bi-info-circle me-2"></i>
                         실제 계약서 생성 시 변수들이 실제 값으로 치환됩니다.
                     </div>
-                    <div class="border rounded p-3" style="background-color: #f8f9fa; min-height: 400px; white-space: pre-wrap; font-family: 'Times New Roman', serif;" id="previewContent">
+                    <div class="border rounded p-3 template-preview-content" id="previewContent">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -280,7 +247,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <form id="deleteForm" method="post" action="/templates/${template.templateId}/delete" style="display: inline;">
+                    <form id="deleteForm" method="post" action="/templates/${template.templateId}/delete" class="d-inline">
                         <c:if test="${not empty _csrf}">
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         </c:if>

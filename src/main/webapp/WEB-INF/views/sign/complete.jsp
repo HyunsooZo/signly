@@ -18,7 +18,7 @@
             <div class="col-lg-8">
                 <div class="text-center mb-5">
                     <div class="success-icon mb-4">
-                        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                        <i class="bi bi-check-circle-fill text-success"></i>
                     </div>
                     <h1 class="display-5 fw-bold text-success mb-3">서명 완료!</h1>
                     <p class="lead text-muted">계약서 전자서명이 성공적으로 완료되었습니다.</p>
@@ -145,27 +145,5 @@
         });
     </script>
 
-    <style>
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .success-icon {
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
 </body>
 </html>

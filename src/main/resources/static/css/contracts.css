@@ -142,25 +142,127 @@
     box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
 }
 
+/* 계약서 빌더 레이아웃 */
+.contract-builder-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 992px) {
+    .contract-builder-wrap {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+#presetLayout,
+#presetSelect,
+#customVariablesContainer,
+#customContentPreviewWrapper,
+#presetFormFields {
+    display: none;
+}
+
+.preset-preview-body {
+    background-color: #fff;
+    padding: 3rem;
+}
+
+.custom-content-preview {
+    min-height: 200px;
+    background-color: #f8f9fa;
+    overflow-x: auto;
+}
+
+.custom-variable-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: rgba(255, 243, 205, 0.8);
+    border: 1px dashed #f0ad4e;
+    border-radius: 6px;
+    padding: 2px 6px;
+    margin: 0 2px;
+}
+
+.custom-variable-inline-label {
+    font-size: 0.75rem;
+    color: #b58105;
+    font-weight: 600;
+}
+
+.custom-variable-inline-input {
+    width: auto;
+    min-width: 60px;
+    border: none;
+    background: transparent;
+    border-bottom: 1px solid #f0ad4e;
+    padding: 0 2px;
+    font-size: 0.85rem;
+}
+
+.custom-variable-inline-input:focus {
+    outline: none;
+    border-bottom: 2px solid #f0ad4e;
+    background-color: rgba(255, 243, 205, 0.4);
+}
+
+.contract-preview-panel {
+    background-color: #f8f9fa;
+    min-height: 400px;
+    white-space: pre-wrap;
+    font-family: 'Malgun Gothic', sans-serif;
+    line-height: 1.4;
+    font-size: 13px;
+}
+
 /* 계약서 상세보기 스타일 */
 .contract-content {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    background-color: #f8f9fa;
     border: 1px solid #dee2e6;
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 2rem;
     font-family: 'Times New Roman', serif;
-    line-height: 1.8;
+    line-height: 1.6;
     white-space: pre-wrap;
-    min-height: 500px;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    min-height: 400px;
+}
+
+.contract-content--html {
+    background-color: #fff;
+    border: none;
+    padding: 2rem;
+    white-space: normal;
+    min-height: 600px;
+    line-height: 1.6;
+}
+
+.contract-content--html * {
+    max-width: 100%;
+}
+
+.contract-content--html img {
+    display: block;
+    margin: 1rem auto;
+    height: auto;
+}
+
+.contract-content--html table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.contract-content--html table th,
+.contract-content--html table td {
+    border: 1px solid #dee2e6;
+    padding: 0.75rem;
 }
 
 .contract-info {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    background-color: #fff;
     border: 1px solid #dee2e6;
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .info-item {
@@ -169,15 +271,6 @@
     align-items: center;
     padding: 0.75rem 0;
     border-bottom: 1px solid #f0f0f0;
-    transition: background-color 0.2s ease;
-}
-
-.info-item:hover {
-    background-color: rgba(79, 172, 254, 0.02);
-    border-radius: 6px;
-    margin: 0 -0.5rem;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
 }
 
 .info-item:last-child {
@@ -205,12 +298,10 @@
 
 /* 서명 정보 스타일 */
 .signature-info {
-    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
     margin-bottom: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .signature-status {
@@ -218,6 +309,12 @@
     align-items: center;
     gap: 0.5rem;
     font-weight: 500;
+}
+
+.action-buttons {
+    position: sticky;
+    top: 1rem;
+    z-index: 1000;
 }
 
 /* 액션 버튼 스타일 */
@@ -252,6 +349,86 @@
     white-space: pre-wrap;
     min-height: 400px;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.contract-preview-modal .modal-dialog {
+    max-width: 90vw;
+}
+
+.contract-preview-modal-content {
+    background-color: #fff;
+    min-height: 500px;
+    width: 100%;
+    overflow: visible;
+}
+
+#previewContent body {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+}
+
+/* 계약서 유형 선택 카드 */
+.contract-type-card {
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+    padding: 20px;
+    height: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.contract-type-card:hover {
+    border-color: #0d6efd;
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+}
+
+.contract-type-icon {
+    width: 100%;
+    height: 200px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    overflow: hidden;
+    position: relative;
+}
+
+.contract-type-icon i {
+    font-size: 4rem;
+    color: #6c757d;
+}
+
+.contract-type-icon .contract-preview {
+    width: 100%;
+    height: 100%;
+    transform: scale(0.2);
+    transform-origin: top left;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    font-size: 12px;
+}
+
+.contract-type-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.contract-type-desc {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0;
 }
 
 /* 페이지네이션 스타일 */

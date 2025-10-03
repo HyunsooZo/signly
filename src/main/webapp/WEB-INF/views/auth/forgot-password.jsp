@@ -49,7 +49,7 @@
     </div>
 
     <div class="auth-container mt-4">
-        <div class="auth-card" style="max-width: 400px;">
+        <div class="auth-card auth-card--compact">
             <div class="alert alert-info" role="alert">
                 <strong>개발 모드 안내</strong><br>
                 현재 개발 중이므로 실제 이메일 발송은 되지 않습니다.<br>

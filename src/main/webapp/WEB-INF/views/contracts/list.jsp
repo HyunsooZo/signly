@@ -267,7 +267,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <form id="deleteForm" method="post" style="display: inline;">
+                    <form id="deleteForm" method="post" class="d-inline">
                         <c:if test="${not empty _csrf}">
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         </c:if>
@@ -295,7 +295,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">돌아가기</button>
-                    <form id="cancelForm" method="post" style="display: inline;">
+                    <form id="cancelForm" method="post" class="d-inline">
                         <c:if test="${not empty _csrf}">
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         </c:if>

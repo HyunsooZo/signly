@@ -9,62 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
-    <style>
-        .contract-type-card {
-            border: 2px solid #dee2e6;
-            border-radius: 12px;
-            padding: 20px;
-            height: 100%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        .contract-type-card:hover {
-            border-color: #0d6efd;
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
-        }
-        .contract-type-icon {
-            width: 100%;
-            height: 200px;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            background: #f8f9fa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            overflow: hidden;
-            position: relative;
-        }
-        .contract-type-icon i {
-            font-size: 4rem;
-            color: #6c757d;
-        }
-        .contract-preview {
-            width: 100%;
-            height: 100%;
-            transform: scale(0.2);
-            transform-origin: top left;
-            position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            font-size: 12px;
-        }
-        .contract-type-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        .contract-type-desc {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin-bottom: 0;
-        }
-    </style>
+    <link href="/css/contracts.css" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">

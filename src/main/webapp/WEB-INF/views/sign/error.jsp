@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
+    <link href="/css/signature.css" rel="stylesheet">
 </head>
 <body class="error-page">
     <div class="container mt-5">
@@ -16,7 +17,7 @@
             <div class="col-md-6">
                 <div class="text-center">
                     <div class="error-icon mb-4">
-                        <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 4rem;"></i>
+                        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
                     </div>
                     <h1 class="display-6 fw-bold text-danger mb-3">서명 오류</h1>
                     <p class="lead text-muted mb-4">

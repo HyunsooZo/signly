@@ -265,7 +265,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <form id="deleteForm" method="post" style="display: inline;">
+                    <form id="deleteForm" method="post" class="d-inline">
                         <c:if test="${not empty _csrf}">
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         </c:if>
@@ -290,8 +290,7 @@
                         현재 템플릿에 입력된 내용을 기준으로 샘플 데이터를 이용해 미리보기를 제공합니다.
                     </div>
                     <div id="previewContent"
-                         class="border rounded p-4"
-                         style="background-color:#f8f9fa; min-height:400px; white-space:pre-wrap; font-family:'Times New Roman', serif;"></div>
+                         class="border rounded p-4 template-preview-content"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>

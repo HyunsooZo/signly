@@ -24,6 +24,10 @@ body {
     animation: slideUp 0.6s ease-out;
 }
 
+.auth-card--compact {
+    max-width: 400px;
+}
+
 @keyframes slideUp {
     from {
         opacity: 0;

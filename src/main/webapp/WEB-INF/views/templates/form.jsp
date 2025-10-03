@@ -11,151 +11,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
     <link href="/css/templates.css" rel="stylesheet">
-    <style>
-        .builder-wrap {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-            gap: 1.5rem;
-        }
-        @media (max-width: 992px) {
-            .builder-wrap {
-                grid-template-columns: minmax(0, 1fr);
-            }
-        }
-        .section-card {
-            border-left: 4px solid var(--primary-color);
-        }
-        .section-card.dotted {
-            border-left-color: #6c757d;
-        }
-        .section-card.footer {
-            border-left-color: #0d6efd;
-        }
-        .preview-container {
-            position: sticky;
-            top: 20px;
-            align-self: flex-start;
-            transition: transform 0.2s ease;
-            z-index: 10;
-        }
-        .preview-surface {
-            background: #fff;
-            padding: 1.5rem;
-            max-height: calc(100vh - 120px);
-            overflow: auto;
-            min-height: 500px;
-            word-wrap: break-word;
-            word-break: break-word;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            border-radius: 0 0 12px 12px;
-        }
-        .preview-surface .title {
-            font-size: 1.1rem !important;
-        }
-        .preview-surface .section {
-            margin: 8px 0 !important;
-        }
-        .preview-surface .signature-section {
-            margin-top: 15px !important;
-        }
-        .preview-surface .template-header {
-            border-bottom: 2px solid #0d6efd;
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .preview-surface .template-paragraph {
-            margin-bottom: 1.25rem;
-        }
-        .preview-surface .template-dotted {
-            border: 2px dashed #adb5bd;
-            border-radius: 12px;
-            padding: 1rem 1.25rem;
-            margin-bottom: 1.25rem;
-            background-color: #f8f9fa;
-        }
-        .preview-surface .template-footer {
-            border-top: 1px solid #dee2e6;
-            margin-top: 2rem;
-            padding-top: 1rem;
-            text-align: right;
-            color: #495057;
-        }
-        .section-actions button {
-            min-width: 36px;
-        }
-
-        /* 미리보기 확대 기능 스타일 */
-        .preview-surface {
-            cursor: pointer;
-        }
-
-        /* 확대 모달 스타일 */
-        .preview-modal {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            overflow: auto;
-        }
-        .preview-modal-content {
-            background-color: white;
-            margin: 2% auto;
-            padding: 40px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 900px;
-            max-height: 90%;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        .preview-modal-close {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            color: #666;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: #f8f9fa;
-            transition: all 0.2s ease;
-        }
-        .preview-modal-close:hover {
-            color: #000;
-            background: #e9ecef;
-        }
-        .preview-modal-header {
-            border-bottom: 2px solid #0d6efd;
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-        }
-        .preview-modal-title {
-            margin: 0;
-            color: #0d6efd;
-            font-size: 1.5rem;
-        }
-        .variable-tag {
-            display: inline-block;
-            background-color: #e9f2ff;
-            color: #1d4ed8;
-            padding: 0.35rem 0.6rem;
-            border-radius: 6px;
-            margin: 0.15rem;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-    </style>
 </head>
 <body>
 <c:set var="formAction" value="/templates" />
@@ -256,24 +111,24 @@
                         <p class="small text-muted mb-2">현재 커서가 있는 섹션에 변수를 삽입합니다.</p>
                         <div class="mb-2">
                             <strong>당사자 정보:</strong>
-                            <span class="variable-tag" data-variable="{PARTY_A_NAME}">{PARTY_A_NAME}</span>
-                            <span class="variable-tag" data-variable="{PARTY_A_ADDRESS}">{PARTY_A_ADDRESS}</span>
-                            <span class="variable-tag" data-variable="{PARTY_B_NAME}">{PARTY_B_NAME}</span>
-                            <span class="variable-tag" data-variable="{PARTY_B_ADDRESS}">{PARTY_B_ADDRESS}</span>
+                            <span class="variable-tag template-variable-tag" data-variable="{PARTY_A_NAME}">{PARTY_A_NAME}</span>
+                            <span class="variable-tag template-variable-tag" data-variable="{PARTY_A_ADDRESS}">{PARTY_A_ADDRESS}</span>
+                            <span class="variable-tag template-variable-tag" data-variable="{PARTY_B_NAME}">{PARTY_B_NAME}</span>
+                            <span class="variable-tag template-variable-tag" data-variable="{PARTY_B_ADDRESS}">{PARTY_B_ADDRESS}</span>
                         </div>
                         <div class="mb-2">
                             <strong>계약 정보:</strong>
-                            <span class="variable-tag" data-variable="{CONTRACT_TITLE}">{CONTRACT_TITLE}</span>
-                            <span class="variable-tag" data-variable="{CONTRACT_DATE}">{CONTRACT_DATE}</span>
-                            <span class="variable-tag" data-variable="{CONTRACT_AMOUNT}">{CONTRACT_AMOUNT}</span>
-                            <span class="variable-tag" data-variable="{START_DATE}">{START_DATE}</span>
-                            <span class="variable-tag" data-variable="{END_DATE}">{END_DATE}</span>
+                            <span class="variable-tag template-variable-tag" data-variable="{CONTRACT_TITLE}">{CONTRACT_TITLE}</span>
+                            <span class="variable-tag template-variable-tag" data-variable="{CONTRACT_DATE}">{CONTRACT_DATE}</span>
+                            <span class="variable-tag template-variable-tag" data-variable="{CONTRACT_AMOUNT}">{CONTRACT_AMOUNT}</span>
+                            <span class="variable-tag template-variable-tag" data-variable="{START_DATE}">{START_DATE}</span>
+                            <span class="variable-tag template-variable-tag" data-variable="{END_DATE}">{END_DATE}</span>
                         </div>
                         <div>
                             <strong>서명 정보:</strong>
-                            <span class="variable-tag" data-variable="{SIGNATURE_A}">{SIGNATURE_A}</span>
-                            <span class="variable-tag" data-variable="{SIGNATURE_B}">{SIGNATURE_B}</span>
-                            <span class="variable-tag" data-variable="{SIGNATURE_DATE}">{SIGNATURE_DATE}</span>
+                            <span class="variable-tag template-variable-tag" data-variable="{SIGNATURE_A}">{SIGNATURE_A}</span>
+                            <span class="variable-tag template-variable-tag" data-variable="{SIGNATURE_B}">{SIGNATURE_B}</span>
+                            <span class="variable-tag template-variable-tag" data-variable="{SIGNATURE_DATE}">{SIGNATURE_DATE}</span>
                         </div>
                     </div>
                 </div>
