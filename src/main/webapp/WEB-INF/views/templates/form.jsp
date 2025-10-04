@@ -145,11 +145,19 @@
         /* 편집 가능 섹션 */
         .editable-section {
             position: relative;
-            padding: 8px;
-            margin: 10px 0;
+            padding: 6px;
+            margin: 8px 0;
             border: 2px solid transparent;
             border-radius: 4px;
             transition: all 0.2s;
+            min-height: 44px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editable-section > :first-child {
+            flex: 1 1 auto;
+            width: 100%;
         }
 
         .editable-section:hover {
@@ -207,34 +215,55 @@
             letter-spacing: 2px;
         }
 
-        .section-text {
+        .section-text,
+        .section-footer,
+        .section-dotted-box,
+        .section-title {
             font-size: 14px;
-            line-height: 1.8;
+            line-height: 1.4;
             text-align: justify;
         }
 
         .section-clause {
-            margin: 20px 0;
-            padding-left: 20px;
+            margin: 4px 0;
+            padding: 4px 6px;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            border-radius: 4px;
+            background: transparent;
         }
 
         .clause-number {
             font-weight: bold;
             display: inline-block;
-            min-width: 20px;
+            min-width: 18px;
+            text-align: right;
+            margin-top: 0;
+        }
+
+        .section-clause span[contenteditable="true"],
+        .section-text[contenteditable="true"],
+        .section-footer[contenteditable="true"],
+        .section-dotted-box[contenteditable="true"],
+        .section-title[contenteditable="true"] {
+            min-height: 0;
+            line-height: 1.4;
+            padding: 2px 4px;
+            flex: 1;
+            display: block;
         }
 
         .section-dotted-box {
             border: 1px dashed #999;
-            padding: 15px;
-            margin: 20px 0;
+            margin: 12px 0;
             border-radius: 4px;
             background: #fafafa;
         }
 
         .section-footer {
-            margin-top: 40px;
-            padding-top: 20px;
+            margin-top: 12px;
+            padding-top: 8px;
             border-top: 1px solid #ddd;
             text-align: center;
             font-size: 13px;
@@ -641,29 +670,53 @@
 
     const FRONTEND_TYPES = new Set(['text', 'clause', 'dotted', 'footer', 'signature', 'html', 'title']);
 
-    function extractSectionsFromPayload(payload) {
-        if (!payload) {
+    function parseSectionsPayload(raw) {
+        if (!raw) {
             return [];
         }
-        if (Array.isArray(payload)) {
-            return payload;
+
+        let parsed = raw;
+
+        if (typeof raw === 'string') {
+            const trimmed = raw.trim();
+            if (!trimmed) {
+                return [];
+            }
+            try {
+                parsed = JSON.parse(trimmed);
+            } catch (error) {
+                console.warn('Failed to parse sections JSON (first pass)', error);
+                return [];
+            }
         }
-        if (Array.isArray(payload.sections)) {
-            return payload.sections;
+
+        if (Array.isArray(parsed)) {
+            return parsed;
         }
-        if (Array.isArray(payload.content)) {
-            return payload.content;
+
+        if (parsed && typeof parsed === 'object') {
+            if (Array.isArray(parsed.sections)) {
+                return parsed.sections;
+            }
+            if (Array.isArray(parsed.data)) {
+                return parsed.data;
+            }
+            if (Array.isArray(parsed.content)) {
+                return parsed.content;
+            }
+            if (typeof parsed.sectionsJson === 'string') {
+                return parseSectionsPayload(parsed.sectionsJson);
+            }
+            return [parsed];
         }
-        if (Array.isArray(payload.data)) {
-            return payload.data;
-        }
-        if (typeof payload === 'object') {
-            return [payload];
-        }
+
         return [];
     }
 
     function normalizeFrontendType(type, metadata = {}) {
+        if (metadata && typeof metadata === 'object' && metadata.kind && FRONTEND_TYPES.has(String(metadata.kind).toLowerCase())) {
+            return String(metadata.kind).toLowerCase();
+        }
         if (!type) {
             return 'text';
         }
@@ -704,6 +757,9 @@
         if (type === 'title' && base.header === undefined) {
             base.header = true;
         }
+        if (!base.kind) {
+            base.kind = type;
+        }
         return base;
     }
 
@@ -737,6 +793,24 @@
             return {};
         }
         return decodeMetadata(section.dataset.metadata);
+    }
+
+    function coerceMetadata(metadata) {
+        if (!metadata) {
+            return {};
+        }
+        if (typeof metadata === 'string') {
+            try {
+                return JSON.parse(metadata);
+            } catch (error) {
+                console.warn('Failed to parse metadata string', error);
+                return {};
+            }
+        }
+        if (typeof metadata === 'object') {
+            return { ...metadata };
+        }
+        return {};
     }
 
     function mapFrontendTypeToServer(type, metadata = {}) {
@@ -814,8 +888,9 @@
 
     // 섹션 요소 생성
     function createSectionElement(type, content = '', metadata = {}) {
-        const normalizedType = normalizeFrontendType(type, metadata);
-        const normalizedMetadata = ensureMetadataForType(normalizedType, metadata);
+        const coercedMetadata = coerceMetadata(metadata);
+        const normalizedType = normalizeFrontendType(type, coercedMetadata);
+        const normalizedMetadata = ensureMetadataForType(normalizedType, coercedMetadata);
         const section = document.createElement('div');
         section.className = 'editable-section';
         section.dataset.type = normalizedType;
@@ -1119,19 +1194,24 @@
         const scriptEl = document.getElementById('initialSections');
         if (scriptEl) {
             try {
-                const parsed = JSON.parse(scriptEl.textContent || '[]');
-                const sectionsData = extractSectionsFromPayload(parsed);
+                const sectionsData = parseSectionsPayload(scriptEl.textContent || '[]');
                 if (sectionsData.length > 0) {
                     const documentBody = document.getElementById('documentBody');
                     documentBody.innerHTML = '';
 
                     clauseCounter = 0;
-                    sectionsData.forEach(sectionData => {
-                        const metadata = sectionData.metadata || {};
-                        const section = createSectionElement(sectionData.type, sectionData.content, metadata);
-                        section.dataset.id = sectionData.sectionId || ('section-' + Date.now());
-                        documentBody.appendChild(section);
-                    });
+                    [...sectionsData]
+                        .sort((a, b) => {
+                            const orderA = typeof a.order === 'number' ? a.order : parseInt(a.order, 10) || 0;
+                            const orderB = typeof b.order === 'number' ? b.order : parseInt(b.order, 10) || 0;
+                            return orderA - orderB;
+                        })
+                        .forEach(sectionData => {
+                            const metadata = coerceMetadata(sectionData.metadata);
+                            const section = createSectionElement(sectionData.type, sectionData.content, metadata);
+                            section.dataset.id = sectionData.sectionId || ('section-' + Date.now());
+                            documentBody.appendChild(section);
+                        });
 
                     // 플레이스홀더 추가
                     documentBody.appendChild(createPlaceholder());
