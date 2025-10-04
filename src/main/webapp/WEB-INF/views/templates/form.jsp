@@ -791,36 +791,15 @@
     }
 
     function normalizePreviewContent(type, rawContent) {
-        let value = ensureString(rawContent);
-
-        if (!value) {
+        if (rawContent === null || rawContent === undefined) {
             return '';
         }
 
+        let value = ensureString(rawContent);
         value = decodeHtmlEntities(value);
 
-        const lower = value.toLowerCase();
-        if (lower.startsWith('false')) {
-            const nextChar = value.charAt(5);
-            if (!/[a-z0-9_]/i.test(nextChar)) {
-                value = value.slice(5).trimStart();
-            }
-        }
-        if (lower.startsWith('true')) {
-            const nextChar = value.charAt(4);
-            if (!/[a-z0-9_]/i.test(nextChar)) {
-                value = value.slice(4).trimStart();
-            }
-        }
-
-        // 브라우저가 빈 contenteditable을 문자열 "false"/"true"로 반환하는 경우 처리
         const trimmedLower = value.trim().toLowerCase();
         if (trimmedLower === 'false' || trimmedLower === 'true') {
-            return '';
-        }
-
-        // 비어 있는 태그는 제거
-        if (!value.replace(/<[^>]+>/g, '').trim()) {
             return '';
         }
 
