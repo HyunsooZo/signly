@@ -790,6 +790,7 @@
         return typeof value === 'string' ? value : String(value);
     }
 
+    // 수정된 normalizePreviewContent 함수 - 단순화
     function normalizePreviewContent(type, rawContent) {
         if (rawContent === null || rawContent === undefined) {
             return '';
@@ -798,11 +799,7 @@
         let value = ensureString(rawContent);
         value = decodeHtmlEntities(value);
 
-        const trimmedLower = value.trim().toLowerCase();
-        if (trimmedLower === 'false' || trimmedLower === 'true') {
-            return '';
-        }
-
+        // placeholder 텍스트는 그대로 유지
         return value;
     }
 
@@ -1280,28 +1277,23 @@
     }
 
     // 템플릿 미리보기
+    // 템플릿 미리보기
     function previewTemplate() {
         updateSectionsData();
 
-        const previewSections = collectSectionsForPreview();
-        console.debug('[TemplateEditor] preview sections snapshot:', previewSections);
-
-        if (!previewSections.length) {
+        // sections 배열이 비어있는지 확인
+        if (sections.length === 0) {
             alert('미리볼 섹션이 없습니다. 먼저 섹션을 추가해주세요.');
             return;
         }
 
-        const previewHtml = generatePreviewHtml(previewSections);
-        console.debug('[TemplateEditor] sections before preview:', sections);
-        console.debug('[TemplateEditor] preview HTML sample:', previewHtml.substring(0, 500));
+        const previewHtml = generatePreviewHtml(sections);  // sections 직접 전달
         const previewTitle = document.getElementById('templateTitle').value || '제목 없음';
         const previewFrame = document.getElementById('previewFrame');
 
-        if (previewFrame && previewFrame.contentWindow) {
-            const iframeDocument = previewFrame.contentDocument || previewFrame.contentWindow.document;
-            iframeDocument.open();
-            iframeDocument.write(previewHtml);
-            iframeDocument.close();
+        if (previewFrame) {
+            // srcdoc 속성 사용
+            previewFrame.srcdoc = previewHtml;
 
             const modalElement = document.getElementById('previewModal');
             const modalTitle = document.getElementById('previewModalLabel');
@@ -1309,19 +1301,10 @@
                 modalTitle.textContent = previewTitle + ' 미리보기';
             }
 
-            if (modalElement && window.bootstrap && window.bootstrap.Modal) {
-                const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
-                modalInstance.show();
-                return;
+            if (modalElement) {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
             }
-        }
-
-        const fallbackWindow = window.open('', 'templatePreview', 'width=900,height=700');
-        if (fallbackWindow) {
-            fallbackWindow.document.write(previewHtml);
-            fallbackWindow.document.close();
-        } else {
-            alert('미리보기를 열 수 없습니다. 팝업 차단 설정을 확인해주세요.');
         }
     }
 
