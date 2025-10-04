@@ -849,6 +849,17 @@
     document.addEventListener('DOMContentLoaded', function() {
         loadInitialSections();
         setupEventListeners();
+
+        window.SignlyTemplateEditor = {
+            getSectionsSnapshot() {
+                updateSectionsData();
+                return JSON.parse(JSON.stringify(sections));
+            },
+            getPreviewHtml() {
+                updateSectionsData();
+                return generatePreviewHtml();
+            }
+        };
     });
 
     // 이벤트 리스너 설정
@@ -1323,6 +1334,8 @@
                     break;
             }
         });
+
+        console.debug('[TemplateEditor] body content snippet:', bodyContent.substring(0, 500));
 
         return `
         <!DOCTYPE html>
