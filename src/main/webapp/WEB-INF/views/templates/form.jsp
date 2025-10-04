@@ -1262,12 +1262,15 @@
     function previewTemplate() {
         updateSectionsData();
 
-        if (!sections.length) {
+        const previewSections = collectSectionsForPreview();
+        console.debug('[TemplateEditor] preview sections snapshot:', previewSections);
+
+        if (!previewSections.length) {
             alert('미리볼 섹션이 없습니다. 먼저 섹션을 추가해주세요.');
             return;
         }
 
-        const previewHtml = generatePreviewHtml();
+        const previewHtml = generatePreviewHtml(previewSections);
         console.debug('[TemplateEditor] sections before preview:', sections);
         console.debug('[TemplateEditor] preview HTML sample:', previewHtml.substring(0, 500));
         const previewTitle = document.getElementById('templateTitle').value || '제목 없음';
@@ -1302,13 +1305,47 @@
     }
 
     // 미리보기 HTML 생성
-    function generatePreviewHtml() {
+    function collectSectionsForPreview() {
+        const documentBody = document.getElementById('documentBody');
+        const sectionElements = Array.from(documentBody.querySelectorAll('.editable-section'))
+            .filter(section => !section.classList.contains('add-section-placeholder'));
+
+        return sectionElements.map((section, index) => {
+            const existingMetadata = getSectionMetadata(section);
+            const type = normalizeFrontendType(section.dataset.type, existingMetadata);
+            let content = '';
+
+            if (type === 'html') {
+                const textarea = section.querySelector('.html-editor');
+                content = textarea ? textarea.value : '';
+            } else if (type === 'signature') {
+                const signatureElement = section.querySelector('.section-signature');
+                content = signatureElement ? signatureElement.innerHTML : '';
+            } else if (type === 'clause') {
+                const clauseContent = section.querySelector('.section-clause span[contenteditable="true"]');
+                content = clauseContent ? clauseContent.innerHTML : '';
+            } else {
+                const editableElement = section.querySelector('[contenteditable="true"]');
+                content = editableElement ? editableElement.innerHTML : '';
+            }
+
+            return {
+                sectionId: section.dataset.id,
+                type,
+                order: index,
+                content,
+                metadata: existingMetadata
+            };
+        });
+    }
+
+    function generatePreviewHtml(previewSections = sections) {
         const title = document.getElementById('templateTitle').value || '제목 없음';
 
         let bodyContent = '';
         let clauseIndex = 0;
 
-        sections.forEach(section => {
+        previewSections.forEach(section => {
             console.debug('[TemplateEditor] rendering section type:', section.type, 'content length:', section.content ? section.content.length : 0, 'raw:', JSON.stringify(section.content));
             switch (section.type) {
                 case 'html':
