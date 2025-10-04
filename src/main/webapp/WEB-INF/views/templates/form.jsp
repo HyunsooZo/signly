@@ -641,6 +641,28 @@
 
     const FRONTEND_TYPES = new Set(['text', 'clause', 'dotted', 'footer', 'signature', 'html', 'title']);
 
+    function extractSectionsFromPayload(payload) {
+        if (!payload) {
+            return [];
+        }
+        if (Array.isArray(payload)) {
+            return payload;
+        }
+        if (Array.isArray(payload.sections)) {
+            return payload.sections;
+        }
+        if (Array.isArray(payload.content)) {
+            return payload.content;
+        }
+        if (Array.isArray(payload.data)) {
+            return payload.data;
+        }
+        if (typeof payload === 'object') {
+            return [payload];
+        }
+        return [];
+    }
+
     function normalizeFrontendType(type, metadata = {}) {
         if (!type) {
             return 'text';
@@ -1097,7 +1119,8 @@
         const scriptEl = document.getElementById('initialSections');
         if (scriptEl) {
             try {
-                const sectionsData = JSON.parse(scriptEl.textContent || '[]');
+                const parsed = JSON.parse(scriptEl.textContent || '[]');
+                const sectionsData = extractSectionsFromPayload(parsed);
                 if (sectionsData.length > 0) {
                     const documentBody = document.getElementById('documentBody');
                     documentBody.innerHTML = '';
@@ -1113,6 +1136,11 @@
                     // 플레이스홀더 추가
                     documentBody.appendChild(createPlaceholder());
                     updateSectionsData();
+                } else {
+                    const documentBody = document.getElementById('documentBody');
+                    if (!documentBody.querySelector('.add-section-placeholder')) {
+                        documentBody.appendChild(createPlaceholder());
+                    }
                 }
             } catch (e) {
                 console.error('Failed to load initial sections:', e);
