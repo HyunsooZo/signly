@@ -670,6 +670,16 @@
 
     const FRONTEND_TYPES = new Set(['text', 'clause', 'dotted', 'footer', 'signature', 'html', 'title']);
 
+    const htmlEntityDecoder = document.createElement('textarea');
+
+    function decodeHtmlEntities(value) {
+        if (!value || typeof value !== 'string') {
+            return value;
+        }
+        htmlEntityDecoder.innerHTML = value;
+        return htmlEntityDecoder.value;
+    }
+
     function parseSectionsPayload(raw) {
         if (!raw) {
             return [];
@@ -682,8 +692,9 @@
             if (!trimmed) {
                 return [];
             }
+            const decoded = decodeHtmlEntities(trimmed);
             try {
-                parsed = JSON.parse(trimmed);
+                parsed = JSON.parse(decoded);
             } catch (error) {
                 console.warn('Failed to parse sections JSON (first pass)', error);
                 return [];
@@ -800,8 +811,9 @@
             return {};
         }
         if (typeof metadata === 'string') {
+            const decoded = decodeHtmlEntities(metadata);
             try {
-                return JSON.parse(metadata);
+                return JSON.parse(decoded);
             } catch (error) {
                 console.warn('Failed to parse metadata string', error);
                 return {};
@@ -1194,7 +1206,11 @@
         const scriptEl = document.getElementById('initialSections');
         if (scriptEl) {
             try {
-                const sectionsData = parseSectionsPayload(scriptEl.textContent || '[]');
+                const rawPayload = scriptEl.textContent || '[]';
+                console.debug('[TemplateEditor] raw initial sections payload:', rawPayload.substring(0, 500));
+
+                const sectionsData = parseSectionsPayload(rawPayload);
+                console.debug('[TemplateEditor] parsed sections array:', sectionsData);
                 if (sectionsData.length > 0) {
                     const documentBody = document.getElementById('documentBody');
                     documentBody.innerHTML = '';
@@ -1207,6 +1223,9 @@
                             return orderA - orderB;
                         })
                         .forEach(sectionData => {
+                            if (!sectionData) {
+                                return;
+                            }
                             const metadata = coerceMetadata(sectionData.metadata);
                             const section = createSectionElement(sectionData.type, sectionData.content, metadata);
                             section.dataset.id = sectionData.sectionId || ('section-' + Date.now());
