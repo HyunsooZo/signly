@@ -1346,40 +1346,42 @@
         let clauseIndex = 0;
 
         previewSections.forEach(section => {
-            console.debug('[TemplateEditor] rendering section type:', section.type, 'content length:', section.content ? section.content.length : 0, 'raw:', JSON.stringify(section.content));
+            const rawContentOnce = section.content;
+            const rawContentTwice = section.content;
+            console.debug('[TemplateEditor] rendering section type:', section.type, 'content length:', rawContentOnce ? rawContentOnce.length : 0, 'first read:', JSON.stringify(rawContentOnce), 'second read:', JSON.stringify(rawContentTwice));
             switch (section.type) {
                 case 'html':
-                    bodyContent += section.content;
-                    console.debug('[TemplateEditor] appended markup:', section.content.substring ? section.content.substring(0, 200) : section.content);
+                    bodyContent += rawContentOnce;
+                    console.debug('[TemplateEditor] appended markup:', rawContentOnce && rawContentOnce.substring ? rawContentOnce.substring(0, 200) : rawContentOnce);
                     break;
                 case 'signature':
-                    const signatureMarkup = `<div class="section-signature">${section.content}</div>`;
+                    const signatureMarkup = `<div class="section-signature">${rawContentOnce}</div>`;
                     console.debug('[TemplateEditor] appended markup:', signatureMarkup.substring(0, 200));
                     bodyContent += signatureMarkup;
                     break;
                 case 'clause':
                     clauseIndex++;
-                    const clauseMarkup = `<div class="section-clause"><span class="clause-number">${clauseIndex}.</span> <span>${section.content}</span></div>`;
+                    const clauseMarkup = `<div class="section-clause"><span class="clause-number">${clauseIndex}.</span> <span>${rawContentOnce}</span></div>`;
                     console.debug('[TemplateEditor] appended markup:', clauseMarkup.substring(0, 200));
                     bodyContent += clauseMarkup;
                     break;
                 case 'title':
-                    const titleMarkup = `<h2 class="section-title">${section.content}</h2>`;
+                    const titleMarkup = `<h2 class="section-title">${rawContentOnce}</h2>`;
                     console.debug('[TemplateEditor] appended markup:', titleMarkup.substring(0, 200));
                     bodyContent += titleMarkup;
                     break;
                 case 'dotted':
-                    const dottedMarkup = `<div class="section-dotted">${section.content}</div>`;
+                    const dottedMarkup = `<div class="section-dotted">${rawContentOnce}</div>`;
                     console.debug('[TemplateEditor] appended markup:', dottedMarkup.substring(0, 200));
                     bodyContent += dottedMarkup;
                     break;
                 case 'footer':
-                    const footerMarkup = `<div class="section-footer">${section.content}</div>`;
+                    const footerMarkup = `<div class="section-footer">${rawContentOnce}</div>`;
                     console.debug('[TemplateEditor] appended markup:', footerMarkup.substring(0, 200));
                     bodyContent += footerMarkup;
                     break;
                 default:
-                    const textMarkup = `<div class="section-text">${section.content}</div>`;
+                    const textMarkup = `<div class="section-text">${rawContentOnce}</div>`;
                     console.debug('[TemplateEditor] appended markup:', textMarkup.substring(0, 200));
                     bodyContent += textMarkup;
                     break;
