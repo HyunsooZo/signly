@@ -783,6 +783,50 @@
         }
     }
 
+    function ensureString(value) {
+        if (value === null || value === undefined) {
+            return '';
+        }
+        return typeof value === 'string' ? value : String(value);
+    }
+
+    function normalizePreviewContent(type, rawContent) {
+        let value = ensureString(rawContent);
+
+        if (!value) {
+            return '';
+        }
+
+        value = decodeHtmlEntities(value);
+
+        const lower = value.toLowerCase();
+        if (lower.startsWith('false')) {
+            const nextChar = value.charAt(5);
+            if (!/[a-z0-9_]/i.test(nextChar)) {
+                value = value.slice(5).trimStart();
+            }
+        }
+        if (lower.startsWith('true')) {
+            const nextChar = value.charAt(4);
+            if (!/[a-z0-9_]/i.test(nextChar)) {
+                value = value.slice(4).trimStart();
+            }
+        }
+
+        // 브라우저가 빈 contenteditable을 문자열 "false"/"true"로 반환하는 경우 처리
+        const trimmedLower = value.trim().toLowerCase();
+        if (trimmedLower === 'false' || trimmedLower === 'true') {
+            return '';
+        }
+
+        // 비어 있는 태그는 제거
+        if (!value.replace(/<[^>]+>/g, '').trim()) {
+            return '';
+        }
+
+        return value;
+    }
+
     function decodeMetadata(encoded) {
         if (!encoded) {
             return {};
@@ -1176,7 +1220,7 @@
 
             if (type === 'html') {
                 const textarea = section.querySelector('.html-editor');
-                content = textarea ? textarea.value : '';
+                content = normalizePreviewContent(type, textarea ? textarea.value : '');
 
                 const preview = section.querySelector('.html-preview');
                 if (preview) {
@@ -1184,10 +1228,10 @@
                 }
             } else if (type === 'signature') {
                 const signatureElement = section.querySelector('.section-signature');
-                content = signatureElement ? signatureElement.innerHTML : '';
+                content = normalizePreviewContent(type, signatureElement ? signatureElement.innerHTML : '');
             } else if (type === 'clause') {
                 const clauseContent = section.querySelector('.section-clause span[contenteditable="true"]');
-                content = clauseContent ? clauseContent.innerHTML : '';
+                content = normalizePreviewContent(type, clauseContent ? clauseContent.innerHTML : '');
                 clauseIndex++;
                 const numberElement = section.querySelector('.clause-number');
                 if (numberElement) {
@@ -1195,9 +1239,7 @@
                 }
             } else {
                 const editableElement = section.querySelector('[contenteditable="true"]');
-                if (editableElement) {
-                    content = editableElement.innerHTML;
-                }
+                content = normalizePreviewContent(type, editableElement ? editableElement.innerHTML : '');
             }
 
             sections.push({
@@ -1317,16 +1359,16 @@
 
             if (type === 'html') {
                 const textarea = section.querySelector('.html-editor');
-                content = textarea ? textarea.value : '';
+                content = normalizePreviewContent(type, textarea ? textarea.value : '');
             } else if (type === 'signature') {
                 const signatureElement = section.querySelector('.section-signature');
-                content = signatureElement ? signatureElement.innerHTML : '';
+                content = normalizePreviewContent(type, signatureElement ? signatureElement.innerHTML : '');
             } else if (type === 'clause') {
                 const clauseContent = section.querySelector('.section-clause span[contenteditable="true"]');
-                content = clauseContent ? clauseContent.innerHTML : '';
+                content = normalizePreviewContent(type, clauseContent ? clauseContent.innerHTML : '');
             } else {
                 const editableElement = section.querySelector('[contenteditable="true"]');
-                content = editableElement ? editableElement.innerHTML : '';
+                content = normalizePreviewContent(type, editableElement ? editableElement.innerHTML : '');
             }
 
             return {
@@ -1346,42 +1388,42 @@
         let clauseIndex = 0;
 
         previewSections.forEach(section => {
-            const rawContentOnce = section.content;
-            const rawContentTwice = section.content;
-            console.debug('[TemplateEditor] rendering section type:', section.type, 'content length:', rawContentOnce ? rawContentOnce.length : 0, 'first read:', JSON.stringify(rawContentOnce), 'second read:', JSON.stringify(rawContentTwice));
+            const rawContent = normalizePreviewContent(section.type, section.content);
+            const codePoints = rawContent ? Array.from(rawContent).map(ch => ch.charCodeAt(0).toString(16)) : [];
+            console.debug('[TemplateEditor] rendering section type:', section.type, 'content length:', rawContent ? rawContent.length : 0, 'value:', JSON.stringify(rawContent), 'codes:', codePoints);
             switch (section.type) {
                 case 'html':
-                    bodyContent += rawContentOnce;
-                    console.debug('[TemplateEditor] appended markup:', rawContentOnce && rawContentOnce.substring ? rawContentOnce.substring(0, 200) : rawContentOnce);
+                    bodyContent += rawContent;
+                    console.debug('[TemplateEditor] appended markup:', rawContent && rawContent.substring ? rawContent.substring(0, 200) : rawContent);
                     break;
                 case 'signature':
-                    const signatureMarkup = `<div class="section-signature">${rawContentOnce}</div>`;
+                    const signatureMarkup = `<div class="section-signature">${rawContent}</div>`;
                     console.debug('[TemplateEditor] appended markup:', signatureMarkup.substring(0, 200));
                     bodyContent += signatureMarkup;
                     break;
                 case 'clause':
                     clauseIndex++;
-                    const clauseMarkup = `<div class="section-clause"><span class="clause-number">${clauseIndex}.</span> <span>${rawContentOnce}</span></div>`;
+                    const clauseMarkup = `<div class="section-clause"><span class="clause-number">${clauseIndex}.</span> <span>${rawContent}</span></div>`;
                     console.debug('[TemplateEditor] appended markup:', clauseMarkup.substring(0, 200));
                     bodyContent += clauseMarkup;
                     break;
                 case 'title':
-                    const titleMarkup = `<h2 class="section-title">${rawContentOnce}</h2>`;
+                    const titleMarkup = `<h2 class="section-title">${rawContent}</h2>`;
                     console.debug('[TemplateEditor] appended markup:', titleMarkup.substring(0, 200));
                     bodyContent += titleMarkup;
                     break;
                 case 'dotted':
-                    const dottedMarkup = `<div class="section-dotted">${rawContentOnce}</div>`;
+                    const dottedMarkup = `<div class="section-dotted">${rawContent}</div>`;
                     console.debug('[TemplateEditor] appended markup:', dottedMarkup.substring(0, 200));
                     bodyContent += dottedMarkup;
                     break;
                 case 'footer':
-                    const footerMarkup = `<div class="section-footer">${rawContentOnce}</div>`;
+                    const footerMarkup = `<div class="section-footer">${rawContent}</div>`;
                     console.debug('[TemplateEditor] appended markup:', footerMarkup.substring(0, 200));
                     bodyContent += footerMarkup;
                     break;
                 default:
-                    const textMarkup = `<div class="section-text">${rawContentOnce}</div>`;
+                    const textMarkup = `<div class="section-text">${rawContent}</div>`;
                     console.debug('[TemplateEditor] appended markup:', textMarkup.substring(0, 200));
                     bodyContent += textMarkup;
                     break;
