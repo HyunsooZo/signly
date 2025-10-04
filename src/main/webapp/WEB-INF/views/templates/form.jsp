@@ -1309,6 +1309,7 @@
         let clauseIndex = 0;
 
         sections.forEach(section => {
+            console.debug('[TemplateEditor] rendering section:', section);
             switch (section.type) {
                 case 'html':
                     bodyContent += section.content;
