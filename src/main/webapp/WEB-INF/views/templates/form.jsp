@@ -1257,6 +1257,8 @@
         }
 
         const previewHtml = generatePreviewHtml();
+        console.debug('[TemplateEditor] sections before preview:', sections);
+        console.debug('[TemplateEditor] preview HTML sample:', previewHtml.substring(0, 500));
         const previewTitle = document.getElementById('templateTitle').value || '제목 없음';
         const previewFrame = document.getElementById('previewFrame');
 
