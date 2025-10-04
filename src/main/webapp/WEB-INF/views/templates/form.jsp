@@ -1313,25 +1313,38 @@
             switch (section.type) {
                 case 'html':
                     bodyContent += section.content;
+                    console.debug('[TemplateEditor] appended markup:', section.content.substring ? section.content.substring(0, 200) : section.content);
                     break;
                 case 'signature':
-                    bodyContent += `<div class="section-signature">${section.content}</div>`;
+                    const signatureMarkup = `<div class="section-signature">${section.content}</div>`;
+                    console.debug('[TemplateEditor] appended markup:', signatureMarkup.substring(0, 200));
+                    bodyContent += signatureMarkup;
                     break;
                 case 'clause':
                     clauseIndex++;
-                    bodyContent += `<div class="section-clause"><span class="clause-number">${clauseIndex}.</span> <span>${section.content}</span></div>`;
+                    const clauseMarkup = `<div class="section-clause"><span class="clause-number">${clauseIndex}.</span> <span>${section.content}</span></div>`;
+                    console.debug('[TemplateEditor] appended markup:', clauseMarkup.substring(0, 200));
+                    bodyContent += clauseMarkup;
                     break;
                 case 'title':
-                    bodyContent += `<h2 class="section-title">${section.content}</h2>`;
+                    const titleMarkup = `<h2 class="section-title">${section.content}</h2>`;
+                    console.debug('[TemplateEditor] appended markup:', titleMarkup.substring(0, 200));
+                    bodyContent += titleMarkup;
                     break;
                 case 'dotted':
-                    bodyContent += `<div class="section-dotted">${section.content}</div>`;
+                    const dottedMarkup = `<div class="section-dotted">${section.content}</div>`;
+                    console.debug('[TemplateEditor] appended markup:', dottedMarkup.substring(0, 200));
+                    bodyContent += dottedMarkup;
                     break;
                 case 'footer':
-                    bodyContent += `<div class="section-footer">${section.content}</div>`;
+                    const footerMarkup = `<div class="section-footer">${section.content}</div>`;
+                    console.debug('[TemplateEditor] appended markup:', footerMarkup.substring(0, 200));
+                    bodyContent += footerMarkup;
                     break;
                 default:
-                    bodyContent += `<div class="section-text">${section.content}</div>`;
+                    const textMarkup = `<div class="section-text">${section.content}</div>`;
+                    console.debug('[TemplateEditor] appended markup:', textMarkup.substring(0, 200));
+                    bodyContent += textMarkup;
                     break;
             }
         });
