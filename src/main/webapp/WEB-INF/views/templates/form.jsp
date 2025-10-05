@@ -822,6 +822,14 @@
         return typeof value === 'string' ? value : String(value);
     }
 
+    // 변수 span을 [VARIABLE_NAME] 형식으로 변환
+    function convertVariablesToBrackets(html) {
+        if (!html) return '';
+
+        // <span class="template-variable"><span>VARIABLE_NAME</span>...</span> 형태를 [VARIABLE_NAME]으로 변환
+        return html.replace(/<span class="template-variable"[^>]*>\s*<span>([^<]+)<\/span>[\s\S]*?<\/span>/g, '[$1]');
+    }
+
     // 수정된 normalizePreviewContent 함수 - 단순화
     function normalizePreviewContent(type, rawContent) {
         console.debug('[normalizePreviewContent] input:', type, JSON.stringify(rawContent));
@@ -1285,15 +1293,16 @@
                 }
             } else if (type === 'signature') {
                 const signatureElement = section.querySelector('.section-signature');
-                content = signatureElement ? signatureElement.innerHTML : '';
+                content = signatureElement ? convertVariablesToBrackets(signatureElement.innerHTML) : '';
             } else if (type === 'clause') {
-                const clauseContent = section.querySelector('.section-clause span[contenteditable="true"]');
-                content = clauseContent ? clauseContent.innerHTML : '';
                 clauseIndex++;
                 const numberElement = section.querySelector('.clause-number');
                 if (numberElement) {
                     numberElement.textContent = clauseIndex + '.';
                 }
+                // 조항 전체 HTML을 저장 (번호 포함)
+                const clauseElement = section.querySelector('.section-clause');
+                content = clauseElement ? clauseElement.innerHTML : '';
             } else {
                 const editableElement = section.querySelector('[contenteditable="true"]');
                 content = editableElement ? editableElement.innerHTML : '';

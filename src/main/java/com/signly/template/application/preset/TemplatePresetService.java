@@ -1,15 +1,10 @@
 package com.signly.template.application.preset;
 
-import com.signly.template.domain.model.TemplateSectionType;
-import org.springframework.util.StreamUtils;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.signly.template.infrastructure.repository.TemplateJpaRepository;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,58 +12,55 @@ import java.util.Optional;
 @Service
 public class TemplatePresetService {
 
-    private final Map<String, TemplatePreset> presets;
+    private final TemplateJpaRepository templateRepository;
+    private final ObjectMapper objectMapper;
 
-    public TemplatePresetService(ResourceLoader resourceLoader) {
-        try {
-            this.presets = Map.copyOf(loadPresets(resourceLoader));
-        } catch (IOException e) {
-            throw new UncheckedIOException("Failed to initialize template presets", e);
-        }
+    public TemplatePresetService(TemplateJpaRepository templateRepository, ObjectMapper objectMapper) {
+        this.templateRepository = templateRepository;
+        this.objectMapper = objectMapper;
     }
 
     public List<TemplatePresetSummary> getSummaries() {
-        return presets.values().stream()
-                .map(preset -> new TemplatePresetSummary(preset.id(), preset.name(), preset.description()))
+        return templateRepository.findAllActivePresets().stream()
+                .map(entity -> new TemplatePresetSummary(
+                        entity.getPresetId(),
+                        entity.getTitle(),
+                        "프리셋 템플릿" // description은 별도 필드로 추가 가능
+                ))
                 .toList();
     }
 
     public Optional<TemplatePreset> getPreset(String presetId) {
-        return Optional.ofNullable(presets.get(presetId));
-    }
+        return templateRepository.findByIsPresetTrueAndPresetId(presetId)
+                .map(entity -> {
+                    try {
+                        List<Map<String, Object>> sectionsData = objectMapper.readValue(
+                                entity.getContent(),
+                                new TypeReference<List<Map<String, Object>>>() {}
+                        );
 
-    private Map<String, TemplatePreset> loadPresets(ResourceLoader resourceLoader) throws IOException {
-        Map<String, TemplatePreset> map = new LinkedHashMap<>();
+                        List<PresetSection> sections = sectionsData.stream()
+                                .map(data -> {
+                                    Map<String, Object> metadata = (Map<String, Object>) data.get("metadata");
+                                    return new PresetSection(
+                                            (String) data.get("sectionId"),
+                                            (String) data.get("type"),
+                                            ((Number) data.get("order")).intValue(),
+                                            (String) data.get("content"),
+                                            metadata != null ? metadata : Map.of()
+                                    );
+                                })
+                                .toList();
 
-        map.put("standard-employment-contract", loadStandardEmploymentContract(resourceLoader));
-
-        return map;
-    }
-
-    private TemplatePreset loadStandardEmploymentContract(ResourceLoader resourceLoader) throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:presets/templates/standard-employment-contract.html");
-        String html;
-        try (var inputStream = resource.getInputStream()) {
-            html = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
-        }
-
-        PresetSection section = new PresetSection(
-                "preset-standard-employment-contract",
-                TemplateSectionType.CUSTOM.name(),
-                0,
-                html,
-                Map.of(
-                        "rawHtml", true,
-                        "preset", true,
-                        "title", "표준근로계약서"
-                )
-        );
-
-        return new TemplatePreset(
-                "standard-employment-contract",
-                "표준 근로계약서",
-                "고용노동부 표준 근로계약서 양식",
-                List.of(section)
-        );
+                        return new TemplatePreset(
+                                entity.getPresetId(),
+                                entity.getTitle(),
+                                "프리셋 템플릿",
+                                sections
+                        );
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to parse preset template: " + presetId, e);
+                    }
+                });
     }
 }

@@ -69,6 +69,9 @@
             <c:if test="${not empty selectedPreset}">
                 <input type="hidden" name="selectedPreset" value="${selectedPreset}" />
             </c:if>
+            <c:if test="${not empty selectedTemplate}">
+                <script type="application/json" id="selectedTemplateData">${selectedTemplateContent}</script>
+            </c:if>
 
             <!-- 프리셋 레이아웃 -->
             <div id="presetLayout">
@@ -916,6 +919,24 @@
             }
         }
 
+        function loadTemplateAsPreset(templateTitle, templateHtml) {
+            console.log('[DEBUG] Loading template as preset:', templateTitle);
+
+            let rendered = templateHtml || '';
+
+            // HTML 엔티티가 인코딩되어 있는지 확인
+            if (rendered.includes('&lt;') || rendered.includes('&gt;')) {
+                console.log('[DEBUG] Decoding HTML entities...');
+                rendered = decodeHtmlEntities(rendered);
+            }
+
+            // 프리셋 모드로 전환
+            switchToPresetMode();
+
+            // HTML 렌더링
+            renderPresetHtml(rendered, templateTitle);
+        }
+
         const presetSelect = document.getElementById('presetSelect');
         if (presetSelect && contractContentTextarea) {
             presetSelect.addEventListener('change', async (event) => {
@@ -1349,10 +1370,16 @@
 
         // 스크롤 이벤트 리스너 등록
                 
-                // 페이지 로드 시 selectedPreset이 있으면 자동으로 로드
+                // 페이지 로드 시 selectedPreset 또는 selectedTemplate이 있으면 자동으로 로드
         <c:if test="${not empty selectedPreset}">
         document.addEventListener('DOMContentLoaded', function() {
             loadPresetById('${selectedPreset}');
+        });
+        </c:if>
+        <c:if test="${not empty selectedTemplate}">
+        document.addEventListener('DOMContentLoaded', function() {
+            const templateContent = document.getElementById('selectedTemplateData')?.textContent || '';
+            loadTemplateAsPreset('${selectedTemplateTitle}', templateContent);
         });
         </c:if>
 

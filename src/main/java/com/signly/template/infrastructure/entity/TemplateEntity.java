@@ -13,7 +13,7 @@ public class TemplateEntity {
     @Column(name = "template_id", length = 36)
     private String templateId;
 
-    @Column(name = "owner_id", length = 36, nullable = false)
+    @Column(name = "owner_id", length = 36, nullable = true)
     private String ownerId;
 
     @Column(name = "title", length = 255, nullable = false)
@@ -29,6 +29,12 @@ public class TemplateEntity {
     @Column(name = "status", length = 20, nullable = false)
     private TemplateStatus status;
 
+    @Column(name = "is_preset", nullable = false)
+    private boolean isPreset;
+
+    @Column(name = "preset_id", length = 100, nullable = true)
+    private String presetId;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -39,13 +45,16 @@ public class TemplateEntity {
     }
 
     public TemplateEntity(String templateId, String ownerId, String title, String content,
-                         int version, TemplateStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+                         int version, TemplateStatus status, boolean isPreset, String presetId,
+                         LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.templateId = templateId;
         this.ownerId = ownerId;
         this.title = title;
         this.content = content;
         this.version = version;
         this.status = status;
+        this.isPreset = isPreset;
+        this.presetId = presetId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -100,5 +109,13 @@ public class TemplateEntity {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isPreset() {
+        return isPreset;
+    }
+
+    public String getPresetId() {
+        return presetId;
     }
 }
