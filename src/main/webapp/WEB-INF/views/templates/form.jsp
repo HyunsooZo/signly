@@ -665,6 +665,7 @@
 </div>
 
 <!-- Hidden form for submission -->
+<c:set var="formAction" value="${not empty templateId && templateId ne 'new' ? '/templates/'.concat(templateId) : '/templates'}" />
 <form id="templateForm" method="post" action="${formAction}" style="display: none;">
     <c:if test="${not empty _csrf}">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
@@ -972,12 +973,13 @@
         if (afterElement) {
             afterElement.insertAdjacentElement('afterend', section);
         } else {
-            // 초기 플레이스홀더 제거
+            // 플레이스홀더 앞에 삽입
             const placeholder = documentBody.querySelector('.add-section-placeholder');
             if (placeholder) {
-                placeholder.remove();
+                documentBody.insertBefore(section, placeholder);
+            } else {
+                documentBody.appendChild(section);
             }
-            documentBody.appendChild(section);
         }
 
         setActiveSection(section);
@@ -1243,7 +1245,7 @@
     function addSectionFromPlaceholder(type, button) {
         const placeholder = button.closest('.add-section-placeholder');
         const section = createSectionElement(type);
-        placeholder.replaceWith(section);
+        placeholder.insertAdjacentElement('beforebegin', section);
 
         setActiveSection(section);
         updateSectionsData();
