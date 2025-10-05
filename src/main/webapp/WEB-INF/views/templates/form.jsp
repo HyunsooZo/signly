@@ -254,6 +254,14 @@
             display: block;
         }
 
+        /* Placeholder 스타일 */
+        [contenteditable="true"][data-placeholder]:empty:before {
+            content: attr(data-placeholder);
+            color: #999;
+            pointer-events: none;
+            font-style: italic;
+        }
+
         .section-dotted-box {
             border: 1px dashed #999;
             margin: 12px 0;
@@ -273,26 +281,24 @@
         .section-signature {
             margin: 30px 0;
             padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #f9f9f9;
         }
 
-        .signature-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
 
         .signature-block {
-            padding: 15px;
+            flex: 1;
         }
 
         .signature-line {
-            border-bottom: 1px solid #333;
-            margin: 15px 0;
-            padding-bottom: 5px;
-            min-height: 30px;
+            margin: 8px 0;
+        }
+
+        .signature-line--seal {
+            font-weight: normal;
         }
 
         /* 변수 스타일 */
@@ -303,15 +309,37 @@
             border: 1px solid #ffa500;
             font-weight: 600;
             color: #d2691e;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             margin: 0 2px;
-            cursor: pointer;
+            cursor: default;
             transition: all 0.2s;
         }
 
         .template-variable:hover {
             background: #ffd700;
-            transform: scale(1.05);
+        }
+
+        .template-variable-remove {
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            padding: 0 2px;
+            margin-left: 2px;
+            color: #d2691e;
+            font-weight: bold;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .template-variable-remove::after {
+            content: '×';
+        }
+
+        .template-variable-remove:hover {
+            opacity: 1;
+            color: #c0392b;
         }
 
         /* 플레이스홀더 */
@@ -350,8 +378,10 @@
             box-shadow: 0 10px 40px rgba(0,0,0,.2);
             z-index: 1000;
             max-width: 600px;
+            max-height: 80vh;
             width: 90%;
             display: none;
+            overflow-y: auto;
         }
 
         .variable-modal.show {
@@ -676,8 +706,9 @@
         if (!value || typeof value !== 'string') {
             return value;
         }
-        htmlEntityDecoder.innerHTML = value;
-        return htmlEntityDecoder.value;
+        const temp = document.createElement('div');
+        temp.innerHTML = value;
+        return temp.textContent || temp.innerText || value;
     }
 
     function parseSectionsPayload(raw) {
@@ -792,12 +823,42 @@
 
     // 수정된 normalizePreviewContent 함수 - 단순화
     function normalizePreviewContent(type, rawContent) {
+        console.debug('[normalizePreviewContent] input:', type, JSON.stringify(rawContent));
         if (rawContent === null || rawContent === undefined) {
+            console.debug('[normalizePreviewContent] null/undefined -> empty string');
             return '';
         }
 
         let value = ensureString(rawContent);
+        console.debug('[normalizePreviewContent] after ensureString:', JSON.stringify(value));
+
+        // signature와 html 타입은 HTML을 그대로 유지
+        if (type === 'signature' || type === 'html') {
+            console.debug('[normalizePreviewContent] signature/html - keeping HTML as is');
+            // 변수를 밑줄로 변환
+            value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, function(match) {
+                return '<span class="blank-line"></span>';
+            });
+            return value;
+        }
+
+        // 변수를 임시 마커로 치환
+        const BLANK_MARKER = '___BLANK_LINE___';
+        // X 버튼도 함께 제거
+        value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>\s*<span class="template-variable-remove"[^>]*>[\s\S]*?<\/span>/g, function(match) {
+            return BLANK_MARKER;
+        });
+        // 혹시 순서가 다르거나 중첩된 경우를 위해 별도로도 제거
+        value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, function(match) {
+            return BLANK_MARKER;
+        });
+        value = value.replace(/<span class="template-variable-remove"[^>]*>[\s\S]*?<\/span>/g, '');
+
         value = decodeHtmlEntities(value);
+        console.debug('[normalizePreviewContent] after decodeHtmlEntities:', JSON.stringify(value));
+
+        // 마커를 밑줄 HTML로 복원
+        value = value.replace(new RegExp(BLANK_MARKER, 'g'), '<span class="blank-line"></span>');
 
         // placeholder 텍스트는 그대로 유지
         return value;
@@ -911,18 +972,12 @@
         if (afterElement) {
             afterElement.insertAdjacentElement('afterend', section);
         } else {
-            // 플레이스홀더 제거
+            // 초기 플레이스홀더 제거
             const placeholder = documentBody.querySelector('.add-section-placeholder');
-            if (placeholder && documentBody.children.length === 1) {
+            if (placeholder) {
                 placeholder.remove();
             }
             documentBody.appendChild(section);
-        }
-
-        // 새 플레이스홀더 추가
-        if (!documentBody.querySelector('.add-section-placeholder')) {
-            const newPlaceholder = createPlaceholder();
-            documentBody.appendChild(newPlaceholder);
         }
 
         setActiveSection(section);
@@ -944,64 +999,57 @@
 
         switch(normalizedType) {
             case 'text':
-                innerHTML = `<div contenteditable="true" class="section-text">${content || '텍스트를 입력하세요...'}</div>`;
+                innerHTML = '<div contenteditable="true" class="section-text" data-placeholder="텍스트를 입력하세요...">' + (content || '') + '</div>';
                 break;
 
             case 'title':
-                innerHTML = `<div contenteditable="true" class="section-title">${content || '제목을 입력하세요...'}</div>`;
+                innerHTML = '<div contenteditable="true" class="section-title" data-placeholder="제목을 입력하세요...">' + (content || '') + '</div>';
                 break;
 
             case 'clause':
                 clauseCounter++;
-                innerHTML = `
-                <div class="section-clause">
-                    <span class="clause-number">${clauseCounter}.</span>
-                    <span contenteditable="true">${content || '조항 내용을 입력하세요...'}</span>
-                </div>`;
+                innerHTML = '<div class="section-clause">' +
+                    '<span class="clause-number">' + clauseCounter + '.</span>' +
+                    '<span contenteditable="true" data-placeholder="조항 내용을 입력하세요...">' + (content || '') + '</span>' +
+                    '</div>';
                 break;
 
             case 'dotted':
-                innerHTML = `<div contenteditable="true" class="section-dotted-box">${content || '점선 박스 내용을 입력하세요...'}</div>`;
+                innerHTML = '<div contenteditable="true" class="section-dotted-box" data-placeholder="점선 박스 내용을 입력하세요...">' + (content || '') + '</div>';
                 break;
 
             case 'footer':
-                innerHTML = `<div contenteditable="true" class="section-footer">${content || '꼬릿말을 입력하세요...'}</div>`;
+                innerHTML = '<div contenteditable="true" class="section-footer" data-placeholder="꼬릿말을 입력하세요...">' + (content || '') + '</div>';
                 break;
 
             case 'signature':
-                innerHTML = `
-                <div class="section-signature">
-                    <div class="signature-grid">
-                        <div class="signature-block">
-                            <h6>사업주</h6>
-                            <div class="signature-line">사업체명: [COMPANY_NAME]</div>
-                            <div class="signature-line">주소: [EMPLOYER_ADDRESS]</div>
-                            <div class="signature-line">대표자: [EMPLOYER] (인)</div>
-                            <div class="signature-line">연락처: [EMPLOYER_PHONE]</div>
-                        </div>
-                        <div class="signature-block">
-                            <h6>근로자</h6>
-                            <div class="signature-line">성명: [EMPLOYEE]</div>
-                            <div class="signature-line">주소: [EMPLOYEE_ADDRESS]</div>
-                            <div class="signature-line">연락처: [EMPLOYEE_PHONE]</div>
-                            <div class="signature-line">서명: (인)</div>
-                        </div>
-                    </div>
-                    <div class="text-center mt-3">
-                        <div contenteditable="true">[CONTRACT_DATE]</div>
-                    </div>
-                </div>`;
+                innerHTML = '<div class="section-signature" contenteditable="true">' +
+                    '<div class="signature-section">' +
+                        '<div class="signature-block">' +
+                            '<div class="signature-line">(사업주) 사업체명: <span class="template-variable" contenteditable="false"><span>COMPANY_NAME</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="signature-line" style="margin-left: 60px;">주소: <span class="template-variable" contenteditable="false"><span>EMPLOYER_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="signature-line signature-line--seal" style="margin-left: 60px;">대표자: <span class="template-variable" contenteditable="false"><span>EMPLOYER</span><span class="template-variable-remove"></span></span> (인)</div>' +
+                        '</div>' +
+                        '<div class="signature-block">' +
+                            '<div class="signature-line">(전화: <span class="template-variable" contenteditable="false"><span>EMPLOYER_PHONE</span><span class="template-variable-remove"></span></span>)</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="margin-top: 30px;">' +
+                        '<div>(근로자) 주소: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
+                        '<div style="margin-left: 70px; margin-top: 15px;">연락처: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_PHONE</span><span class="template-variable-remove"></span></span></div>' +
+                        '<div style="margin-left: 70px; margin-top: 15px;">성명: <span class="template-variable" contenteditable="false"><span>EMPLOYEE</span><span class="template-variable-remove"></span></span> (인)</div>' +
+                    '</div>' +
+                '</div>';
                 break;
 
             case 'html':
-                innerHTML = `
-                <div class="html-section">
-                    <textarea class="html-editor" placeholder="HTML 코드를 입력하세요...">${content || ''}</textarea>
-                    <div class="html-preview mt-2"></div>
-                </div>`;
+                innerHTML = '<div class="html-section">' +
+                    '<textarea class="html-editor" placeholder="HTML 코드를 입력하세요...">' + (content || '') + '</textarea>' +
+                    '<div class="html-preview mt-2"></div>' +
+                    '</div>';
                 break;
             default:
-                innerHTML = `<div contenteditable="true" class="section-text">${content || '텍스트를 입력하세요...'}</div>`;
+                innerHTML = '<div contenteditable="true" class="section-text" data-placeholder="텍스트를 입력하세요...">' + (content || '') + '</div>';
                 break;
         }
 
@@ -1104,18 +1152,52 @@
         if (activeElement.contentEditable === 'true') {
             // contenteditable 요소
             const selection = window.getSelection();
-            const range = selection.getRangeAt(0);
+            let range;
+
+            // range가 없거나 activeElement 밖에 있으면 새로 생성
+            if (selection.rangeCount === 0 || !activeElement.contains(selection.anchorNode)) {
+                range = document.createRange();
+                range.selectNodeContents(activeElement);
+                range.collapse(false); // 끝으로 이동
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                range = selection.getRangeAt(0);
+            }
 
             const varSpan = document.createElement('span');
             varSpan.className = 'template-variable';
-            varSpan.textContent = variable;
             varSpan.contentEditable = 'false';
 
+            const varText = document.createElement('span');
+            varText.textContent = variable;
+
+            const removeBtn = document.createElement('span');
+            removeBtn.className = 'template-variable-remove';
+            removeBtn.onclick = function(e) {
+                e.stopPropagation();
+                varSpan.remove();
+                updateSectionsData();
+            };
+
+            varSpan.appendChild(varText);
+            varSpan.appendChild(removeBtn);
+
+            range.deleteContents();
             range.insertNode(varSpan);
+
+            // 변수 뒤에 공백 추가 (커서가 변수 뒤로 이동하도록)
+            const space = document.createTextNode(' ');
             range.setStartAfter(varSpan);
+            range.insertNode(space);
+            range.setStartAfter(space);
             range.collapse(true);
+
             selection.removeAllRanges();
             selection.addRange(range);
+
+            // 포커스 유지
+            activeElement.focus();
         } else if (activeElement.tagName === 'TEXTAREA') {
             // textarea 요소 (HTML 편집기)
             const start = activeElement.selectionStart;
@@ -1123,6 +1205,7 @@
             const text = activeElement.value;
             activeElement.value = text.substring(0, start) + variable + text.substring(end);
             activeElement.selectionStart = activeElement.selectionEnd = start + variable.length;
+            activeElement.focus();
         }
 
         closeVariableModal();
@@ -1162,10 +1245,6 @@
         const section = createSectionElement(type);
         placeholder.replaceWith(section);
 
-        // 새 플레이스홀더 추가
-        const documentBody = document.getElementById('documentBody');
-        documentBody.appendChild(createPlaceholder());
-
         setActiveSection(section);
         updateSectionsData();
     }
@@ -1196,18 +1275,18 @@
 
             if (type === 'html') {
                 const textarea = section.querySelector('.html-editor');
-                content = normalizePreviewContent(type, textarea ? textarea.value : '');
+                content = textarea ? textarea.value : '';
 
                 const preview = section.querySelector('.html-preview');
                 if (preview) {
-                    preview.innerHTML = content;
+                    preview.innerHTML = normalizePreviewContent(type, content);
                 }
             } else if (type === 'signature') {
                 const signatureElement = section.querySelector('.section-signature');
-                content = normalizePreviewContent(type, signatureElement ? signatureElement.innerHTML : '');
+                content = signatureElement ? signatureElement.innerHTML : '';
             } else if (type === 'clause') {
                 const clauseContent = section.querySelector('.section-clause span[contenteditable="true"]');
-                content = normalizePreviewContent(type, clauseContent ? clauseContent.innerHTML : '');
+                content = clauseContent ? clauseContent.innerHTML : '';
                 clauseIndex++;
                 const numberElement = section.querySelector('.clause-number');
                 if (numberElement) {
@@ -1215,7 +1294,7 @@
                 }
             } else {
                 const editableElement = section.querySelector('[contenteditable="true"]');
-                content = normalizePreviewContent(type, editableElement ? editableElement.innerHTML : '');
+                content = editableElement ? editableElement.innerHTML : '';
             }
 
             sections.push({
@@ -1261,10 +1340,9 @@
                             documentBody.appendChild(section);
                         });
 
-                    // 플레이스홀더 추가
-                    documentBody.appendChild(createPlaceholder());
                     updateSectionsData();
                 } else {
+                    // 섹션이 없을 때만 플레이스홀더 표시
                     const documentBody = document.getElementById('documentBody');
                     if (!documentBody.querySelector('.add-section-placeholder')) {
                         documentBody.appendChild(createPlaceholder());
@@ -1350,7 +1428,7 @@
         let clauseIndex = 0;
 
         previewSections.forEach(section => {
-            const rawContent = normalizePreviewContent(section.type, section.content);
+            let rawContent = normalizePreviewContent(section.type, section.content);
             const codePoints = rawContent ? Array.from(rawContent).map(ch => ch.charCodeAt(0).toString(16)) : [];
             console.debug('[TemplateEditor] rendering section type:', section.type, 'content length:', rawContent ? rawContent.length : 0, 'value:', JSON.stringify(rawContent), 'codes:', codePoints);
             switch (section.type) {
@@ -1359,33 +1437,36 @@
                     console.debug('[TemplateEditor] appended markup:', rawContent && rawContent.substring ? rawContent.substring(0, 200) : rawContent);
                     break;
                 case 'signature':
-                    const signatureMarkup = `<div class="section-signature">${rawContent}</div>`;
+                    const signatureMarkup = '<div class="section-signature">' + rawContent + '</div>';
                     console.debug('[TemplateEditor] appended markup:', signatureMarkup.substring(0, 200));
                     bodyContent += signatureMarkup;
                     break;
                 case 'clause':
                     clauseIndex++;
-                    const clauseMarkup = `<div class="section-clause"><span class="clause-number">${clauseIndex}.</span> <span>${rawContent}</span></div>`;
+                    const clauseMarkup = '<div class="section-clause"><span class="clause-number">' + clauseIndex + '.</span> <span>' + rawContent + '</span></div>';
                     console.debug('[TemplateEditor] appended markup:', clauseMarkup.substring(0, 200));
                     bodyContent += clauseMarkup;
                     break;
                 case 'title':
-                    const titleMarkup = `<h2 class="section-title">${rawContent}</h2>`;
+                    const titleMarkup = '<h2 class="section-title">' + rawContent + '</h2>';
                     console.debug('[TemplateEditor] appended markup:', titleMarkup.substring(0, 200));
                     bodyContent += titleMarkup;
                     break;
                 case 'dotted':
-                    const dottedMarkup = `<div class="section-dotted">${rawContent}</div>`;
+                    const dottedMarkup = '<div class="section-dotted">' + rawContent + '</div>';
                     console.debug('[TemplateEditor] appended markup:', dottedMarkup.substring(0, 200));
                     bodyContent += dottedMarkup;
                     break;
                 case 'footer':
-                    const footerMarkup = `<div class="section-footer">${rawContent}</div>`;
+                    const footerMarkup = '<div class="section-footer">' + rawContent + '</div>';
                     console.debug('[TemplateEditor] appended markup:', footerMarkup.substring(0, 200));
                     bodyContent += footerMarkup;
                     break;
                 default:
-                    const textMarkup = `<div class="section-text">${rawContent}</div>`;
+                    console.debug('[TemplateEditor] default case - rawContent before markup:', JSON.stringify(rawContent), 'type:', typeof rawContent, 'length:', rawContent ? rawContent.length : 'null');
+                    // 템플릿 리터럴 대신 문자열 연결 사용
+                    const textMarkup = '<div class="section-text">' + rawContent + '</div>';
+                    console.debug('[TemplateEditor] default case - textMarkup:', textMarkup.substring(0, 200));
                     console.debug('[TemplateEditor] appended markup:', textMarkup.substring(0, 200));
                     bodyContent += textMarkup;
                     break;
@@ -1394,90 +1475,95 @@
 
         console.debug('[TemplateEditor] body content snippet:', bodyContent.substring(0, 500));
 
-        return `
-        <!DOCTYPE html>
-        <html lang="ko">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${title}</title>
-            <style>
-                body {
-                    font-family: 'Malgun Gothic', sans-serif;
-                    max-width: 210mm;
-                    margin: 0 auto;
-                    padding: 20mm;
-                    line-height: 1.6;
-                    font-size: 14px;
-                    background: white;
-                }
-                .section-text {
-                    margin: 15px 0;
-                    text-align: justify;
-                }
-                .section-clause {
-                    margin: 20px 0;
-                    padding-left: 20px;
-                }
-                .clause-number {
-                    font-weight: bold;
-                    display: inline-block;
-                    min-width: 20px;
-                }
-                .section-dotted {
-                    border: 0.5px dashed #666;
-                    padding: 15px;
-                    margin: 20px 0;
-                    border-radius: 4px;
-                }
-                .section-title {
-                    font-size: 24px;
-                    font-weight: bold;
-                    text-align: center;
-                    margin: 30px 0;
-                    letter-spacing: 2px;
-                }
-                .section-footer {
-                    margin-top: 40px;
-                    padding-top: 20px;
-                    border-top: 1px solid #ddd;
-                    text-align: center;
-                    font-size: 13px;
-                    color: #666;
-                }
-                .section-signature {
-                    margin: 30px 0;
-                    padding: 20px;
-                }
-                .signature-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 30px;
-                }
-                .signature-line {
-                    border-bottom: 1px solid #333;
-                    margin: 15px 0;
-                    padding-bottom: 5px;
-                    min-height: 30px;
-                }
-                .template-variable {
-                    background: #ffe4b5;
-                    padding: 2px 6px;
-                    border-radius: 3px;
-                    font-weight: 600;
-                    color: #d2691e;
-                }
-                @media print {
-                    body { padding: 10mm; }
-                }
-            </style>
-        </head>
-        <body>
-            <h1 style="text-align: center; margin-bottom: 40px;">${title}</h1>
-            ${bodyContent}
-        </body>
-        </html>
-    `;
+        return '<!DOCTYPE html>' +
+        '<html lang="ko">' +
+        '<head>' +
+            '<meta charset="UTF-8">' +
+            '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+            '<title>' + title + '</title>' +
+            '<style>' +
+                'body {' +
+                    'font-family: \'Malgun Gothic\', sans-serif;' +
+                    'max-width: 210mm;' +
+                    'margin: 0 auto;' +
+                    'padding: 20mm;' +
+                    'line-height: 1.6;' +
+                    'font-size: 14px;' +
+                    'background: white;' +
+                '}' +
+                '.section-text {' +
+                    'margin: 15px 0;' +
+                    'text-align: justify;' +
+                '}' +
+                '.section-clause {' +
+                    'margin: 20px 0;' +
+                    'padding-left: 20px;' +
+                '}' +
+                '.clause-number {' +
+                    'font-weight: bold;' +
+                    'display: inline-block;' +
+                    'min-width: 20px;' +
+                '}' +
+                '.section-dotted {' +
+                    'border: 0.5px dashed #666;' +
+                    'padding: 15px;' +
+                    'margin: 20px 0;' +
+                    'border-radius: 4px;' +
+                '}' +
+                '.section-title {' +
+                    'font-size: 24px;' +
+                    'font-weight: bold;' +
+                    'text-align: center;' +
+                    'margin: 30px 0;' +
+                    'letter-spacing: 2px;' +
+                '}' +
+                '.section-footer {' +
+                    'margin-top: 40px;' +
+                    'padding-top: 20px;' +
+                    'border-top: 1px solid #ddd;' +
+                    'text-align: center;' +
+                    'font-size: 13px;' +
+                    'color: #666;' +
+                '}' +
+                '.section-signature {' +
+                    'margin: 30px 0;' +
+                    'padding: 20px;' +
+                '}' +
+                '.signature-section {' +
+                    'display: flex;' +
+                    'justify-content: space-between;' +
+                    'margin-bottom: 20px;' +
+                '}' +
+                '.signature-block {' +
+                    'flex: 1;' +
+                '}' +
+                '.signature-line {' +
+                    'margin: 8px 0;' +
+                '}' +
+                '.signature-line--seal {' +
+                    'font-weight: normal;' +
+                '}' +
+                '.blank-line {' +
+                    'display: inline-block;' +
+                    'border-bottom: 1px solid #000;' +
+                    'min-width: 80px;' +
+                    'height: 16px;' +
+                    'margin: 0 3px;' +
+                    'padding: 0 5px;' +
+                '}' +
+                '.template-variable-remove {' +
+                    'display: none;' +
+                '}' +
+                '@media print {' +
+                    'body { padding: 10mm; }' +
+                '}' +
+            '</style>' +
+        '</head>' +
+        '<body>' +
+            '<h1 style="text-align: center; margin-bottom: 40px;">' + title + '</h1>' +
+            bodyContent +
+        '</body>' +
+        '</html>';
     }
 
     // 템플릿 저장
