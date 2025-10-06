@@ -236,17 +236,15 @@
 
         /* 섹션 타입별 스타일 */
         .section-title {
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 18px;
+            font-weight: 700;
             text-align: center;
-            margin: 30px 0;
-            letter-spacing: 2px;
+            margin: 24px 0 12px;
         }
 
         .section-text,
         .section-footer,
-        .section-dotted-box,
-        .section-title {
+        .section-dotted-box {
             font-size: 14px;
             line-height: 1.4;
             text-align: justify;
@@ -1048,7 +1046,7 @@
         // [VARIABLE_NAME] 형식을 변수 span으로 복원
         let processedContent = content;
         if (normalizedType !== 'html' && normalizedType !== 'signature') {
-            processedContent = convertBracketsToVariables(content || '');
+            // processedContent = convertBracketsToVariables(content || '');
         } else if (normalizedType === 'signature') {
             // 서명란은 기본 템플릿 사용 (content가 있으면 그대로 사용)
             if (content) {
@@ -1300,6 +1298,9 @@
         <div style="display: flex; gap: 6px; justify-content: center; padding: 8px;">
             <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('text', this)">
                 <i class="bi bi-text-left"></i> 텍스트
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('title', this)">
+                <i class="bi bi-type"></i> 타이틀
             </button>
             <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('clause', this)">
                 <i class="bi bi-list-ol"></i> 조항
@@ -1596,11 +1597,10 @@
                     'border-radius: 4px;' +
                 '}' +
                 '.section-title {' +
-                    'font-size: 24px;' +
-                    'font-weight: bold;' +
+                    'font-size: 18px;' +
+                    'font-weight: 700;' +
                     'text-align: center;' +
-                    'margin: 30px 0;' +
-                    'letter-spacing: 2px;' +
+                    'margin: 24px 0 12px;' +
                 '}' +
                 '.section-footer {' +
                     'margin-top: 40px;' +
