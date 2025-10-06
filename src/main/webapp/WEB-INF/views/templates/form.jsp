@@ -751,11 +751,10 @@
             if (!trimmed) {
                 return [];
             }
-            const decoded = decodeHtmlEntities(trimmed);
             try {
-                parsed = JSON.parse(decoded);
+                parsed = JSON.parse(trimmed);
             } catch (error) {
-                console.warn('Failed to parse sections JSON (first pass)', error);
+                console.warn('Failed to parse sections JSON', error);
                 return [];
             }
         }
@@ -1070,17 +1069,11 @@
 
             case 'clause':
                 clauseCounter++;
-                // 조항은 전체 HTML을 포함할 수 있으므로 직접 처리
-                if (content && content.includes('section-clause')) {
-                    // 이미 clause HTML 형식이면 그대로 사용하되 변수만 복원
-                    innerHTML = convertBracketsToVariables(content);
-                } else {
-                    // 텍스트만 있으면 새로 생성
-                    innerHTML = '<div class="section-clause">' +
-                        '<span class="clause-number">' + clauseCounter + '.</span>' +
-                        '<span contenteditable="true" data-placeholder="조항 내용을 입력하세요...">' + (processedContent || '') + '</span>' +
-                        '</div>';
-                }
+                // 조항은 번호를 자동 생성하고 내용만 복원
+                innerHTML = '<div class="section-clause">' +
+                    '<span class="clause-number">' + clauseCounter + '.</span>' +
+                    '<span contenteditable="true" data-placeholder="조항 내용을 입력하세요...">' + (processedContent || '') + '</span>' +
+                    '</div>';
                 break;
 
             case 'dotted':
@@ -1379,9 +1372,9 @@
                 if (numberElement) {
                     numberElement.textContent = clauseIndex + '.';
                 }
-                // 조항 전체 HTML을 저장 (번호 포함)
-                const clauseElement = section.querySelector('.section-clause');
-                content = clauseElement ? clauseElement.innerHTML : '';
+                // 조항 내용만 저장 (번호 제외)
+                const clauseContentElement = section.querySelector('.section-clause > [contenteditable="true"]');
+                content = clauseContentElement ? clauseContentElement.innerHTML : '';
             } else {
                 const editableElement = section.querySelector('[contenteditable="true"]');
                 content = editableElement ? editableElement.innerHTML : '';
