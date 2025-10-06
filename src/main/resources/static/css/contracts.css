@@ -696,3 +696,44 @@
     color: #28a745;
     font-weight: 600;
 }
+
+/* 서명 스탬프 스타일 */
+.signature-line--seal {
+    position: relative;
+    min-height: 90px;
+    white-space: nowrap;
+}
+
+.signature-stamp-label {
+    margin-left: 8px;
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+}
+
+.signature-stamp-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.signature-stamp-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    opacity: 0.9;
+}
+
+.signature-stamp-image-element {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* 템플릿 조항 스타일은 template-preview.css에서 관리 */

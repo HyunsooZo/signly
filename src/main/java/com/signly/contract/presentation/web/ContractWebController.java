@@ -101,12 +101,16 @@ public class ContractWebController {
             // 폼 화면으로 진행
             ContractForm form = new ContractForm();
 
-            // 템플릿이 지정된 경우 템플릿 정보 로드
+            // 템플릿이 지정된 경우 템플릿 정보 로드 (프리셋 레이아웃으로 표시)
             if (templateId != null && !templateId.isEmpty()) {
                 TemplateResponse template = templateService.getTemplate(resolvedUserId, templateId);
                 form.setTemplateId(templateId);
                 form.setTitle(template.getTitle());
                 form.setContent(template.getContent());
+                // 템플릿을 프리셋처럼 사용
+                model.addAttribute("selectedTemplate", templateId);
+                model.addAttribute("selectedTemplateTitle", template.getTitle());
+                model.addAttribute("selectedTemplateContent", template.getRenderedHtml());
             }
 
             // 활성 템플릿 목록 로드

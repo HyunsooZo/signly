@@ -120,10 +120,7 @@
                                                         </a>
                                                         <c:if test="${not empty template.previewText}">
                                                             <br>
-                                                            <small class="text-muted">
-                                                                ${template.previewText.length() > 120 ?
-                                                                  template.previewText.substring(0, 120).concat('...') :
-                                                                  template.previewText}
+                                                            <small class="text-muted preview-text" data-html="${fn:escapeXml(template.previewText)}">
                                                             </small>
                                                         </c:if>
                                                     </td>
@@ -301,6 +298,28 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // HTML 태그 제거 및 텍스트만 추출
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.preview-text').forEach(function(el) {
+                const html = el.getAttribute('data-html');
+                if (html) {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = html;
+                    // 이중 인코딩된 경우 한번 더 디코딩
+                    let decoded = temp.textContent || temp.innerText || '';
+                    if (decoded.includes('&lt;') || decoded.includes('&gt;')) {
+                        temp.innerHTML = decoded;
+                        decoded = temp.textContent || temp.innerText || '';
+                    }
+                    let text = decoded.trim().replace(/\s+/g, ' ');
+                    if (text.length > 120) {
+                        text = text.substring(0, 120) + '...';
+                    }
+                    el.textContent = text;
+                }
+            });
+        });
+
         function previewTemplateButton(button) {
             const templateId = button.getAttribute('data-template-id');
             const title = button.getAttribute('data-template-title') || '템플릿 미리보기';
@@ -309,7 +328,13 @@
         }
 
         function previewTemplateModal(templateId, title, htmlContent) {
-            const decoded = decodeHtml(htmlContent).trim();
+            let decoded = decodeHtml(htmlContent).trim();
+
+            // 변수를 밑줄로 변환
+            decoded = decoded.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, '<span style="display: inline-block; border-bottom: 1px solid #000; min-width: 60px; height: 16px; margin: 0 3px;"></span>');
+            // [VARIABLE_NAME] 형식도 밑줄로 변환
+            decoded = decoded.replace(/\[[\w_]+\]/g, '<span style="display: inline-block; border-bottom: 1px solid #000; min-width: 60px; height: 16px; margin: 0 3px;"></span>');
+
             const previewContent = decoded ? decoded : '<p class="text-muted">템플릿 내용이 비어있습니다.</p>';
 
             document.getElementById('previewModalTitle').textContent = title;

@@ -92,8 +92,7 @@
                         </h5>
                     </div>
                     <div class="card-body p-0">
-                        <div class="template-content">
-                            <c:out value="${template.renderedHtml}" escapeXml="false" />
+                        <div class="template-content" id="templateContent">
                         </div>
                     </div>
                 </div>
@@ -263,6 +262,30 @@
         const csrfParam = '${_csrf.parameterName}';
         const csrfToken = '${_csrf.token}';
 
+        // 페이지 로드 시 템플릿 내용 디코딩 및 표시
+        document.addEventListener('DOMContentLoaded', function() {
+            const templateContent = document.getElementById('templateContent');
+            const rawHtml = `<c:out value="${template.renderedHtml}" escapeXml="true" />`;
+
+            // 이중 인코딩 디코딩
+            const temp = document.createElement('textarea');
+            temp.innerHTML = rawHtml;
+            let decoded = temp.value;
+
+            // HTML 엔티티가 남아있으면 한번 더 디코딩
+            if (decoded.includes('&lt;') || decoded.includes('&gt;')) {
+                temp.innerHTML = decoded;
+                decoded = temp.value;
+            }
+
+            // 변수를 밑줄로 변환
+            decoded = decoded.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, '<span style="display: inline-block; border-bottom: 1px solid #000; min-width: 60px; height: 16px; margin: 0 3px;"></span>');
+            // [VARIABLE_NAME] 형식도 밑줄로 변환
+            decoded = decoded.replace(/\[[\w_]+\]/g, '<span style="display: inline-block; border-bottom: 1px solid #000; min-width: 60px; height: 16px; margin: 0 3px;"></span>');
+
+            templateContent.innerHTML = decoded;
+        });
+
         function appendCsrfField(form) {
             if (!csrfParam || !csrfToken) {
                 return;
@@ -275,7 +298,13 @@
         }
 
         function previewTemplate() {
-            const html = decodeHtml(`${template.renderedHtml}`);
+            let html = decodeHtml(`${template.renderedHtml}`);
+
+            // 변수를 밑줄로 변환
+            html = html.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, '<span style="display: inline-block; border-bottom: 1px solid #000; min-width: 60px; height: 16px; margin: 0 3px;"></span>');
+            // [VARIABLE_NAME] 형식도 밑줄로 변환
+            html = html.replace(/\[[\w_]+\]/g, '<span style="display: inline-block; border-bottom: 1px solid #000; min-width: 60px; height: 16px; margin: 0 3px;"></span>');
+
             document.getElementById('previewContent').innerHTML = html || '<p class="text-muted">템플릿 내용이 비어있습니다.</p>';
             new bootstrap.Modal(document.getElementById('previewModal')).show();
         }

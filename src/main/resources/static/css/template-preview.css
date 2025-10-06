@@ -1,0 +1,193 @@
+/* 템플릿 미리보기 및 계약서 렌더링 공통 스타일 */
+
+/* iframe 내부(미리보기)에만 적용 */
+body:not(:has(.navbar)) {
+    font-family: 'Malgun Gothic', sans-serif;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 20mm;
+    line-height: 1.6;
+    font-size: 14px;
+    background: white;
+}
+
+/* 프리셋 문서 컨테이너 */
+.preset-document {
+    font-family: 'Malgun Gothic', sans-serif;
+    line-height: 1.6;
+    font-size: 14px;
+    padding: 20px;
+    background: white;
+}
+
+/* 계약서 상세 컨텐츠 */
+.contract-content {
+    font-family: 'Malgun Gothic', sans-serif;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+/* 텍스트 섹션 */
+.section-text {
+    margin: 15px 0;
+    text-align: justify;
+}
+
+/* 조항 섹션 */
+.section-clause {
+    margin: 20px 0;
+    padding-left: 20px;
+}
+
+.clause-number {
+    font-weight: bold;
+    display: inline-block;
+    min-width: 20px;
+}
+
+/* 점선 박스 */
+.section-dotted {
+    border: 0.5px dashed #666;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+/* 제목 섹션 */
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    margin: 24px 0 12px;
+}
+
+/* 꼬릿말 */
+.section-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+}
+
+/* 서명란 */
+.section-signature {
+    margin-top: 50px;
+    line-height: 2;
+}
+
+.signature-section {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.signature-block {
+    flex: 1;
+}
+
+.signature-line {
+    margin: 8px 0;
+}
+
+.signature-line--seal {
+    position: relative;
+    min-height: 90px;
+    white-space: nowrap;
+    font-weight: normal;
+}
+
+.signature-stamp-label {
+    margin-left: 8px;
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+}
+
+.signature-stamp-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.signature-stamp-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    opacity: 0.9;
+}
+
+/* 밑줄 표시 (변수 미리보기) */
+.blank-line {
+    display: inline-block;
+    border-bottom: 1px solid #000;
+    min-width: 80px;
+    height: 1.2em;
+    margin: 0 4px;
+    vertical-align: bottom;
+}
+
+/* 템플릿 조항 (CSS counter 자동 번호) */
+.contract-content,
+body,
+.preset-document {
+    counter-reset: clause-counter;
+}
+
+.template-clause {
+    counter-increment: clause-counter;
+    margin: 20px 0;
+    padding-left: 20px;
+}
+
+.template-clause::before {
+    content: counter(clause-counter) ". ";
+    font-weight: bold;
+    display: inline;
+    margin-right: 8px;
+}
+
+.template-clause p {
+    display: inline;
+    margin: 0;
+}
+
+/* 템플릿 기타 섹션 타입 */
+.template-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    margin: 24px 0 12px;
+}
+
+.template-header {
+    margin: 24px 0 12px;
+}
+
+.template-dotted {
+    border: 0.5px dashed #666;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.template-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+}
+
+.template-paragraph {
+    margin: 15px 0;
+    text-align: justify;
+}

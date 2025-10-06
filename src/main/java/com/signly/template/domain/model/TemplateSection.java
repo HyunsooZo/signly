@@ -51,7 +51,15 @@ public class TemplateSection {
     }
 
     private String defaultParagraph(String escaped) {
+        // metadata에 kind가 'clause'면 조항 스타일로 렌더링 (번호는 CSS counter 사용)
+        if (isClause()) {
+            return "<section class=\"template-clause\"><p>" + fallback(escaped, "조항 내용을 입력하세요") + "</p></section>";
+        }
         return "<section class=\"template-paragraph\"><p>" + fallback(escaped, "본문 내용을 입력하세요") + "</p></section>";
+    }
+
+    private boolean isClause() {
+        return metadata != null && "clause".equals(metadata.get("kind"));
     }
 
     private boolean allowsRawContent() {

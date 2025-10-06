@@ -12,6 +12,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
     <link href="/css/contracts.css" rel="stylesheet">
+    <link href="/css/template-preview.css" rel="stylesheet">
 </head>
 <body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -68,6 +69,9 @@
             </c:if>
             <c:if test="${not empty selectedPreset}">
                 <input type="hidden" name="selectedPreset" value="${selectedPreset}" />
+            </c:if>
+            <c:if test="${not empty selectedTemplate}">
+                <script type="application/json" id="selectedTemplateData">${selectedTemplateContent}</script>
             </c:if>
 
             <!-- 프리셋 레이아웃 -->
@@ -422,6 +426,11 @@
         function switchToPresetMode() {
             document.getElementById('normalLayout').style.display = 'none';
             document.getElementById('presetLayout').style.display = 'block';
+
+            // 일반 레이아웃의 required 필드 비활성화
+            document.querySelectorAll('#normalLayout [required]').forEach(field => {
+                field.removeAttribute('required');
+            });
         }
 
         // 일반 모드로 전환
@@ -916,6 +925,24 @@
             }
         }
 
+        function loadTemplateAsPreset(templateTitle, templateHtml) {
+            console.log('[DEBUG] Loading template as preset:', templateTitle);
+
+            let rendered = templateHtml || '';
+
+            // HTML 엔티티가 인코딩되어 있는지 확인
+            if (rendered.includes('&lt;') || rendered.includes('&gt;')) {
+                console.log('[DEBUG] Decoding HTML entities...');
+                rendered = decodeHtmlEntities(rendered);
+            }
+
+            // 프리셋 모드로 전환
+            switchToPresetMode();
+
+            // HTML 렌더링
+            renderPresetHtml(rendered, templateTitle);
+        }
+
         const presetSelect = document.getElementById('presetSelect');
         if (presetSelect && contractContentTextarea) {
             presetSelect.addEventListener('change', async (event) => {
@@ -1269,19 +1296,48 @@
         }
 
         function previewContract() {
-            if (!contractContentTextarea) {
-                return;
-            }
-
-            const raw = contractContentTextarea.value || '';
-            const withVariables = applyCustomVariablesToContent(raw);
-            const withSignature = applyOwnerSignature(withVariables);
-            const sanitized = sanitizeHtml(withSignature);
-
             const previewContent = document.getElementById('previewContent');
-            if (previewContent) {
-                previewContent.innerHTML = sanitized;
+            if (!previewContent) return;
+
+            let htmlToPreview = '';
+
+            // 프리셋 모드인 경우
+            const presetLayout = document.getElementById('presetLayout');
+            if (presetLayout && presetLayout.style.display !== 'none') {
+                // 프리셋 컨테이너에서 HTML 가져오기
+                const presetContainer = document.getElementById('presetHtmlContainer');
+                if (presetContainer) {
+                    const clone = presetContainer.cloneNode(true);
+
+                    // input 필드를 실제 값으로 교체
+                    const inputs = clone.querySelectorAll('input[data-variable-name]');
+                    inputs.forEach(input => {
+                        const value = input.value || '';
+                        const span = document.createElement('span');
+                        span.textContent = value;
+                        span.style.borderBottom = '1px solid #333';
+                        span.style.display = 'inline-block';
+                        span.style.minWidth = '80px';
+                        input.parentNode.replaceChild(span, input);
+                    });
+
+                    htmlToPreview = clone.innerHTML;
+                } else {
+                    htmlToPreview = '<p>프리셋 내용이 없습니다.</p>';
+                }
+            } else {
+                // 일반 모드인 경우
+                if (!contractContentTextarea) {
+                    htmlToPreview = '<p>계약서 내용이 없습니다.</p>';
+                } else {
+                    const raw = contractContentTextarea.value || '';
+                    const withVariables = applyCustomVariablesToContent(raw);
+                    const withSignature = applyOwnerSignature(withVariables);
+                    htmlToPreview = sanitizeHtml(withSignature);
+                }
             }
+
+            previewContent.innerHTML = htmlToPreview;
             new bootstrap.Modal(document.getElementById('previewModal')).show();
         }
 
@@ -1349,10 +1405,16 @@
 
         // 스크롤 이벤트 리스너 등록
                 
-                // 페이지 로드 시 selectedPreset이 있으면 자동으로 로드
+                // 페이지 로드 시 selectedPreset 또는 selectedTemplate이 있으면 자동으로 로드
         <c:if test="${not empty selectedPreset}">
         document.addEventListener('DOMContentLoaded', function() {
             loadPresetById('${selectedPreset}');
+        });
+        </c:if>
+        <c:if test="${not empty selectedTemplate}">
+        document.addEventListener('DOMContentLoaded', function() {
+            const templateContent = document.getElementById('selectedTemplateData')?.textContent || '';
+            loadTemplateAsPreset('${selectedTemplateTitle}', templateContent);
         });
         </c:if>
 

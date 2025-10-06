@@ -16,12 +16,19 @@ public class TemplateEntityMapper {
                 template.getContent().getJsonContent(),
                 template.getVersion(),
                 template.getStatus(),
+                false, // isPreset - 사용자 템플릿은 프리셋이 아님
+                null,  // presetId
                 template.getCreatedAt(),
                 template.getUpdatedAt()
         );
     }
 
     public ContractTemplate toDomain(TemplateEntity entity) {
+        // 프리셋은 도메인 객체로 변환하지 않음 (프리셋은 읽기 전용)
+        if (entity.isPreset()) {
+            throw new IllegalStateException("Preset templates cannot be converted to domain objects");
+        }
+
         return ContractTemplate.restore(
                 TemplateId.of(entity.getTemplateId()),
                 UserId.of(entity.getOwnerId()),

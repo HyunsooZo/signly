@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TemplateJpaRepository extends JpaRepository<TemplateEntity, String> {
 
@@ -22,4 +23,10 @@ public interface TemplateJpaRepository extends JpaRepository<TemplateEntity, Str
     boolean existsByOwnerIdAndTitle(String ownerId, String title);
 
     long countByOwnerId(String ownerId);
+
+    // 프리셋 관련 메서드
+    @Query("SELECT t FROM TemplateEntity t WHERE t.isPreset = true AND t.status = 'ACTIVE'")
+    List<TemplateEntity> findAllActivePresets();
+
+    Optional<TemplateEntity> findByIsPresetTrueAndPresetId(String presetId);
 }
