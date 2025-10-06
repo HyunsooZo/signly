@@ -425,6 +425,11 @@
         function switchToPresetMode() {
             document.getElementById('normalLayout').style.display = 'none';
             document.getElementById('presetLayout').style.display = 'block';
+
+            // 일반 레이아웃의 required 필드 비활성화
+            document.querySelectorAll('#normalLayout [required]').forEach(field => {
+                field.removeAttribute('required');
+            });
         }
 
         // 일반 모드로 전환

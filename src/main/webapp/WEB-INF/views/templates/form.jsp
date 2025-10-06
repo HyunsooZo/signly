@@ -89,6 +89,34 @@
             font-size: 16px;
         }
 
+        .toolbar-btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+            margin: 0 2px;
+            line-height: 1;
+            height: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toolbar-btn-sm i {
+            font-size: 12px !important;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 12px;
+            height: 12px;
+        }
+
+        .toolbar-btn-sm i::before {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px !important;
+        }
+
         /* 문서 편집 영역 */
         .document-container {
             background: white;
@@ -520,33 +548,32 @@
 <div class="builder-container">
     <!-- 툴바 -->
     <div class="toolbar">
-        <div class="d-flex align-items-center">
-            <div class="toolbar-section">
-                <strong class="me-3">섹션 추가:</strong>
-                <button class="toolbar-btn" onclick="addSection('text')">
-                    <i class="bi bi-text-left"></i> 일반 텍스트
-                </button>
-                <button class="toolbar-btn" onclick="addSection('clause')">
-                    <i class="bi bi-list-ol"></i> 조항
-                </button>
-                <button class="toolbar-btn" onclick="addSection('dotted')">
-                    <i class="bi bi-border-style"></i> 점선 박스
-                </button>
-                <button class="toolbar-btn" onclick="addSection('footer')">
-                    <i class="bi bi-text-center"></i> 꼬릿말
-                </button>
-                <button class="toolbar-btn" onclick="addSection('signature')">
-                    <i class="bi bi-pen"></i> 서명란
-                </button>
-                <button class="toolbar-btn" onclick="addSection('html')">
-                    <i class="bi bi-code-slash"></i> HTML
-                </button>
-            </div>
-            <div class="toolbar-section">
-                <button class="toolbar-btn" onclick="showVariableModal()">
-                    <i class="bi bi-braces"></i> 변수 추가
-                </button>
-            </div>
+        <div class="d-flex align-items-center flex-wrap gap-2">
+            <strong class="me-2" style="font-size: 0.9rem;">변수 추가하기:</strong>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYER]')" title="사업주명">
+                <i class="bi bi-person-badge"></i> 사업주명
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[COMPANY_NAME]')" title="사업체명">
+                <i class="bi bi-building"></i> 회사명
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYEE]')" title="근로자명">
+                <i class="bi bi-person"></i> 근로자명
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[CONTRACT_DATE]')" title="계약 체결일">
+                <i class="bi bi-calendar-event"></i> 계약일
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[WORKPLACE]')" title="근무 장소">
+                <i class="bi bi-geo-alt"></i> 근무지
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[JOB_DESCRIPTION]')" title="업무 내용">
+                <i class="bi bi-briefcase"></i> 업무
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[MONTHLY_SALARY]')" title="월급">
+                <i class="bi bi-cash"></i> 월급
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm ms-auto" onclick="showVariableModal()">
+                <i class="bi bi-braces"></i> 더보기
+            </button>
         </div>
     </div>
 
@@ -830,6 +857,18 @@
         return html.replace(/<span class="template-variable"[^>]*>\s*<span>([^<]+)<\/span>[\s\S]*?<\/span>/g, '[$1]');
     }
 
+    // [VARIABLE_NAME] 형식을 변수 span으로 변환
+    function convertBracketsToVariables(html) {
+        if (!html) return '';
+
+        return html.replace(/\[([A-Z_]+)\]/g, function(match, varName) {
+            return '<span class="template-variable" contenteditable="false">' +
+                   '<span>' + varName + '</span>' +
+                   '<span class="template-variable-remove"></span>' +
+                   '</span>';
+        });
+    }
+
     // 수정된 normalizePreviewContent 함수 - 단순화
     function normalizePreviewContent(type, rawContent) {
         console.debug('[normalizePreviewContent] input:', type, JSON.stringify(rawContent));
@@ -844,10 +883,12 @@
         // signature와 html 타입은 HTML을 그대로 유지
         if (type === 'signature' || type === 'html') {
             console.debug('[normalizePreviewContent] signature/html - keeping HTML as is');
-            // 변수를 밑줄로 변환
+            // 변수를 밑줄로 변환 (span 형식)
             value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, function(match) {
                 return '<span class="blank-line"></span>';
             });
+            // [VARIABLE_NAME] 형식도 밑줄로 변환
+            value = value.replace(/\[[\w_]+\]/g, '<span class="blank-line"></span>');
             return value;
         }
 
@@ -1005,51 +1046,80 @@
         section.dataset.id = 'section-' + Date.now();
         setSectionMetadata(section, normalizedMetadata);
 
+        // [VARIABLE_NAME] 형식을 변수 span으로 복원
+        let processedContent = content;
+        if (normalizedType !== 'html' && normalizedType !== 'signature') {
+            processedContent = convertBracketsToVariables(content || '');
+        } else if (normalizedType === 'signature') {
+            // 서명란은 기본 템플릿 사용 (content가 있으면 그대로 사용)
+            if (content) {
+                processedContent = convertBracketsToVariables(content);
+            }
+        }
+
         let innerHTML = '';
 
         switch(normalizedType) {
             case 'text':
-                innerHTML = '<div contenteditable="true" class="section-text" data-placeholder="텍스트를 입력하세요...">' + (content || '') + '</div>';
+                innerHTML = '<div contenteditable="true" class="section-text" data-placeholder="텍스트를 입력하세요...">' + (processedContent || '') + '</div>';
                 break;
 
             case 'title':
-                innerHTML = '<div contenteditable="true" class="section-title" data-placeholder="제목을 입력하세요...">' + (content || '') + '</div>';
+                innerHTML = '<div contenteditable="true" class="section-title" data-placeholder="제목을 입력하세요...">' + (processedContent || '') + '</div>';
                 break;
 
             case 'clause':
                 clauseCounter++;
-                innerHTML = '<div class="section-clause">' +
-                    '<span class="clause-number">' + clauseCounter + '.</span>' +
-                    '<span contenteditable="true" data-placeholder="조항 내용을 입력하세요...">' + (content || '') + '</span>' +
-                    '</div>';
+                // 조항은 전체 HTML을 포함할 수 있으므로 직접 처리
+                if (content && content.includes('section-clause')) {
+                    // 이미 clause HTML 형식이면 그대로 사용하되 변수만 복원
+                    innerHTML = convertBracketsToVariables(content);
+                } else {
+                    // 텍스트만 있으면 새로 생성
+                    innerHTML = '<div class="section-clause">' +
+                        '<span class="clause-number">' + clauseCounter + '.</span>' +
+                        '<span contenteditable="true" data-placeholder="조항 내용을 입력하세요...">' + (processedContent || '') + '</span>' +
+                        '</div>';
+                }
                 break;
 
             case 'dotted':
-                innerHTML = '<div contenteditable="true" class="section-dotted-box" data-placeholder="점선 박스 내용을 입력하세요...">' + (content || '') + '</div>';
+                innerHTML = '<div contenteditable="true" class="section-dotted-box" data-placeholder="점선 박스 내용을 입력하세요...">' + (processedContent || '') + '</div>';
                 break;
 
             case 'footer':
-                innerHTML = '<div contenteditable="true" class="section-footer" data-placeholder="꼬릿말을 입력하세요...">' + (content || '') + '</div>';
+                innerHTML = '<div contenteditable="true" class="section-footer" data-placeholder="꼬릿말을 입력하세요...">' + (processedContent || '') + '</div>';
                 break;
 
             case 'signature':
-                innerHTML = '<div class="section-signature" contenteditable="true">' +
-                    '<div class="signature-section">' +
-                        '<div class="signature-block">' +
-                            '<div class="signature-line">(사업주) 사업체명: <span class="template-variable" contenteditable="false"><span>COMPANY_NAME</span><span class="template-variable-remove"></span></span></div>' +
-                            '<div class="signature-line" style="margin-left: 60px;">주소: <span class="template-variable" contenteditable="false"><span>EMPLOYER_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
-                            '<div class="signature-line signature-line--seal" style="margin-left: 60px;">대표자: <span class="template-variable" contenteditable="false"><span>EMPLOYER</span><span class="template-variable-remove"></span></span> (인)</div>' +
+                if (content && processedContent) {
+                    // 저장된 서명란이 있으면 복원
+                    innerHTML = '<div class="section-signature" contenteditable="true">' + processedContent + '</div>';
+                } else {
+                    // 기본 서명란 템플릿
+                    innerHTML = '<div class="section-signature" contenteditable="true">' +
+                        '<div class="signature-section">' +
+                            '<div class="signature-block">' +
+                                '<div class="signature-line">(사업주) 사업체명: <span class="template-variable" contenteditable="false"><span>COMPANY_NAME</span><span class="template-variable-remove"></span></span></div>' +
+                                '<div class="signature-line" style="margin-left: 60px;">주소: <span class="template-variable" contenteditable="false"><span>EMPLOYER_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
+                                '<div class="signature-line signature-line--seal" style="margin-left: 60px;">' +
+                                    '대표자: <span class="template-variable" contenteditable="false"><span>EMPLOYER</span><span class="template-variable-remove"></span></span> ' +
+                                    '<span class="signature-stamp-label">(인)' +
+                                        '<span class="signature-stamp-wrapper"><span class="template-variable" contenteditable="false"><span>EMPLOYER_SIGNATURE_IMAGE</span><span class="template-variable-remove"></span></span></span>' +
+                                    '</span>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="signature-block">' +
+                                '<div class="signature-line">(전화: <span class="template-variable" contenteditable="false"><span>EMPLOYER_PHONE</span><span class="template-variable-remove"></span></span>)</div>' +
+                            '</div>' +
                         '</div>' +
-                        '<div class="signature-block">' +
-                            '<div class="signature-line">(전화: <span class="template-variable" contenteditable="false"><span>EMPLOYER_PHONE</span><span class="template-variable-remove"></span></span>)</div>' +
+                        '<div style="margin-top: 30px;">' +
+                            '<div>(근로자) 주소: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div style="margin-left: 70px; margin-top: 15px;">연락처: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_PHONE</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div style="margin-left: 70px; margin-top: 15px;">성명: <span class="template-variable" contenteditable="false"><span>EMPLOYEE</span><span class="template-variable-remove"></span></span> (인)</div>' +
                         '</div>' +
-                    '</div>' +
-                    '<div style="margin-top: 30px;">' +
-                        '<div>(근로자) 주소: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
-                        '<div style="margin-left: 70px; margin-top: 15px;">연락처: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_PHONE</span><span class="template-variable-remove"></span></span></div>' +
-                        '<div style="margin-left: 70px; margin-top: 15px;">성명: <span class="template-variable" contenteditable="false"><span>EMPLOYEE</span><span class="template-variable-remove"></span></span> (인)</div>' +
-                    '</div>' +
-                '</div>';
+                    '</div>';
+                }
                 break;
 
             case 'html':
@@ -1059,11 +1129,20 @@
                     '</div>';
                 break;
             default:
-                innerHTML = '<div contenteditable="true" class="section-text" data-placeholder="텍스트를 입력하세요...">' + (content || '') + '</div>';
+                innerHTML = '<div contenteditable="true" class="section-text" data-placeholder="텍스트를 입력하세요...">' + (processedContent || '') + '</div>';
                 break;
         }
 
         section.innerHTML = innerHTML + createSectionControls();
+
+        // 변수 제거 버튼에 이벤트 추가
+        section.querySelectorAll('.template-variable-remove').forEach(btn => {
+            btn.onclick = function(e) {
+                e.stopPropagation();
+                btn.parentElement.remove();
+                updateSectionsData();
+            };
+        });
 
         return section;
     }
@@ -1225,23 +1304,23 @@
     // 섹션 추가 메뉴 표시
     function showAddSectionMenu(placeholder) {
         const menu = `
-        <div style="display: flex; gap: 10px; justify-content: center; padding: 10px;">
-            <button class="toolbar-btn" onclick="addSectionFromPlaceholder('text', this)">
+        <div style="display: flex; gap: 6px; justify-content: center; padding: 8px;">
+            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('text', this)">
                 <i class="bi bi-text-left"></i> 텍스트
             </button>
-            <button class="toolbar-btn" onclick="addSectionFromPlaceholder('clause', this)">
+            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('clause', this)">
                 <i class="bi bi-list-ol"></i> 조항
             </button>
-            <button class="toolbar-btn" onclick="addSectionFromPlaceholder('dotted', this)">
+            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('dotted', this)">
                 <i class="bi bi-border-style"></i> 점선
             </button>
-            <button class="toolbar-btn" onclick="addSectionFromPlaceholder('footer', this)">
+            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('footer', this)">
                 <i class="bi bi-text-center"></i> 꼬릿말
             </button>
-            <button class="toolbar-btn" onclick="addSectionFromPlaceholder('signature', this)">
+            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('signature', this)">
                 <i class="bi bi-pen"></i> 서명란
             </button>
-            <button class="toolbar-btn" onclick="addSectionFromPlaceholder('html', this)">
+            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('html', this)">
                 <i class="bi bi-code-slash"></i> HTML
             </button>
         </div>
@@ -1330,8 +1409,9 @@
 
                 const sectionsData = parseSectionsPayload(rawPayload);
                 console.debug('[TemplateEditor] parsed sections array:', sectionsData);
+                const documentBody = document.getElementById('documentBody');
+
                 if (sectionsData.length > 0) {
-                    const documentBody = document.getElementById('documentBody');
                     documentBody.innerHTML = '';
 
                     clauseCounter = 0;
@@ -1351,10 +1431,11 @@
                             documentBody.appendChild(section);
                         });
 
+                    // 섹션 로드 후 플레이스홀더 추가
+                    documentBody.appendChild(createPlaceholder());
                     updateSectionsData();
                 } else {
-                    // 섹션이 없을 때만 플레이스홀더 표시
-                    const documentBody = document.getElementById('documentBody');
+                    // 섹션이 없을 때도 플레이스홀더 표시
                     if (!documentBody.querySelector('.add-section-placeholder')) {
                         documentBody.appendChild(createPlaceholder());
                     }
@@ -1552,7 +1633,28 @@
                     'margin: 8px 0;' +
                 '}' +
                 '.signature-line--seal {' +
+                    'position: relative;' +
+                    'min-height: 90px;' +
+                    'white-space: nowrap;' +
                     'font-weight: normal;' +
+                '}' +
+                '.signature-stamp-label {' +
+                    'margin-left: 8px;' +
+                    'position: relative;' +
+                    'display: inline-block;' +
+                    'z-index: 1;' +
+                '}' +
+                '.signature-stamp-wrapper {' +
+                    'position: absolute;' +
+                    'top: 50%;' +
+                    'left: 50%;' +
+                    'transform: translate(-50%, -50%);' +
+                    'width: 90px;' +
+                    'height: 40px;' +
+                    'display: flex;' +
+                    'align-items: center;' +
+                    'justify-content: center;' +
+                    'pointer-events: none;' +
                 '}' +
                 '.blank-line {' +
                     'display: inline-block;' +
