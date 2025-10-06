@@ -12,6 +12,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
     <link href="/css/contracts.css" rel="stylesheet">
+    <link href="/css/template-preview.css" rel="stylesheet">
 </head>
 <body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -1295,19 +1296,48 @@
         }
 
         function previewContract() {
-            if (!contractContentTextarea) {
-                return;
-            }
-
-            const raw = contractContentTextarea.value || '';
-            const withVariables = applyCustomVariablesToContent(raw);
-            const withSignature = applyOwnerSignature(withVariables);
-            const sanitized = sanitizeHtml(withSignature);
-
             const previewContent = document.getElementById('previewContent');
-            if (previewContent) {
-                previewContent.innerHTML = sanitized;
+            if (!previewContent) return;
+
+            let htmlToPreview = '';
+
+            // 프리셋 모드인 경우
+            const presetLayout = document.getElementById('presetLayout');
+            if (presetLayout && presetLayout.style.display !== 'none') {
+                // 프리셋 컨테이너에서 HTML 가져오기
+                const presetContainer = document.getElementById('presetHtmlContainer');
+                if (presetContainer) {
+                    const clone = presetContainer.cloneNode(true);
+
+                    // input 필드를 실제 값으로 교체
+                    const inputs = clone.querySelectorAll('input[data-variable-name]');
+                    inputs.forEach(input => {
+                        const value = input.value || '';
+                        const span = document.createElement('span');
+                        span.textContent = value;
+                        span.style.borderBottom = '1px solid #333';
+                        span.style.display = 'inline-block';
+                        span.style.minWidth = '80px';
+                        input.parentNode.replaceChild(span, input);
+                    });
+
+                    htmlToPreview = clone.innerHTML;
+                } else {
+                    htmlToPreview = '<p>프리셋 내용이 없습니다.</p>';
+                }
+            } else {
+                // 일반 모드인 경우
+                if (!contractContentTextarea) {
+                    htmlToPreview = '<p>계약서 내용이 없습니다.</p>';
+                } else {
+                    const raw = contractContentTextarea.value || '';
+                    const withVariables = applyCustomVariablesToContent(raw);
+                    const withSignature = applyOwnerSignature(withVariables);
+                    htmlToPreview = sanitizeHtml(withSignature);
+                }
             }
+
+            previewContent.innerHTML = htmlToPreview;
             new bootstrap.Modal(document.getElementById('previewModal')).show();
         }
 
