@@ -37,8 +37,9 @@ public class SigningWebController {
             );
 
             if (alreadySigned) {
-                model.addAttribute("errorMessage", "이미 서명된 계약서입니다.");
-                return "sign/already_signed";
+                // 이미 서명된 경우 완료 페이지로 리다이렉트
+                logger.info("이미 서명 완료된 계약서, 완료 페이지로 이동: token={}", token);
+                return "redirect:/sign/" + token + "/complete";
             }
 
             model.addAttribute("pageTitle", "계약서 서명");
