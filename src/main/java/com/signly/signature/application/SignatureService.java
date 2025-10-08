@@ -81,7 +81,9 @@ public class SignatureService {
     @Transactional(readOnly = true)
     public boolean isContractSigned(String contractId, String signerEmail) {
         ContractId cId = ContractId.of(contractId);
-        return signatureRepository.existsByContractIdAndSignerEmail(cId, signerEmail);
+        boolean exists = signatureRepository.existsByContractIdAndSignerEmail(cId, signerEmail);
+        logger.info("서명 여부 체크: contractId={}, signerEmail={}, exists={}", contractId, signerEmail, exists);
+        return exists;
     }
 
     @Transactional(readOnly = true)

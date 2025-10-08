@@ -106,6 +106,7 @@ public class SigningWebController {
                                  @RequestParam String signerName,
                                  HttpServletRequest request) {
         try {
+            logger.info("서명 처리 요청: token={}, signerEmail={}", token, signerEmail);
             ContractResponse contract = contractService.getContractByToken(token);
 
             String ipAddress = getClientIpAddress(request);

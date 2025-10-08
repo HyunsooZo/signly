@@ -16,6 +16,8 @@ import com.signly.user.domain.model.User;
 import com.signly.user.domain.model.UserId;
 import com.signly.user.domain.model.UserType;
 import com.signly.user.domain.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class ContractService {
+
+    private final Logger logger = LoggerFactory.getLogger(ContractService.class);
 
     private final ContractRepository contractRepository;
     private final UserRepository userRepository;
@@ -320,9 +324,15 @@ public class ContractService {
 
     @Transactional(readOnly = true)
     public ContractResponse getContractByToken(String token) {
+        logger.info("토큰으로 계약서 조회: token={}", token);
         SignToken signToken = SignToken.of(token);
         Contract contract = contractRepository.findBySignToken(signToken)
-                .orElseThrow(() -> new NotFoundException("유효하지 않은 서명 링크입니다"));
+                .orElseThrow(() -> {
+                    logger.error("서명 토큰으로 계약서를 찾을 수 없음: token={}", token);
+                    return new NotFoundException("유효하지 않은 서명 링크입니다");
+                });
+
+        logger.info("계약서 찾음: contractId={}, status={}", contract.getId().getValue(), contract.getStatus());
 
         if (contract.isExpired()) {
             throw new ValidationException("만료된 계약서입니다");
