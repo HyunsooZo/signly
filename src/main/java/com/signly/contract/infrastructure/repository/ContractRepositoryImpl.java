@@ -9,6 +9,8 @@ import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
 import com.signly.contract.infrastructure.entity.ContractJpaEntity;
 import com.signly.contract.infrastructure.mapper.ContractEntityMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 
 @Repository
 public class ContractRepositoryImpl implements ContractRepository {
+
+    private static final Logger logger = LoggerFactory.getLogger(ContractRepositoryImpl.class);
 
     private final ContractJpaRepository jpaRepository;
     private final ContractEntityMapper entityMapper;
@@ -113,7 +117,13 @@ public class ContractRepositoryImpl implements ContractRepository {
 
     @Override
     public Optional<Contract> findBySignToken(SignToken signToken) {
+        logger.info("DB 쿼리: findBySignToken - signToken={}", signToken.value());
         ContractJpaEntity entity = jpaRepository.findBySignToken(signToken.value());
+        logger.info("DB 쿼리 결과: entity found={}", entity != null);
+        if (entity != null) {
+            logger.info("Entity details: id={}, signToken={}, status={}",
+                entity.getId(), entity.getSignToken(), entity.getStatus());
+        }
         return entity != null ? Optional.of(entityMapper.toDomain(entity)) : Optional.empty();
     }
 }
