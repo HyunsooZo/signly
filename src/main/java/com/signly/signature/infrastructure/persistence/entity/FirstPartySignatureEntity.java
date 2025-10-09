@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 public class FirstPartySignatureEntity extends BaseEntity {
 
     @Id
-    @Column(name = "signature_id", length = 36)
+    @Column(name = "signature_id", length = 26)
     private String signatureId;
 
-    @Column(name = "owner_id", length = 36, nullable = false, unique = true)
+    @Column(name = "owner_id", length = 26, nullable = false, unique = true)
     private String ownerId;
 
     @Column(name = "storage_path", nullable = false, length = 512)

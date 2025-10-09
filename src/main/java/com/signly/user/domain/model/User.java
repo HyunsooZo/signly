@@ -97,6 +97,11 @@ public class User extends AggregateRoot {
         updateTimestamp();
     }
 
+    public void resetPassword(Password newPassword, PasswordEncoder passwordEncoder) {
+        this.encodedPassword = passwordEncoder.encode(newPassword.getValue());
+        updateTimestamp();
+    }
+
     private static void validateCreateParameters(Email email, Password password, String name, UserType userType) {
         if (email == null) {
             throw new ValidationException("이메일은 필수입니다");

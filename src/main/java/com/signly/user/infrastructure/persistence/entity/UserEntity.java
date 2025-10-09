@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class UserEntity {
 
     @Id
-    @Column(name = "user_id", length = 36)
+    @Column(name = "user_id", length = 26)
     private String userId;
 
     @Column(name = "email", length = 255, unique = true, nullable = false)

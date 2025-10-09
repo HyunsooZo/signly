@@ -70,6 +70,14 @@ public class EmailService {
                 html.append("<p>").append(variables.get("signerName")).append("님이 계약서에 서명하였습니다.</p>");
                 html.append("<p>계약서: ").append(variables.get("contractTitle")).append("</p>");
                 break;
+            case PASSWORD_RESET:
+                html.append("<p>안녕하세요, ").append(variables.get("userName")).append("님</p>");
+                html.append("<p>비밀번호 재설정을 요청하셨습니다.</p>");
+                html.append("<p>아래 링크를 클릭하여 비밀번호를 재설정해주세요:</p>");
+                html.append("<p><a href='").append(variables.get("resetUrl")).append("' style='display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;'>비밀번호 재설정하기</a></p>");
+                html.append("<p>이 링크는 ").append(variables.get("expiryHours")).append("시간 동안 유효합니다.</p>");
+                html.append("<p style='color: #666; font-size: 12px;'>본인이 요청하지 않은 경우 이 메일을 무시하셔도 됩니다.</p>");
+                break;
             default:
                 html.append("<p>Signly에서 알림 메일을 보내드립니다.</p>");
         }
@@ -136,5 +144,17 @@ public class EmailService {
         );
 
         sendTemplateEmail(to, EmailTemplate.USER_WELCOME, variables);
+    }
+
+    public void sendPasswordResetEmail(String to, String userName, String resetToken, String baseUrl) {
+        String resetUrl = baseUrl + "/reset-password?token=" + resetToken;
+        Map<String, Object> variables = Map.of(
+            "userName", userName,
+            "resetUrl", resetUrl,
+            "expiryHours", "24",
+            "companyName", "Signly"
+        );
+
+        sendTemplateEmail(to, EmailTemplate.PASSWORD_RESET, variables);
     }
 }

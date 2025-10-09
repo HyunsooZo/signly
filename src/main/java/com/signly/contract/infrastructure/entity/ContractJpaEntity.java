@@ -22,13 +22,13 @@ import java.util.List;
 public class ContractJpaEntity extends BaseEntity {
 
     @Id
-    @Column(name = "id", length = 36)
+    @Column(name = "id", length = 26)
     private String id;
 
-    @Column(name = "creator_id", nullable = false, length = 36)
+    @Column(name = "creator_id", nullable = false, length = 26)
     private String creatorId;
 
-    @Column(name = "template_id", length = 36)
+    @Column(name = "template_id", length = 26)
     private String templateId;
 
     @Column(name = "title", nullable = false, length = 200)
@@ -63,7 +63,7 @@ public class ContractJpaEntity extends BaseEntity {
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<SignatureJpaEntity> signatures = new ArrayList<>();
 
-    @Column(name = "sign_token", nullable = false, unique = true, length = 36)
+    @Column(name = "sign_token", nullable = false, unique = true, length = 26)
     private String signToken;
 
     @Column(name = "expires_at")

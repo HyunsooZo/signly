@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 public class SignatureEntity extends BaseEntity {
 
     @Id
-    @Column(name = "signature_id", length = 36)
+    @Column(name = "signature_id", length = 26)
     private String signatureId;
 
-    @Column(name = "contract_id", length = 36, nullable = false)
+    @Column(name = "contract_id", length = 26, nullable = false)
     private String contractId;
 
     @Column(name = "signer_email", length = 255, nullable = false)
