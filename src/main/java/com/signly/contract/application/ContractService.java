@@ -73,10 +73,6 @@ public class ContractService {
             firstPartySignatureService.ensureSignatureExists(userId);
         }
 
-        if (contractRepository.existsByCreatorIdAndTitle(userIdObj, command.title())) {
-            throw new ValidationException("이미 같은 제목의 계약서가 존재합니다");
-        }
-
         TemplateId templateId = StringUtils.hasText(command.templateId()) ? TemplateId.of(command.templateId().trim()) : null;
         if (templateId != null) {
             ContractTemplate template = templateRepository.findById(templateId)
@@ -126,11 +122,6 @@ public class ContractService {
                 .orElseThrow(() -> new NotFoundException("계약서를 찾을 수 없습니다"));
 
         validateOwnership(userId, contract);
-
-        if (!command.title().equals(contract.getTitle()) &&
-                contractRepository.existsByCreatorIdAndTitle(contract.getCreatorId(), command.title())) {
-            throw new ValidationException("이미 같은 제목의 계약서가 존재합니다");
-        }
 
         contract.updateTitle(command.title());
         ContractContent newContent = ContractContent.of(command.content());
