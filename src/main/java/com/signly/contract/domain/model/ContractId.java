@@ -1,7 +1,7 @@
 package com.signly.contract.domain.model;
 
 import com.signly.common.exception.ValidationException;
-import com.signly.common.util.UuidGenerator;
+import com.signly.common.util.UlidGenerator;
 
 import java.util.Objects;
 
@@ -20,7 +20,7 @@ public class ContractId {
     }
 
     public static ContractId generate() {
-        return new ContractId(UuidGenerator.generate());
+        return new ContractId(UlidGenerator.generate());
     }
 
     public String getValue() {

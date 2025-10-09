@@ -1,7 +1,8 @@
 package com.signly.document.domain.model;
 
+import com.signly.common.util.UlidGenerator;
+
 import java.util.Objects;
-import java.util.UUID;
 
 public class DocumentId {
     private final String value;
@@ -14,7 +15,7 @@ public class DocumentId {
     }
 
     public static DocumentId generate() {
-        return new DocumentId(UUID.randomUUID().toString());
+        return new DocumentId(UlidGenerator.generate());
     }
 
     public static DocumentId of(String value) {

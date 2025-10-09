@@ -37,8 +37,14 @@ public class SignatureService {
 
         ContractId contractId = ContractId.of(command.contractId());
 
+        // 이미 서명이 존재하는 경우 기존 서명 반환 (중복 방지)
         if (signatureRepository.existsByContractIdAndSignerEmail(contractId, command.signerEmail())) {
-            throw new BusinessException("이미 서명된 계약서입니다");
+            logger.warn("이미 서명이 존재함, 기존 서명 반환: contractId={}, signerEmail={}",
+                command.contractId(), command.signerEmail());
+            ContractSignature existingSignature = signatureRepository
+                .findByContractIdAndSignerEmail(contractId, command.signerEmail())
+                .orElseThrow(() -> new NotFoundException("서명을 찾을 수 없습니다"));
+            return mapper.toResponse(existingSignature);
         }
 
         ContractSignature signature = ContractSignature.create(
@@ -81,7 +87,9 @@ public class SignatureService {
     @Transactional(readOnly = true)
     public boolean isContractSigned(String contractId, String signerEmail) {
         ContractId cId = ContractId.of(contractId);
-        return signatureRepository.existsByContractIdAndSignerEmail(cId, signerEmail);
+        boolean exists = signatureRepository.existsByContractIdAndSignerEmail(cId, signerEmail);
+        logger.info("서명 여부 체크: contractId={}, signerEmail={}, exists={}", contractId, signerEmail, exists);
+        return exists;
     }
 
     @Transactional(readOnly = true)

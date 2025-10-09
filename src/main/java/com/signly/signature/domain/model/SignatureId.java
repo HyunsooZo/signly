@@ -1,6 +1,7 @@
 package com.signly.signature.domain.model;
 
 import com.signly.common.exception.ValidationException;
+import com.signly.common.util.UlidGenerator;
 
 public class SignatureId {
     private final String value;
@@ -17,7 +18,7 @@ public class SignatureId {
     }
 
     public static SignatureId generate() {
-        return new SignatureId(java.util.UUID.randomUUID().toString());
+        return new SignatureId(UlidGenerator.generate());
     }
 
     public String value() {
