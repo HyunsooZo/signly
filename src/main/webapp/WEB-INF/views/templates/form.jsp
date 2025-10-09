@@ -9,522 +9,7 @@
     <title>${pageTitle} - Signly</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #0066cc;
-            --secondary-color: #6c757d;
-            --border-color: #dee2e6;
-            --hover-bg: #f8f9fa;
-        }
-
-        body {
-            background: #f5f7fa;
-            font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-
-        /* 네비게이션 */
-        .navbar {
-            box-shadow: 0 2px 4px rgba(0,0,0,.08);
-        }
-
-        /* 메인 컨테이너 */
-        .builder-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px 15px;
-        }
-
-        /* 툴바 */
-        .toolbar {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.08);
-            position: sticky;
-            top: 20px;
-            z-index: 100;
-        }
-
-        .toolbar-section {
-            border-right: 1px solid var(--border-color);
-            padding-right: 20px;
-            margin-right: 20px;
-        }
-
-        .toolbar-section:last-child {
-            border-right: none;
-            padding-right: 0;
-            margin-right: 0;
-        }
-
-        .toolbar-btn {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 8px 16px;
-            margin: 0 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .toolbar-btn:hover {
-            background: var(--hover-bg);
-            border-color: var(--primary-color);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,.1);
-        }
-
-        .toolbar-btn.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .toolbar-btn i {
-            font-size: 16px;
-        }
-
-        .toolbar-btn-sm {
-            padding: 6px 12px;
-            font-size: 13px;
-            margin: 0 2px;
-            line-height: 1;
-            height: auto;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .toolbar-btn-sm i {
-            font-size: 12px !important;
-            line-height: 1;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 12px;
-            height: 12px;
-        }
-
-        .toolbar-btn-sm i::before {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px !important;
-        }
-
-        /* 문서 편집 영역 */
-        .document-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,.08);
-            max-width: 900px;
-            margin: 0 auto;
-            min-height: 800px;
-        }
-
-        .document-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 30px;
-            border-radius: 12px 12px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .document-title-input {
-            background: rgba(255,255,255,.2);
-            border: 2px solid rgba(255,255,255,.3);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            width: 400px;
-        }
-
-        .document-title-input::placeholder {
-            color: rgba(255,255,255,.7);
-        }
-
-        .document-title-input:focus {
-            background: rgba(255,255,255,.3);
-            border-color: rgba(255,255,255,.5);
-            outline: none;
-        }
-
-        .document-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .document-body {
-            padding: 40px;
-            font-family: 'Malgun Gothic', sans-serif;
-            line-height: 1.8;
-            color: #333;
-        }
-
-        /* 편집 가능 섹션 */
-        .editable-section {
-            position: relative;
-            padding: 6px;
-            margin: 8px 0;
-            border: 2px solid transparent;
-            border-radius: 4px;
-            transition: all 0.2s;
-            min-height: 44px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .editable-section > :first-child {
-            flex: 1 1 auto;
-            width: 100%;
-        }
-
-        .editable-section:hover {
-            background: rgba(0, 102, 204, 0.05);
-            border-color: rgba(0, 102, 204, 0.2);
-        }
-
-        .editable-section.active {
-            background: rgba(0, 102, 204, 0.08);
-            border-color: var(--primary-color);
-        }
-
-        .section-controls {
-            position: absolute;
-            top: -30px;
-            right: 0;
-            display: none;
-            gap: 5px;
-            background: white;
-            padding: 4px;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.15);
-        }
-
-        .editable-section:hover .section-controls,
-        .editable-section.active .section-controls {
-            display: flex;
-        }
-
-        .section-control-btn {
-            width: 28px;
-            height: 28px;
-            border: 1px solid var(--border-color);
-            background: white;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .section-control-btn:hover {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        /* 섹션 타입별 스타일 */
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            text-align: center;
-            margin: 24px 0 12px;
-        }
-
-        .section-text,
-        .section-footer,
-        .section-dotted-box {
-            font-size: 14px;
-            line-height: 1.4;
-            text-align: justify;
-        }
-
-        .section-clause {
-            margin: 4px 0;
-            padding: 4px 6px;
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            border-radius: 4px;
-            background: transparent;
-        }
-
-        .clause-number {
-            font-weight: bold;
-            display: inline-block;
-            min-width: 18px;
-            text-align: right;
-            margin-top: 0;
-        }
-
-        .section-clause span[contenteditable="true"],
-        .section-text[contenteditable="true"],
-        .section-footer[contenteditable="true"],
-        .section-dotted-box[contenteditable="true"],
-        .section-title[contenteditable="true"] {
-            min-height: 0;
-            line-height: 1.4;
-            padding: 2px 4px;
-            flex: 1;
-            display: block;
-        }
-
-        /* Placeholder 스타일 */
-        [contenteditable="true"][data-placeholder]:empty:before {
-            content: attr(data-placeholder);
-            color: #999;
-            pointer-events: none;
-            font-style: italic;
-        }
-
-        .section-dotted-box {
-            border: 1px dashed #999;
-            margin: 12px 0;
-            border-radius: 4px;
-            background: #fafafa;
-        }
-
-        .section-footer {
-            margin-top: 12px;
-            padding-top: 8px;
-            border-top: 1px solid #ddd;
-            text-align: center;
-            font-size: 13px;
-            color: #666;
-        }
-
-        .section-signature {
-            margin: 30px 0;
-            padding: 20px;
-        }
-
-        .signature-section {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .signature-block {
-            flex: 1;
-        }
-
-        .signature-line {
-            margin: 8px 0;
-        }
-
-        .signature-line--seal {
-            font-weight: normal;
-        }
-
-        /* 변수 스타일 */
-        .template-variable {
-            background: #ffe4b5;
-            padding: 2px 8px;
-            border-radius: 4px;
-            border: 1px solid #ffa500;
-            font-weight: 600;
-            color: #d2691e;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin: 0 2px;
-            cursor: default;
-            transition: all 0.2s;
-        }
-
-        .template-variable:hover {
-            background: #ffd700;
-        }
-
-        .template-variable-remove {
-            cursor: pointer;
-            font-size: 16px;
-            line-height: 1;
-            padding: 0 2px;
-            margin-left: 2px;
-            color: #d2691e;
-            font-weight: bold;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-
-        .template-variable-remove::after {
-            content: '×';
-        }
-
-        .template-variable-remove:hover {
-            opacity: 1;
-            color: #c0392b;
-        }
-
-        /* 플레이스홀더 */
-        .add-section-placeholder {
-            border: 2px dashed #ccc;
-            padding: 20px;
-            text-align: center;
-            margin: 20px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #999;
-        }
-
-        .add-section-placeholder:hover {
-            border-color: var(--primary-color);
-            background: var(--hover-bg);
-            color: var(--primary-color);
-        }
-
-        .add-section-placeholder i {
-            font-size: 24px;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        /* 모달 */
-        .variable-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,.2);
-            z-index: 1000;
-            max-width: 600px;
-            max-height: 80vh;
-            width: 90%;
-            display: none;
-            overflow-y: auto;
-        }
-
-        .variable-modal.show {
-            display: block;
-        }
-
-        .modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,.5);
-            z-index: 999;
-            display: none;
-        }
-
-        .modal-backdrop.show {
-            display: block;
-        }
-
-        .variable-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .variable-item {
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            font-size: 13px;
-        }
-
-        .variable-item:hover {
-            background: var(--hover-bg);
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-        }
-
-        /* HTML 에디터 */
-        .html-editor {
-            width: 100%;
-            min-height: 200px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background: #f8f8f8;
-        }
-
-        /* 반응형 */
-        @media (max-width: 768px) {
-            .toolbar {
-                position: static;
-            }
-
-            .signature-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .variable-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* 애니메이션 */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .editable-section {
-            animation: slideIn 0.3s ease;
-        }
-
-        /* 사이드바 액션 버튼 */
-        .floating-actions {
-            position: fixed;
-            right: 30px;
-            bottom: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 50;
-        }
-
-        .floating-btn {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,.15);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .floating-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0,0,0,.2);
-        }
-    </style>
+    <link href="/css/template-builder.css" rel="stylesheet">
 </head>
 <body>
 
@@ -547,7 +32,7 @@
     <!-- 툴바 -->
     <div class="toolbar">
         <div class="d-flex align-items-center flex-wrap gap-2">
-            <strong class="me-2" style="font-size: 0.9rem;">변수 추가하기:</strong>
+            <strong class="me-2 toolbar-label">변수 추가하기:</strong>
             <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYER]')" title="사업주명">
                 <i class="bi bi-person-badge"></i> 사업주명
             </button>
@@ -691,7 +176,7 @@
 
 <!-- Hidden form for submission -->
 <c:set var="formAction" value="${not empty templateId && templateId ne 'new' ? '/templates/'.concat(templateId) : '/templates'}" />
-<form id="templateForm" method="post" action="${formAction}" style="display: none;">
+<form id="templateForm" method="post" action="${formAction}" class="template-form-hidden">
     <c:if test="${not empty _csrf}">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
     </c:if>
@@ -708,7 +193,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
             </div>
             <div class="modal-body p-0">
-                <iframe id="previewFrame" title="템플릿 미리보기" style="width: 100%; height: 70vh; border: 0;"></iframe>
+                <iframe id="previewFrame" title="템플릿 미리보기" class="preview-iframe"></iframe>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
@@ -1092,8 +577,8 @@
                         '<div class="signature-section">' +
                             '<div class="signature-block">' +
                                 '<div class="signature-line">(사업주) 사업체명: <span class="template-variable" contenteditable="false"><span>COMPANY_NAME</span><span class="template-variable-remove"></span></span></div>' +
-                                '<div class="signature-line" style="margin-left: 60px;">주소: <span class="template-variable" contenteditable="false"><span>EMPLOYER_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
-                                '<div class="signature-line signature-line--seal" style="margin-left: 60px;">' +
+                                '<div class="signature-line signature-line-indent">주소: <span class="template-variable" contenteditable="false"><span>EMPLOYER_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
+                                '<div class="signature-line signature-line--seal signature-line-indent">' +
                                     '대표자: <span class="template-variable" contenteditable="false"><span>EMPLOYER</span><span class="template-variable-remove"></span></span> ' +
                                     '<span class="signature-stamp-label">(인)' +
                                         '<span class="signature-stamp-wrapper"><span class="template-variable" contenteditable="false"><span>EMPLOYER_SIGNATURE_IMAGE</span><span class="template-variable-remove"></span></span></span>' +
@@ -1104,10 +589,10 @@
                                 '<div class="signature-line">(전화: <span class="template-variable" contenteditable="false"><span>EMPLOYER_PHONE</span><span class="template-variable-remove"></span></span>)</div>' +
                             '</div>' +
                         '</div>' +
-                        '<div style="margin-top: 30px;">' +
+                        '<div class="employee-signature-section">' +
                             '<div>(근로자) 주소: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
-                            '<div style="margin-left: 70px; margin-top: 15px;">연락처: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_PHONE</span><span class="template-variable-remove"></span></span></div>' +
-                            '<div style="margin-left: 70px; margin-top: 15px;">성명: <span class="template-variable" contenteditable="false"><span>EMPLOYEE</span><span class="template-variable-remove"></span></span> (인)</div>' +
+                            '<div class="employee-signature-line">연락처: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_PHONE</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="employee-signature-line">성명: <span class="template-variable" contenteditable="false"><span>EMPLOYEE</span><span class="template-variable-remove"></span></span> (인)</div>' +
                         '</div>' +
                     '</div>';
                 }
@@ -1295,7 +780,7 @@
     // 섹션 추가 메뉴 표시
     function showAddSectionMenu(placeholder) {
         const menu = `
-        <div style="display: flex; gap: 6px; justify-content: center; padding: 8px;">
+        <div class="add-section-menu">
             <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('text', this)">
                 <i class="bi bi-text-left"></i> 텍스트
             </button>

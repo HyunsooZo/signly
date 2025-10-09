@@ -639,12 +639,11 @@
             }
 
             const wrapper = document.createElement('span');
-            wrapper.style.cssText = 'display: inline-block; border-bottom: 1px solid #dee2e6; padding: 0 2px;';
+            wrapper.className = 'contract-variable-underline';
 
             const input = document.createElement('input');
             input.type = 'text';
-            input.className = 'form-control-plaintext d-inline';
-            input.style.cssText = 'border: none; padding: 0; margin: 0; height: auto; display: inline; font-size: 13px; font-family: inherit;';
+            input.className = 'form-control-plaintext d-inline contract-input-inline';
             input.size = inputSize;
             if (maxLength) {
                 input.maxLength = maxLength;
