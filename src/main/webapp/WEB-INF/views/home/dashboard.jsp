@@ -337,6 +337,8 @@
                 email: '${currentUserEmail}',
                 userId: '${currentUserId}',
                 companyName: '${currentUserCompany}' || '',
+                businessPhone: '${currentUserBusinessPhone}' || '',
+                businessAddress: '${currentUserBusinessAddress}' || '',
                 updatedAt: new Date().toISOString()
             };
             localStorage.setItem('signly_user_info', JSON.stringify(userInfo));

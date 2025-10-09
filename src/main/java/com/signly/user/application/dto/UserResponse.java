@@ -10,6 +10,8 @@ public record UserResponse(
         String email,
         String name,
         String companyName,
+        String businessPhone,
+        String businessAddress,
         UserType userType,
         UserStatus status,
         LocalDateTime createdAt,

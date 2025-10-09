@@ -1,6 +1,6 @@
-package com.signly.user.infrastructure.repository;
+package com.signly.user.infrastructure.persistence.repository;
 
-import com.signly.user.infrastructure.entity.UserEntity;
+import com.signly.user.infrastructure.persistence.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -73,6 +73,24 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="businessPhone" class="form-label">사업장 전화번호</label>
+                    <input type="text" class="form-control" id="businessPhone" name="businessPhone"
+                           value="${param.businessPhone}" placeholder="02-1234-5678">
+                    <c:if test="${not empty fieldErrors.businessPhone}">
+                        <div class="field-error">${fieldErrors.businessPhone}</div>
+                    </c:if>
+                </div>
+
+                <div class="form-group">
+                    <label for="businessAddress" class="form-label">사업장 주소</label>
+                    <input type="text" class="form-control" id="businessAddress" name="businessAddress"
+                           value="${param.businessAddress}" placeholder="서울시 강남구 테헤란로 123">
+                    <c:if test="${not empty fieldErrors.businessAddress}">
+                        <div class="field-error">${fieldErrors.businessAddress}</div>
+                    </c:if>
+                </div>
+
+                <div class="form-group">
                     <label for="userType" class="form-label">사용자 유형 *</label>
                     <select class="form-control" id="userType" name="userType" required>
                         <option value="">선택해주세요</option>

@@ -9,6 +9,12 @@ public record UpdateProfileCommand(
         String name,
 
         @Size(max = 200, message = "회사명은 200자를 초과할 수 없습니다")
-        String companyName
+        String companyName,
+
+        @Size(max = 20, message = "사업장 전화번호는 20자를 초과할 수 없습니다")
+        String businessPhone,
+
+        @Size(max = 500, message = "사업장 주소는 500자를 초과할 수 없습니다")
+        String businessAddress
 ) {
 }

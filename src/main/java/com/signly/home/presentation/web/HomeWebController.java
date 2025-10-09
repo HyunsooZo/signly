@@ -86,6 +86,8 @@ public class HomeWebController {
                 model.addAttribute("currentUserEmail", securityUser.getEmail());
                 model.addAttribute("currentUserId", securityUser.getUserId());
                 model.addAttribute("currentUserCompany", securityUser.getCompanyName());
+                model.addAttribute("currentUserBusinessPhone", securityUser.getBusinessPhone());
+                model.addAttribute("currentUserBusinessAddress", securityUser.getBusinessAddress());
             }
 
             return "home/dashboard";

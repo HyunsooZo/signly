@@ -58,12 +58,17 @@ public class UserService {
         }
 
         Password password = Password.of(command.password());
+        Company company = Company.of(
+                command.companyName(),
+                command.businessPhone(),
+                command.businessAddress()
+        );
 
         User user = User.create(
                 email,
                 password,
                 command.name(),
-                command.companyName(),
+                company,
                 command.userType(),
                 passwordEncoder
         );
@@ -94,7 +99,12 @@ public class UserService {
         User user = userRepository.findById(userIdObj)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
 
-        user.updateProfile(command.name(), command.companyName());
+        Company company = Company.of(
+                command.companyName(),
+                command.businessPhone(),
+                command.businessAddress()
+        );
+        user.updateProfile(command.name(), company);
         User updatedUser = userRepository.save(user);
 
         return userDtoMapper.toResponse(updatedUser);

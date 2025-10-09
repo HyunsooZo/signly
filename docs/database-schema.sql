@@ -133,6 +133,8 @@ CREATE TABLE IF NOT EXISTS users (
     user_id varchar(26) NOT NULL,
     name varchar(100) NOT NULL,
     company_name varchar(200),
+    business_phone varchar(20),
+    business_address varchar(500),
     email varchar(255) NOT NULL,
     password varchar(255) NOT NULL,
     status enum ('ACTIVE','INACTIVE','SUSPENDED') NOT NULL,

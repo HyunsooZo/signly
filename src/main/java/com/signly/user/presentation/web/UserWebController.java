@@ -36,6 +36,8 @@ public class UserWebController {
                                     @RequestParam String confirmPassword,
                                     @RequestParam String name,
                                     @RequestParam(required = false) String companyName,
+                                    @RequestParam(required = false) String businessPhone,
+                                    @RequestParam(required = false) String businessAddress,
                                     @RequestParam String userType,
                                     @RequestParam(required = false) boolean agreeTerms,
                                     Model model,
@@ -86,6 +88,8 @@ public class UserWebController {
                 password,
                 name.trim(),
                 companyName != null ? companyName.trim() : null,
+                businessPhone != null ? businessPhone.trim() : null,
+                businessAddress != null ? businessAddress.trim() : null,
                 UserType.valueOf(userType)
             );
 

@@ -12,7 +12,7 @@ public class User extends AggregateRoot {
     private Email email;
     private String encodedPassword;
     private String name;
-    private String companyName;
+    private Company company;
     private UserType userType;
     private UserStatus status;
 
@@ -21,34 +21,34 @@ public class User extends AggregateRoot {
     }
 
     private User(UserId userId, Email email, String encodedPassword, String name,
-                String companyName, UserType userType, UserStatus status,
+                Company company, UserType userType, UserStatus status,
                 LocalDateTime createdAt, LocalDateTime updatedAt) {
         super(createdAt, updatedAt);
         this.userId = userId;
         this.email = email;
         this.encodedPassword = encodedPassword;
         this.name = name;
-        this.companyName = companyName;
+        this.company = company != null ? company : Company.empty();
         this.userType = userType;
         this.status = status;
     }
 
     public static User create(Email email, Password password, String name,
-                             String companyName, UserType userType, PasswordEncoder passwordEncoder) {
+                             Company company, UserType userType, PasswordEncoder passwordEncoder) {
         validateCreateParameters(email, password, name, userType);
 
         UserId userId = UserId.generate();
         String encodedPassword = passwordEncoder.encode(password.getValue());
         UserStatus status = UserStatus.ACTIVE;
 
-        return new User(userId, email, encodedPassword, name, companyName, userType, status,
+        return new User(userId, email, encodedPassword, name, company, userType, status,
                        LocalDateTime.now(), LocalDateTime.now());
     }
 
     public static User restore(UserId userId, Email email, String encodedPassword, String name,
-                              String companyName, UserType userType, UserStatus status,
+                              Company company, UserType userType, UserStatus status,
                               LocalDateTime createdAt, LocalDateTime updatedAt) {
-        return new User(userId, email, encodedPassword, name, companyName, userType, status,
+        return new User(userId, email, encodedPassword, name, company, userType, status,
                        createdAt, updatedAt);
     }
 
@@ -82,10 +82,10 @@ public class User extends AggregateRoot {
         updateTimestamp();
     }
 
-    public void updateProfile(String name, String companyName) {
+    public void updateProfile(String name, Company company) {
         validateName(name);
         this.name = name;
-        this.companyName = companyName;
+        this.company = company != null ? company : Company.empty();
         updateTimestamp();
     }
 
@@ -140,8 +140,8 @@ public class User extends AggregateRoot {
         return name;
     }
 
-    public String getCompanyName() {
-        return companyName;
+    public Company getCompany() {
+        return company;
     }
 
     public UserType getUserType() {
