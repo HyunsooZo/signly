@@ -1,6 +1,6 @@
 package com.signly.template.domain.model;
 
-import com.signly.common.util.UuidGenerator;
+import com.signly.common.util.UlidGenerator;
 
 import java.util.Objects;
 
@@ -12,7 +12,7 @@ public class TemplateId {
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException("템플릿 ID는 null이거나 빈 값일 수 없습니다");
         }
-        if (!UuidGenerator.isValid(value)) {
+        if (!UlidGenerator.isValid(value)) {
             throw new IllegalArgumentException("유효하지 않은 템플릿 ID 형식입니다");
         }
         this.value = value;
@@ -23,7 +23,7 @@ public class TemplateId {
     }
 
     public static TemplateId generate() {
-        return new TemplateId(UuidGenerator.generate());
+        return new TemplateId(UlidGenerator.generate());
     }
 
     public String getValue() {

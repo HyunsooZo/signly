@@ -1,8 +1,7 @@
 package com.signly.contract.domain.model;
 
 import com.signly.common.exception.ValidationException;
-
-import java.util.UUID;
+import com.signly.common.util.UlidGenerator;
 
 public class SignToken {
     private final String value;
@@ -19,7 +18,7 @@ public class SignToken {
     }
 
     public static SignToken generate() {
-        return new SignToken(UUID.randomUUID().toString());
+        return new SignToken(UlidGenerator.generate());
     }
 
     public String value() {

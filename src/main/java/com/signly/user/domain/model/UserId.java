@@ -1,6 +1,6 @@
 package com.signly.user.domain.model;
 
-import com.signly.common.util.UuidGenerator;
+import com.signly.common.util.UlidGenerator;
 
 import java.util.Objects;
 
@@ -12,7 +12,7 @@ public class UserId {
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException("사용자 ID는 null이거나 빈 값일 수 없습니다");
         }
-        if (!UuidGenerator.isValid(value)) {
+        if (!UlidGenerator.isValid(value)) {
             throw new IllegalArgumentException("유효하지 않은 사용자 ID 형식입니다");
         }
         this.value = value;
@@ -23,7 +23,7 @@ public class UserId {
     }
 
     public static UserId generate() {
-        return new UserId(UuidGenerator.generate());
+        return new UserId(UlidGenerator.generate());
     }
 
     public String getValue() {
