@@ -51,7 +51,7 @@ public class HomeWebController {
                        HttpServletRequest request,
                        Model model) {
         try {
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             // 대시보드 통계 데이터 수집
             PageRequest pageRequest = PageRequest.of(0, 5, Sort.by("createdAt").descending());
 
