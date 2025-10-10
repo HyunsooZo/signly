@@ -2,9 +2,6 @@ package com.signly.signature.presentation.web;
 
 import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.ContractResponse;
-import com.signly.signature.application.SignatureService;
-import com.signly.signature.application.dto.CreateSignatureCommand;
-import com.signly.signature.application.dto.SignatureResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +16,9 @@ public class SigningWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(SigningWebController.class);
     private final ContractService contractService;
-    private final SignatureService signatureService;
 
-    public SigningWebController(ContractService contractService, SignatureService signatureService) {
+    public SigningWebController(ContractService contractService) {
         this.contractService = contractService;
-        this.signatureService = signatureService;
     }
 
     @GetMapping("/{token}")
@@ -31,13 +26,8 @@ public class SigningWebController {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
-            boolean alreadySigned = signatureService.isContractSigned(
-                    contract.getId(),
-                    contract.getSecondParty().getEmail()
-            );
-
-            if (alreadySigned) {
-                // 이미 서명된 경우 완료 페이지로 리다이렉트
+            // 계약서 상태가 SIGNED 또는 COMPLETED인 경우 완료 페이지로 리다이렉트
+            if (contract.getStatus().name().equals("SIGNED") || contract.getStatus().name().equals("COMPLETED")) {
                 logger.info("이미 서명 완료된 계약서, 완료 페이지로 이동: token={}", token);
                 return "redirect:/sign/" + token + "/complete";
             }
@@ -108,27 +98,14 @@ public class SigningWebController {
                                  HttpServletRequest request) {
         try {
             logger.info("서명 처리 요청: token={}, signerEmail={}", token, signerEmail);
-            ContractResponse contract = contractService.getContractByToken(token);
 
             String ipAddress = getClientIpAddress(request);
-            String userAgent = request.getHeader("User-Agent");
 
-            CreateSignatureCommand command = new CreateSignatureCommand(
-                    contract.getId(),
-                    signatureData,
-                    signerEmail,
-                    signerName,
-                    ipAddress,
-                    userAgent
-            );
-
-            SignatureResponse signature = signatureService.createSignature(command);
-
-            contractService.processSignature(token, signerEmail, signerName,
+            // Contract 도메인의 sign() 메서드를 통해 서명 처리 (signatures 컬렉션에 추가됨)
+            ContractResponse contract = contractService.processSignature(token, signerEmail, signerName,
                                            signatureData, ipAddress);
 
-            logger.info("서명 처리 완료: contractId={}, signatureId={}",
-                       contract.getId(), signature.signatureId());
+            logger.info("서명 처리 완료: contractId={}", contract.getId());
 
             return "{\"success\": true, \"message\": \"서명이 완료되었습니다.\"}";
 
