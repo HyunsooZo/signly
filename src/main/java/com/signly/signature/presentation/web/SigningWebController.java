@@ -124,7 +124,7 @@ public class SigningWebController {
 
             SignatureResponse signature = signatureService.createSignature(command);
 
-            contractService.processSignature(contract.getId(), signerEmail, signerName,
+            contractService.processSignature(token, signerEmail, signerName,
                                            signatureData, ipAddress);
 
             logger.info("서명 처리 완료: contractId={}, signatureId={}",
