@@ -36,5 +36,6 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
 
     long countByTemplateId(String templateId);
 
-    ContractJpaEntity findBySignToken(String signToken);
+    @Query("SELECT c FROM ContractJpaEntity c WHERE c.signToken = :signToken")
+    ContractJpaEntity findBySignToken(@Param("signToken") String signToken);
 }
