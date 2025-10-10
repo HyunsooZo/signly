@@ -413,7 +413,7 @@ public class ContractWebController {
 
     @PostMapping("/{contractId}/complete")
     public String completeContract(@PathVariable String contractId,
-                                  @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                  @RequestHeader(value = "X-User-Id", defaultValue = "01ARZ3NDEKTSV4RRFFQ69G5FAV") String userId,
                                   RedirectAttributes redirectAttributes) {
         try {
             contractService.completeContract(userId, contractId);

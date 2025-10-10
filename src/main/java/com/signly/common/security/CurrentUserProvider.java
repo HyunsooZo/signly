@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 @Component
 public class CurrentUserProvider {
 
-    public static final String DEMO_OWNER_ID = "dbd51de0-b234-47d8-893b-241c744e7337";
+    public static final String DEMO_OWNER_ID = "01ARZ3NDEKTSV4RRFFQ69G5FAV";
 
     public String resolveUserId(SecurityUser securityUser,
                                 HttpServletRequest request,
