@@ -2,6 +2,9 @@ package com.signly.signature.presentation.web;
 
 import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.ContractResponse;
+import com.signly.signature.application.SignatureService;
+import com.signly.signature.application.dto.CreateSignatureCommand;
+import com.signly.signature.application.dto.SignatureResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +19,11 @@ public class SigningWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(SigningWebController.class);
     private final ContractService contractService;
+    private final SignatureService signatureService;
 
-    public SigningWebController(ContractService contractService) {
+    public SigningWebController(ContractService contractService, SignatureService signatureService) {
         this.contractService = contractService;
+        this.signatureService = signatureService;
     }
 
     @GetMapping("/{token}")
@@ -98,14 +103,26 @@ public class SigningWebController {
                                  HttpServletRequest request) {
         try {
             logger.info("서명 처리 요청: token={}, signerEmail={}", token, signerEmail);
+            ContractResponse contract = contractService.getContractByToken(token);
 
             String ipAddress = getClientIpAddress(request);
+            String userAgent = request.getHeader("User-Agent");
 
-            // Contract 도메인의 sign() 메서드를 통해 서명 처리 (signatures 컬렉션에 추가됨)
-            ContractResponse contract = contractService.processSignature(token, signerEmail, signerName,
-                                           signatureData, ipAddress);
+            // 1. SignatureService를 통해 서명 데이터 저장 (contract_signatures 테이블)
+            CreateSignatureCommand command = new CreateSignatureCommand(
+                    contract.getId(),
+                    signatureData,
+                    signerEmail,
+                    signerName,
+                    ipAddress,
+                    userAgent
+            );
+            SignatureResponse signature = signatureService.createSignature(command);
 
-            logger.info("서명 처리 완료: contractId={}", contract.getId());
+            // 2. Contract 상태 업데이트 (markSignedBy 사용)
+            contractService.processSignature(token, signerEmail, signerName, signatureData, ipAddress);
+
+            logger.info("서명 처리 완료: contractId={}, signatureId={}", contract.getId(), signature.signatureId());
 
             return "{\"success\": true, \"message\": \"서명이 완료되었습니다.\"}";
 

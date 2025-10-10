@@ -9,6 +9,7 @@ import com.signly.contract.domain.model.*;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.notification.application.EmailNotificationService;
 import com.signly.signature.application.FirstPartySignatureService;
+import com.signly.signature.domain.repository.SignatureRepository;
 import com.signly.template.domain.model.ContractTemplate;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.template.domain.repository.TemplateRepository;
@@ -40,6 +41,7 @@ public class ContractService {
     private final ContractDtoMapper contractDtoMapper;
     private final EmailNotificationService emailNotificationService;
     private final FirstPartySignatureService firstPartySignatureService;
+    private final SignatureRepository signatureRepository;
 
     public ContractService(
             ContractRepository contractRepository,
@@ -47,7 +49,8 @@ public class ContractService {
             TemplateRepository templateRepository,
             ContractDtoMapper contractDtoMapper,
             EmailNotificationService emailNotificationService,
-            FirstPartySignatureService firstPartySignatureService
+            FirstPartySignatureService firstPartySignatureService,
+            SignatureRepository signatureRepository
     ) {
         this.contractRepository = contractRepository;
         this.userRepository = userRepository;
@@ -55,6 +58,7 @@ public class ContractService {
         this.contractDtoMapper = contractDtoMapper;
         this.emailNotificationService = emailNotificationService;
         this.firstPartySignatureService = firstPartySignatureService;
+        this.signatureRepository = signatureRepository;
     }
 
     public ContractResponse createContract(
@@ -345,7 +349,25 @@ public class ContractService {
         Contract contract = contractRepository.findBySignToken(signToken)
                 .orElseThrow(() -> new NotFoundException("유효하지 않은 서명 링크입니다"));
 
-        contract.sign(signerEmail, signerName, signatureData, ipAddress);
+        // 모든 당사자가 서명을 완료했는지 확인 (contract_signatures 테이블에서 확인)
+        ContractId contractId = contract.getId();
+        boolean firstPartySigned = signatureRepository.existsByContractIdAndSignerEmail(
+                contractId, contract.getFirstParty().getEmail());
+        boolean secondPartySigned = signatureRepository.existsByContractIdAndSignerEmail(
+                contractId, contract.getSecondParty().getEmail());
+
+        // 현재 서명하는 사람이 어느 당사자인지 확인하여 서명 후 상태 결정
+        boolean allSignaturesComplete;
+        if (signerEmail.equalsIgnoreCase(contract.getFirstParty().getEmail())) {
+            // firstParty가 서명하는 경우, secondParty도 서명했으면 완료
+            allSignaturesComplete = secondPartySigned;
+        } else {
+            // secondParty가 서명하는 경우, firstParty도 서명했으면 완료
+            allSignaturesComplete = firstPartySigned;
+        }
+
+        // 서명 검증 및 상태 업데이트 (서명 데이터는 SignatureService에서 별도 저장)
+        contract.markSignedBy(signerEmail, allSignaturesComplete);
         Contract savedContract = contractRepository.save(contract);
         return contractDtoMapper.toResponse(savedContract);
     }

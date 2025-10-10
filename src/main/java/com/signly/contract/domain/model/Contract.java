@@ -159,6 +159,31 @@ public class Contract extends AggregateRoot {
         }
     }
 
+    /**
+     * 서명 검증 및 상태 업데이트 (서명 데이터는 외부에서 관리)
+     * SignatureService에서 이미 서명 데이터를 저장한 후 호출됨
+     */
+    public void markSignedBy(String signerEmail, boolean allSignaturesComplete) {
+        if (!status.canSign()) {
+            throw new ValidationException("서명 대기 상태에서만 서명할 수 있습니다");
+        }
+
+        if (isExpired()) {
+            expire();
+            throw new ValidationException("만료된 계약서에는 서명할 수 없습니다");
+        }
+
+        if (!isValidSigner(signerEmail)) {
+            throw new ValidationException("해당 계약서에 서명할 권한이 없습니다");
+        }
+
+        this.updatedAt = LocalDateTime.now();
+
+        if (allSignaturesComplete) {
+            this.status = ContractStatus.SIGNED;
+        }
+    }
+
     public void complete() {
         if (!status.canComplete()) {
             throw new ValidationException("서명 완료 상태에서만 완료할 수 있습니다");
