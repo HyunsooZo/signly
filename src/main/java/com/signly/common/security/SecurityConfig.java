@@ -55,20 +55,24 @@ public class SecurityConfig {
                 // 인증 관련 페이지는 공개 허용
                 .requestMatchers("/", "/login", "/register", "/forgot-password").permitAll()
                 .requestMatchers("/WEB-INF/views/auth/**").permitAll()
-                // 홈 페이지는 공개 허용
-                .requestMatchers("/home", "/about").permitAll()
-                .requestMatchers("/WEB-INF/views/home/**").permitAll()
-                // 템플릿 관리 페이지 (개발 중이므로 임시 허용)
-                .requestMatchers("/templates/**").permitAll()
-                .requestMatchers("/WEB-INF/views/templates/**").permitAll()
-                // 계약서 관리 페이지 (개발 중이므로 임시 허용)
-                .requestMatchers("/contracts/**").permitAll()
-                .requestMatchers("/WEB-INF/views/contracts/**").permitAll()
                 // 개발 도구는 공개 허용
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
+                // JSP Forward를 위한 뷰 경로는 permitAll (실제 접근은 컨트롤러에서 제어)
+                .requestMatchers("/WEB-INF/views/**").permitAll()
+                // 홈, 템플릿, 계약서 페이지는 인증 필요
+                .requestMatchers("/home", "/templates/**", "/contracts/**").authenticated()
                 // 나머지 모든 요청은 인증 필요
                 .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
+                .permitAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
