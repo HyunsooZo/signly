@@ -9,6 +9,8 @@ import com.signly.contract.domain.model.*;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.notification.application.EmailNotificationService;
 import com.signly.signature.application.FirstPartySignatureService;
+import com.signly.signature.application.SignatureService;
+import com.signly.signature.application.dto.CreateSignatureCommand;
 import com.signly.signature.domain.repository.SignatureRepository;
 import com.signly.template.domain.model.ContractTemplate;
 import com.signly.template.domain.model.TemplateId;
@@ -42,6 +44,7 @@ public class ContractService {
     private final EmailNotificationService emailNotificationService;
     private final FirstPartySignatureService firstPartySignatureService;
     private final SignatureRepository signatureRepository;
+    private final SignatureService signatureService;
 
     public ContractService(
             ContractRepository contractRepository,
@@ -50,7 +53,8 @@ public class ContractService {
             ContractDtoMapper contractDtoMapper,
             EmailNotificationService emailNotificationService,
             FirstPartySignatureService firstPartySignatureService,
-            SignatureRepository signatureRepository
+            SignatureRepository signatureRepository,
+            SignatureService signatureService
     ) {
         this.contractRepository = contractRepository;
         this.userRepository = userRepository;
@@ -59,6 +63,7 @@ public class ContractService {
         this.emailNotificationService = emailNotificationService;
         this.firstPartySignatureService = firstPartySignatureService;
         this.signatureRepository = signatureRepository;
+        this.signatureService = signatureService;
     }
 
     public ContractResponse createContract(
@@ -148,9 +153,29 @@ public class ContractService {
                 .orElseThrow(() -> new NotFoundException("계약서를 찾을 수 없습니다"));
 
         validateOwnership(userId, contract);
+
+        // 1. 제1 당사자(발송자)의 서명 이미지가 등록되어 있는지 확인
         firstPartySignatureService.ensureSignatureExists(contract.getCreatorId().getValue());
+
+        // 2. 제1 당사자의 서명을 contract_signatures 테이블에 저장
+        String firstPartySignatureData = firstPartySignatureService.getSignatureDataUrl(contract.getCreatorId().getValue());
+        CreateSignatureCommand firstPartyCommand = new CreateSignatureCommand(
+                contract.getId().getValue(),
+                firstPartySignatureData,
+                contract.getFirstParty().getEmail(),
+                contract.getFirstParty().getName(),
+                "SERVER", // 서버에서 발송하므로
+                "Server-initiated signature" // 서버에서 자동 서명
+        );
+        signatureService.createSignature(firstPartyCommand);
+        logger.info("제1 당사자 서명 저장 완료: contractId={}, email={}",
+                contract.getId().getValue(), contract.getFirstParty().getEmail());
+
+        // 3. 계약서 상태를 PENDING으로 변경
         contract.sendForSigning();
         Contract savedContract = contractRepository.save(contract);
+
+        // 4. 제2 당사자에게 서명 요청 이메일 발송
         emailNotificationService.sendContractSigningRequest(savedContract);
     }
 
@@ -168,7 +193,24 @@ public class ContractService {
             throw new ValidationException("서명 대기 상태에서만 서명 요청을 재전송할 수 있습니다");
         }
 
+        // 제1 당사자 서명이 있는지 확인하고, 없으면 저장 (기존 데이터 보정)
         firstPartySignatureService.ensureSignatureExists(contract.getCreatorId().getValue());
+        ContractId cId = contract.getId();
+        if (!signatureRepository.existsByContractIdAndSignerEmail(cId, contract.getFirstParty().getEmail())) {
+            String firstPartySignatureData = firstPartySignatureService.getSignatureDataUrl(contract.getCreatorId().getValue());
+            CreateSignatureCommand firstPartyCommand = new CreateSignatureCommand(
+                    contract.getId().getValue(),
+                    firstPartySignatureData,
+                    contract.getFirstParty().getEmail(),
+                    contract.getFirstParty().getName(),
+                    "SERVER",
+                    "Server-initiated signature on resend"
+            );
+            signatureService.createSignature(firstPartyCommand);
+            logger.info("재전송 시 제1 당사자 서명 저장: contractId={}, email={}",
+                    contract.getId().getValue(), contract.getFirstParty().getEmail());
+        }
+
         emailNotificationService.sendContractSigningRequest(contract);
     }
 
@@ -369,6 +411,13 @@ public class ContractService {
         // 서명 검증 및 상태 업데이트 (서명 데이터는 SignatureService에서 별도 저장)
         contract.markSignedBy(signerEmail, allSignaturesComplete);
         Contract savedContract = contractRepository.save(contract);
+
+        // 모든 당사자의 서명이 완료되면 양측에 완료 이메일 발송
+        if (allSignaturesComplete) {
+            logger.info("모든 서명 완료, 완료 알림 이메일 발송: contractId={}", contract.getId().getValue());
+            emailNotificationService.sendContractCompleted(savedContract);
+        }
+
         return contractDtoMapper.toResponse(savedContract);
     }
 
