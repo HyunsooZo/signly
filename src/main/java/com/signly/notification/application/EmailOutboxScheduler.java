@@ -59,7 +59,8 @@ public class EmailOutboxScheduler {
                     outbox.getRecipientEmail(),
                     outbox.getRecipientName(),
                     outbox.getEmailTemplate(),
-                    outbox.getTemplateVariables()
+                    outbox.getTemplateVariables(),
+                    outbox.getAttachments()
             );
 
             emailSender.sendEmail(request);
@@ -68,8 +69,9 @@ public class EmailOutboxScheduler {
             outbox.markAsSent();
             outboxRepository.save(outbox);
 
-            logger.info("이메일 발송 성공: id={}, recipient={}",
-                    outbox.getId().getValue(), outbox.getRecipientEmail());
+            logger.info("이메일 발송 성공: id={}, recipient={}, attachments={}",
+                    outbox.getId().getValue(), outbox.getRecipientEmail(),
+                    outbox.getAttachments().size());
 
         } catch (Exception e) {
             // 발송 실패

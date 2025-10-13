@@ -17,6 +17,12 @@ public class ConsoleEmailSender implements EmailSender {
         logger.info("To: {} <{}>", request.toName(), request.to());
         logger.info("Template: {}", request.template().getSubject());
         logger.info("Variables: {}", request.templateVariables());
+        if (request.hasAttachments()) {
+            logger.info("Attachments: {}", request.attachments().size());
+            request.attachments().forEach(attachment ->
+                    logger.info("  - {} ({} bytes)", attachment.getFileName(), attachment.getSizeInBytes())
+            );
+        }
         logger.info("================================");
     }
 }

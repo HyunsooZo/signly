@@ -30,6 +30,9 @@ public class EmailOutboxEntity {
     @Column(name = "template_variables", nullable = false, columnDefinition = "TEXT")
     private String templateVariables; // JSON string
 
+    @Column(name = "attachments", columnDefinition = "TEXT")
+    private String attachments; // JSON string for EmailAttachment list
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private EmailOutboxStatus status;
@@ -91,6 +94,14 @@ public class EmailOutboxEntity {
 
     public void setTemplateVariables(String templateVariables) {
         this.templateVariables = templateVariables;
+    }
+
+    public String getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(String attachments) {
+        this.attachments = attachments;
     }
 
     public EmailOutboxStatus getStatus() {
