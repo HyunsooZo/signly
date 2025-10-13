@@ -9,6 +9,7 @@ import com.signly.notification.domain.model.EmailOutboxId;
 import com.signly.notification.infrastructure.persistence.entity.EmailOutboxEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
@@ -32,6 +33,7 @@ public class EmailOutboxEntityMapper {
         entity.setMaxRetries(outbox.getMaxRetries());
         entity.setErrorMessage(outbox.getErrorMessage());
         entity.setCreatedAt(outbox.getCreatedAt());
+        entity.setUpdatedAt(LocalDateTime.now());
         entity.setSentAt(outbox.getSentAt());
         entity.setNextRetryAt(outbox.getNextRetryAt());
         return entity;
