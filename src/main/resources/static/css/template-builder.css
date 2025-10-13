@@ -298,24 +298,6 @@ body {
     padding: 20px;
 }
 
-.signature-section {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.signature-block {
-    flex: 1;
-}
-
-.signature-line {
-    margin: 8px 0;
-}
-
-.signature-line--seal {
-    font-weight: normal;
-}
-
 /* 변수 스타일 */
 .template-variable {
     background: #ffe4b5;
