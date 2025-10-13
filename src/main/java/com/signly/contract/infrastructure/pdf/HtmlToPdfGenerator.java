@@ -1,5 +1,6 @@
 package com.signly.contract.infrastructure.pdf;
 
+import com.lowagie.text.pdf.BaseFont;
 import com.signly.contract.domain.model.GeneratedPdf;
 import com.signly.contract.domain.service.PdfGenerator;
 import org.slf4j.Logger;
@@ -10,9 +11,12 @@ import org.springframework.util.StreamUtils;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +30,16 @@ import java.util.regex.Pattern;
 public class HtmlToPdfGenerator implements PdfGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(HtmlToPdfGenerator.class);
+    private static final List<String> PDF_CSS_RESOURCES = List.of(
+            "static/css/template-preview.css",
+            "static/css/contracts.css"
+    );
+    private static final String PRESET_TEMPLATE_PATH = "presets/templates/standard-employment-contract.html";
+    private static final Pattern STYLE_PATTERN = Pattern.compile("<style>(.*?)</style>", Pattern.DOTALL);
+    private static final List<String> FONT_RESOURCES = List.of(
+            "fonts/NanumGothic-Regular.ttf",
+            "fonts/NanumGothic-Bold.ttf"
+    );
 
     @Override
     public GeneratedPdf generateFromHtml(String htmlContent, String fileName) {
@@ -37,6 +51,8 @@ public class HtmlToPdfGenerator implements PdfGenerator {
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ITextRenderer renderer = new ITextRenderer();
+
+            registerFonts(renderer);
 
             // HTML을 PDF로 렌더링
             renderer.setDocumentFromString(xhtmlContent);
@@ -117,45 +133,37 @@ public class HtmlToPdfGenerator implements PdfGenerator {
      * 템플릿 파일의 <style> 태그 내용을 그대로 사용
      */
     private String getContractCssStyles() {
-        try {
-            // 표준 근로계약서 템플릿에서 CSS 추출
-            ClassPathResource resource = new ClassPathResource("presets/templates/standard-employment-contract.html");
+        StringBuilder cssBuilder = new StringBuilder();
 
-            if (!resource.exists()) {
-                logger.warn("템플릿 파일을 찾을 수 없습니다. 기본 스타일 사용");
-                return getDefaultCssStyles();
-            }
+        for (String resourcePath : PDF_CSS_RESOURCES) {
+            loadResourceAsString(resourcePath)
+                    .map(this::adaptCssForPdf)
+                    .ifPresent(css -> appendCss(cssBuilder, css));
+        }
 
-            try (InputStream inputStream = resource.getInputStream()) {
-                String templateHtml = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+        if (cssBuilder.length() == 0) {
+            extractCssFromPresetTemplate()
+                    .map(this::adaptCssForPdf)
+                    .ifPresent(css -> appendCss(cssBuilder, css));
+        }
 
-                // <style> 태그 안의 내용 추출
-                Pattern stylePattern = Pattern.compile("<style>(.*?)</style>", Pattern.DOTALL);
-                Matcher matcher = stylePattern.matcher(templateHtml);
-
-                if (matcher.find()) {
-                    String originalCss = matcher.group(1);
-                    // Flying Saucer 호환을 위해 폰트만 수정
-                    String adaptedCss = originalCss.replaceAll("font-family:\\s*['\"]?Malgun Gothic['\"]?[^;]*;", "font-family: serif;");
-
-                    logger.debug("템플릿에서 CSS 스타일 추출 완료");
-                    return adaptedCss;
-                } else {
-                    logger.warn("템플릿에서 <style> 태그를 찾을 수 없습니다. 기본 스타일 사용");
-                    return getDefaultCssStyles();
-                }
-            }
-        } catch (Exception e) {
-            logger.error("템플릿 CSS 추출 실패, 기본 스타일 사용", e);
+        if (cssBuilder.length() == 0) {
+            logger.warn("PDF용 CSS를 찾지 못해 기본 스타일을 사용합니다.");
             return getDefaultCssStyles();
         }
+
+        // PDF 렌더링 호환을 위한 폴백 스타일 보강
+        appendCss(cssBuilder, "body, .contract-content, .preset-document { font-family: 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', sans-serif; line-height: 1.6; font-size: 13px; }");
+        appendCss(cssBuilder, ".signature-stamp-image-element { width: 90px; height: auto; }");
+
+        return cssBuilder.toString();
     }
 
     /**
      * 기본 CSS 스타일 (템플릿 로드 실패 시 대체용)
      */
     private String getDefaultCssStyles() {
-        return "body { font-family: serif; line-height: 1.6; font-size: 12pt; padding: 20mm; }\n" +
+        return "body { font-family: 'NanumGothic', 'Nanum Gothic', sans-serif; line-height: 1.6; font-size: 12pt; padding: 20mm; }\n" +
                ".title { text-align: center; font-size: 20pt; font-weight: bold; margin-bottom: 30pt; }\n" +
                ".section { margin: 12pt 0; }\n" +
                ".signature-stamp-image-element { width: 60pt; height: auto; vertical-align: middle; }";
@@ -165,5 +173,81 @@ public class HtmlToPdfGenerator implements PdfGenerator {
     public GeneratedPdf generateFromTemplate(String templateName, Map<String, Object> variables, String fileName) {
         // 현재는 미구현 (필요시 Thymeleaf 템플릿 엔진 연동)
         throw new UnsupportedOperationException("Template-based PDF generation is not yet implemented");
+    }
+
+    private Optional<String> loadResourceAsString(String path) {
+        ClassPathResource resource = new ClassPathResource(path);
+        if (!resource.exists()) {
+            logger.warn("리소스를 찾을 수 없습니다: {}", path);
+            return Optional.empty();
+        }
+
+        try (InputStream inputStream = resource.getInputStream()) {
+            return Optional.of(StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            logger.error("리소스 로딩 실패: {}", path, e);
+            return Optional.empty();
+        }
+    }
+
+    private Optional<String> extractCssFromPresetTemplate() {
+        ClassPathResource resource = new ClassPathResource(PRESET_TEMPLATE_PATH);
+        if (!resource.exists()) {
+            logger.warn("템플릿 파일을 찾을 수 없습니다: {}", PRESET_TEMPLATE_PATH);
+            return Optional.empty();
+        }
+
+        try (InputStream inputStream = resource.getInputStream()) {
+            String templateHtml = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+            Matcher matcher = STYLE_PATTERN.matcher(templateHtml);
+            if (matcher.find()) {
+                logger.debug("템플릿에서 CSS 스타일 추출 완료");
+                return Optional.of(matcher.group(1));
+            }
+            logger.warn("템플릿에 <style> 태그가 없어 기본 CSS로 대체합니다.");
+            return Optional.empty();
+        } catch (IOException e) {
+            logger.error("템플릿 CSS 추출 실패", e);
+            return Optional.empty();
+        }
+    }
+
+    private String adaptCssForPdf(String css) {
+        String adapted = css.replace("body:not(:has(.navbar))", "body");
+        adapted = adapted.replace("'Malgun Gothic'", "'NanumGothic', 'Nanum Gothic', 'Malgun Gothic'");
+        adapted = adapted.replace("\"Malgun Gothic\"", "'NanumGothic', 'Nanum Gothic', 'Malgun Gothic'");
+        adapted = adapted.replace("font-family: Malgun Gothic", "font-family: NanumGothic, Nanum Gothic, Malgun Gothic");
+        return adapted;
+    }
+
+    private void appendCss(StringBuilder builder, String css) {
+        if (builder.length() > 0) {
+            builder.append('\n');
+        }
+        builder.append(css);
+    }
+
+    private void registerFonts(ITextRenderer renderer) {
+        for (String fontResource : FONT_RESOURCES) {
+            try {
+                ClassPathResource resource = new ClassPathResource(fontResource);
+                if (!resource.exists()) {
+                    logger.warn("PDF 폰트 리소스를 찾을 수 없습니다: {}", fontResource);
+                    continue;
+                }
+
+                String fontPath;
+                if (resource.isFile()) {
+                    fontPath = resource.getFile().getAbsolutePath();
+                } else {
+                    fontPath = resource.getURL().toExternalForm();
+                }
+
+                renderer.getFontResolver().addFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                logger.debug("PDF 폰트 등록 완료: {}", fontResource);
+            } catch (Exception e) {
+                logger.warn("PDF 폰트 등록 실패: {}", fontResource, e);
+            }
+        }
     }
 }
