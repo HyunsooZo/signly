@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 public class TemplateEntity {
 
     @Id
-    @Column(name = "template_id", length = 36)
+    @Column(name = "template_id", length = 26)
     private String templateId;
 
-    @Column(name = "owner_id", length = 36, nullable = true)
+    @Column(name = "owner_id", length = 26, nullable = true)
     private String ownerId;
 
     @Column(name = "title", length = 255, nullable = false)

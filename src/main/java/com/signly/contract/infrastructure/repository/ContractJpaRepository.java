@@ -25,8 +25,8 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
 
     List<ContractJpaEntity> findByTemplateId(String templateId);
 
-    @Query("SELECT c FROM ContractJpaEntity c WHERE c.status IN ('PENDING', 'SIGNED') AND c.expiresAt < :currentTime")
-    List<ContractJpaEntity> findExpiredContracts(@Param("currentTime") LocalDateTime currentTime);
+    @Query("SELECT c FROM ContractJpaEntity c WHERE c.status IN (:statuses) AND c.expiresAt < :currentTime")
+    List<ContractJpaEntity> findExpiredContracts(@Param("statuses") List<ContractStatus> statuses, @Param("currentTime") LocalDateTime currentTime);
 
     List<ContractJpaEntity> findByStatusAndExpiresAtBefore(ContractStatus status, LocalDateTime dateTime);
 
@@ -36,5 +36,6 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
 
     long countByTemplateId(String templateId);
 
-    ContractJpaEntity findBySignToken(String signToken);
+    @Query("SELECT c FROM ContractJpaEntity c WHERE c.signToken = :signToken")
+    ContractJpaEntity findBySignToken(@Param("signToken") String signToken);
 }

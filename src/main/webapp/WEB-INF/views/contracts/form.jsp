@@ -325,7 +325,9 @@
                     name: parsed.name || '',
                     email: parsed.email || '',
                     userId: parsed.userId || '',
-                    companyName: parsed.companyName || ''
+                    companyName: parsed.companyName || '',
+                    businessPhone: parsed.businessPhone || '',
+                    businessAddress: parsed.businessAddress || ''
                 };
             } catch (error) {
                 console.warn('[WARN] 사용자 정보를 불러올 수 없습니다:', error);
@@ -639,12 +641,11 @@
             }
 
             const wrapper = document.createElement('span');
-            wrapper.style.cssText = 'display: inline-block; border-bottom: 1px solid #dee2e6; padding: 0 2px;';
+            wrapper.className = 'contract-variable-underline';
 
             const input = document.createElement('input');
             input.type = 'text';
-            input.className = 'form-control-plaintext d-inline';
-            input.style.cssText = 'border: none; padding: 0; margin: 0; height: auto; display: inline; font-size: 13px; font-family: inherit;';
+            input.className = 'form-control-plaintext d-inline contract-input-inline';
             input.size = inputSize;
             if (maxLength) {
                 input.maxLength = maxLength;
@@ -810,6 +811,20 @@
             if (normalized.includes('COMPANY') || normalized.includes('ORGANIZATION') ||
                 upper === '회사' || upper === '회사명' || upper === '조직' || upper === '조직명') {
                 return ownerInfo?.companyName || '';
+            }
+
+            // 사업주 전화번호
+            if (normalized.includes('EMPLOYER') && (normalized.includes('PHONE') || normalized.includes('TEL')) ||
+                normalized.includes('OWNER') && (normalized.includes('PHONE') || normalized.includes('TEL')) ||
+                upper === '사업주전화번호' || upper === '사업장전화번호' || upper === '업체전화번호') {
+                return ownerInfo?.businessPhone || '';
+            }
+
+            // 사업주 주소
+            if (normalized.includes('EMPLOYER') && normalized.includes('ADDRESS') ||
+                normalized.includes('OWNER') && normalized.includes('ADDRESS') ||
+                upper === '사업주주소' || upper === '사업장주소' || upper === '업체주소') {
+                return ownerInfo?.businessAddress || '';
             }
 
             // 근로자/직원 이름

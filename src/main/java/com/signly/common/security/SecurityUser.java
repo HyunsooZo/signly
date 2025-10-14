@@ -75,6 +75,17 @@ public class SecurityUser implements UserDetails {
     }
 
     public String getCompanyName() {
-        return user.getCompanyName();
+        var company = user.getCompany();
+        return company != null ? company.getName() : null;
+    }
+
+    public String getBusinessPhone() {
+        var company = user.getCompany();
+        return company != null ? company.getPhone() : null;
+    }
+
+    public String getBusinessAddress() {
+        var company = user.getCompany();
+        return company != null ? company.getAddress() : null;
     }
 }

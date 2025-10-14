@@ -172,21 +172,21 @@ public class ContractWebController {
         } catch (ValidationException e) {
             logger.warn("계약서 생성 유효성 검사 실패: {}", e.getMessage());
             if (resolvedUserId == null) {
-                resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+                resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             }
             return handleFormError(e.getMessage(), model, form, resolvedUserId);
 
         } catch (BusinessException e) {
             logger.warn("계약서 생성 비즈니스 로직 실패: {}", e.getMessage());
             if (resolvedUserId == null) {
-                resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+                resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             }
             return handleFormError(e.getMessage(), model, form, resolvedUserId);
 
         } catch (Exception e) {
             logger.error("계약서 생성 중 예상치 못한 오류 발생", e);
             if (resolvedUserId == null) {
-                resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+                resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             }
             return handleFormError("계약서 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", model, form, resolvedUserId);
         }
@@ -328,7 +328,7 @@ public class ContractWebController {
             model.addAttribute("pageTitle", "계약서 수정");
             model.addAttribute("contractId", contractId);
             if (securityUser != null) {
-                String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+                String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
                 model.addAttribute("currentUserId", resolvedUserId);
             }
             return "contracts/form";
@@ -339,7 +339,7 @@ public class ContractWebController {
             model.addAttribute("pageTitle", "계약서 수정");
             model.addAttribute("contractId", contractId);
             if (securityUser != null) {
-                String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+                String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
                 model.addAttribute("currentUserId", resolvedUserId);
             }
             return "contracts/form";
@@ -350,7 +350,7 @@ public class ContractWebController {
             model.addAttribute("pageTitle", "계약서 수정");
             model.addAttribute("contractId", contractId);
             if (securityUser != null) {
-                String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+                String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
                 model.addAttribute("currentUserId", resolvedUserId);
             }
             return "contracts/form";
@@ -413,7 +413,7 @@ public class ContractWebController {
 
     @PostMapping("/{contractId}/complete")
     public String completeContract(@PathVariable String contractId,
-                                  @RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+                                  @RequestHeader(value = "X-User-Id", defaultValue = "01ARZ3NDEKTSV4RRFFQ69G5FAV") String userId,
                                   RedirectAttributes redirectAttributes) {
         try {
             contractService.completeContract(userId, contractId);

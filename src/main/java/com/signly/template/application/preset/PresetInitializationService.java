@@ -50,7 +50,7 @@ public class PresetInitializationService {
             );
 
             TemplateEntity preset = new TemplateEntity(
-                    "preset-standard-employment-contract",
+                    "01JB0000000000000000000001", // ULID 형식의 고정 ID for preset
                     null, // owner_id is null for presets
                     "표준 근로계약서",
                     jsonContent,

@@ -279,9 +279,9 @@
             }
 
             // 변수를 밑줄로 변환
-            decoded = decoded.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, '<span style="display: inline-block; border-bottom: 1px solid #000; min-width: 60px; height: 16px; margin: 0 3px;"></span>');
+            decoded = decoded.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, '<span class="template-variable-underline"></span>');
             // [VARIABLE_NAME] 형식도 밑줄로 변환
-            decoded = decoded.replace(/\[[\w_]+\]/g, '<span style="display: inline-block; border-bottom: 1px solid #000; min-width: 60px; height: 16px; margin: 0 3px;"></span>');
+            decoded = decoded.replace(/\[[\w_]+\]/g, '<span class="template-variable-underline"></span>');
 
             templateContent.innerHTML = decoded;
         });
@@ -301,9 +301,9 @@
             let html = decodeHtml(`${template.renderedHtml}`);
 
             // 변수를 밑줄로 변환
-            html = html.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, '<span style="display: inline-block; border-bottom: 1px solid #000; min-width: 60px; height: 16px; margin: 0 3px;"></span>');
+            html = html.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, '<span class="template-variable-underline"></span>');
             // [VARIABLE_NAME] 형식도 밑줄로 변환
-            html = html.replace(/\[[\w_]+\]/g, '<span style="display: inline-block; border-bottom: 1px solid #000; min-width: 60px; height: 16px; margin: 0 3px;"></span>');
+            html = html.replace(/\[[\w_]+\]/g, '<span class="template-variable-underline"></span>');
 
             document.getElementById('previewContent').innerHTML = html || '<p class="text-muted">템플릿 내용이 비어있습니다.</p>';
             new bootstrap.Modal(document.getElementById('previewModal')).show();

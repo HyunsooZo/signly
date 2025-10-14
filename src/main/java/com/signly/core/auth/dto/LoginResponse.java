@@ -8,6 +8,9 @@ public record LoginResponse(
     String userId,
     String email,
     String name,
+    String companyName,
+    String businessPhone,
+    String businessAddress,
     UserType userType,
     long expiresIn
 ) {}

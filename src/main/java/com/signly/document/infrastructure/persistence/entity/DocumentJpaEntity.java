@@ -11,13 +11,13 @@ import java.time.LocalDateTime;
 @Table(name = "documents")
 public class DocumentJpaEntity {
     @Id
-    @Column(name = "id", length = 36)
+    @Column(name = "id", length = 26)
     private String id;
 
-    @Column(name = "contract_id", nullable = false, length = 36)
+    @Column(name = "contract_id", nullable = false, length = 26)
     private String contractId;
 
-    @Column(name = "uploaded_by", nullable = false, length = 36)
+    @Column(name = "uploaded_by", nullable = false, length = 26)
     private String uploadedBy;
 
     @Enumerated(EnumType.STRING)

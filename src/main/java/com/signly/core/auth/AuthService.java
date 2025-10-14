@@ -56,12 +56,16 @@ public class AuthService {
                 user.getUserId().getValue()
             );
 
+            var company = user.getCompany();
             return new LoginResponse(
                 accessToken,
                 refreshToken,
                 user.getUserId().getValue(),
                 user.getEmail().getValue(),
                 user.getName(),
+                company != null ? company.getName() : null,
+                company != null ? company.getPhone() : null,
+                company != null ? company.getAddress() : null,
                 user.getUserType(),
                 jwtTokenProvider.getAccessTokenValidityInMs()
             );
@@ -96,12 +100,16 @@ public class AuthService {
             user.getUserId().getValue()
         );
 
+        var company = user.getCompany();
         return new LoginResponse(
             newAccessToken,
             newRefreshToken,
             user.getUserId().getValue(),
             user.getEmail().getValue(),
             user.getName(),
+            company != null ? company.getName() : null,
+            company != null ? company.getPhone() : null,
+            company != null ? company.getAddress() : null,
             user.getUserType(),
             jwtTokenProvider.getAccessTokenValidityInMs()
         );

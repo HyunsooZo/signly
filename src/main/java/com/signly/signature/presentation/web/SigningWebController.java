@@ -31,13 +31,8 @@ public class SigningWebController {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
-            boolean alreadySigned = signatureService.isContractSigned(
-                    contract.getId(),
-                    contract.getSecondParty().getEmail()
-            );
-
-            if (alreadySigned) {
-                // 이미 서명된 경우 완료 페이지로 리다이렉트
+            // 계약서 상태가 SIGNED 또는 COMPLETED인 경우 완료 페이지로 리다이렉트
+            if (contract.getStatus().name().equals("SIGNED") || contract.getStatus().name().equals("COMPLETED")) {
                 logger.info("이미 서명 완료된 계약서, 완료 페이지로 이동: token={}", token);
                 return "redirect:/sign/" + token + "/complete";
             }
@@ -113,6 +108,7 @@ public class SigningWebController {
             String ipAddress = getClientIpAddress(request);
             String userAgent = request.getHeader("User-Agent");
 
+            // 1. SignatureService를 통해 서명 데이터 저장 (contract_signatures 테이블)
             CreateSignatureCommand command = new CreateSignatureCommand(
                     contract.getId(),
                     signatureData,
@@ -121,14 +117,12 @@ public class SigningWebController {
                     ipAddress,
                     userAgent
             );
-
             SignatureResponse signature = signatureService.createSignature(command);
 
-            contractService.processSignature(contract.getId(), signerEmail, signerName,
-                                           signatureData, ipAddress);
+            // 2. Contract 상태 업데이트 (markSignedBy 사용)
+            contractService.processSignature(token, signerEmail, signerName, signatureData, ipAddress);
 
-            logger.info("서명 처리 완료: contractId={}, signatureId={}",
-                       contract.getId(), signature.signatureId());
+            logger.info("서명 처리 완료: contractId={}, signatureId={}", contract.getId(), signature.signatureId());
 
             return "{\"success\": true, \"message\": \"서명이 완료되었습니다.\"}";
 

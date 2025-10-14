@@ -1,12 +1,11 @@
-package com.signly.user.infrastructure.repository.impl;
+package com.signly.user.infrastructure.persistence.repository;
 
 import com.signly.user.domain.model.Email;
 import com.signly.user.domain.model.User;
 import com.signly.user.domain.model.UserId;
 import com.signly.user.domain.repository.UserRepository;
-import com.signly.user.infrastructure.entity.UserEntity;
-import com.signly.user.infrastructure.mapper.UserEntityMapper;
-import com.signly.user.infrastructure.repository.UserJpaRepository;
+import com.signly.user.infrastructure.persistence.entity.UserEntity;
+import com.signly.user.infrastructure.persistence.mapper.UserEntityMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

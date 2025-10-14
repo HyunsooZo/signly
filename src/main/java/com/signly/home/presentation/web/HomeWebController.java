@@ -46,12 +46,12 @@ public class HomeWebController {
     }
 
     @GetMapping("/home")
-    public String home(@RequestHeader(value = "X-User-Id", defaultValue = "dbd51de0-b234-47d8-893b-241c744e7337") String userId,
+    public String home(@RequestHeader(value = "X-User-Id", defaultValue = "01ARZ3NDEKTSV4RRFFQ69G5FAV") String userId,
                        @AuthenticationPrincipal SecurityUser securityUser,
                        HttpServletRequest request,
                        Model model) {
         try {
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             // 대시보드 통계 데이터 수집
             PageRequest pageRequest = PageRequest.of(0, 5, Sort.by("createdAt").descending());
 
@@ -86,6 +86,8 @@ public class HomeWebController {
                 model.addAttribute("currentUserEmail", securityUser.getEmail());
                 model.addAttribute("currentUserId", securityUser.getUserId());
                 model.addAttribute("currentUserCompany", securityUser.getCompanyName());
+                model.addAttribute("currentUserBusinessPhone", securityUser.getBusinessPhone());
+                model.addAttribute("currentUserBusinessAddress", securityUser.getBusinessAddress());
             }
 
             return "home/dashboard";

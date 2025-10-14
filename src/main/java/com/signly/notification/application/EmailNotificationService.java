@@ -1,14 +1,15 @@
 package com.signly.notification.application;
 
 import com.signly.contract.domain.model.Contract;
-import com.signly.notification.application.dto.EmailRequest;
+import com.signly.notification.domain.model.EmailOutbox;
 import com.signly.notification.domain.model.EmailTemplate;
-import com.signly.notification.infrastructure.EmailSender;
+import com.signly.notification.domain.repository.EmailOutboxRepository;
 import com.signly.signature.application.FirstPartySignatureService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,21 +18,23 @@ import java.util.Map;
 public class EmailNotificationService {
     private static final Logger logger = LoggerFactory.getLogger(EmailNotificationService.class);
 
-    private final EmailSender emailSender;
+    private final EmailOutboxRepository outboxRepository;
     private final String baseUrl;
     private final String companyName;
     private final FirstPartySignatureService firstPartySignatureService;
 
-    public EmailNotificationService(EmailSender emailSender,
-                                    @Value("${app.base-url:http://localhost:8080}") String baseUrl,
-                                    @Value("${app.name:Signly}") String companyName,
-                                    FirstPartySignatureService firstPartySignatureService) {
-        this.emailSender = emailSender;
+    public EmailNotificationService(
+            EmailOutboxRepository outboxRepository,
+            @Value("${app.base-url:http://localhost:8080}") String baseUrl,
+            @Value("${app.name:Signly}") String companyName,
+            FirstPartySignatureService firstPartySignatureService) {
+        this.outboxRepository = outboxRepository;
         this.baseUrl = baseUrl;
         this.companyName = companyName;
         this.firstPartySignatureService = firstPartySignatureService;
     }
 
+    @Transactional
     public void sendContractSigningRequest(Contract contract) {
         try {
             String signingUrl = baseUrl + "/sign/" + contract.getSignToken().value();
@@ -46,21 +49,23 @@ public class EmailNotificationService {
             variables.put("expiresAt", contract.getExpiresAt());
             variables.put("companyName", companyName);
 
-            EmailRequest request = new EmailRequest(
-                contract.getSecondParty().getEmail(),
-                contract.getSecondParty().getName(),
-                EmailTemplate.CONTRACT_SIGNING_REQUEST,
-                variables
+            EmailOutbox outbox = EmailOutbox.create(
+                    EmailTemplate.CONTRACT_SIGNING_REQUEST,
+                    contract.getSecondParty().getEmail(),
+                    contract.getSecondParty().getName(),
+                    variables
             );
 
-            emailSender.sendEmail(request);
-            logger.info("계약서 서명 요청 이메일 발송 완료: {}", contract.getId().getValue());
+            outboxRepository.save(outbox);
+            logger.info("계약서 서명 요청 이메일을 Outbox에 저장: contractId={}, outboxId={}",
+                    contract.getId().getValue(), outbox.getId().getValue());
 
         } catch (Exception e) {
-            logger.error("계약서 서명 요청 이메일 발송 실패: {}", contract.getId().getValue(), e);
+            logger.error("계약서 서명 요청 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
         }
     }
 
+    @Transactional
     public void sendContractCompleted(Contract contract) {
         try {
             Map<String, Object> variables = new HashMap<>();
@@ -77,31 +82,32 @@ public class EmailNotificationService {
                 logger.warn("갑 서명을 이메일에 첨부하지 못했습니다: contractId={}", contract.getId().getValue(), ex);
             }
 
-            // 양 당사자에게 발송
-            EmailRequest firstPartyRequest = new EmailRequest(
-                contract.getFirstParty().getEmail(),
-                contract.getFirstParty().getName(),
-                EmailTemplate.CONTRACT_COMPLETED,
-                variables
+            // 양 당사자에게 Outbox 저장
+            EmailOutbox firstPartyOutbox = EmailOutbox.create(
+                    EmailTemplate.CONTRACT_COMPLETED,
+                    contract.getFirstParty().getEmail(),
+                    contract.getFirstParty().getName(),
+                    variables
             );
 
-            EmailRequest secondPartyRequest = new EmailRequest(
-                contract.getSecondParty().getEmail(),
-                contract.getSecondParty().getName(),
-                EmailTemplate.CONTRACT_COMPLETED,
-                variables
+            EmailOutbox secondPartyOutbox = EmailOutbox.create(
+                    EmailTemplate.CONTRACT_COMPLETED,
+                    contract.getSecondParty().getEmail(),
+                    contract.getSecondParty().getName(),
+                    variables
             );
 
-            emailSender.sendEmail(firstPartyRequest);
-            emailSender.sendEmail(secondPartyRequest);
+            outboxRepository.save(firstPartyOutbox);
+            outboxRepository.save(secondPartyOutbox);
 
-            logger.info("계약서 완료 알림 이메일 발송 완료: {}", contract.getId().getValue());
+            logger.info("계약서 완료 알림 이메일을 Outbox에 저장: contractId={}", contract.getId().getValue());
 
         } catch (Exception e) {
-            logger.error("계약서 완료 알림 이메일 발송 실패: {}", contract.getId().getValue(), e);
+            logger.error("계약서 완료 알림 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
         }
     }
 
+    @Transactional
     public void sendContractCancelled(Contract contract) {
         try {
             Map<String, Object> variables = new HashMap<>();
@@ -111,21 +117,22 @@ public class EmailNotificationService {
             variables.put("cancelledAt", contract.getUpdatedAt());
             variables.put("companyName", companyName);
 
-            EmailRequest request = new EmailRequest(
-                contract.getSecondParty().getEmail(),
-                contract.getSecondParty().getName(),
-                EmailTemplate.CONTRACT_CANCELLED,
-                variables
+            EmailOutbox outbox = EmailOutbox.create(
+                    EmailTemplate.CONTRACT_CANCELLED,
+                    contract.getSecondParty().getEmail(),
+                    contract.getSecondParty().getName(),
+                    variables
             );
 
-            emailSender.sendEmail(request);
-            logger.info("계약서 취소 알림 이메일 발송 완료: {}", contract.getId().getValue());
+            outboxRepository.save(outbox);
+            logger.info("계약서 취소 알림 이메일을 Outbox에 저장: contractId={}", contract.getId().getValue());
 
         } catch (Exception e) {
-            logger.error("계약서 취소 알림 이메일 발송 실패: {}", contract.getId().getValue(), e);
+            logger.error("계약서 취소 알림 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
         }
     }
 
+    @Transactional
     public void sendContractExpired(Contract contract) {
         try {
             Map<String, Object> variables = new HashMap<>();
@@ -135,28 +142,28 @@ public class EmailNotificationService {
             variables.put("expiredAt", contract.getExpiresAt());
             variables.put("companyName", companyName);
 
-            // 양 당사자에게 발송
-            EmailRequest firstPartyRequest = new EmailRequest(
-                contract.getFirstParty().getEmail(),
-                contract.getFirstParty().getName(),
-                EmailTemplate.CONTRACT_EXPIRED,
-                variables
+            // 양 당사자에게 Outbox 저장
+            EmailOutbox firstPartyOutbox = EmailOutbox.create(
+                    EmailTemplate.CONTRACT_EXPIRED,
+                    contract.getFirstParty().getEmail(),
+                    contract.getFirstParty().getName(),
+                    variables
             );
 
-            EmailRequest secondPartyRequest = new EmailRequest(
-                contract.getSecondParty().getEmail(),
-                contract.getSecondParty().getName(),
-                EmailTemplate.CONTRACT_EXPIRED,
-                variables
+            EmailOutbox secondPartyOutbox = EmailOutbox.create(
+                    EmailTemplate.CONTRACT_EXPIRED,
+                    contract.getSecondParty().getEmail(),
+                    contract.getSecondParty().getName(),
+                    variables
             );
 
-            emailSender.sendEmail(firstPartyRequest);
-            emailSender.sendEmail(secondPartyRequest);
+            outboxRepository.save(firstPartyOutbox);
+            outboxRepository.save(secondPartyOutbox);
 
-            logger.info("계약서 만료 알림 이메일 발송 완료: {}", contract.getId().getValue());
+            logger.info("계약서 만료 알림 이메일을 Outbox에 저장: contractId={}", contract.getId().getValue());
 
         } catch (Exception e) {
-            logger.error("계약서 만료 알림 이메일 발송 실패: {}", contract.getId().getValue(), e);
+            logger.error("계약서 만료 알림 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
         }
     }
 }

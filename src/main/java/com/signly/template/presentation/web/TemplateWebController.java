@@ -56,7 +56,7 @@ public class TemplateWebController {
                               HttpServletRequest request,
                               Model model) {
         try {
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
             Page<TemplateResponse> templates = status != null ?
@@ -136,7 +136,7 @@ public class TemplateWebController {
                                 HttpServletRequest request,
                                 Model model) {
         try {
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             TemplateResponse template = templateService.getTemplate(resolvedUserId, templateId);
 
             model.addAttribute("pageTitle", "템플릿 상세보기");
@@ -157,7 +157,7 @@ public class TemplateWebController {
                                   HttpServletRequest request,
                                   Model model) {
         try {
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, false);
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             TemplateResponse template = templateService.getTemplate(resolvedUserId, templateId);
 
             TemplateForm form = new TemplateForm();

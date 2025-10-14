@@ -375,11 +375,14 @@
     border-radius: 12px;
     padding: 20px;
     height: 100%;
-    cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
     color: inherit;
     display: block;
+}
+
+.contract-type-card-clickable {
+    cursor: pointer;
 }
 
 .contract-type-card:hover {
@@ -737,3 +740,20 @@
 }
 
 /* 템플릿 조항 스타일은 template-preview.css에서 관리 */
+
+/* 계약서 변수 입력 스타일 */
+.contract-variable-underline {
+    display: inline-block;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0 2px;
+}
+
+.contract-input-inline {
+    border: none;
+    padding: 0;
+    margin: 0;
+    height: auto;
+    display: inline;
+    font-size: 13px;
+    font-family: inherit;
+}

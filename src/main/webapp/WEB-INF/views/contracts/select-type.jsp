@@ -39,7 +39,7 @@
         <div class="row g-4 justify-content-center">
             <!-- 템플릿 불러오기 -->
             <div class="col-md-6 col-lg-4">
-                <div class="contract-type-card" onclick="showTemplateSelector()" style="cursor: pointer;">
+                <div class="contract-type-card contract-type-card-clickable" onclick="showTemplateSelector()">
                     <div class="contract-type-icon">
                         <i class="bi bi-file-earmark-text"></i>
                     </div>

@@ -1,4 +1,4 @@
-package com.signly.user.infrastructure.entity;
+package com.signly.user.infrastructure.persistence.entity;
 
 import com.signly.user.domain.model.UserStatus;
 import com.signly.user.domain.model.UserType;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class UserEntity {
 
     @Id
-    @Column(name = "user_id", length = 36)
+    @Column(name = "user_id", length = 26)
     private String userId;
 
     @Column(name = "email", length = 255, unique = true, nullable = false)
@@ -25,6 +25,12 @@ public class UserEntity {
 
     @Column(name = "company_name", length = 200)
     private String companyName;
+
+    @Column(name = "business_phone", length = 20)
+    private String businessPhone;
+
+    @Column(name = "business_address", length = 500)
+    private String businessAddress;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "user_type", length = 20, nullable = false)
@@ -44,13 +50,16 @@ public class UserEntity {
     }
 
     public UserEntity(String userId, String email, String password, String name,
-                     String companyName, UserType userType, UserStatus status,
+                     String companyName, String businessPhone, String businessAddress,
+                     UserType userType, UserStatus status,
                      LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.userId = userId;
         this.email = email;
         this.password = password;
         this.name = name;
         this.companyName = companyName;
+        this.businessPhone = businessPhone;
+        this.businessAddress = businessAddress;
         this.userType = userType;
         this.status = status;
         this.createdAt = createdAt;
@@ -111,5 +120,21 @@ public class UserEntity {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public void setBusinessPhone(String businessPhone) {
+        this.businessPhone = businessPhone;
+    }
+
+    public void setBusinessAddress(String businessAddress) {
+        this.businessAddress = businessAddress;
+    }
+
+    public String getBusinessPhone() {
+        return businessPhone;
+    }
+
+    public String getBusinessAddress() {
+        return businessAddress;
     }
 }
