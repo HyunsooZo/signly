@@ -161,6 +161,10 @@
     font-size: var(--font-size-base);
 }
 
+.contract-body > .title:first-child {
+    display: none;
+}
+
 .contract-body h1,
 .contract-body h2,
 .contract-body h3 {

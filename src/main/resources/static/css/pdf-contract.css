@@ -1,96 +1,78 @@
-.preset-document {
-    font-family: 'Malgun Gothic', sans-serif;
+body {
+    font-family: 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', sans-serif;
     line-height: 1.6;
-    font-size: 14px;
-    padding: 20px;
+    font-size: 13px;
+    color: #222;
     background: white;
 }
-.contract-content,
-body {
-    font-family: 'Malgun Gothic', sans-serif;
-    line-height: 1.6;
-    font-size: 14px;
-}
+
+.preset-document,
 .contract-content {
-    color: #222;
+    font-family: inherit;
+    line-height: inherit;
+    font-size: inherit;
+    color: inherit;
 }
-.section {
-    margin: 15px 0;
+
+.title,
+.contract-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    letter-spacing: 6px;
 }
+
+.contract-intro,
 .section-text {
-    margin: 15px 0;
     text-align: justify;
+    margin: 18px 0;
 }
+
+.section,
+.section-signature,
+.section-footer,
+.section-title,
+.section-dotted,
 .section-clause {
-    margin: 20px 0;
-    padding-left: 20px;
+    margin: 16px 0;
 }
+
+.section-number,
+.section-title,
+.section-clause::before {
+    font-weight: 700;
+}
+
+.section-clause {
+    padding-left: 18px;
+}
+
 .section-dotted {
-    border: 0.5px dashed #666;
-    padding: 15px;
-    margin: 20px 0;
+    border: 1px dashed #666;
+    padding: 16px;
     border-radius: 4px;
 }
+
 .section-title {
-    font-size: 18px;
-    font-weight: 700;
     text-align: center;
-    margin: 24px 0 12px;
+    font-size: 18px;
 }
+
 .section-footer {
-    margin-top: 40px;
     padding-top: 20px;
     border-top: 1px solid #ddd;
     text-align: center;
-    font-size: 13px;
+    font-size: 12px;
     color: #666;
 }
-.section-signature {
-    margin-top: 50px;
-    line-height: 2;
-}
-.signature-section {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-.signature-block {
-    flex: 1;
-}
-.signature-line {
-    margin: 8px 0;
-}
-.signature-line--seal {
-    position: relative;
-    min-height: 90px;
-    white-space: nowrap;
-    font-weight: normal;
-}
-.signature-stamp-label {
-    margin-left: 8px;
-    position: relative;
-    display: inline-block;
-    z-index: 1;
-}
-.signature-stamp-wrapper {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-}
-.signature-stamp-wrapper img,
-.signature-stamp-image-element {
-    max-width: 100%;
-    max-height: 100%;
-    display: block;
-    opacity: 0.9;
-}
+
+.indent { margin-left: 20px; }
+.note { font-size: 11px; margin-left: 40px; margin-top: 6px; }
+.wage-section { margin-left: 18px; }
+.wage-item { margin: 8px 0; }
+.date-section { text-align: center; margin: 36px 0 28px; font-size: 15px; }
+
 .blank-line {
     display: inline-block;
     border-bottom: 1px solid #000;
@@ -99,21 +81,72 @@ body {
     margin: 0 4px;
     vertical-align: bottom;
 }
+
+.contract-content,
+body,
 .preset-document {
     counter-reset: clause-counter;
 }
+
 .template-clause {
     counter-increment: clause-counter;
-    margin: 20px 0;
-    padding-left: 20px;
+    margin: 18px 0;
+    padding-left: 18px;
 }
+
 .template-clause::before {
-    content: counter(clause-counter) ". ";
-    font-weight: bold;
-    display: inline;
+    content: counter(clause-counter) '. ';
+    font-weight: 700;
     margin-right: 8px;
 }
+
 .template-clause p {
     display: inline;
     margin: 0;
+}
+
+.signature-section {
+    width: 100%;
+    margin-top: 30px;
+}
+
+.signature-block {
+    display: inline-block;
+    width: 48%;
+    vertical-align: top;
+}
+
+.signature-line {
+    margin: 8px 0;
+}
+
+.signature-line--seal {
+    position: relative;
+    min-height: 90px;
+    white-space: nowrap;
+}
+
+.signature-stamp-label {
+    margin-left: 8px;
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+}
+
+.signature-stamp-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90px;
+    height: 40px;
+    text-align: center;
+}
+
+.signature-stamp-wrapper img,
+.signature-stamp-image-element {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    opacity: 0.9;
 }

@@ -77,6 +77,10 @@ body:not(:has(.navbar)) {
     line-height: 2;
 }
 
+.contract-body > .title:first-child {
+    display: none;
+}
+
 /* 밑줄 표시 (변수 미리보기) */
 .blank-line {
     display: inline-block;
