@@ -22,7 +22,8 @@ public class SignatureEntity extends BaseEntity {
     @Column(name = "signer_name", length = 100, nullable = false)
     private String signerName;
 
-    @Column(name = "signature_data", columnDefinition = "TEXT", nullable = false)
+    @Lob
+    @Column(name = "signature_data", columnDefinition = "LONGTEXT", nullable = false)
     private String signatureData;
 
     @Column(name = "signed_at", nullable = false)
@@ -31,7 +32,8 @@ public class SignatureEntity extends BaseEntity {
     @Column(name = "ip_address", length = 45)
     private String ipAddress;
 
-    @Column(name = "device_info", columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "device_info", columnDefinition = "LONGTEXT")
     private String deviceInfo;
 
     protected SignatureEntity() {}
