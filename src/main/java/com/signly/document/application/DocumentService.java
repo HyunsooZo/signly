@@ -6,6 +6,7 @@ import com.signly.common.exception.ValidationException;
 import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.model.ContractId;
 import com.signly.contract.domain.repository.ContractRepository;
+import com.signly.contract.domain.model.GeneratedPdf;
 import com.signly.document.application.dto.CreateDocumentCommand;
 import com.signly.document.application.dto.DocumentResponse;
 import com.signly.document.application.mapper.DocumentDtoMapper;
@@ -19,6 +20,8 @@ import com.signly.user.domain.model.UserId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,6 +33,8 @@ public class DocumentService {
     private final ContractRepository contractRepository;
     private final FileStorageService fileStorageService;
     private final DocumentDtoMapper documentDtoMapper;
+
+    private static final String PDF_CHECKSUM_ALGORITHM = "SHA-256";
 
     public DocumentService(DocumentRepository documentRepository,
                          ContractRepository contractRepository,
@@ -63,6 +68,65 @@ public class DocumentService {
         Document savedDocument = documentRepository.save(document);
 
         return documentDtoMapper.toResponse(savedDocument);
+    }
+
+    public Document storeContractPdf(Contract contract, GeneratedPdf pdf) {
+        if (contract == null) {
+            throw new ValidationException("계약서 정보가 필요합니다");
+        }
+        if (pdf == null) {
+            throw new ValidationException("PDF 데이터가 필요합니다");
+        }
+
+        ContractId contractId = contract.getId();
+        UserId uploaderId = contract.getCreatorId();
+
+        removeExistingContractPdf(contractId);
+
+        String checksum = calculateChecksum(pdf.getContent());
+        FileMetadata metadata = FileMetadata.create(
+                ensurePdfExtension(pdf.getFileName()),
+                pdf.getContentType(),
+                pdf.getSizeInBytes(),
+                checksum
+        );
+
+        String storagePath = fileStorageService.storeFile(pdf.getContent(), metadata);
+        Document document = Document.create(contractId, uploaderId, DocumentType.CONTRACT_PDF, metadata, storagePath);
+        return documentRepository.save(document);
+    }
+
+    private void removeExistingContractPdf(ContractId contractId) {
+        List<Document> existing = documentRepository.findByContractIdAndType(contractId, DocumentType.CONTRACT_PDF);
+        for (Document document : existing) {
+            fileStorageService.deleteFile(document.getStoragePath());
+            documentRepository.delete(document);
+        }
+    }
+
+    private String ensurePdfExtension(String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            return "contract.pdf";
+        }
+        return fileName.toLowerCase().endsWith(".pdf") ? fileName : fileName + ".pdf";
+    }
+
+    private String calculateChecksum(byte[] data) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance(PDF_CHECKSUM_ALGORITHM);
+            byte[] hash = digest.digest(data);
+            StringBuilder hexString = new StringBuilder(hash.length * 2);
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new ValidationException("체크섬 계산을 위한 알고리즘이 없습니다");
+        }
     }
 
     @Transactional(readOnly = true)

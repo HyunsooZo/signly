@@ -10,6 +10,7 @@ import com.signly.notification.domain.repository.EmailOutboxRepository;
 import com.signly.signature.application.FirstPartySignatureService;
 import com.signly.signature.domain.model.ContractSignature;
 import com.signly.signature.domain.repository.SignatureRepository;
+import com.signly.document.application.DocumentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,7 @@ public class EmailNotificationService {
     private final FirstPartySignatureService firstPartySignatureService;
     private final SignatureRepository signatureRepository;
     private final ContractPdfService contractPdfService;
+    private final DocumentService documentService;
 
     public EmailNotificationService(
             EmailOutboxRepository outboxRepository,
@@ -38,13 +40,15 @@ public class EmailNotificationService {
             @Value("${app.name:Signly}") String companyName,
             FirstPartySignatureService firstPartySignatureService,
             SignatureRepository signatureRepository,
-            ContractPdfService contractPdfService) {
+            ContractPdfService contractPdfService,
+            DocumentService documentService) {
         this.outboxRepository = outboxRepository;
         this.baseUrl = baseUrl;
         this.companyName = companyName;
         this.firstPartySignatureService = firstPartySignatureService;
         this.signatureRepository = signatureRepository;
         this.contractPdfService = contractPdfService;
+        this.documentService = documentService;
     }
 
     @Transactional
@@ -93,16 +97,17 @@ public class EmailNotificationService {
 
             // PDF 생성 및 첨부파일 준비
             List<EmailAttachment> attachments = new ArrayList<>();
+            GeneratedPdf generatedPdf = null;
             try {
-                GeneratedPdf pdf = contractPdfService.generateContractPdf(contract.getId().getValue());
+                generatedPdf = contractPdfService.generateContractPdf(contract.getId().getValue());
                 EmailAttachment pdfAttachment = EmailAttachment.of(
-                        pdf.getFileName(),
-                        pdf.getContent(),
-                        pdf.getContentType()
+                        generatedPdf.getFileName(),
+                        generatedPdf.getContent(),
+                        generatedPdf.getContentType()
                 );
                 attachments.add(pdfAttachment);
                 logger.info("계약서 PDF 생성 및 첨부 준비 완료: contractId={}, fileName={}",
-                        contract.getId().getValue(), pdf.getFileName());
+                        contract.getId().getValue(), generatedPdf.getFileName());
             } catch (Exception ex) {
                 logger.error("계약서 PDF 생성 실패, PDF 없이 이메일 발송: contractId={}",
                         contract.getId().getValue(), ex);
@@ -127,6 +132,14 @@ public class EmailNotificationService {
 
             outboxRepository.save(firstPartyOutbox);
             outboxRepository.save(secondPartyOutbox);
+
+            if (generatedPdf != null) {
+                try {
+                    documentService.storeContractPdf(contract, generatedPdf);
+                } catch (Exception storeEx) {
+                    logger.error("계약서 PDF 저장 실패: contractId={}", contract.getId().getValue(), storeEx);
+                }
+            }
 
             logger.info("계약서 완료 알림 이메일을 Outbox에 저장: contractId={}, PDF첨부={}",
                     contract.getId().getValue(), !attachments.isEmpty());
