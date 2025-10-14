@@ -1,6 +1,7 @@
 package com.signly.contract.application;
 
 import com.signly.common.exception.NotFoundException;
+import com.signly.common.storage.FileStorageService;
 import com.signly.contract.domain.model.*;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.contract.domain.service.PdfGenerator;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Base64;
 import java.util.Optional;
 
 /**
@@ -27,15 +29,18 @@ public class ContractPdfService {
     private final ContractRepository contractRepository;
     private final SignatureRepository signatureRepository;
     private final PdfGenerator pdfGenerator;
+    private final FileStorageService fileStorageService;
 
     public ContractPdfService(
             ContractRepository contractRepository,
             SignatureRepository signatureRepository,
-            PdfGenerator pdfGenerator
+            PdfGenerator pdfGenerator,
+            FileStorageService fileStorageService
     ) {
         this.contractRepository = contractRepository;
         this.signatureRepository = signatureRepository;
         this.pdfGenerator = pdfGenerator;
+        this.fileStorageService = fileStorageService;
     }
 
     /**
@@ -88,7 +93,7 @@ public class ContractPdfService {
         Optional<ContractSignature> signature = signatureRepository
                 .findByContractIdAndSignerEmail(contractId, signerEmail);
 
-        return signature.map(sig -> sig.signatureData().value()).orElse(null);
+        return signature.flatMap(this::buildSignatureDataUrl).orElse(null);
     }
 
     /**
@@ -122,5 +127,34 @@ public class ContractPdfService {
      */
     private String createImageTag(String dataUrl) {
         return String.format("<img src=\"%s\" class=\"signature-stamp-image-element\" alt=\"서명\"/>", dataUrl);
+    }
+
+    private Optional<String> buildSignatureDataUrl(ContractSignature signature) {
+        String signaturePath = signature.signaturePath();
+        String originalDataUrl = signature.signatureData().value();
+
+        if (signaturePath != null && !signaturePath.isBlank()) {
+            try {
+                byte[] imageBytes = fileStorageService.loadFile(signaturePath);
+                String contentType = extractContentType(originalDataUrl);
+                String base64 = Base64.getEncoder().encodeToString(imageBytes);
+                return Optional.of("data:" + contentType + ";base64," + base64);
+            } catch (Exception e) {
+                logger.warn("서명 이미지 파일을 로드할 수 없어 DB 데이터를 사용합니다: path={}", signaturePath, e);
+            }
+        }
+
+        return Optional.ofNullable(originalDataUrl);
+    }
+
+    private String extractContentType(String dataUrl) {
+        if (dataUrl == null || !dataUrl.startsWith("data:")) {
+            return "image/png";
+        }
+        int semicolonIndex = dataUrl.indexOf(';');
+        if (semicolonIndex > 5) {
+            return dataUrl.substring(5, semicolonIndex);
+        }
+        return "image/png";
     }
 }
