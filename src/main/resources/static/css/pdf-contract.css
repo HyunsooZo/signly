@@ -1,0 +1,119 @@
+.preset-document {
+    font-family: 'Malgun Gothic', sans-serif;
+    line-height: 1.6;
+    font-size: 14px;
+    padding: 20px;
+    background: white;
+}
+.contract-content,
+body {
+    font-family: 'Malgun Gothic', sans-serif;
+    line-height: 1.6;
+    font-size: 14px;
+}
+.contract-content {
+    color: #222;
+}
+.section {
+    margin: 15px 0;
+}
+.section-text {
+    margin: 15px 0;
+    text-align: justify;
+}
+.section-clause {
+    margin: 20px 0;
+    padding-left: 20px;
+}
+.section-dotted {
+    border: 0.5px dashed #666;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    margin: 24px 0 12px;
+}
+.section-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+}
+.section-signature {
+    margin-top: 50px;
+    line-height: 2;
+}
+.signature-section {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.signature-block {
+    flex: 1;
+}
+.signature-line {
+    margin: 8px 0;
+}
+.signature-line--seal {
+    position: relative;
+    min-height: 90px;
+    white-space: nowrap;
+    font-weight: normal;
+}
+.signature-stamp-label {
+    margin-left: 8px;
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+}
+.signature-stamp-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+.signature-stamp-wrapper img,
+.signature-stamp-image-element {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    opacity: 0.9;
+}
+.blank-line {
+    display: inline-block;
+    border-bottom: 1px solid #000;
+    min-width: 80px;
+    height: 1.2em;
+    margin: 0 4px;
+    vertical-align: bottom;
+}
+.preset-document {
+    counter-reset: clause-counter;
+}
+.template-clause {
+    counter-increment: clause-counter;
+    margin: 20px 0;
+    padding-left: 20px;
+}
+.template-clause::before {
+    content: counter(clause-counter) ". ";
+    font-weight: bold;
+    display: inline;
+    margin-right: 8px;
+}
+.template-clause p {
+    display: inline;
+    margin: 0;
+}

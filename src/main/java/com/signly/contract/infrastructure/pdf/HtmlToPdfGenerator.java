@@ -31,8 +31,7 @@ public class HtmlToPdfGenerator implements PdfGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(HtmlToPdfGenerator.class);
     private static final List<String> PDF_CSS_RESOURCES = List.of(
-            "static/css/template-preview.css",
-            "static/css/contracts.css"
+            "static/css/pdf-contract.css"
     );
     private static final String PRESET_TEMPLATE_PATH = "presets/templates/standard-employment-contract.html";
     private static final Pattern STYLE_PATTERN = Pattern.compile("<style>(.*?)</style>", Pattern.DOTALL);
