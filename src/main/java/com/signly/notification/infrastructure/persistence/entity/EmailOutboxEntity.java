@@ -27,10 +27,12 @@ public class EmailOutboxEntity {
     @Column(name = "recipient_name", nullable = false, length = 100)
     private String recipientName;
 
-    @Column(name = "template_variables", nullable = false, columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "template_variables", nullable = false, columnDefinition = "LONGTEXT")
     private String templateVariables; // JSON string
 
-    @Column(name = "attachments", columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "attachments", columnDefinition = "LONGTEXT")
     private String attachments; // JSON string for EmailAttachment list
 
     @Enumerated(EnumType.STRING)
