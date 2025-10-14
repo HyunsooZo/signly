@@ -18,6 +18,7 @@ public class ContractSignatureSchemaInitializer {
         this.jdbcTemplate = jdbcTemplate;
         ensureLongTextColumn("signature_data", true);
         ensureLongTextColumn("device_info", false);
+        ensureSignaturePathColumn();
     }
 
     private void ensureLongTextColumn(String columnName, boolean notNull) {
@@ -46,6 +47,22 @@ public class ContractSignatureSchemaInitializer {
             logger.warn("contract_signatures.{} 컬럼을 찾지 못했습니다.", columnName);
         } catch (DataAccessException e) {
             logger.error("contract_signatures.{} 컬럼 스키마 확인/변경 중 오류가 발생했습니다.", columnName, e);
+        }
+    }
+
+    private void ensureSignaturePathColumn() {
+        try {
+            Integer count = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'contract_signatures' AND COLUMN_NAME = 'signature_path'",
+                    Integer.class
+            );
+
+            if (count == null || count == 0) {
+                logger.info("contract_signatures.signature_path 컬럼을 추가합니다.");
+                jdbcTemplate.execute("ALTER TABLE contract_signatures ADD COLUMN signature_path VARCHAR(1000)");
+            }
+        } catch (DataAccessException e) {
+            logger.error("contract_signatures.signature_path 컬럼 생성 중 오류가 발생했습니다.", e);
         }
     }
 }

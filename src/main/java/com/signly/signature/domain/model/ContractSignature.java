@@ -8,23 +8,38 @@ public class ContractSignature extends AggregateRoot {
     private final ContractId contractId;
     private final SignatureData signatureData;
     private final SignerInfo signerInfo;
+    private final String signaturePath;
 
     private ContractSignature(SignatureId id, ContractId contractId,
-                             SignatureData signatureData, SignerInfo signerInfo) {
+                             SignatureData signatureData, SignerInfo signerInfo, String signaturePath) {
         this.id = id;
         this.contractId = contractId;
         this.signatureData = signatureData;
         this.signerInfo = signerInfo;
+        this.signaturePath = signaturePath;
     }
 
     public static ContractSignature create(ContractId contractId, String signatureDataValue,
                                           String signerEmail, String signerName,
                                           String ipAddress, String deviceInfo) {
+        return create(contractId, signatureDataValue, signerEmail, signerName, ipAddress, deviceInfo, null);
+    }
+
+    public static ContractSignature create(ContractId contractId, String signatureDataValue,
+                                          String signerEmail, String signerName,
+                                          String ipAddress, String deviceInfo,
+                                          String signaturePath) {
         SignatureId id = SignatureId.generate();
         SignatureData data = SignatureData.of(signatureDataValue);
         SignerInfo info = SignerInfo.create(signerEmail, signerName, ipAddress, deviceInfo);
 
-        return new ContractSignature(id, contractId, data, info);
+        return new ContractSignature(id, contractId, data, info, signaturePath);
+    }
+
+    public static ContractSignature restore(SignatureId id, ContractId contractId,
+                                          SignatureData signatureData, SignerInfo signerInfo,
+                                          String signaturePath) {
+        return new ContractSignature(id, contractId, signatureData, signerInfo, signaturePath);
     }
 
     public boolean validate() {
@@ -52,6 +67,10 @@ public class ContractSignature extends AggregateRoot {
 
     public SignerInfo signerInfo() {
         return signerInfo;
+    }
+
+    public String signaturePath() {
+        return signaturePath;
     }
 
     @Override

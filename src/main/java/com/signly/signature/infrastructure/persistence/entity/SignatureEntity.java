@@ -36,10 +36,14 @@ public class SignatureEntity extends BaseEntity {
     @Column(name = "device_info", columnDefinition = "LONGTEXT")
     private String deviceInfo;
 
+    @Column(name = "signature_path", length = 1000)
+    private String signaturePath;
+
     protected SignatureEntity() {}
 
     public SignatureEntity(String signatureId, String contractId, String signerEmail, String signerName,
-                          String signatureData, LocalDateTime signedAt, String ipAddress, String deviceInfo) {
+                          String signatureData, LocalDateTime signedAt, String ipAddress,
+                          String deviceInfo, String signaturePath) {
         this.signatureId = signatureId;
         this.contractId = contractId;
         this.signerEmail = signerEmail;
@@ -48,6 +52,7 @@ public class SignatureEntity extends BaseEntity {
         this.signedAt = signedAt;
         this.ipAddress = ipAddress;
         this.deviceInfo = deviceInfo;
+        this.signaturePath = signaturePath;
     }
 
     public String getSignatureId() {
@@ -80,5 +85,9 @@ public class SignatureEntity extends BaseEntity {
 
     public String getDeviceInfo() {
         return deviceInfo;
+    }
+
+    public String getSignaturePath() {
+        return signaturePath;
     }
 }

@@ -3,6 +3,8 @@ package com.signly.signature.application;
 import com.signly.common.exception.BusinessException;
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
+import com.signly.common.storage.FileStorageService;
+import com.signly.common.storage.StoredFile;
 import com.signly.contract.domain.model.ContractId;
 import com.signly.signature.application.dto.CreateSignatureCommand;
 import com.signly.signature.application.dto.SignatureResponse;
@@ -15,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,12 +28,17 @@ public class SignatureService {
 
     private static final Logger logger = LoggerFactory.getLogger(SignatureService.class);
 
+    private static final String STORAGE_CATEGORY_PREFIX = "signatures/contracts";
     private final SignatureRepository signatureRepository;
     private final SignatureDtoMapper mapper;
+    private final FileStorageService fileStorageService;
 
-    public SignatureService(SignatureRepository signatureRepository, SignatureDtoMapper mapper) {
+    public SignatureService(SignatureRepository signatureRepository,
+                            SignatureDtoMapper mapper,
+                            FileStorageService fileStorageService) {
         this.signatureRepository = signatureRepository;
         this.mapper = mapper;
+        this.fileStorageService = fileStorageService;
     }
 
     public SignatureResponse createSignature(CreateSignatureCommand command) {
@@ -47,13 +56,25 @@ public class SignatureService {
             return mapper.toResponse(existingSignature);
         }
 
+        ImagePayload payload = parseDataUrl(command.signatureData());
+
+        String category = buildCategory(contractId.getValue(), command.signerEmail());
+        String originalFileName = buildFileName(contractId.getValue(), command.signerEmail(), payload.extension());
+        StoredFile storedFile = fileStorageService.storeFile(
+                payload.data(),
+                originalFileName,
+                payload.contentType(),
+                category
+        );
+
         ContractSignature signature = ContractSignature.create(
                 contractId,
                 command.signatureData(),
                 command.signerEmail(),
                 command.signerName(),
                 command.ipAddress(),
-                command.deviceInfo()
+                command.deviceInfo(),
+                storedFile.filePath()
         );
 
         if (!signature.validate()) {
@@ -65,6 +86,67 @@ public class SignatureService {
         logger.info("서명 생성 완료: signatureId={}", signature.id().value());
         return mapper.toResponse(signature);
     }
+
+    private ImagePayload parseDataUrl(String dataUrl) {
+        if (dataUrl == null || dataUrl.trim().isEmpty()) {
+            throw new ValidationException("서명 데이터를 전달해주세요.");
+        }
+
+        if (!dataUrl.startsWith("data:")) {
+            throw new ValidationException("올바른 데이터 URL 형식이 아닙니다.");
+        }
+
+        int commaIndex = dataUrl.indexOf(',');
+        if (commaIndex <= 0) {
+            throw new ValidationException("잘못된 데이터 URL입니다.");
+        }
+
+        String metadata = dataUrl.substring(5, commaIndex);
+        String base64Data = dataUrl.substring(commaIndex + 1);
+
+        if (!metadata.contains(";base64")) {
+            throw new ValidationException("지원하지 않는 서명 데이터 형식입니다.");
+        }
+
+        String contentType = metadata.substring(0, metadata.indexOf(';'));
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new ValidationException("서명은 이미지 형식이어야 합니다.");
+        }
+
+        byte[] decoded;
+        try {
+            decoded = Base64.getDecoder().decode(base64Data.getBytes(StandardCharsets.UTF_8));
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("서명 데이터를 해석할 수 없습니다.");
+        }
+
+        if (decoded.length == 0) {
+            throw new ValidationException("서명 데이터가 비어 있습니다.");
+        }
+
+        String extension = switch (contentType) {
+            case "image/png" -> "png";
+            case "image/jpeg" -> "jpg";
+            case "image/gif" -> "gif";
+            default -> throw new ValidationException("지원하지 않는 이미지 형식입니다.");
+        };
+
+        return new ImagePayload(decoded, contentType, extension);
+    }
+
+    private String buildCategory(String contractId, String signerEmail) {
+        return STORAGE_CATEGORY_PREFIX + "/" + contractId + "/" + sanitizeEmail(signerEmail);
+    }
+
+    private String buildFileName(String contractId, String signerEmail, String extension) {
+        return "signature-" + contractId + "-" + sanitizeEmail(signerEmail) + "." + extension;
+    }
+
+    private String sanitizeEmail(String email) {
+        return email == null ? "unknown" : email.replaceAll("[^a-zA-Z0-9]+", "-");
+    }
+
+    private record ImagePayload(byte[] data, String contentType, String extension) {}
 
     @Transactional(readOnly = true)
     public SignatureResponse getSignature(String signatureId) {
