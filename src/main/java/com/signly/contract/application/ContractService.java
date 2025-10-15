@@ -5,6 +5,7 @@ import com.signly.common.exception.ForbiddenException;
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
 import com.signly.contract.application.mapper.ContractDtoMapper;
+import com.signly.contract.application.support.ContractHtmlSanitizer;
 import com.signly.contract.domain.model.*;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.notification.application.EmailNotificationService;
@@ -92,7 +93,8 @@ public class ContractService {
             }
         }
 
-        ContractContent content = ContractContent.of(command.content());
+        String sanitizedContent = ContractHtmlSanitizer.sanitize(command.content());
+        ContractContent content = ContractContent.of(sanitizedContent);
         PartyInfo firstParty = PartyInfo.of(
                 command.firstPartyName(),
                 command.firstPartyEmail(),
@@ -133,7 +135,8 @@ public class ContractService {
         validateOwnership(userId, contract);
 
         contract.updateTitle(command.title());
-        ContractContent newContent = ContractContent.of(command.content());
+        String sanitizedContent = ContractHtmlSanitizer.sanitize(command.content());
+        ContractContent newContent = ContractContent.of(sanitizedContent);
         contract.updateContent(newContent);
 
         if (command.expiresAt() != null) {
@@ -394,13 +397,13 @@ public class ContractService {
         // 모든 당사자가 서명을 완료했는지 확인 (contract_signatures 테이블에서 확인)
         ContractId contractId = contract.getId();
         boolean firstPartySigned = signatureRepository.existsByContractIdAndSignerEmail(
-                contractId, contract.getFirstParty().getEmail());
+                contractId, normalizeEmail(contract.getFirstParty().getEmail()));
         boolean secondPartySigned = signatureRepository.existsByContractIdAndSignerEmail(
-                contractId, contract.getSecondParty().getEmail());
+                contractId, normalizeEmail(contract.getSecondParty().getEmail()));
 
         // 현재 서명하는 사람이 어느 당사자인지 확인하여 서명 후 상태 결정
         boolean allSignaturesComplete;
-        if (signerEmail.equalsIgnoreCase(contract.getFirstParty().getEmail())) {
+        if (normalizeEmail(signerEmail).equals(normalizeEmail(contract.getFirstParty().getEmail()))) {
             // firstParty가 서명하는 경우, secondParty도 서명했으면 완료
             allSignaturesComplete = secondPartySigned;
         } else {
@@ -409,7 +412,7 @@ public class ContractService {
         }
 
         // 서명 검증 및 상태 업데이트 (서명 데이터는 SignatureService에서 별도 저장)
-        contract.markSignedBy(signerEmail, allSignaturesComplete);
+        contract.markSignedBy(normalizeEmail(signerEmail), allSignaturesComplete);
         Contract savedContract = contractRepository.save(contract);
 
         // 모든 당사자의 서명이 완료되면 양측에 완료 이메일 발송
@@ -459,5 +462,9 @@ public class ContractService {
         if (!template.getOwnerId().getValue().equals(userId)) {
             throw new ForbiddenException("해당 템플릿에 대한 권한이 없습니다");
         }
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase();
     }
 }

@@ -2,6 +2,7 @@ package com.signly.contract.application;
 
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.storage.FileStorageService;
+import com.signly.contract.application.support.ContractHtmlSanitizer;
 import com.signly.contract.domain.model.*;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.contract.domain.service.PdfGenerator;
@@ -12,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -25,7 +28,6 @@ import java.util.Optional;
 public class ContractPdfService {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractPdfService.class);
-
     private final ContractRepository contractRepository;
     private final SignatureRepository signatureRepository;
     private final PdfGenerator pdfGenerator;
@@ -77,8 +79,13 @@ public class ContractPdfService {
         // HTML에 서명 이미지를 삽입한 최종 HTML 생성
         String finalHtml = insertSignatureImages(pdfData);
 
-        // PDF 생성
-        GeneratedPdf pdf = pdfGenerator.generateFromHtml(finalHtml, pdfData.generateFileName());
+        GeneratedPdf pdf;
+        try {
+            pdf = pdfGenerator.generateFromHtml(finalHtml, pdfData.generateFileName());
+        } catch (Exception ex) {
+            dumpPdfHtmlDebug(contractId, finalHtml);
+            throw ex;
+        }
 
         logger.info("계약서 PDF 생성 완료: contractId={}, fileName={}, size={}bytes",
                 contractId, pdf.getFileName(), pdf.getSizeInBytes());
@@ -90,8 +97,9 @@ public class ContractPdfService {
      * 서명 이미지 조회 (없으면 null 반환)
      */
     private String getSignatureImage(ContractId contractId, String signerEmail) {
+        String normalizedEmail = normalizeEmail(signerEmail);
         Optional<ContractSignature> signature = signatureRepository
-                .findByContractIdAndSignerEmail(contractId, signerEmail);
+                .findByContractIdAndSignerEmail(contractId, normalizedEmail);
 
         return signature.flatMap(this::buildSignatureDataUrl).orElse(null);
     }
@@ -101,25 +109,127 @@ public class ContractPdfService {
      * SRP: 템플릿 치환 로직 분리
      */
     private String insertSignatureImages(ContractPdfData pdfData) {
-        String html = pdfData.getHtmlContent();
-
-        // 갑(첫번째 당사자) 서명 이미지 삽입
-        if (pdfData.getFirstPartySignatureImage() != null) {
-            String firstPartyImageTag = createImageTag(pdfData.getFirstPartySignatureImage());
-            html = html.replace("[EMPLOYER_SIGNATURE_IMAGE]", firstPartyImageTag);
-        } else {
-            html = html.replace("[EMPLOYER_SIGNATURE_IMAGE]", "");
+        String html = normalizeSignaturePlaceholders(pdfData.getHtmlContent());
+        if (html == null) {
+            return "";
         }
 
-        // 을(두번째 당사자) 서명 이미지 삽입
-        if (pdfData.getSecondPartySignatureImage() != null) {
-            String secondPartyImageTag = createImageTag(pdfData.getSecondPartySignatureImage());
-            html = html.replace("[EMPLOYEE_SIGNATURE_IMAGE]", secondPartyImageTag);
-        } else {
-            html = html.replace("[EMPLOYEE_SIGNATURE_IMAGE]", "");
+        html = injectSignatureImage(
+                html,
+                pdfData.getFirstPartySignatureImage(),
+                "[EMPLOYER_SIGNATURE_IMAGE]",
+                1
+        );
+
+        html = injectSignatureImage(
+                html,
+                pdfData.getSecondPartySignatureImage(),
+                "[EMPLOYEE_SIGNATURE_IMAGE]",
+                2
+        );
+
+        return html;
+    }
+
+    private String normalizeSignaturePlaceholders(String html) {
+        String sanitized = ContractHtmlSanitizer.sanitize(html);
+
+        if (sanitized == null || sanitized.isBlank()) {
+            return sanitized;
+        }
+
+        return sanitized
+                .replace("&#91;EMPLOYER_SIGNATURE_IMAGE&#93;", "[EMPLOYER_SIGNATURE_IMAGE]")
+                .replace("&#91;EMPLOYEE_SIGNATURE_IMAGE&#93;", "[EMPLOYEE_SIGNATURE_IMAGE]")
+                .replace("&amp;#91;EMPLOYER_SIGNATURE_IMAGE&amp;#93;", "[EMPLOYER_SIGNATURE_IMAGE]")
+                .replace("&amp;#91;EMPLOYEE_SIGNATURE_IMAGE&amp;#93;", "[EMPLOYEE_SIGNATURE_IMAGE]")
+                .replace("&lbrack;EMPLOYER_SIGNATURE_IMAGE&rbrack;", "[EMPLOYER_SIGNATURE_IMAGE]")
+                .replace("&lbrack;EMPLOYEE_SIGNATURE_IMAGE&rbrack;", "[EMPLOYEE_SIGNATURE_IMAGE]");
+    }
+
+    private String injectSignatureImage(String html,
+                                       String dataUrl,
+                                       String placeholder,
+                                       int wrapperIndex) {
+        if (dataUrl == null || dataUrl.isBlank()) {
+            return html.replace(placeholder, "");
+        }
+
+        String imageTag = createImageTag(dataUrl);
+
+        if (html.contains(placeholder)) {
+            return html.replace(placeholder, imageTag);
+        }
+
+        return insertIntoWrapper(html, imageTag, wrapperIndex);
+    }
+
+    private String insertIntoWrapper(String html, String imageTag, int occurrence) {
+        int searchIndex = 0;
+
+        for (int i = 0; i < occurrence; i++) {
+            int marker = html.indexOf("signature-stamp-wrapper", searchIndex);
+            if (marker == -1) {
+                return html;
+            }
+
+            int tagStart = html.lastIndexOf('<', marker);
+            int openingEnd = html.indexOf('>', marker);
+            if (tagStart == -1 || openingEnd == -1) {
+                return html;
+            }
+
+            int wrapperEnd = findMatchingSpanEnd(html, openingEnd + 1);
+            if (wrapperEnd == -1) {
+                return html;
+            }
+
+            if (i == occurrence - 1) {
+                String inner = html.substring(openingEnd + 1, wrapperEnd - "</span>".length());
+                String innerText = inner
+                        .replace("&nbsp;", "")
+                        .replace("&#160;", "")
+                        .replaceAll("<[^>]+>", "")
+                        .trim();
+
+                if (!innerText.isEmpty()) {
+                    return html;
+                }
+
+                return html.substring(0, openingEnd + 1) + imageTag + "</span>" + html.substring(wrapperEnd);
+            }
+
+            searchIndex = wrapperEnd;
         }
 
         return html;
+    }
+
+    private int findMatchingSpanEnd(String html, int searchFrom) {
+        int depth = 1;
+        int index = searchFrom;
+
+        while (index < html.length()) {
+            int nextOpen = html.indexOf("<span", index);
+            int nextClose = html.indexOf("</span>", index);
+
+            if (nextClose == -1) {
+                return -1;
+            }
+
+            if (nextOpen != -1 && nextOpen < nextClose) {
+                depth++;
+                index = nextOpen + 5;
+            } else {
+                depth--;
+                index = nextClose + "</span>".length();
+                if (depth == 0) {
+                    return index;
+                }
+            }
+        }
+
+        return -1;
     }
 
     /**
@@ -156,5 +266,21 @@ public class ContractPdfService {
             return dataUrl.substring(5, semicolonIndex);
         }
         return "image/png";
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase();
+    }
+
+    private void dumpPdfHtmlDebug(String contractId, String html) {
+        try {
+            Path debugDir = Path.of("logs", "pdf-debug");
+            Files.createDirectories(debugDir);
+            Path file = debugDir.resolve("contract-" + contractId + ".html");
+            Files.writeString(file, html);
+            logger.error("PDF 생성 실패: 디버그 HTML 저장됨 -> {}", file.toAbsolutePath());
+        } catch (Exception dumpEx) {
+            logger.error("PDF 생성 실패 HTML 저장 중 추가 오류 발생", dumpEx);
+        }
     }
 }
