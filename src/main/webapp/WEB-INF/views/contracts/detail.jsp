@@ -13,6 +13,126 @@
     <link href="/css/common.css" rel="stylesheet">
     <link href="/css/contracts.css" rel="stylesheet">
     <link href="/css/template-preview.css" rel="stylesheet">
+    <style>
+        /* 표준 근로계약서 스타일 */
+        #contractContentHtmlContainer .title,
+        #previewContent .title {
+            font-size: 24px !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            margin-bottom: 30px !important;
+            text-decoration: underline !important;
+        }
+
+        #contractContentHtmlContainer .contract-intro,
+        #previewContent .contract-intro {
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        #contractContentHtmlContainer .section,
+        #previewContent .section {
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        #contractContentHtmlContainer .section-number,
+        #previewContent .section-number {
+            font-weight: bold;
+        }
+
+        #contractContentHtmlContainer .contract-variable-underline,
+        #previewContent .contract-variable-underline {
+            display: inline-block;
+            min-width: 50px;
+            border-bottom: 1px solid #000;
+            padding: 0 5px;
+            text-align: center;
+        }
+
+        #contractContentHtmlContainer .wage-section,
+        #previewContent .wage-section {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        #contractContentHtmlContainer .wage-item,
+        #previewContent .wage-item {
+            margin-bottom: 5px;
+            line-height: 1.8;
+        }
+
+        #contractContentHtmlContainer .indent,
+        #previewContent .indent {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        #contractContentHtmlContainer .note,
+        #previewContent .note {
+            font-size: 12px;
+            color: #666;
+            margin-left: 20px;
+        }
+
+        #contractContentHtmlContainer .date-section,
+        #previewContent .date-section {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 30px;
+        }
+
+        #contractContentHtmlContainer .signature-section,
+        #previewContent .signature-section {
+            margin-top: 30px;
+        }
+
+        #contractContentHtmlContainer .signature-block,
+        #previewContent .signature-block {
+            margin-bottom: 15px;
+        }
+
+        #contractContentHtmlContainer .signature-line,
+        #previewContent .signature-line {
+            line-height: 2;
+            position: relative;
+        }
+
+        #contractContentHtmlContainer .signature-line--seal,
+        #previewContent .signature-line--seal {
+            position: relative;
+        }
+
+        #contractContentHtmlContainer .signature-stamp-label,
+        #previewContent .signature-stamp-label {
+            position: relative;
+            display: inline-block;
+            width: 90px;
+            text-align: center;
+        }
+
+        #contractContentHtmlContainer .signature-stamp-wrapper,
+        #previewContent .signature-stamp-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #contractContentHtmlContainer .signature-stamp-image-element,
+        #previewContent .signature-stamp-image-element {
+            display: inline-block;
+            max-width: 90px;
+            max-height: 40px;
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -102,10 +222,10 @@
                             <i class="bi bi-file-earmark-text me-2"></i>계약서 내용
                         </h5>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body p-0" style="background-color: white;">
                         <c:choose>
                             <c:when test="${contract.presetType ne null and contract.presetType ne 'NONE'}">
-                                <div class="contract-content contract-content--html" id="contractContentHtmlContainer"></div>
+                                <div class="contract-content contract-content--html" id="contractContentHtmlContainer" style="background-color: white; color: black;"></div>
                             </c:when>
                             <c:otherwise>
                                 <div class="contract-content">${contract.content}</div>
@@ -156,46 +276,63 @@
                         </div>
                         <div class="card-body">
                             <div class="d-grid gap-2">
-                                <c:if test="${contract.status == 'DRAFT'}">
-                                    <a href="/contracts/${contract.id}/edit" class="btn btn-primary">
-                                        <i class="bi bi-pencil me-2"></i>수정
-                                    </a>
-                                    <button type="button" class="btn btn-success" onclick="sendForSigning()">
-                                        <i class="bi bi-send me-2"></i>서명 요청 전송
-                                    </button>
-                                    <hr>
-                                    <button type="button" class="btn btn-outline-danger" onclick="deleteContract()">
-                                        <i class="bi bi-trash me-2"></i>삭제
-                                    </button>
-                                </c:if>
+                                <c:choose>
+                                    <c:when test="${contract.status == 'SIGNED' or contract.status == 'COMPLETED'}">
+                                        <!-- 서명 완료된 계약서 -->
+                                        <a href="/contracts/${contract.id}/pdf-view" class="btn btn-success">
+                                            <i class="bi bi-file-pdf me-2"></i>계약서 PDF 보기
+                                        </a>
+                                        <a href="/contracts/${contract.id}/pdf/download" class="btn btn-outline-primary" download>
+                                            <i class="bi bi-download me-2"></i>PDF 다운로드
+                                        </a>
 
-                                <c:if test="${contract.status == 'PENDING'}">
-                                    <button type="button" class="btn btn-outline-info" onclick="resendSigningEmail()">
-                                        <i class="bi bi-arrow-repeat me-2"></i>서명 요청 재전송
-                                    </button>
-                                </c:if>
+                                        <c:if test="${contract.status == 'SIGNED'}">
+                                            <hr>
+                                            <button type="button" class="btn btn-outline-primary" onclick="completeContract()">
+                                                <i class="bi bi-check-circle me-2"></i>계약 완료 처리
+                                            </button>
+                                        </c:if>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <!-- 진행 중인 계약서 -->
+                                        <c:if test="${contract.status == 'DRAFT'}">
+                                            <a href="/contracts/${contract.id}/edit" class="btn btn-primary">
+                                                <i class="bi bi-pencil me-2"></i>수정
+                                            </a>
+                                            <button type="button" class="btn btn-success" onclick="sendForSigning()">
+                                                <i class="bi bi-send me-2"></i>서명 요청 전송
+                                            </button>
+                                            <hr>
+                                            <button type="button" class="btn btn-outline-danger" onclick="deleteContract()">
+                                                <i class="bi bi-trash me-2"></i>삭제
+                                            </button>
+                                        </c:if>
 
-                                <c:if test="${contract.status == 'PENDING' or contract.status == 'SIGNED'}">
-                                    <button type="button" class="btn btn-outline-warning" onclick="cancelContract()">
-                                        <i class="bi bi-x-circle me-2"></i>계약 취소
-                                    </button>
-                                </c:if>
+                                        <c:if test="${contract.status == 'PENDING'}">
+                                            <button type="button" class="btn btn-outline-info" onclick="resendSigningEmail()">
+                                                <i class="bi bi-arrow-repeat me-2"></i>서명 요청 재전송
+                                            </button>
+                                        </c:if>
 
-                                <button type="button" class="btn btn-outline-primary" onclick="previewContract()">
-                                    <i class="bi bi-eye me-2"></i>미리보기
-                                </button>
+                                        <c:if test="${contract.status == 'PENDING' or contract.status == 'SIGNED'}">
+                                            <button type="button" class="btn btn-outline-warning" onclick="cancelContract()">
+                                                <i class="bi bi-x-circle me-2"></i>계약 취소
+                                            </button>
+                                        </c:if>
 
-                                <c:if test="${contract.status == 'SIGNED'}">
-                                    <button type="button" class="btn btn-primary" onclick="completeContract()">
-                                        <i class="bi bi-check-circle me-2"></i>계약 완료
-                                    </button>
-                                </c:if>
+                                        <c:if test="${contract.status != 'SIGNED'}">
+                                            <button type="button" class="btn btn-outline-primary" onclick="previewContract()">
+                                                <i class="bi bi-eye me-2"></i>미리보기
+                                            </button>
+                                        </c:if>
 
-                                <c:if test="${contract.status == 'PENDING' or contract.status == 'SIGNED'}">
-                                    <a href="/sign/${contract.id}" class="btn btn-outline-success" target="_blank">
-                                        <i class="bi bi-pen me-2"></i>서명 페이지 보기
-                                    </a>
-                                </c:if>
+                                        <c:if test="${contract.status == 'PENDING'}">
+                                            <a href="/sign/${contract.id}" class="btn btn-outline-success" target="_blank">
+                                                <i class="bi bi-pen me-2"></i>서명 페이지 보기
+                                            </a>
+                                        </c:if>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                         </div>
                     </div>
@@ -321,19 +458,19 @@
     <!-- 미리보기 모달 -->
     <div class="modal fade contract-preview-modal" id="previewModal" tabindex="-1">
         <div class="modal-dialog modal-fullscreen-lg-down">
-            <div class="modal-content">
+            <div class="modal-content" style="background-color: white;">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="bi bi-eye me-2"></i>계약서 미리보기
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4">
+                <div class="modal-body p-4" style="background-color: white;">
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle me-2"></i>
                         아래는 현재 계약서 내용의 미리보기입니다.
                     </div>
-                    <div class="border rounded p-4 contract-preview-modal-content" id="previewContent">
+                    <div class="border rounded p-4 contract-preview-modal-content" id="previewContent" style="background-color: white;">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -391,7 +528,16 @@
         const contractContentTextarea = document.getElementById('contractContentHtml');
         const contractRawContent = contractContentTextarea ? contractContentTextarea.value : '';
         const presetTypeValue = (previewData.presetType || '').toUpperCase();
-        const isHtmlPreset = presetTypeValue && presetTypeValue !== 'NONE';
+
+        // HTML 내용인지 자동 감지 (meta, div, style 태그 등이 있으면 HTML로 판단)
+        const looksLikeHtml = contractRawContent && (
+            contractRawContent.includes('<meta') ||
+            contractRawContent.includes('<div') ||
+            contractRawContent.includes('<style') ||
+            contractRawContent.includes('<body')
+        );
+
+        const isHtmlPreset = (presetTypeValue && presetTypeValue !== 'NONE') || looksLikeHtml;
 
         if (isHtmlPreset) {
             renderHtmlContract(contractRawContent);
@@ -544,6 +690,21 @@
             const bodyTag = working.querySelector('body');
             const htmlTag = working.querySelector('html');
 
+            // body 태그의 인라인 스타일 및 클래스 추출
+            let bodyStyles = {};
+            let bodyClasses = [];
+            if (bodyTag) {
+                const computedStyle = bodyTag.style;
+                for (let i = 0; i < computedStyle.length; i++) {
+                    const prop = computedStyle[i];
+                    bodyStyles[prop] = computedStyle.getPropertyValue(prop);
+                }
+                // body의 클래스들도 추출
+                if (bodyTag.className) {
+                    bodyClasses = bodyTag.className.split(' ').filter(c => c.trim());
+                }
+            }
+
             let htmlToRender = '';
             if (bodyTag && bodyTag.innerHTML.trim()) {
                 htmlToRender = bodyTag.innerHTML;
@@ -554,8 +715,30 @@
             }
 
             container.innerHTML = htmlToRender;
+
+            // body의 클래스들을 컨테이너에 추가
+            bodyClasses.forEach(cls => {
+                if (cls && !container.classList.contains(cls)) {
+                    container.classList.add(cls);
+                }
+            });
+
+            // body 스타일을 컨테이너에 적용
+            Object.keys(bodyStyles).forEach(prop => {
+                if (bodyStyles[prop]) {
+                    container.style[prop] = bodyStyles[prop];
+                }
+            });
+
+            // 기본 스타일 설정 (body 스타일이 없을 경우)
+            if (!bodyStyles.backgroundColor || bodyStyles.backgroundColor === 'transparent') {
+                container.style.backgroundColor = 'white';
+            }
+            if (!bodyStyles.color) {
+                container.style.color = 'black';
+            }
             container.style.whiteSpace = 'normal';
-            container.style.fontFamily = "'Times New Roman', serif";
+            container.style.padding = '2rem';  // 패딩 추가
 
             container.querySelectorAll('table').forEach(table => {
                 table.classList.add('table', 'table-bordered');
@@ -595,15 +778,29 @@
             const presetType = presetTypeValue || 'NONE';
             const previewContentEl = document.getElementById('previewContent');
 
+            // 기존 미리보기 스타일 제거
+            const existingPreviewStyle = document.getElementById('previewModalScopedStyles');
+            if (existingPreviewStyle) {
+                existingPreviewStyle.remove();
+            }
+
             // 프리셋인 경우 HTML로 렌더링, 아니면 텍스트로 표시
             if (presetType !== 'NONE' && presetType !== '') {
-                // 임시 DOM에서 style 태그 제거
+                // 임시 DOM에서 처리
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = content;
 
-                // 모든 style 태그 제거
+                const scopedStyles = [];
+
+                // style 태그 추출 및 스코핑
                 const styleTags = tempDiv.querySelectorAll('style');
-                styleTags.forEach(tag => tag.remove());
+                styleTags.forEach(tag => {
+                    const scoped = scopeCssText(tag.textContent || '', '#previewContent');
+                    if (scoped) {
+                        scopedStyles.push(scoped);
+                    }
+                    tag.remove();
+                });
 
                 // body 태그를 div로 변경
                 const bodyTags = tempDiv.querySelectorAll('body');
@@ -616,6 +813,15 @@
                 previewContentEl.innerHTML = tempDiv.innerHTML;
                 previewContentEl.style.whiteSpace = 'normal';
                 previewContentEl.style.fontFamily = 'inherit';
+                previewContentEl.style.backgroundColor = 'white';
+
+                // 스코핑된 CSS 적용
+                if (scopedStyles.length) {
+                    const scopedStyleEl = document.createElement('style');
+                    scopedStyleEl.id = 'previewModalScopedStyles';
+                    scopedStyleEl.textContent = scopedStyles.join('\n');
+                    document.head.appendChild(scopedStyleEl);
+                }
             } else {
                 // 일반 계약서는 변수 치환 후 텍스트로 표시
                 let previewContent = content
@@ -643,6 +849,12 @@
             // 모달 내부의 모든 style 태그 제거
             const modalStyles = this.querySelectorAll('style');
             modalStyles.forEach(style => style.remove());
+
+            // head에 추가된 미리보기 스타일도 제거
+            const previewStyle = document.getElementById('previewModalScopedStyles');
+            if (previewStyle) {
+                previewStyle.remove();
+            }
         });
 
         function sendForSigning() {

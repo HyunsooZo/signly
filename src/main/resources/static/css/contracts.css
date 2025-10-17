@@ -575,9 +575,15 @@
         color: #f8f9fa;
     }
 
-    .contract-content {
+    .contract-content:not(.contract-content--html) {
         background: linear-gradient(135deg, #212529 0%, #343a40 100%);
         color: #f8f9fa;
+    }
+
+    /* HTML 프리셋 계약서는 항상 흰색 배경 유지 */
+    .contract-content--html {
+        background-color: #fff !important;
+        color: #000 !important;
     }
 
     .info-item:hover {
