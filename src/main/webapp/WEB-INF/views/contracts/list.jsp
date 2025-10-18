@@ -176,16 +176,11 @@
                                                         <div class="btn-group btn-group-sm" role="group">
                                                             <c:choose>
                                                                 <c:when test="${contract.status == 'SIGNED' or contract.status == 'COMPLETED'}">
-                                                                    <!-- 서명 완료된 계약서: PDF 보기 버튼 -->
+                                                                    <!-- 서명 완료된 계약서: PDF 보기 버튼만 표시 -->
                                                                     <a href="/contracts/${contract.id}/pdf-view"
                                                                        class="btn btn-outline-success"
                                                                        title="계약서 PDF 보기">
                                                                         <i class="bi bi-file-pdf"></i>
-                                                                    </a>
-                                                                    <a href="/contracts/${contract.id}"
-                                                                       class="btn btn-outline-primary"
-                                                                       title="상세보기">
-                                                                        <i class="bi bi-eye"></i>
                                                                     </a>
                                                                 </c:when>
                                                                 <c:otherwise>

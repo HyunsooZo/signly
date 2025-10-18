@@ -76,7 +76,13 @@ public class ContractWebController {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-            Page<ContractResponse> contracts = contractService.getContractsByCreator(resolvedUserId, pageRequest);
+            // 상태 필터링이 있으면 상태별로 조회, 없으면 전체 조회
+            Page<ContractResponse> contracts;
+            if (status != null) {
+                contracts = contractService.getContractsByCreatorAndStatus(resolvedUserId, status, pageRequest);
+            } else {
+                contracts = contractService.getContractsByCreator(resolvedUserId, pageRequest);
+            }
 
             model.addAttribute("pageTitle", "계약서 관리");
             model.addAttribute("contracts", contracts);
