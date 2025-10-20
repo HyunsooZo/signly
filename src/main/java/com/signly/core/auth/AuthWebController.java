@@ -51,13 +51,21 @@ public class AuthWebController {
             LoginRequest request = new LoginRequest(email, password);
             LoginResponse loginResponse = authService.login(request);
 
-            // JWT 토큰을 쿠키에 저장
+            // JWT 액세스 토큰을 쿠키에 저장
             Cookie authCookie = new Cookie("authToken", loginResponse.accessToken());
-            authCookie.setHttpOnly(true);
+            authCookie.setHttpOnly(false); // JavaScript에서 접근 가능하도록
             authCookie.setSecure(false); // 개발환경에서는 false, 프로덕션에서는 true
             authCookie.setPath("/");
-            authCookie.setMaxAge(rememberMe ? 7 * 24 * 60 * 60 : 24 * 60 * 60); // 기억하기 체크 시 7일, 아니면 1일
+            authCookie.setMaxAge(60 * 60); // 1시간
             response.addCookie(authCookie);
+
+            // 리프레시 토큰을 쿠키에 저장
+            Cookie refreshCookie = new Cookie("refreshToken", loginResponse.refreshToken());
+            refreshCookie.setHttpOnly(false); // JavaScript에서 접근 가능하도록
+            refreshCookie.setSecure(false);
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge(rememberMe ? 7 * 24 * 60 * 60 : 24 * 60 * 60); // 기억하기 체크 시 7일, 아니면 1일
+            response.addCookie(refreshCookie);
 
             logger.info("로그인 성공: {}", email);
             redirectAttributes.addFlashAttribute("successMessage", "로그인되었습니다.");
@@ -89,10 +97,16 @@ public class AuthWebController {
 
         // 쿠키 삭제
         Cookie authCookie = new Cookie("authToken", "");
-        authCookie.setHttpOnly(true);
+        authCookie.setHttpOnly(false);
         authCookie.setPath("/");
         authCookie.setMaxAge(0);
         response.addCookie(authCookie);
+
+        Cookie refreshCookie = new Cookie("refreshToken", "");
+        refreshCookie.setHttpOnly(false);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0);
+        response.addCookie(refreshCookie);
 
         redirectAttributes.addFlashAttribute("successMessage", "로그아웃되었습니다.");
         return "redirect:/login";

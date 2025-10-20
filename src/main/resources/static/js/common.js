@@ -259,9 +259,9 @@ function hideLoadingSpinner(button) {
 }
 
 /**
- * AJAX 요청 공통 함수
+ * AJAX 요청 공통 함수 (JWT 인증 포함)
  */
-function sendRequest(url, options = {}) {
+async function sendRequest(url, options = {}) {
     const defaultOptions = {
         method: 'GET',
         headers: {
@@ -272,18 +272,31 @@ function sendRequest(url, options = {}) {
 
     const mergedOptions = { ...defaultOptions, ...options };
 
-    return fetch(url, mergedOptions)
-        .then(response => {
+    try {
+        // AuthManager가 로드되어 있고 인증 필요한 요청이면 authenticatedFetch 사용
+        if (window.AuthManager && window.AuthManager.isAuthenticated()) {
+            const response = await window.AuthManager.authenticatedFetch(url, mergedOptions);
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return response.json();
-        })
-        .catch(error => {
-            console.error('Request failed:', error);
-            showAlert('요청 처리 중 오류가 발생했습니다.', 'danger');
-            throw error;
-        });
+
+            return await response.json();
+        } else {
+            // 인증 불필요한 요청은 일반 fetch 사용
+            const response = await fetch(url, mergedOptions);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        }
+    } catch (error) {
+        console.error('Request failed:', error);
+        showAlert('요청 처리 중 오류가 발생했습니다.', 'danger');
+        throw error;
+    }
 }
 
 /**
