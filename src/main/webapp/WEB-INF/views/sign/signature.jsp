@@ -195,8 +195,7 @@
                 <div class="modal-body">
                     <p class="mb-3">다음 내용으로 계약서에 서명하시겠습니까?</p>
 
-                    <div class="signature-preview mb-3">
-                        <div class="signature-preview-title">서명 미리보기</div>
+                    <div class="signature-preview-container">
                         <img id="signaturePreviewImage" class="signature-preview-image" alt="서명 미리보기">
                     </div>
 
@@ -207,7 +206,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-secondary" id="cancelSignBtn">
                         취소
                     </button>
                     <button type="button" class="btn btn-primary" id="finalSignBtn">
@@ -285,6 +284,9 @@
                     Signly.showAlert('서명을 입력해 주세요.', 'warning');
                 }
             });
+
+            // 모달 취소 버튼
+            document.getElementById('cancelSignBtn').addEventListener('click', closeModal);
 
             // 최종 서명 버튼
             document.getElementById('finalSignBtn').addEventListener('click', submitSignature);

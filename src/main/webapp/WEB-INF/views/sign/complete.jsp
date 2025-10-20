@@ -86,10 +86,20 @@
                                             <i class="bi bi-check-circle me-2"></i>서명 완료
                                         </span>
                                     </div>
-                                    <div class="qr-placeholder">
+                                    <div class="pdf-download-section">
                                         <div class="border rounded p-4 bg-light">
-                                            <i class="bi bi-qr-code display-6 text-muted"></i>
-                                            <p class="small text-muted mt-2 mb-0">계약서 검증 QR코드</p>
+                                            <i class="bi bi-file-earmark-pdf display-4 text-danger mb-3"></i>
+                                            <h6 class="fw-bold mb-3">계약서 PDF</h6>
+                                            <a href="/contracts/${contract.id}/pdf/download"
+                                               class="btn btn-danger btn-lg w-100 mb-2"
+                                               download>
+                                                <i class="bi bi-download me-2"></i>PDF 다운로드
+                                            </a>
+                                            <a href="/contracts/${contract.id}/pdf/inline"
+                                               class="btn btn-outline-secondary btn-sm w-100"
+                                               target="_blank">
+                                                <i class="bi bi-eye me-2"></i>미리보기
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -106,7 +116,7 @@
                         <li>서명된 계약서는 모든 당사자에게 이메일로 발송됩니다.</li>
                         <li>계약서는 법적 효력을 가지며, 전자서명법에 따라 보호됩니다.</li>
                         <li>서명 기록은 안전하게 보관되며, 필요 시 검증이 가능합니다.</li>
-                        <li>계약서 사본이 필요한 경우 계약 담당자에게 문의하세요.</li>
+                        <li>계약서 PDF는 위의 다운로드 버튼을 통해 언제든지 내려받을 수 있습니다.</li>
                     </ul>
                 </div>
 
