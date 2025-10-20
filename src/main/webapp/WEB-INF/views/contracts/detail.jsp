@@ -28,13 +28,13 @@
         #previewContent .contract-intro {
             text-align: center;
             margin-bottom: 30px;
-            line-height: 1.8;
+            line-height: 1.4;
         }
 
         #contractContentHtmlContainer .section,
         #previewContent .section {
-            margin-bottom: 20px;
-            line-height: 1.8;
+            margin-bottom: 15px;
+            line-height: 1.4;
         }
 
         #contractContentHtmlContainer .section-number,
@@ -60,13 +60,13 @@
         #contractContentHtmlContainer .wage-item,
         #previewContent .wage-item {
             margin-bottom: 5px;
-            line-height: 1.8;
+            line-height: 1.4;
         }
 
         #contractContentHtmlContainer .indent,
         #previewContent .indent {
             margin-left: 20px;
-            line-height: 1.8;
+            line-height: 1.4;
         }
 
         #contractContentHtmlContainer .note,
@@ -88,14 +88,20 @@
             margin-top: 30px;
         }
 
+        /* 근로자 서명 블록의 과도한 margin-top 제거 */
+        #contractContentHtmlContainer .signature-section + div,
+        #previewContent .signature-section + div {
+            margin-top: 10px !important;
+        }
+
         #contractContentHtmlContainer .signature-block,
         #previewContent .signature-block {
-            margin-bottom: 15px;
+            margin-bottom: 5px;
         }
 
         #contractContentHtmlContainer .signature-line,
         #previewContent .signature-line {
-            line-height: 2;
+            line-height: 1.6;
             position: relative;
         }
 
@@ -222,15 +228,9 @@
                             <i class="bi bi-file-earmark-text me-2"></i>계약서 내용
                         </h5>
                     </div>
-                    <div class="card-body p-0" style="background-color: white;">
-                        <c:choose>
-                            <c:when test="${contract.presetType ne null and contract.presetType ne 'NONE'}">
-                                <div class="contract-content contract-content--html" id="contractContentHtmlContainer" style="background-color: white; color: black;"></div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="contract-content">${contract.content}</div>
-                            </c:otherwise>
-                        </c:choose>
+                    <div class="card-body p-0" style="background-color: white !important;">
+                        <!-- HTML 자동 감지를 위해 항상 동일한 컨테이너 사용 -->
+                        <div class="contract-content contract-content--html" id="contractContentHtmlContainer" style="background-color: white !important; color: black !important;"></div>
                     </div>
                 </div>
 
@@ -320,7 +320,7 @@
                                             </button>
                                         </c:if>
 
-                                        <c:if test="${contract.status != 'SIGNED'}">
+                                        <c:if test="${contract.status != 'SIGNED' and contract.status != 'COMPLETED'}">
                                             <button type="button" class="btn btn-outline-primary" onclick="previewContract()">
                                                 <i class="bi bi-eye me-2"></i>미리보기
                                             </button>
@@ -542,7 +542,7 @@
         if (isHtmlPreset) {
             renderHtmlContract(contractRawContent);
         } else {
-            ensurePlainTextContract();
+            renderPlainTextContract(contractRawContent);
         }
 
         const previewDefaults = {
@@ -558,13 +558,17 @@
         const csrfParam = '${_csrf.parameterName}';
         const csrfToken = '${_csrf.token}';
 
-        function ensurePlainTextContract() {
-            const contentEl = document.querySelector('.contract-content');
-            if (!contentEl) {
+        function renderPlainTextContract(content) {
+            const container = document.getElementById('contractContentHtmlContainer');
+            if (!container) {
                 return;
             }
-            contentEl.style.whiteSpace = 'pre-wrap';
-            contentEl.style.fontFamily = "'Times New Roman', serif";
+            container.textContent = content || '';
+            container.style.whiteSpace = 'pre-wrap';
+            container.style.fontFamily = "'Times New Roman', serif";
+            container.style.backgroundColor = 'white';
+            container.style.color = 'black';
+            container.style.padding = '2rem';
         }
 
         function scopeCssText(cssText, scopeSelector) {
@@ -663,7 +667,9 @@
 
             working.querySelectorAll('script').forEach(node => node.remove());
 
+            let hasStyles = false;
             working.querySelectorAll('style').forEach(node => {
+                hasStyles = true;
                 const scoped = scopeCssText(node.textContent || '', '#contractContentHtmlContainer');
                 if (scoped) {
                     scopedStyles.push(scoped);
@@ -678,6 +684,100 @@
                 }
                 node.remove();
             });
+
+            // HTML에 스타일이 없는 경우, 기본 계약서 스타일을 추가
+            if (!hasStyles) {
+                const defaultStyles = `
+                    #contractContentHtmlContainer .title {
+                        font-size: 24px !important;
+                        font-weight: bold !important;
+                        text-align: center !important;
+                        margin-bottom: 30px !important;
+                        text-decoration: underline !important;
+                    }
+                    #contractContentHtmlContainer .contract-intro {
+                        text-align: center;
+                        margin-bottom: 30px;
+                        line-height: 1.4;
+                    }
+                    #contractContentHtmlContainer .section {
+                        margin-bottom: 15px !important;
+                        line-height: 1.4 !important;
+                    }
+                    #contractContentHtmlContainer .section-number {
+                        font-weight: bold !important;
+                    }
+                    #contractContentHtmlContainer .contract-variable-underline {
+                        display: inline-block;
+                        min-width: 50px;
+                        border-bottom: 1px solid #000;
+                        padding: 0 5px;
+                        text-align: center;
+                    }
+                    #contractContentHtmlContainer .wage-section {
+                        margin-left: 20px !important;
+                        margin-top: 10px !important;
+                    }
+                    #contractContentHtmlContainer .wage-item {
+                        margin-bottom: 5px !important;
+                        line-height: 1.4 !important;
+                    }
+                    #contractContentHtmlContainer .indent {
+                        margin-left: 20px !important;
+                        line-height: 1.4 !important;
+                    }
+                    #contractContentHtmlContainer .note {
+                        font-size: 12px !important;
+                        color: #666 !important;
+                        margin-left: 20px !important;
+                    }
+                    #contractContentHtmlContainer .date-section {
+                        text-align: center !important;
+                        margin-top: 40px !important;
+                        margin-bottom: 30px !important;
+                    }
+                    #contractContentHtmlContainer .signature-section {
+                        margin-top: 30px !important;
+                    }
+                    #contractContentHtmlContainer .signature-section + div {
+                        margin-top: 10px !important;
+                    }
+                    #contractContentHtmlContainer .signature-block {
+                        margin-bottom: 5px !important;
+                    }
+                    #contractContentHtmlContainer .signature-line {
+                        line-height: 1.6 !important;
+                        position: relative;
+                    }
+                    #contractContentHtmlContainer .signature-line--seal {
+                        position: relative;
+                    }
+                    #contractContentHtmlContainer .signature-stamp-label {
+                        position: relative;
+                        display: inline-block;
+                        width: 90px;
+                        text-align: center;
+                    }
+                    #contractContentHtmlContainer .signature-stamp-wrapper {
+                        position: absolute;
+                        top: 50%;
+                        left: 20px;
+                        transform: translate(-50%, -50%);
+                        width: 80px;
+                        height: 80px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    #contractContentHtmlContainer .signature-stamp-image-element {
+                        display: inline-block;
+                        max-width: 90px;
+                        max-height: 40px;
+                        vertical-align: middle;
+                    }
+                `;
+                scopedStyles.push(defaultStyles);
+            }
 
             const styleElementId = 'contractContentHtmlScopedStyles';
             const existingScopedStyle = document.getElementById(styleElementId);
@@ -793,14 +893,110 @@
                 const scopedStyles = [];
 
                 // style 태그 추출 및 스코핑
+                let hasStyles = false;
                 const styleTags = tempDiv.querySelectorAll('style');
                 styleTags.forEach(tag => {
+                    hasStyles = true;
                     const scoped = scopeCssText(tag.textContent || '', '#previewContent');
                     if (scoped) {
                         scopedStyles.push(scoped);
                     }
                     tag.remove();
                 });
+
+                // HTML에 스타일이 없는 경우, 기본 계약서 스타일을 추가
+                if (!hasStyles) {
+                    const defaultStyles = `
+                        #previewContent .title {
+                            font-size: 24px !important;
+                            font-weight: bold !important;
+                            text-align: center !important;
+                            margin-bottom: 30px !important;
+                            text-decoration: underline !important;
+                        }
+                        #previewContent .contract-intro {
+                            text-align: center;
+                            margin-bottom: 30px;
+                            line-height: 1.4;
+                        }
+                        #previewContent .section {
+                            margin-bottom: 15px !important;
+                            line-height: 1.4 !important;
+                        }
+                        #previewContent .section-number {
+                            font-weight: bold !important;
+                        }
+                        #previewContent .contract-variable-underline {
+                            display: inline-block;
+                            min-width: 50px;
+                            border-bottom: 1px solid #000;
+                            padding: 0 5px;
+                            text-align: center;
+                        }
+                        #previewContent .wage-section {
+                            margin-left: 20px !important;
+                            margin-top: 10px !important;
+                        }
+                        #previewContent .wage-item {
+                            margin-bottom: 5px !important;
+                            line-height: 1.4 !important;
+                        }
+                        #previewContent .indent {
+                            margin-left: 20px !important;
+                            line-height: 1.4 !important;
+                        }
+                        #previewContent .note {
+                            font-size: 12px !important;
+                            color: #666 !important;
+                            margin-left: 20px !important;
+                        }
+                        #previewContent .date-section {
+                            text-align: center !important;
+                            margin-top: 40px !important;
+                            margin-bottom: 30px !important;
+                        }
+                        #previewContent .signature-section {
+                            margin-top: 30px !important;
+                        }
+                        #previewContent .signature-section + div {
+                            margin-top: 10px !important;
+                        }
+                        #previewContent .signature-block {
+                            margin-bottom: 5px !important;
+                        }
+                        #previewContent .signature-line {
+                            line-height: 1.6 !important;
+                            position: relative;
+                        }
+                        #previewContent .signature-line--seal {
+                            position: relative;
+                        }
+                        #previewContent .signature-stamp-label {
+                            position: relative;
+                            display: inline-block;
+                            width: 90px;
+                            text-align: center;
+                        }
+                        #previewContent .signature-stamp-wrapper {
+                            position: absolute;
+                            top: 50%;
+                            left: 20px;
+                            transform: translate(-50%, -50%);
+                            width: 80px;
+                            height: 80px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
+                        #previewContent .signature-stamp-image-element {
+                            display: inline-block;
+                            max-width: 90px;
+                            max-height: 40px;
+                            vertical-align: middle;
+                        }
+                    `;
+                    scopedStyles.push(defaultStyles);
+                }
 
                 // body 태그를 div로 변경
                 const bodyTags = tempDiv.querySelectorAll('body');
@@ -814,6 +1010,7 @@
                 previewContentEl.style.whiteSpace = 'normal';
                 previewContentEl.style.fontFamily = 'inherit';
                 previewContentEl.style.backgroundColor = 'white';
+                previewContentEl.style.padding = '2rem';
 
                 // 스코핑된 CSS 적용
                 if (scopedStyles.length) {
