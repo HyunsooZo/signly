@@ -320,10 +320,12 @@ function createAlertContainer() {
     container.className = 'alert-container';
     container.style.cssText = `
         position: fixed;
-        top: 20px;
-        right: 20px;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
         z-index: 9999;
-        max-width: 400px;
+        max-width: 90%;
+        width: 400px;
     `;
 
     document.body.appendChild(container);
