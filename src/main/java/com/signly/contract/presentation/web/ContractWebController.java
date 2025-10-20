@@ -4,23 +4,28 @@ import com.signly.common.exception.BusinessException;
 import com.signly.common.exception.ValidationException;
 import com.signly.common.security.CurrentUserProvider;
 import com.signly.common.security.SecurityUser;
+import com.signly.contract.application.ContractPdfService;
 import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.ContractResponse;
 import com.signly.contract.application.dto.CreateContractCommand;
 import com.signly.contract.application.dto.UpdateContractCommand;
 import com.signly.contract.domain.model.ContractStatus;
+import com.signly.contract.domain.model.GeneratedPdf;
 import com.signly.contract.domain.model.PresetType;
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.dto.TemplateResponse;
 import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.domain.model.TemplateStatus;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,6 +34,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -38,15 +47,18 @@ public class ContractWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractWebController.class);
     private final ContractService contractService;
+    private final ContractPdfService contractPdfService;
     private final TemplateService templateService;
     private final TemplatePresetService templatePresetService;
     private final CurrentUserProvider currentUserProvider;
 
     public ContractWebController(ContractService contractService,
+                                ContractPdfService contractPdfService,
                                 TemplateService templateService,
                                 TemplatePresetService templatePresetService,
                                 CurrentUserProvider currentUserProvider) {
         this.contractService = contractService;
+        this.contractPdfService = contractPdfService;
         this.templateService = templateService;
         this.templatePresetService = templatePresetService;
         this.currentUserProvider = currentUserProvider;
@@ -442,6 +454,128 @@ public class ContractWebController {
             redirectAttributes.addFlashAttribute("errorMessage", "계약서 삭제 중 오류가 발생했습니다.");
         }
         return "redirect:/contracts";
+    }
+
+    @GetMapping("/{contractId}/pdf-view")
+    public String viewPdf(@PathVariable String contractId,
+                         @RequestHeader(value = "X-User-Id", required = false) String userId,
+                         @AuthenticationPrincipal SecurityUser securityUser,
+                         HttpServletRequest request,
+                         Model model) {
+        try {
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
+
+            // SIGNED 또는 COMPLETED 상태가 아니면 접근 불가
+            if (contract.getStatus() != ContractStatus.SIGNED &&
+                contract.getStatus() != ContractStatus.COMPLETED) {
+                logger.warn("서명 완료되지 않은 계약서 PDF 뷰어 접근 시도: contractId={}, status={}",
+                           contractId, contract.getStatus());
+                model.addAttribute("errorMessage", "서명이 완료된 계약서만 PDF로 볼 수 있습니다.");
+                return "redirect:/contracts/" + contractId;
+            }
+
+            model.addAttribute("pageTitle", "계약서 PDF");
+            model.addAttribute("contract", contract);
+            return "contracts/pdf-view";
+
+        } catch (Exception e) {
+            logger.error("PDF 뷰어 화면 조회 중 오류 발생: contractId={}", contractId, e);
+            model.addAttribute("errorMessage", "PDF 뷰어를 불러오는 중 오류가 발생했습니다.");
+            return "redirect:/contracts";
+        }
+    }
+
+    @GetMapping("/{contractId}/pdf/download")
+    public void downloadPdf(@PathVariable String contractId,
+                           @RequestHeader(value = "X-User-Id", required = false) String userId,
+                           @AuthenticationPrincipal SecurityUser securityUser,
+                           HttpServletRequest request,
+                           HttpServletResponse response) throws IOException {
+        try {
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
+
+            // SIGNED 또는 COMPLETED 상태가 아니면 다운로드 불가
+            if (contract.getStatus() != ContractStatus.SIGNED &&
+                contract.getStatus() != ContractStatus.COMPLETED) {
+                logger.warn("서명 완료되지 않은 계약서 PDF 다운로드 시도: contractId={}, status={}",
+                           contractId, contract.getStatus());
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "서명이 완료된 계약서만 다운로드할 수 있습니다.");
+                return;
+            }
+
+            // PDF 생성
+            GeneratedPdf pdf = contractPdfService.generateContractPdf(contractId);
+
+            // 파일명 인코딩 (한글 파일명 지원)
+            String encodedFileName = URLEncoder.encode(pdf.getFileName(), StandardCharsets.UTF_8)
+                    .replace("+", "%20");
+
+            // HTTP 응답 헤더 설정
+            response.setContentType(MediaType.APPLICATION_PDF_VALUE);
+            response.setContentLengthLong(pdf.getSizeInBytes());
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                             "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
+
+            // PDF 바이트 스트림으로 전송
+            try (OutputStream out = response.getOutputStream()) {
+                out.write(pdf.getContent());
+                out.flush();
+            }
+
+            logger.info("PDF 다운로드 성공: contractId={}, fileName={}", contractId, pdf.getFileName());
+
+        } catch (Exception e) {
+            logger.error("PDF 다운로드 중 오류 발생: contractId={}", contractId, e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "PDF 다운로드 중 오류가 발생했습니다.");
+        }
+    }
+
+    @GetMapping("/{contractId}/pdf/inline")
+    public void viewPdfInline(@PathVariable String contractId,
+                             @RequestHeader(value = "X-User-Id", required = false) String userId,
+                             @AuthenticationPrincipal SecurityUser securityUser,
+                             HttpServletRequest request,
+                             HttpServletResponse response) throws IOException {
+        try {
+            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+            ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
+
+            // SIGNED 또는 COMPLETED 상태가 아니면 조회 불가
+            if (contract.getStatus() != ContractStatus.SIGNED &&
+                contract.getStatus() != ContractStatus.COMPLETED) {
+                logger.warn("서명 완료되지 않은 계약서 PDF 조회 시도: contractId={}, status={}",
+                           contractId, contract.getStatus());
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "서명이 완료된 계약서만 조회할 수 있습니다.");
+                return;
+            }
+
+            // PDF 생성
+            GeneratedPdf pdf = contractPdfService.generateContractPdf(contractId);
+
+            // 파일명 인코딩
+            String encodedFileName = URLEncoder.encode(pdf.getFileName(), StandardCharsets.UTF_8)
+                    .replace("+", "%20");
+
+            // HTTP 응답 헤더 설정 (inline으로 표시)
+            response.setContentType(MediaType.APPLICATION_PDF_VALUE);
+            response.setContentLengthLong(pdf.getSizeInBytes());
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                             "inline; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
+
+            // PDF 바이트 스트림으로 전송
+            try (OutputStream out = response.getOutputStream()) {
+                out.write(pdf.getContent());
+                out.flush();
+            }
+
+            logger.info("PDF 인라인 뷰 성공: contractId={}, fileName={}", contractId, pdf.getFileName());
+
+        } catch (Exception e) {
+            logger.error("PDF 인라인 뷰 중 오류 발생: contractId={}", contractId, e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "PDF 조회 중 오류가 발생했습니다.");
+        }
     }
 
     public static class ContractForm {

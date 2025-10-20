@@ -108,12 +108,15 @@ body,
 .signature-section {
     width: 100%;
     margin-top: 30px;
+    display: table;
+    table-layout: fixed;
+    border-spacing: 40px 0;
 }
 
 .signature-block {
-    display: inline-block;
-    width: 48%;
+    display: table-cell;
     vertical-align: top;
+    width: 50%;
 }
 
 .signature-line {
@@ -129,18 +132,25 @@ body,
 .signature-stamp-label {
     margin-left: 8px;
     position: relative;
-    display: inline-block;
-    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 60px;
+    text-align: center;
+    line-height: 1.2;
 }
 
 .signature-stamp-wrapper {
     position: absolute;
     top: 50%;
-    left: 50%;
+    left: 20px;
     transform: translate(-50%, -50%);
-    width: 90px;
-    height: 40px;
-    text-align: center;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .signature-stamp-wrapper img,

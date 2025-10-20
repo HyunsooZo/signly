@@ -14,6 +14,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,9 +56,14 @@ public class HtmlToPdfGenerator implements PdfGenerator {
             registerFonts(renderer);
 
             // HTML을 PDF로 렌더링
-            renderer.setDocumentFromString(xhtmlContent);
-            renderer.layout();
-            renderer.createPDF(outputStream);
+            try {
+                renderer.setDocumentFromString(xhtmlContent);
+                renderer.layout();
+                renderer.createPDF(outputStream);
+            } catch (Exception renderEx) {
+                dumpFailureHtml(fileName, xhtmlContent);
+                throw renderEx;
+            }
 
             byte[] pdfBytes = outputStream.toByteArray();
             outputStream.close();
@@ -125,6 +132,19 @@ public class HtmlToPdfGenerator implements PdfGenerator {
                bodyContent +
                "\n</body>\n" +
                "</html>";
+    }
+
+    private void dumpFailureHtml(String fileName, String xhtmlContent) {
+        try {
+            Path debugDir = Path.of("logs", "pdf-debug");
+            Files.createDirectories(debugDir);
+            String sanitizedName = fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
+            Path file = debugDir.resolve("failure-" + sanitizedName + ".xhtml");
+            Files.writeString(file, xhtmlContent);
+            logger.error("PDF 렌더링 실패: 디버그 XHTML 저장 -> {}", file.toAbsolutePath());
+        } catch (Exception dumpEx) {
+            logger.error("PDF 렌더링 실패 XHTML 저장 중 오류", dumpEx);
+        }
     }
 
     /**

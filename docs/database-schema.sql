@@ -17,8 +17,9 @@ CREATE TABLE IF NOT EXISTS contract_signatures (
     signature_id varchar(26) NOT NULL,
     ip_address varchar(45),
     signer_name varchar(100) NOT NULL,
-    device_info TEXT,
-    signature_data TEXT NOT NULL,
+    device_info LONGTEXT,
+    signature_data LONGTEXT NOT NULL,
+    signature_path varchar(1000),
     signer_email varchar(255) NOT NULL,
     PRIMARY KEY (signature_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

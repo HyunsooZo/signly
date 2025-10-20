@@ -20,18 +20,24 @@ public class SignatureEntityMapper {
                 signature.signatureData().value(),
                 signature.signerInfo().signedAt(),
                 signature.signerInfo().ipAddress(),
-                signature.signerInfo().deviceInfo()
+                signature.signerInfo().deviceInfo(),
+                signature.signaturePath()
         );
     }
 
     public ContractSignature toDomain(SignatureEntity entity) {
-        return ContractSignature.create(
+        return ContractSignature.restore(
+                SignatureId.of(entity.getSignatureId()),
                 ContractId.of(entity.getContractId()),
-                entity.getSignatureData(),
-                entity.getSignerEmail(),
-                entity.getSignerName(),
-                entity.getIpAddress(),
-                entity.getDeviceInfo()
+                SignatureData.of(entity.getSignatureData()),
+                SignerInfo.restore(
+                        entity.getSignerEmail(),
+                        entity.getSignerName(),
+                        entity.getIpAddress(),
+                        entity.getDeviceInfo(),
+                        entity.getSignedAt()
+                ),
+                entity.getSignaturePath()
         );
     }
 }

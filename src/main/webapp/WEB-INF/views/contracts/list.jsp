@@ -174,38 +174,56 @@
                                                     </td>
                                                     <td class="text-center">
                                                         <div class="btn-group btn-group-sm" role="group">
-                                                            <a href="/contracts/${contract.id}"
-                                                               class="btn btn-outline-primary"
-                                                               title="상세보기">
-                                                                <i class="bi bi-eye"></i>
-                                                            </a>
-                                                            <c:if test="${contract.status == 'DRAFT'}">
-                                                                <a href="/contracts/${contract.id}/edit"
-                                                                   class="btn btn-outline-secondary"
-                                                                   title="수정">
-                                                                    <i class="bi bi-pencil"></i>
-                                                                </a>
-                                                                <button type="button"
-                                                                        class="btn btn-outline-success"
-                                                                        onclick="sendForSigning('${contract.id}')"
-                                                                        title="서명 요청">
-                                                                    <i class="bi bi-send"></i>
-                                                                </button>
-                                                                <button type="button"
-                                                                        class="btn btn-outline-danger"
-                                                                        onclick="deleteContract('${contract.id}', '${contract.title}')"
-                                                                        title="삭제">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
-                                                            </c:if>
-                                                            <c:if test="${contract.status == 'PENDING' or contract.status == 'SIGNED'}">
-                                                                <button type="button"
-                                                                        class="btn btn-outline-warning"
-                                                                        onclick="cancelContract('${contract.id}')"
-                                                                        title="취소">
-                                                                    <i class="bi bi-x-circle"></i>
-                                                                </button>
-                                                            </c:if>
+                                                            <c:choose>
+                                                                <c:when test="${contract.status == 'SIGNED' or contract.status == 'COMPLETED'}">
+                                                                    <!-- 서명 완료된 계약서: PDF 보기 버튼 -->
+                                                                    <a href="/contracts/${contract.id}/pdf-view"
+                                                                       class="btn btn-outline-success"
+                                                                       title="계약서 PDF 보기">
+                                                                        <i class="bi bi-file-pdf"></i>
+                                                                    </a>
+                                                                    <a href="/contracts/${contract.id}"
+                                                                       class="btn btn-outline-primary"
+                                                                       title="상세보기">
+                                                                        <i class="bi bi-eye"></i>
+                                                                    </a>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <!-- 진행 중인 계약서: 기존 버튼들 -->
+                                                                    <a href="/contracts/${contract.id}"
+                                                                       class="btn btn-outline-primary"
+                                                                       title="상세보기">
+                                                                        <i class="bi bi-eye"></i>
+                                                                    </a>
+                                                                    <c:if test="${contract.status == 'DRAFT'}">
+                                                                        <a href="/contracts/${contract.id}/edit"
+                                                                           class="btn btn-outline-secondary"
+                                                                           title="수정">
+                                                                            <i class="bi bi-pencil"></i>
+                                                                        </a>
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-success"
+                                                                                onclick="sendForSigning('${contract.id}')"
+                                                                                title="서명 요청">
+                                                                            <i class="bi bi-send"></i>
+                                                                        </button>
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-danger"
+                                                                                onclick="deleteContract('${contract.id}', '${contract.title}')"
+                                                                                title="삭제">
+                                                                            <i class="bi bi-trash"></i>
+                                                                        </button>
+                                                                    </c:if>
+                                                                    <c:if test="${contract.status == 'PENDING' or contract.status == 'SIGNED'}">
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-warning"
+                                                                                onclick="cancelContract('${contract.id}')"
+                                                                                title="취소">
+                                                                            <i class="bi bi-x-circle"></i>
+                                                                        </button>
+                                                                    </c:if>
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                         </div>
                                                     </td>
                                                 </tr>

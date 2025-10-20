@@ -43,6 +43,18 @@ public class SignerInfo {
         );
     }
 
+    public static SignerInfo restore(String signerEmail, String signerName,
+                                    String ipAddress, String deviceInfo,
+                                    LocalDateTime signedAt) {
+        return new SignerInfo(
+                signerEmail,
+                signerName,
+                ipAddress,
+                deviceInfo,
+                signedAt
+        );
+    }
+
     public String signerEmail() {
         return signerEmail;
     }
