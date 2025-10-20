@@ -114,6 +114,10 @@ public class JwtTokenProvider {
         return accessTokenValidityInMs;
     }
 
+    public long getRefreshTokenValidityInMs() {
+        return refreshTokenValidityInMs;
+    }
+
     private boolean isTokenExpired(Claims claims) {
         return claims.getExpiration().before(new Date());
     }

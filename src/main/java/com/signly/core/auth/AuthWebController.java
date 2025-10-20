@@ -1,10 +1,12 @@
 package com.signly.core.auth;
 
 import com.signly.common.email.EmailService;
+import com.signly.common.security.SecurityUser;
 import com.signly.core.auth.dto.LoginRequest;
 import com.signly.core.auth.dto.LoginResponse;
 import com.signly.user.application.UserService;
 import com.signly.user.application.dto.UserResponse;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -75,7 +77,16 @@ public class AuthWebController {
     }
 
     @PostMapping("/logout")
-    public String logout(HttpServletResponse response, RedirectAttributes redirectAttributes) {
+    public String logout(@AuthenticationPrincipal SecurityUser securityUser,
+                        HttpServletResponse response,
+                        RedirectAttributes redirectAttributes) {
+        // Redis에서 토큰 삭제
+        if (securityUser != null) {
+            String userId = securityUser.getUser().getUserId().getValue();
+            authService.logout(userId);
+            logger.info("로그아웃 완료: userId={}", userId);
+        }
+
         // 쿠키 삭제
         Cookie authCookie = new Cookie("authToken", "");
         authCookie.setHttpOnly(true);
