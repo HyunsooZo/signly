@@ -77,51 +77,8 @@ body:not(:has(.navbar)) {
     line-height: 2;
 }
 
-.signature-section {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.signature-block {
-    flex: 1;
-}
-
-.signature-line {
-    margin: 8px 0;
-}
-
-.signature-line--seal {
-    position: relative;
-    min-height: 90px;
-    white-space: nowrap;
-    font-weight: normal;
-}
-
-.signature-stamp-label {
-    margin-left: 8px;
-    position: relative;
-    display: inline-block;
-    z-index: 1;
-}
-
-.signature-stamp-wrapper {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-}
-
-.signature-stamp-wrapper img {
-    max-width: 100%;
-    max-height: 100%;
-    opacity: 0.9;
+.contract-body > .title:first-child {
+    display: none;
 }
 
 /* 밑줄 표시 (변수 미리보기) */

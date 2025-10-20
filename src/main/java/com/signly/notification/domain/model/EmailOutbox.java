@@ -1,6 +1,9 @@
 package com.signly.notification.domain.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class EmailOutbox {
@@ -9,6 +12,7 @@ public class EmailOutbox {
     private final String recipientEmail;
     private final String recipientName;
     private final Map<String, Object> templateVariables;
+    private final List<EmailAttachment> attachments;
     private EmailOutboxStatus status;
     private int retryCount;
     private final int maxRetries;
@@ -23,6 +27,7 @@ public class EmailOutbox {
             String recipientEmail,
             String recipientName,
             Map<String, Object> templateVariables,
+            List<EmailAttachment> attachments,
             int maxRetries
     ) {
         this.id = id;
@@ -30,6 +35,7 @@ public class EmailOutbox {
         this.recipientEmail = recipientEmail;
         this.recipientName = recipientName;
         this.templateVariables = templateVariables;
+        this.attachments = attachments != null ? new ArrayList<>(attachments) : new ArrayList<>();
         this.status = EmailOutboxStatus.PENDING;
         this.retryCount = 0;
         this.maxRetries = maxRetries;
@@ -37,6 +43,9 @@ public class EmailOutbox {
         this.nextRetryAt = LocalDateTime.now(); // 즉시 발송 시도
     }
 
+    /**
+     * 첨부파일 없는 이메일 생성
+     */
     public static EmailOutbox create(
             EmailTemplate emailTemplate,
             String recipientEmail,
@@ -49,6 +58,28 @@ public class EmailOutbox {
                 recipientEmail,
                 recipientName,
                 templateVariables,
+                Collections.emptyList(),
+                3 // 기본 최대 재시도 횟수
+        );
+    }
+
+    /**
+     * 첨부파일 있는 이메일 생성
+     */
+    public static EmailOutbox create(
+            EmailTemplate emailTemplate,
+            String recipientEmail,
+            String recipientName,
+            Map<String, Object> templateVariables,
+            List<EmailAttachment> attachments
+    ) {
+        return new EmailOutbox(
+                EmailOutboxId.generate(),
+                emailTemplate,
+                recipientEmail,
+                recipientName,
+                templateVariables,
+                attachments,
                 3 // 기본 최대 재시도 횟수
         );
     }
@@ -59,6 +90,7 @@ public class EmailOutbox {
             String recipientEmail,
             String recipientName,
             Map<String, Object> templateVariables,
+            List<EmailAttachment> attachments,
             EmailOutboxStatus status,
             int retryCount,
             int maxRetries,
@@ -67,7 +99,7 @@ public class EmailOutbox {
             LocalDateTime sentAt,
             LocalDateTime nextRetryAt
     ) {
-        EmailOutbox outbox = new EmailOutbox(id, emailTemplate, recipientEmail, recipientName, templateVariables, maxRetries);
+        EmailOutbox outbox = new EmailOutbox(id, emailTemplate, recipientEmail, recipientName, templateVariables, attachments, maxRetries);
         outbox.status = status;
         outbox.retryCount = retryCount;
         outbox.errorMessage = errorMessage;
@@ -121,6 +153,10 @@ public class EmailOutbox {
 
     public Map<String, Object> getTemplateVariables() {
         return templateVariables;
+    }
+
+    public List<EmailAttachment> getAttachments() {
+        return Collections.unmodifiableList(attachments);
     }
 
     public EmailOutboxStatus getStatus() {

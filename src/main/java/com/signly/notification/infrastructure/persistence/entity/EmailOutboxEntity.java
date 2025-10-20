@@ -27,8 +27,13 @@ public class EmailOutboxEntity {
     @Column(name = "recipient_name", nullable = false, length = 100)
     private String recipientName;
 
-    @Column(name = "template_variables", nullable = false, columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "template_variables", nullable = false, columnDefinition = "LONGTEXT")
     private String templateVariables; // JSON string
+
+    @Lob
+    @Column(name = "attachments", columnDefinition = "LONGTEXT")
+    private String attachments; // JSON string for EmailAttachment list
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
@@ -46,11 +51,28 @@ public class EmailOutboxEntity {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
     @Column(name = "sent_at")
     private LocalDateTime sentAt;
 
     @Column(name = "next_retry_at")
     private LocalDateTime nextRetryAt;
+
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        if (createdAt == null) {
+            createdAt = now;
+        }
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
     // Getters and Setters
     public String getId() {
@@ -93,6 +115,14 @@ public class EmailOutboxEntity {
         this.templateVariables = templateVariables;
     }
 
+    public String getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(String attachments) {
+        this.attachments = attachments;
+    }
+
     public EmailOutboxStatus getStatus() {
         return status;
     }
@@ -131,6 +161,14 @@ public class EmailOutboxEntity {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public LocalDateTime getSentAt() {

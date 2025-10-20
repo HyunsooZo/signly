@@ -88,6 +88,30 @@ CREATE TABLE IF NOT EXISTS documents (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
+-- Table: email_outbox
+-- Description: 이메일 발송 아웃박스 (재시도 포함)
+-- ============================================
+CREATE TABLE IF NOT EXISTS email_outbox (
+    created_at datetime(6) NOT NULL,
+    updated_at datetime(6) NOT NULL,
+    sent_at datetime(6),
+    next_retry_at datetime(6),
+    retry_count integer NOT NULL,
+    max_retries integer NOT NULL,
+    id varchar(26) NOT NULL,
+    email_type varchar(50) NOT NULL,
+    recipient_email varchar(255) NOT NULL,
+    recipient_name varchar(100) NOT NULL,
+    status enum ('PENDING','SENT','FAILED') NOT NULL,
+    template_variables LONGTEXT NOT NULL,
+    attachments LONGTEXT,
+    error_message TEXT,
+    PRIMARY KEY (id),
+    KEY idx_status_next_retry (status, next_retry_at),
+    KEY idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
 -- Table: first_party_signatures
 -- Description: 1st Party (계약 작성자) 서명 이미지
 -- ============================================

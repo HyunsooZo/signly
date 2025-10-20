@@ -14,12 +14,14 @@ class UserTest {
     private PasswordEncoder passwordEncoder;
     private Email validEmail;
     private Password validPassword;
+    private Company testCompany;
 
     @BeforeEach
     void setUp() {
         passwordEncoder = new BCryptPasswordEncoder();
         validEmail = Email.of("test@example.com");
         validPassword = Password.of("Test123!@#");
+        testCompany = Company.of("테스트 회사", "010-1234-5678", "서울특별시");
     }
 
     @Test
@@ -29,7 +31,7 @@ class UserTest {
                 validEmail,
                 validPassword,
                 "홍길동",
-                "테스트 회사",
+                testCompany,
                 UserType.OWNER,
                 passwordEncoder
         );
@@ -37,7 +39,7 @@ class UserTest {
         assertThat(user.getUserId()).isNotNull();
         assertThat(user.getEmail()).isEqualTo(validEmail);
         assertThat(user.getName()).isEqualTo("홍길동");
-        assertThat(user.getCompanyName()).isEqualTo("테스트 회사");
+        assertThat(user.getCompany()).isEqualTo(testCompany);
         assertThat(user.getUserType()).isEqualTo(UserType.OWNER);
         assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
         assertThat(user.isActive()).isTrue();
@@ -47,7 +49,7 @@ class UserTest {
     @DisplayName("null 이메일로 사용자 생성 시 예외가 발생한다")
     void createUser_WithNullEmail_ShouldThrowException() {
         assertThatThrownBy(() ->
-                User.create(null, validPassword, "홍길동", "테스트 회사", UserType.OWNER, passwordEncoder)
+                User.create(null, validPassword, "홍길동", testCompany, UserType.OWNER, passwordEncoder)
         ).isInstanceOf(ValidationException.class)
          .hasMessage("이메일은 필수입니다");
     }
@@ -56,7 +58,7 @@ class UserTest {
     @DisplayName("null 비밀번호로 사용자 생성 시 예외가 발생한다")
     void createUser_WithNullPassword_ShouldThrowException() {
         assertThatThrownBy(() ->
-                User.create(validEmail, null, "홍길동", "테스트 회사", UserType.OWNER, passwordEncoder)
+                User.create(validEmail, null, "홍길동", testCompany, UserType.OWNER, passwordEncoder)
         ).isInstanceOf(ValidationException.class)
          .hasMessage("비밀번호는 필수입니다");
     }
@@ -65,7 +67,7 @@ class UserTest {
     @DisplayName("빈 이름으로 사용자 생성 시 예외가 발생한다")
     void createUser_WithEmptyName_ShouldThrowException() {
         assertThatThrownBy(() ->
-                User.create(validEmail, validPassword, "", "테스트 회사", UserType.OWNER, passwordEncoder)
+                User.create(validEmail, validPassword, "", testCompany, UserType.OWNER, passwordEncoder)
         ).isInstanceOf(ValidationException.class)
          .hasMessage("이름은 필수입니다");
     }
@@ -73,7 +75,7 @@ class UserTest {
     @Test
     @DisplayName("올바른 비밀번호로 검증하면 true를 반환한다")
     void validatePassword_WithCorrectPassword_ShouldReturnTrue() {
-        User user = User.create(validEmail, validPassword, "홍길동", "테스트 회사", UserType.OWNER, passwordEncoder);
+        User user = User.create(validEmail, validPassword, "홍길동", testCompany, UserType.OWNER, passwordEncoder);
 
         boolean result = user.validatePassword(validPassword, passwordEncoder);
 
@@ -83,7 +85,7 @@ class UserTest {
     @Test
     @DisplayName("잘못된 비밀번호로 검증하면 false를 반환한다")
     void validatePassword_WithIncorrectPassword_ShouldReturnFalse() {
-        User user = User.create(validEmail, validPassword, "홍길동", "테스트 회사", UserType.OWNER, passwordEncoder);
+        User user = User.create(validEmail, validPassword, "홍길동", testCompany, UserType.OWNER, passwordEncoder);
         Password wrongPassword = Password.of("Wrong123!@#");
 
         boolean result = user.validatePassword(wrongPassword, passwordEncoder);
@@ -94,7 +96,7 @@ class UserTest {
     @Test
     @DisplayName("OWNER 타입이고 ACTIVE 상태인 사용자는 템플릿을 생성할 수 있다")
     void canCreateTemplate_OwnerAndActive_ShouldReturnTrue() {
-        User user = User.create(validEmail, validPassword, "홍길동", "테스트 회사", UserType.OWNER, passwordEncoder);
+        User user = User.create(validEmail, validPassword, "홍길동", testCompany, UserType.OWNER, passwordEncoder);
 
         boolean result = user.canCreateTemplate();
 
@@ -104,7 +106,7 @@ class UserTest {
     @Test
     @DisplayName("CONTRACTOR 타입 사용자는 템플릿을 생성할 수 없다")
     void canCreateTemplate_Contractor_ShouldReturnFalse() {
-        User user = User.create(validEmail, validPassword, "홍길동", "테스트 회사", UserType.CONTRACTOR, passwordEncoder);
+        User user = User.create(validEmail, validPassword, "홍길동", testCompany, UserType.CONTRACTOR, passwordEncoder);
 
         boolean result = user.canCreateTemplate();
 
@@ -114,7 +116,7 @@ class UserTest {
     @Test
     @DisplayName("비활성화된 사용자는 템플릿을 생성할 수 없다")
     void canCreateTemplate_InactiveUser_ShouldReturnFalse() {
-        User user = User.create(validEmail, validPassword, "홍길동", "테스트 회사", UserType.OWNER, passwordEncoder);
+        User user = User.create(validEmail, validPassword, "홍길동", testCompany, UserType.OWNER, passwordEncoder);
         user.deactivate();
 
         boolean result = user.canCreateTemplate();
@@ -125,7 +127,7 @@ class UserTest {
     @Test
     @DisplayName("사용자를 활성화할 수 있다")
     void activate_ShouldChangeStatusToActive() {
-        User user = User.create(validEmail, validPassword, "홍길동", "테스트 회사", UserType.OWNER, passwordEncoder);
+        User user = User.create(validEmail, validPassword, "홍길동", testCompany, UserType.OWNER, passwordEncoder);
         user.deactivate();
 
         user.activate();
@@ -137,7 +139,7 @@ class UserTest {
     @Test
     @DisplayName("정지된 사용자는 활성화할 수 없다")
     void activate_SuspendedUser_ShouldThrowException() {
-        User user = User.create(validEmail, validPassword, "홍길동", "테스트 회사", UserType.OWNER, passwordEncoder);
+        User user = User.create(validEmail, validPassword, "홍길동", testCompany, UserType.OWNER, passwordEncoder);
         user.suspend();
 
         assertThatThrownBy(() -> user.activate())
@@ -148,18 +150,20 @@ class UserTest {
     @Test
     @DisplayName("프로필을 수정할 수 있다")
     void updateProfile_ShouldUpdateNameAndCompany() {
-        User user = User.create(validEmail, validPassword, "홍길동", "테스트 회사", UserType.OWNER, passwordEncoder);
+        User user = User.create(validEmail, validPassword, "홍길동", testCompany, UserType.OWNER, passwordEncoder);
 
-        user.updateProfile("김철수", "새로운 회사");
+        Company newCompany = Company.of("새로운 회사", "02-0000-1111", "경기도 성남시");
+
+        user.updateProfile("김철수", newCompany);
 
         assertThat(user.getName()).isEqualTo("김철수");
-        assertThat(user.getCompanyName()).isEqualTo("새로운 회사");
+        assertThat(user.getCompany()).isEqualTo(newCompany);
     }
 
     @Test
     @DisplayName("비밀번호를 변경할 수 있다")
     void changePassword_WithCorrectOldPassword_ShouldChangePassword() {
-        User user = User.create(validEmail, validPassword, "홍길동", "테스트 회사", UserType.OWNER, passwordEncoder);
+        User user = User.create(validEmail, validPassword, "홍길동", testCompany, UserType.OWNER, passwordEncoder);
         Password newPassword = Password.of("NewPass123!@#");
 
         user.changePassword(validPassword, newPassword, passwordEncoder);
@@ -171,7 +175,7 @@ class UserTest {
     @Test
     @DisplayName("잘못된 기존 비밀번호로 변경 시도하면 예외가 발생한다")
     void changePassword_WithIncorrectOldPassword_ShouldThrowException() {
-        User user = User.create(validEmail, validPassword, "홍길동", "테스트 회사", UserType.OWNER, passwordEncoder);
+        User user = User.create(validEmail, validPassword, "홍길동", testCompany, UserType.OWNER, passwordEncoder);
         Password wrongPassword = Password.of("Wrong123!@#");
         Password newPassword = Password.of("NewPass123!@#");
 

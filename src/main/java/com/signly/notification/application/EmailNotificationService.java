@@ -1,17 +1,24 @@
 package com.signly.notification.application;
 
+import com.signly.contract.application.ContractPdfService;
 import com.signly.contract.domain.model.Contract;
+import com.signly.contract.domain.model.GeneratedPdf;
+import com.signly.notification.domain.model.EmailAttachment;
 import com.signly.notification.domain.model.EmailOutbox;
 import com.signly.notification.domain.model.EmailTemplate;
 import com.signly.notification.domain.repository.EmailOutboxRepository;
 import com.signly.signature.application.FirstPartySignatureService;
+import com.signly.signature.domain.model.ContractSignature;
+import com.signly.signature.domain.repository.SignatureRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -22,16 +29,22 @@ public class EmailNotificationService {
     private final String baseUrl;
     private final String companyName;
     private final FirstPartySignatureService firstPartySignatureService;
+    private final SignatureRepository signatureRepository;
+    private final ContractPdfService contractPdfService;
 
     public EmailNotificationService(
             EmailOutboxRepository outboxRepository,
             @Value("${app.base-url:http://localhost:8080}") String baseUrl,
             @Value("${app.name:Signly}") String companyName,
-            FirstPartySignatureService firstPartySignatureService) {
+            FirstPartySignatureService firstPartySignatureService,
+            SignatureRepository signatureRepository,
+            ContractPdfService contractPdfService) {
         this.outboxRepository = outboxRepository;
         this.baseUrl = baseUrl;
         this.companyName = companyName;
         this.firstPartySignatureService = firstPartySignatureService;
+        this.signatureRepository = signatureRepository;
+        this.contractPdfService = contractPdfService;
     }
 
     @Transactional
@@ -75,32 +88,48 @@ public class EmailNotificationService {
             variables.put("completedAt", contract.getUpdatedAt());
             variables.put("companyName", companyName);
 
+            // 서명 이미지는 PDF에 포함되므로 이메일 템플릿 변수에는 포함하지 않음
+            // (template_variables 컬럼 크기 제한 고려)
+
+            // PDF 생성 및 첨부파일 준비
+            List<EmailAttachment> attachments = new ArrayList<>();
             try {
-                String dataUrl = firstPartySignatureService.getSignatureDataUrl(contract.getCreatorId().getValue());
-                variables.put("firstPartySignatureImage", dataUrl);
+                GeneratedPdf pdf = contractPdfService.generateContractPdf(contract.getId().getValue());
+                EmailAttachment pdfAttachment = EmailAttachment.of(
+                        pdf.getFileName(),
+                        pdf.getContent(),
+                        pdf.getContentType()
+                );
+                attachments.add(pdfAttachment);
+                logger.info("계약서 PDF 생성 및 첨부 준비 완료: contractId={}, fileName={}",
+                        contract.getId().getValue(), pdf.getFileName());
             } catch (Exception ex) {
-                logger.warn("갑 서명을 이메일에 첨부하지 못했습니다: contractId={}", contract.getId().getValue(), ex);
+                logger.error("계약서 PDF 생성 실패, PDF 없이 이메일 발송: contractId={}",
+                        contract.getId().getValue(), ex);
             }
 
-            // 양 당사자에게 Outbox 저장
+            // 양 당사자에게 Outbox 저장 (PDF 첨부)
             EmailOutbox firstPartyOutbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_COMPLETED,
                     contract.getFirstParty().getEmail(),
                     contract.getFirstParty().getName(),
-                    variables
+                    variables,
+                    attachments
             );
 
             EmailOutbox secondPartyOutbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_COMPLETED,
                     contract.getSecondParty().getEmail(),
                     contract.getSecondParty().getName(),
-                    variables
+                    variables,
+                    attachments
             );
 
             outboxRepository.save(firstPartyOutbox);
             outboxRepository.save(secondPartyOutbox);
 
-            logger.info("계약서 완료 알림 이메일을 Outbox에 저장: contractId={}", contract.getId().getValue());
+            logger.info("계약서 완료 알림 이메일을 Outbox에 저장: contractId={}, PDF첨부={}",
+                    contract.getId().getValue(), !attachments.isEmpty());
 
         } catch (Exception e) {
             logger.error("계약서 완료 알림 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);

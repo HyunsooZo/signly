@@ -14,6 +14,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
+import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
@@ -50,9 +51,23 @@ public class SmtpEmailSender implements EmailSender {
             helper.setSubject(request.template().getSubject());
             helper.setText(renderTemplate(request), true);
 
+            // 첨부파일 추가
+            if (request.hasAttachments()) {
+                for (var attachment : request.attachments()) {
+                    helper.addAttachment(
+                            attachment.getFileName(),
+                            () -> new ByteArrayInputStream(attachment.getContent()),
+                            attachment.getContentType()
+                    );
+                    logger.debug("첨부파일 추가: fileName={}, size={}bytes",
+                            attachment.getFileName(), attachment.getSizeInBytes());
+                }
+            }
+
             mailSender.send(mimeMessage);
-            logger.info("이메일 전송 완료: template={}, to={} <{}>",
-                    request.template(), request.toName(), request.to());
+            logger.info("이메일 전송 완료: template={}, to={} <{}>, attachments={}",
+                    request.template(), request.toName(), request.to(),
+                    request.hasAttachments() ? request.attachments().size() : 0);
         } catch (MessagingException e) {
             logger.error("이메일 전송 실패: to={} <{}>", request.toName(), request.to(), e);
         }
