@@ -77,59 +77,6 @@ public class UserService {
         return userDtoMapper.toResponse(savedUser);
     }
 
-    public UserResponse authenticateUser(LoginCommand command) {
-        Email email = Email.of(command.email());
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
-
-        if (!user.isActive()) {
-            throw new ValidationException("비활성화된 사용자입니다");
-        }
-
-        Password password = Password.of(command.password());
-        if (!user.validatePassword(password, passwordEncoder)) {
-            throw new ValidationException("비밀번호가 일치하지 않습니다");
-        }
-
-        return userDtoMapper.toResponse(user);
-    }
-
-    public UserResponse updateProfile(String userId, UpdateProfileCommand command) {
-        UserId userIdObj = UserId.of(userId);
-        User user = userRepository.findById(userIdObj)
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
-
-        Company company = Company.of(
-                command.companyName(),
-                command.businessPhone(),
-                command.businessAddress()
-        );
-        user.updateProfile(command.name(), company);
-        User updatedUser = userRepository.save(user);
-
-        return userDtoMapper.toResponse(updatedUser);
-    }
-
-    public void changePassword(String userId, ChangePasswordCommand command) {
-        UserId userIdObj = UserId.of(userId);
-        User user = userRepository.findById(userIdObj)
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
-
-        Password oldPassword = Password.of(command.oldPassword());
-        Password newPassword = Password.of(command.newPassword());
-
-        user.changePassword(oldPassword, newPassword, passwordEncoder);
-        userRepository.save(user);
-    }
-
-    @Transactional(readOnly = true)
-    public UserResponse getUserById(String userId) {
-        UserId userIdObj = UserId.of(userId);
-        User user = userRepository.findById(userIdObj)
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
-
-        return userDtoMapper.toResponse(user);
-    }
 
     @Transactional(readOnly = true)
     public UserResponse getUserByEmail(String email) {
