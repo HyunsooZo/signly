@@ -46,7 +46,7 @@
                 <div class="form-group form-check">
                     <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
                     <label class="form-check-label" for="rememberMe">
-                        로그인 상태 유지 (7일)
+                        자동 로그인
                     </label>
                 </div>
 

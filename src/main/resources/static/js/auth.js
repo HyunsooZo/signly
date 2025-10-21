@@ -25,9 +25,9 @@ const AuthManager = {
         const accessTokenExpiry = expiresIn ? expiresIn / 1000 / 60 / 60 / 24 : 1/24; // 밀리초를 일로 변환
         Signly.Cookie.set('authToken', accessToken, accessTokenExpiry);
 
-        // 리프레시 토큰 (24시간)
+        // 리프레시 토큰 (자동 로그인 활성화 시에만 저장, 30일)
         if (refreshToken) {
-            Signly.Cookie.set('refreshToken', refreshToken, 1);
+            Signly.Cookie.set('refreshToken', refreshToken, 30);
         }
     },
 
@@ -45,8 +45,10 @@ const AuthManager = {
     async refreshAccessToken() {
         const refreshToken = this.getRefreshToken();
 
+        // 자동 로그인이 비활성화된 경우 (리프레시 토큰 없음)
         if (!refreshToken) {
-            throw new Error('리프레시 토큰이 없습니다');
+            console.log('리프레시 토큰이 없습니다. 자동 로그인이 비활성화되어 있습니다.');
+            throw new Error('자동 로그인이 비활성화되어 있습니다');
         }
 
         try {
@@ -64,9 +66,10 @@ const AuthManager = {
 
             const data = await response.json();
 
-            // 새로운 토큰 저장
+            // 새로운 액세스 토큰과 리프레시 토큰 모두 저장 (무제한 자동 로그인)
             this.setTokens(data.accessToken, data.refreshToken, data.expiresIn);
 
+            console.log('토큰 갱신 성공 (자동 로그인 연장)');
             return data.accessToken;
         } catch (error) {
             console.error('토큰 갱신 중 오류:', error);

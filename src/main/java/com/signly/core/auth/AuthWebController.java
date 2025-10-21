@@ -59,13 +59,18 @@ public class AuthWebController {
             authCookie.setMaxAge(60 * 60); // 1시간
             response.addCookie(authCookie);
 
-            // 리프레시 토큰을 쿠키에 저장
-            Cookie refreshCookie = new Cookie("refreshToken", loginResponse.refreshToken());
-            refreshCookie.setHttpOnly(false); // JavaScript에서 접근 가능하도록
-            refreshCookie.setSecure(false);
-            refreshCookie.setPath("/");
-            refreshCookie.setMaxAge(rememberMe ? 7 * 24 * 60 * 60 : 24 * 60 * 60); // 기억하기 체크 시 7일, 아니면 1일
-            response.addCookie(refreshCookie);
+            // 자동 로그인 체크 시에만 리프레시 토큰을 쿠키에 저장
+            if (rememberMe) {
+                Cookie refreshCookie = new Cookie("refreshToken", loginResponse.refreshToken());
+                refreshCookie.setHttpOnly(false); // JavaScript에서 접근 가능하도록
+                refreshCookie.setSecure(false);
+                refreshCookie.setPath("/");
+                refreshCookie.setMaxAge(30 * 24 * 60 * 60); // 30일
+                response.addCookie(refreshCookie);
+                logger.info("자동 로그인 활성화: {}", email);
+            } else {
+                logger.info("자동 로그인 비활성화: {}", email);
+            }
 
             logger.info("로그인 성공: {}", email);
             redirectAttributes.addFlashAttribute("successMessage", "로그인되었습니다.");
