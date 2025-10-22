@@ -70,6 +70,7 @@
             <c:if test="${not empty selectedPreset}">
                 <input type="hidden" name="selectedPreset" value="${selectedPreset}" />
             </c:if>
+            <input type="hidden" id="templateId" name="templateId" value="${contract.templateId}">
             <c:if test="${not empty selectedTemplate}">
                 <script type="application/json" id="selectedTemplateData">${selectedTemplateContent}</script>
             </c:if>
@@ -105,6 +106,23 @@
                             </div>
                         </div>
 
+                        <div class="card mb-4" id="presetExpirationCard">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-hourglass-split me-2"></i>서명 만료 설정
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted small mb-3">만료일을 비우면 계약서는 생성 시점 기준 24시간 동안 유효합니다.</p>
+                                <div class="mb-0">
+                                    <label for="presetExpiresAt" class="form-label">만료일</label>
+                                    <input type="datetime-local" class="form-control" id="presetExpiresAt" name="expiresAt"
+                                           value="${contract.expiresAtInputValue}">
+                                    <div class="form-text">필요 시 서명 마감 일시를 지정하세요.</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Hidden fields -->
                         <textarea id="presetContentHidden" name="content" hidden required></textarea>
                         <input type="hidden" id="presetTitleHidden" name="title" required>
@@ -121,88 +139,130 @@
                 <div class="row">
                     <!-- 계약서 기본 정보 -->
                     <div class="col-lg-8" id="mainFormCol">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="bi bi-file-earmark-text me-2"></i>계약서 기본 정보
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <!-- 템플릿 선택 (새 계약서인 경우만) -->
-                            <c:if test="${empty contractId}">
-                                <div class="mb-3">
-                                    <label for="templateId" class="form-label">템플릿 선택</label>
-                                    <select class="form-select" id="templateId" name="templateId" onchange="loadTemplate()">
-                                        <option value="">직접 작성</option>
-                                        <c:forEach var="template" items="${templates}">
-                                            <option value="${template.templateId}"
-                                                    data-title="${template.title}"
-                                                    data-content="${fn:escapeXml(template.renderedHtml)}"
-                                                    <c:if test="${contract.templateId == template.templateId}">selected</c:if>>
-                                                ${template.title}
-                                            </option>
-                                        </c:forEach>
-                                    </select>
-                                    <div class="form-text">기존 템플릿을 선택하거나 직접 작성하세요.</div>
-                                </div>
-                            </c:if>
-
-                            <!-- 숨겨진 프리셋 select (selectedPreset으로 넘어온 경우를 위해) -->
-                            <select id="presetSelect">
-                                <option value="">표준 양식을 선택하세요</option>
-                                <c:forEach var="preset" items="${presets}">
-                                    <option value="${preset.id}" data-name="${preset.name}">
-                                        ${preset.name} - ${preset.description}
-                                    </option>
-                                </c:forEach>
-                            </select>
-
-                            <div class="mb-3">
-                                <label for="title" class="form-label">계약서 제목 <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control form-control-lg" id="title" name="title"
-                                       value="${contract.title}" required maxlength="200"
-                                       placeholder="계약서 제목을 입력하세요">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-file-earmark-text me-2"></i>계약서 기본 정보
+                                </h5>
                             </div>
+                            <div class="card-body">
+                                <c:choose>
+                                    <c:when test="${empty contractId}">
+                                        <p class="text-muted">사용할 계약서 템플릿을 선택하면 아래 프리뷰에서 내용을 확인하고 변수 값을 입력할 수 있습니다.</p>
 
-                            <div class="mb-3" id="contentSection">
-                                <label for="content" class="form-label">계약서 내용 <span class="text-danger">*</span></label>
-                                <textarea class="form-control content-editor" id="content" name="content"
-                                          rows="15" required placeholder="계약서 내용을 입력하세요...">${contract.content}</textarea>
-                                <div class="form-text">계약서의 전체 내용을 입력하세요. 변수를 사용하여 동적 값을 설정할 수 있습니다.</div>
+                                        <c:choose>
+                                            <c:when test="${empty templates}">
+                                                <div class="text-center text-muted py-5">
+                                                    <i class="bi bi-collection mx-auto d-block display-5 mb-3"></i>
+                                                    <p class="mb-2">사용 가능한 템플릿이 없습니다.</p>
+                                                    <p class="small">먼저 템플릿을 생성한 후 계약서를 만들 수 있습니다.</p>
+                                                    <a href="/templates/new" class="btn btn-primary mt-3">
+                                                        <i class="bi bi-plus-circle me-2"></i>새 템플릿 만들기
+                                                    </a>
+                                                </div>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div class="row g-3" id="templateCardContainer">
+                                                    <div class="col-md-6 col-lg-4">
+                                                        <div class="card h-100 template-option-card border border-dashed">
+                                                            <div class="card-body d-flex flex-column justify-content-center text-center">
+                                                                <i class="bi bi-plus-circle display-6 text-primary mb-3"></i>
+                                                                <p class="text-muted mb-3">새 템플릿을 만들어 계약서를 준비하세요.</p>
+                                                                <a href="/templates/new" class="btn btn-primary">
+                                                                    템플릿 만들기
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <c:forEach var="template" items="${templates}">
+                                                        <c:set var="renderedHtml" value="${empty template.renderedHtml ? '' : template.renderedHtml}" />
+                                                        <c:set var="previewText" value="${empty template.previewText ? '' : template.previewText}" />
+                                                        <c:set var="isSelectedTemplate" value="${contract.templateId == template.templateId}" />
+                                                        <div class="col-md-6 col-lg-4">
+                                                            <div class="card h-100 template-option-card border" data-template-card data-template-id="${template.templateId}" data-template-selected="${isSelectedTemplate}">
+                                                                <div class="card-body d-flex flex-column">
+                                                                    <h6 class="card-title mb-2"><c:out value="${template.title}" /></h6>
+                                                                    <p class="text-muted small flex-grow-1 mb-3">
+                                                                        <c:choose>
+                                                                            <c:when test="${empty previewText}">
+                                                                                등록된 미리보기가 없습니다.
+                                                                            </c:when>
+                                                                            <c:when test="${fn:length(previewText) > 120}">
+                                                                                <c:out value="${fn:substring(previewText, 0, 120)}" />...
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <c:out value="${previewText}" />
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                    </p>
+                                                                    <button type="button"
+                                                                            class="btn btn-outline-primary w-100 mt-auto"
+                                                                            data-template-button="${template.templateId}"
+                                                                            data-template-id="${template.templateId}"
+                                                                            data-template-title="${fn:escapeXml(template.title)}"
+                                                                            data-template-content="${fn:escapeXml(renderedHtml)}"
+                                                                            onclick="handleTemplateSelection(this)">
+                                                                        템플릿 불러오기
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </c:forEach>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
 
-                                <div class="mt-3" id="customVariablesContainer">
-                                    <label class="form-label d-flex align-items-center gap-2">
-                                        <i class="bi bi-sliders2-vertical"></i> 변수 값 입력
-                                    </label>
-                                    <div class="row g-2" id="customVariableFields"></div>
-                                    <div class="form-text">`{변수명}` 형식의 변수가 감지되면 해당 값을 아래에서 입력할 수 있습니다.</div>
-                                </div>
-
-                                <div class="mt-3" id="customContentPreviewWrapper">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="card-title mb-0">
-                                                <i class="bi bi-eye"></i> 실시간 미리보기
-                                            </h5>
+                                        <!-- 숨겨진 프리셋 select (selectedPreset으로 넘어온 경우를 위해) -->
+                                        <select id="presetSelect" class="d-none">
+                                            <option value="">표준 양식을 선택하세요</option>
+                                            <c:forEach var="preset" items="${presets}">
+                                                <option value="${preset.id}" data-name="${preset.name}">
+                                                    ${preset.name} - ${preset.description}
+                                                </option>
+                                            </c:forEach>
+                                        </select>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">계약서 제목 <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control form-control-lg" id="title" name="title"
+                                                   value="${contract.title}" required maxlength="200"
+                                                   placeholder="계약서 제목을 입력하세요">
                                         </div>
-                                        <div class="card-body custom-content-preview" id="customContentPreview"></div>
-                                    </div>
-                                </div>
 
-                                <!-- 프리셋 폼 필드 컨테이너 (동적으로 생성됨) -->
-                                <div id="presetFormFields"></div>
-                            </div>
+                                        <div class="mb-3" id="contentSection">
+                                            <label for="content" class="form-label">계약서 내용 <span class="text-danger">*</span></label>
+                                            <textarea class="form-control content-editor" id="content" name="content"
+                                                      rows="15" required placeholder="계약서 내용을 입력하세요...">${contract.content}</textarea>
+                                            <div class="form-text">계약서의 전체 내용을 입력하세요. 변수를 사용하여 동적 값을 설정할 수 있습니다.</div>
 
-                            <div class="mb-3">
-                                <label for="expiresAt" class="form-label">만료일</label>
-                                <input type="datetime-local" class="form-control" id="expiresAt" name="expiresAt"
-                                       value="${contract.expiresAtInputValue}">
-                                <div class="form-text">계약서의 서명 만료일을 설정하세요 (선택사항).</div>
+                                            <div class="mt-3" id="customVariablesContainer">
+                                                <label class="form-label d-flex align-items-center gap-2">
+                                                    <i class="bi bi-sliders2-vertical"></i> 변수 값 입력
+                                                </label>
+                                                <div class="row g-2" id="customVariableFields"></div>
+                                                <div class="form-text">`{변수명}` 형식의 변수가 감지되면 해당 값을 아래에서 입력할 수 있습니다.</div>
+                                            </div>
+
+                                            <div class="mt-3" id="customContentPreviewWrapper">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h5 class="card-title mb-0">
+                                                            <i class="bi bi-eye"></i> 실시간 미리보기
+                                                        </h5>
+                                                    </div>
+                                                    <div class="card-body custom-content-preview" id="customContentPreview"></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 프리셋 폼 필드 컨테이너 (동적으로 생성됨) -->
+                                            <div id="presetFormFields"></div>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                         </div>
                     </div>
-
-                </div>
 
                 <!-- 당사자 정보 -->
                 <div class="col-lg-4" id="partyInfoCol">
@@ -254,6 +314,24 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="card mb-4" id="expirationCard">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-hourglass-split me-2"></i>서명 만료 설정
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small mb-3">만료일을 비우면 계약서는 생성 시점 기준 24시간 동안 유효합니다.</p>
+                            <div class="mb-0">
+                                <label for="expiresAt" class="form-label">만료일</label>
+                                <input type="datetime-local" class="form-control" id="expiresAt" name="expiresAt"
+                                       value="${contract.expiresAtInputValue}">
+                                <div class="form-text">필요 시 서명 마감 일시를 지정하세요.</div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 </div>
@@ -364,6 +442,95 @@
         const customVariableValues = {};
         let customVariables = [];
 
+        function toLocalDateTimeValue(date) {
+            const pad = (value) => String(value).padStart(2, '0');
+            return [
+                date.getFullYear(),
+                '-', pad(date.getMonth() + 1),
+                '-', pad(date.getDate()),
+                'T', pad(date.getHours()),
+                ':', pad(date.getMinutes())
+            ].join('');
+        }
+
+        function updateExpirationMinAttributes() {
+            const minValue = toLocalDateTimeValue(new Date());
+            const normal = document.getElementById('expiresAt');
+            const preset = document.getElementById('presetExpiresAt');
+            if (normal) {
+                normal.min = minValue;
+            }
+            if (preset) {
+                preset.min = minValue;
+            }
+        }
+
+        function syncExpirationField(sourceField) {
+            const normal = document.getElementById('expiresAt');
+            const preset = document.getElementById('presetExpiresAt');
+            if (!sourceField) {
+                return;
+            }
+            if (sourceField === normal && preset) {
+                preset.value = normal.value;
+            } else if (sourceField === preset && normal) {
+                normal.value = preset.value;
+            }
+        }
+
+        function initializeExpirationInputs() {
+            const normal = document.getElementById('expiresAt');
+            const preset = document.getElementById('presetExpiresAt');
+
+            if (!normal && !preset) {
+                return;
+            }
+
+            updateExpirationMinAttributes();
+
+            const defaultValue = toLocalDateTimeValue(new Date(Date.now() + 24 * 60 * 60 * 1000));
+            const minValue = document.getElementById('expiresAt')?.min || document.getElementById('presetExpiresAt')?.min || toLocalDateTimeValue(new Date());
+            let initialValue = '';
+            if (normal && normal.value) {
+                initialValue = normal.value;
+            } else if (preset && preset.value) {
+                initialValue = preset.value;
+            } else {
+                initialValue = defaultValue;
+            }
+
+            if (minValue && initialValue < minValue) {
+                initialValue = minValue;
+            }
+
+            if (normal && !normal.value) {
+                normal.value = initialValue;
+            } else if (normal && normal.value && normal.value < minValue) {
+                normal.value = minValue;
+            }
+            if (preset && !preset.value) {
+                preset.value = initialValue;
+            } else if (preset && preset.value && preset.value < minValue) {
+                preset.value = minValue;
+            }
+
+            [normal, preset].forEach((field) => {
+                if (!field) {
+                    return;
+                }
+                field.addEventListener('focus', () => {
+                    updateExpirationMinAttributes();
+                    if (field.min && field.value && field.value < field.min) {
+                        field.value = field.min;
+                        syncExpirationField(field);
+                    }
+                });
+                field.addEventListener('input', () => syncExpirationField(field));
+            });
+
+            syncExpirationField(normal && normal.value ? normal : preset);
+        }
+
         function applyOwnerInfoToNormalForm() {
             if (!ownerInfo) {
                 return;
@@ -410,24 +577,17 @@
             });
         }
 
-        function loadTemplate() {
-            const select = document.getElementById('templateId');
-            const selectedOption = select.options[select.selectedIndex];
-
-            if (selectedOption.value) {
-                document.getElementById('title').value = selectedOption.dataset.title || '';
-                const raw = selectedOption.getAttribute('data-content') || '';
-                const decoded = decodeHtmlEntities(raw);
-                document.getElementById('content').value = decoded;
-                detectCustomVariables();
-                updateDirectPreview();
-            }
-        }
-
         // 프리셋 모드로 전환
         function switchToPresetMode() {
             document.getElementById('normalLayout').style.display = 'none';
             document.getElementById('presetLayout').style.display = 'block';
+
+            updateExpirationMinAttributes();
+            const normalExpires = document.getElementById('expiresAt');
+            const presetExpires = document.getElementById('presetExpiresAt');
+            if (normalExpires && presetExpires && normalExpires.value) {
+                presetExpires.value = normalExpires.value;
+            }
 
             // 일반 레이아웃의 required 필드 비활성화
             document.querySelectorAll('#normalLayout [required]').forEach(field => {
@@ -439,6 +599,13 @@
         function switchToNormalMode() {
             document.getElementById('normalLayout').style.display = 'block';
             document.getElementById('presetLayout').style.display = 'none';
+
+            updateExpirationMinAttributes();
+            const normalExpires = document.getElementById('expiresAt');
+            const presetExpires = document.getElementById('presetExpiresAt');
+            if (normalExpires && presetExpires && presetExpires.value) {
+                normalExpires.value = presetExpires.value;
+            }
         }
 
         // 프리셋 HTML 렌더링 및 변수를 입력 필드로 교체
@@ -958,6 +1125,51 @@
             renderPresetHtml(rendered, templateTitle);
         }
 
+        function highlightTemplateCard(selectedCard) {
+            const cards = document.querySelectorAll('[data-template-card]');
+            cards.forEach(card => {
+                card.classList.remove('border-primary', 'shadow');
+                const button = card.querySelector('[data-template-button]');
+                if (button) {
+                    button.classList.remove('btn-primary', 'text-white');
+                    button.classList.add('btn-outline-primary');
+                }
+            });
+
+            if (!selectedCard) {
+                return;
+            }
+
+            selectedCard.classList.add('border-primary', 'shadow');
+            const activeButton = selectedCard.querySelector('[data-template-button]');
+            if (activeButton) {
+                activeButton.classList.remove('btn-outline-primary');
+                activeButton.classList.add('btn-primary', 'text-white');
+            }
+        }
+
+        function handleTemplateSelection(button) {
+            if (!button) {
+                return;
+            }
+
+            const templateId = button.getAttribute('data-template-id');
+            const templateTitle = button.getAttribute('data-template-title') || '';
+            const templateContent = button.getAttribute('data-template-content') || '';
+
+            const templateIdInput = document.getElementById('templateId');
+            if (templateIdInput) {
+                templateIdInput.value = templateId || '';
+            }
+
+            const selectedCard = button.closest('[data-template-card]');
+            highlightTemplateCard(selectedCard);
+
+            if (templateTitle || templateContent) {
+                loadTemplateAsPreset(templateTitle, templateContent);
+            }
+        }
+
         const presetSelect = document.getElementById('presetSelect');
         if (presetSelect && contractContentTextarea) {
             presetSelect.addEventListener('change', async (event) => {
@@ -1420,16 +1632,38 @@
 
         // 스크롤 이벤트 리스너 등록
                 
+        document.addEventListener('DOMContentLoaded', initializeExpirationInputs);
+        document.addEventListener('DOMContentLoaded', function() {
+            switchToNormalMode();
+        });
+
+        <c:if test="${empty contractId}">
+        document.addEventListener('DOMContentLoaded', function() {
+            const templateIdInput = document.getElementById('templateId');
+            const templateIdValue = templateIdInput ? templateIdInput.value : '';
+            if (templateIdValue) {
+                const selector = '[data-template-button="' + templateIdValue + '"]';
+                const button = document.querySelector(selector);
+                if (button) {
+                    handleTemplateSelection(button);
+                    return;
+                }
+            }
+
+            const preselectedCard = document.querySelector('[data-template-card][data-template-selected="true"]');
+            if (preselectedCard) {
+                const button = preselectedCard.querySelector('[data-template-button]');
+                if (button) {
+                    handleTemplateSelection(button);
+                }
+            }
+        });
+        </c:if>
+
                 // 페이지 로드 시 selectedPreset 또는 selectedTemplate이 있으면 자동으로 로드
         <c:if test="${not empty selectedPreset}">
         document.addEventListener('DOMContentLoaded', function() {
             loadPresetById('${selectedPreset}');
-        });
-        </c:if>
-        <c:if test="${not empty selectedTemplate}">
-        document.addEventListener('DOMContentLoaded', function() {
-            const templateContent = document.getElementById('selectedTemplateData')?.textContent || '';
-            loadTemplateAsPreset('${selectedTemplateTitle}', templateContent);
         });
         </c:if>
 
