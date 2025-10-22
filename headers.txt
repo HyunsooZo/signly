@@ -1,0 +1,14 @@
+HTTP/1.1 200 
+Vary: origin,access-control-request-method,access-control-request-headers,accept-encoding
+Set-Cookie: JSESSIONID=3F426A3DA91E70D78D42977245D916B2; Path=/; HttpOnly
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: SAMEORIGIN
+Content-Type: text/html;charset=UTF-8
+Content-Language: ko-KR
+Content-Length: 3898
+Date: Mon, 20 Oct 2025 16:57:23 GMT
+

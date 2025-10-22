@@ -654,30 +654,63 @@ a:hover {
     border-radius: var(--border-radius);
     margin-bottom: 1rem;
     border: 1px solid transparent;
+    position: relative;
 }
 
 .alert-success {
-    background-color: rgba(5, 150, 105, 0.1);
+    background-color: rgba(5, 150, 105, 0.95);
     border-color: var(--success-color);
-    color: var(--success-color);
+    color: white;
+    box-shadow: var(--box-shadow-lg);
 }
 
 .alert-warning {
-    background-color: rgba(217, 119, 6, 0.1);
+    background-color: rgba(217, 119, 6, 0.95);
     border-color: var(--warning-color);
-    color: var(--warning-color);
+    color: white;
+    box-shadow: var(--box-shadow-lg);
 }
 
 .alert-danger {
-    background-color: rgba(220, 38, 38, 0.1);
+    background-color: rgba(220, 38, 38, 0.95);
     border-color: var(--danger-color);
-    color: var(--danger-color);
+    color: white;
+    box-shadow: var(--box-shadow-lg);
 }
 
 .alert-info {
-    background-color: rgba(8, 145, 178, 0.1);
+    background-color: rgba(8, 145, 178, 0.95);
     border-color: var(--info-color);
-    color: var(--info-color);
+    color: white;
+    box-shadow: var(--box-shadow-lg);
+}
+
+/* 알림 컨테이너 */
+.alert-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* 알림 닫기 버튼 */
+.alert-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.alert-close:hover {
+    opacity: 1;
 }
 
 /* 테이블 */
@@ -811,6 +844,16 @@ a:hover {
 
     .page-title {
         font-size: var(--font-size-xl);
+    }
+
+    /* 모바일 알림 대응 */
+    .alert {
+        font-size: var(--font-size-sm);
+        padding: 0.875rem 2rem 0.875rem 0.875rem;
+    }
+
+    .alert-close {
+        font-size: 1.25rem;
     }
 }
 

@@ -1,10 +1,12 @@
 package com.signly.core.auth;
 
 import com.signly.common.email.EmailService;
+import com.signly.common.security.SecurityUser;
 import com.signly.core.auth.dto.LoginRequest;
 import com.signly.core.auth.dto.LoginResponse;
 import com.signly.user.application.UserService;
 import com.signly.user.application.dto.UserResponse;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -49,13 +51,26 @@ public class AuthWebController {
             LoginRequest request = new LoginRequest(email, password);
             LoginResponse loginResponse = authService.login(request);
 
-            // JWT 토큰을 쿠키에 저장
+            // JWT 액세스 토큰을 쿠키에 저장
             Cookie authCookie = new Cookie("authToken", loginResponse.accessToken());
-            authCookie.setHttpOnly(true);
+            authCookie.setHttpOnly(false); // JavaScript에서 접근 가능하도록
             authCookie.setSecure(false); // 개발환경에서는 false, 프로덕션에서는 true
             authCookie.setPath("/");
-            authCookie.setMaxAge(rememberMe ? 7 * 24 * 60 * 60 : 24 * 60 * 60); // 기억하기 체크 시 7일, 아니면 1일
+            authCookie.setMaxAge(60 * 60); // 1시간
             response.addCookie(authCookie);
+
+            // 자동 로그인 체크 시에만 리프레시 토큰을 쿠키에 저장
+            if (rememberMe) {
+                Cookie refreshCookie = new Cookie("refreshToken", loginResponse.refreshToken());
+                refreshCookie.setHttpOnly(false); // JavaScript에서 접근 가능하도록
+                refreshCookie.setSecure(false);
+                refreshCookie.setPath("/");
+                refreshCookie.setMaxAge(30 * 24 * 60 * 60); // 30일
+                response.addCookie(refreshCookie);
+                logger.info("자동 로그인 활성화: {}", email);
+            } else {
+                logger.info("자동 로그인 비활성화: {}", email);
+            }
 
             logger.info("로그인 성공: {}", email);
             redirectAttributes.addFlashAttribute("successMessage", "로그인되었습니다.");
@@ -75,13 +90,28 @@ public class AuthWebController {
     }
 
     @PostMapping("/logout")
-    public String logout(HttpServletResponse response, RedirectAttributes redirectAttributes) {
+    public String logout(@AuthenticationPrincipal SecurityUser securityUser,
+                        HttpServletResponse response,
+                        RedirectAttributes redirectAttributes) {
+        // Redis에서 토큰 삭제
+        if (securityUser != null) {
+            String userId = securityUser.getUser().getUserId().getValue();
+            authService.logout(userId);
+            logger.info("로그아웃 완료: userId={}", userId);
+        }
+
         // 쿠키 삭제
         Cookie authCookie = new Cookie("authToken", "");
-        authCookie.setHttpOnly(true);
+        authCookie.setHttpOnly(false);
         authCookie.setPath("/");
         authCookie.setMaxAge(0);
         response.addCookie(authCookie);
+
+        Cookie refreshCookie = new Cookie("refreshToken", "");
+        refreshCookie.setHttpOnly(false);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0);
+        response.addCookie(refreshCookie);
 
         redirectAttributes.addFlashAttribute("successMessage", "로그아웃되었습니다.");
         return "redirect:/login";

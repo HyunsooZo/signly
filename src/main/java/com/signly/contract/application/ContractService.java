@@ -106,6 +106,11 @@ public class ContractService {
                 command.secondPartyOrganization()
         );
 
+        LocalDateTime expiresAt = command.expiresAt();
+        if (expiresAt == null) {
+            expiresAt = LocalDateTime.now().plusHours(24);
+        }
+
         Contract contract = Contract.create(
                 userIdObj,
                 templateId,
@@ -113,7 +118,7 @@ public class ContractService {
                 content,
                 firstParty,
                 secondParty,
-                command.expiresAt(),
+                expiresAt,
                 command.presetType()
         );
 

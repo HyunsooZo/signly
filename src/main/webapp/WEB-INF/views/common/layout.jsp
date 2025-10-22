@@ -73,6 +73,7 @@
 
     <!-- JavaScript -->
     <script src="<c:url value='/js/common.js' />"></script>
+    <script src="<c:url value='/js/auth.js' />"></script>
     <c:if test="${not empty additionalJs}">
         <c:forEach items="${additionalJs}" var="js">
             <script src="<c:url value='/js/${js}' />"></script>

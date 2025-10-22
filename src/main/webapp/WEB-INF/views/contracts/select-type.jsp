@@ -48,14 +48,14 @@
                 </div>
             </div>
 
-            <!-- 직접 작성 -->
+            <!-- 템플릿 만들기 -->
             <div class="col-md-6 col-lg-4">
-                <a href="/contracts/new?direct=true" class="contract-type-card">
+                <a href="/templates/new" class="contract-type-card">
                     <div class="contract-type-icon">
-                        <i class="bi bi-pencil-square"></i>
+                        <i class="bi bi-plus-circle"></i>
                     </div>
-                    <div class="contract-type-title">직접 작성</div>
-                    <p class="contract-type-desc">빈 양식으로 시작하여 자유롭게 작성</p>
+                    <div class="contract-type-title">새 템플릿 만들기</div>
+                    <p class="contract-type-desc">템플릿을 먼저 만들어 두고 계약서를 생성하세요</p>
                 </a>
             </div>
         </div>

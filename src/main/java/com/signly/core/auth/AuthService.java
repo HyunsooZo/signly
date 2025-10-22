@@ -6,6 +6,7 @@ import com.signly.core.auth.dto.RefreshTokenRequest;
 import com.signly.common.exception.UnauthorizedException;
 import com.signly.common.security.JwtTokenProvider;
 import com.signly.common.security.SecurityUser;
+import com.signly.common.security.TokenRedisService;
 import com.signly.user.domain.model.Email;
 import com.signly.user.domain.model.Password;
 import com.signly.user.domain.model.User;
@@ -26,15 +27,18 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final TokenRedisService tokenRedisService;
 
     public AuthService(AuthenticationManager authenticationManager,
                       JwtTokenProvider jwtTokenProvider,
                       PasswordEncoder passwordEncoder,
-                      UserRepository userRepository) {
+                      UserRepository userRepository,
+                      TokenRedisService tokenRedisService) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
+        this.tokenRedisService = tokenRedisService;
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -55,6 +59,10 @@ public class AuthService {
             String refreshToken = jwtTokenProvider.createRefreshToken(
                 user.getUserId().getValue()
             );
+
+            // Redis에 토큰 저장
+            tokenRedisService.saveAccessToken(user.getUserId().getValue(), accessToken);
+            tokenRedisService.saveRefreshToken(user.getUserId().getValue(), refreshToken);
 
             var company = user.getCompany();
             return new LoginResponse(
@@ -83,6 +91,12 @@ public class AuthService {
         }
 
         String userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+
+        // Redis에서 리프레시 토큰 검증
+        if (!tokenRedisService.isRefreshTokenValid(userId, refreshToken)) {
+            throw new UnauthorizedException("Redis에 저장된 리프레시 토큰과 일치하지 않습니다");
+        }
+
         User user = userRepository.findById(com.signly.user.domain.model.UserId.of(userId))
                 .orElseThrow(() -> new UnauthorizedException("사용자를 찾을 수 없습니다"));
 
@@ -100,6 +114,10 @@ public class AuthService {
             user.getUserId().getValue()
         );
 
+        // Redis에 새로운 토큰 저장
+        tokenRedisService.saveAccessToken(user.getUserId().getValue(), newAccessToken);
+        tokenRedisService.saveRefreshToken(user.getUserId().getValue(), newRefreshToken);
+
         var company = user.getCompany();
         return new LoginResponse(
             newAccessToken,
@@ -113,6 +131,13 @@ public class AuthService {
             user.getUserType(),
             jwtTokenProvider.getAccessTokenValidityInMs()
         );
+    }
+
+    /**
+     * 로그아웃 - Redis에서 토큰 삭제
+     */
+    public void logout(String userId) {
+        tokenRedisService.deleteAllTokens(userId);
     }
 
     @Transactional(readOnly = true)

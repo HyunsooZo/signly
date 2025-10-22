@@ -100,7 +100,6 @@ public class ContractWebController {
     @GetMapping("/new")
     public String newContractForm(@RequestParam(value = "templateId", required = false) String templateId,
                                  @RequestParam(value = "preset", required = false) String preset,
-                                 @RequestParam(value = "direct", required = false) Boolean direct,
                                  @RequestHeader(value = "X-User-Id", required = false) String userId,
                                  @AuthenticationPrincipal SecurityUser securityUser,
                                  HttpServletRequest request,
@@ -109,8 +108,8 @@ public class ContractWebController {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             model.addAttribute("currentUserId", resolvedUserId);
 
-            // preset이나 direct 파라미터가 없으면 선택 화면으로
-            if (preset == null && direct == null && templateId == null) {
+            // preset이나 templateId가 없으면 유형 선택 화면으로 이동
+            if (preset == null && templateId == null) {
                 model.addAttribute("pageTitle", "계약서 유형 선택");
                 model.addAttribute("presets", templatePresetService.getSummaries());
                 return "contracts/select-type";
@@ -118,6 +117,7 @@ public class ContractWebController {
 
             // 폼 화면으로 진행
             ContractForm form = new ContractForm();
+            form.setExpiresAt(LocalDateTime.now().plusHours(24));
 
             // 템플릿이 지정된 경우 템플릿 정보 로드 (프리셋 레이아웃으로 표시)
             if (templateId != null && !templateId.isEmpty()) {
@@ -211,6 +211,10 @@ public class ContractWebController {
     }
 
     private String handleFormError(String errorMessage, Model model, ContractForm form, String userId) {
+        if (form.getExpiresAt() == null) {
+            form.setExpiresAt(LocalDateTime.now().plusHours(24));
+        }
+
         model.addAttribute("errorMessage", errorMessage);
         model.addAttribute("pageTitle", "새 계약서 생성");
         model.addAttribute("contract", form);

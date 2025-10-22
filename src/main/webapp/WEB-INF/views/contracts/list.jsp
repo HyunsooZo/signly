@@ -123,9 +123,7 @@
                                                         </a>
                                                         <c:if test="${not empty contract.content and contract.content.length() > 100}">
                                                             <br>
-                                                            <small class="text-muted">
-                                                                ${contract.content.substring(0, 100)}...
-                                                            </small>
+                                                            <small class="text-muted">...</small>
                                                         </c:if>
                                                     </td>
                                                     <td>

@@ -266,6 +266,7 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1050;
     display: none;
+    padding: 1rem;
 }
 
 .signature-view .modal.show {
@@ -276,7 +277,8 @@
 
 .signature-view .modal-dialog {
     max-width: 500px;
-    width: 90%;
+    width: 100%;
+    margin: auto;
 }
 
 .signature-view .modal-content {
@@ -284,6 +286,8 @@
     border-radius: var(--border-radius-lg);
     box-shadow: var(--box-shadow-lg);
     overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .signature-view .modal-header {
@@ -455,24 +459,24 @@
 }
 
 /* 서명 미리보기 */
-.signature-preview {
-    border: 1px solid var(--gray-200);
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    background-color: white;
-    margin-bottom: 1rem;
-}
-
-.signature-preview-title {
-    font-size: var(--font-size-sm);
-    color: var(--gray-600);
-    margin-bottom: 0.5rem;
+.signature-preview-container {
+    border: 2px solid var(--gray-300);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    background-color: var(--gray-50);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
 }
 
 .signature-preview-image {
-    max-width: 200px;
-    max-height: 100px;
-    border: 1px solid var(--gray-200);
+    max-width: 100%;
+    max-height: 120px;
+    display: block;
+    background-color: white;
+    padding: 0.5rem;
     border-radius: var(--border-radius);
 }
 
@@ -564,6 +568,45 @@
     .signature-tools {
         flex-wrap: wrap;
         gap: 0.5rem;
+    }
+
+    /* 모바일 모달 대응 */
+    .signature-view .modal {
+        padding: 0.5rem;
+    }
+
+    .signature-view .modal-dialog {
+        width: calc(100% - 1rem);
+        max-width: 100%;
+    }
+
+    .signature-view .modal-header,
+    .signature-view .modal-body,
+    .signature-view .modal-footer {
+        padding: 1rem;
+    }
+
+    .signature-view .modal-content {
+        max-height: 95vh;
+    }
+
+    /* 모바일 서명 미리보기 */
+    .signature-preview-container {
+        padding: 1rem;
+        min-height: 100px;
+    }
+
+    .signature-preview-image {
+        max-width: 100%;
+        max-height: 100px;
+    }
+
+    .signature-page-title {
+        font-size: var(--font-size-xl);
+    }
+
+    .signature-page-subtitle {
+        font-size: var(--font-size-base);
     }
 }
 
