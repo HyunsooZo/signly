@@ -328,6 +328,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/alerts.js"></script>
     <script>
         // 로그인 시 사용자 정보를 로컬스토리지에 저장
         <c:if test="${not empty currentUserName}">
