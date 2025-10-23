@@ -20,8 +20,9 @@
             </div>
 
             <c:if test="${not empty errorMessage}">
-                <div class="alert alert-danger" role="alert">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
                     ${errorMessage}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </c:if>
 
@@ -123,6 +124,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/common.js"></script>
+    <script src="/js/alerts.js"></script>
     <script>
         function openTermsModal() {
             alert('이용약관 모달 준비 중입니다.');
