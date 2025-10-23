@@ -332,53 +332,53 @@
     }
 }
 
-/* 다크 모드 지원 */
+/* 다크 모드에서도 라이트 테마 유지 */
 @media (prefers-color-scheme: dark) {
     .card {
-        background-color: #2d3748;
-        color: #e2e8f0;
+        background-color: #ffffff;
+        color: #1f2937;
     }
 
     .card-header {
-        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-        border-bottom-color: #4a5568;
+        background: #ffffff;
+        border-bottom-color: #e5e7eb;
     }
 
     .card-title {
-        color: #e2e8f0;
+        color: #1f2937;
     }
 
     .quick-action-btn {
-        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-        border-color: #4a5568;
-        color: #e2e8f0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-color: #e9ecef;
+        color: inherit;
     }
 
     .quick-action-content h6 {
-        color: #e2e8f0;
+        color: #495057;
     }
 
     .quick-action-content small {
-        color: #a0aec0;
+        color: #6c757d;
     }
 
     .recent-item-icon {
-        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     }
 
     .recent-item-content h6 a {
-        color: #e2e8f0;
+        color: #495057;
     }
 
     .recent-item-content h6 a:hover {
-        color: #90cdf4;
+        color: #2563eb;
     }
 
     .recent-item:hover {
-        background-color: rgba(144, 205, 244, 0.1);
+        background-color: rgba(37, 99, 235, 0.05);
     }
 
     .text-muted {
-        color: #a0aec0 !important;
+        color: #6c757d !important;
     }
 }
