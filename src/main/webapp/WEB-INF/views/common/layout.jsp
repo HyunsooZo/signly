@@ -40,22 +40,25 @@
         <main class="main-content <c:if test='${not empty sessionScope.user}'>with-sidebar</c:if>">
             <!-- 알림 메시지 -->
             <c:if test="${not empty sessionScope.successMessage}">
-                <div class="alert alert-success">
+                <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
                     <c:out value="${sessionScope.successMessage}" />
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
                 <c:remove var="successMessage" scope="session" />
             </c:if>
 
             <c:if test="${not empty sessionScope.errorMessage}">
-                <div class="alert alert-danger">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
                     <c:out value="${sessionScope.errorMessage}" />
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
                 <c:remove var="errorMessage" scope="session" />
             </c:if>
 
             <c:if test="${not empty sessionScope.warningMessage}">
-                <div class="alert alert-warning">
+                <div class="alert alert-warning alert-dismissible fade show" role="alert" data-auto-dismiss="true">
                     <c:out value="${sessionScope.warningMessage}" />
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
                 <c:remove var="warningMessage" scope="session" />
             </c:if>
@@ -74,6 +77,7 @@
     <!-- JavaScript -->
     <script src="<c:url value='/js/common.js' />"></script>
     <script src="<c:url value='/js/auth.js' />"></script>
+    <script src="<c:url value='/js/alerts.js' />"></script>
     <c:if test="${not empty additionalJs}">
         <c:forEach items="${additionalJs}" var="js">
             <script src="<c:url value='/js/${js}' />"></script>
