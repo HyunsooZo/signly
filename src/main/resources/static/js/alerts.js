@@ -2,19 +2,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const autoDismissAlerts = document.querySelectorAll('[data-auto-dismiss="true"]');
 
     autoDismissAlerts.forEach(alert => {
-        const timeout = parseInt(alert.dataset.autoDismissTimeout, 10) || 4000;
+        const baseTimeout = parseInt(alert.dataset.autoDismissTimeout, 10) || 4000;
+        let dismissTimer = null;
 
-        const handleDismiss = () => {
-            const bootstrapAlert = bootstrap.Alert.getOrCreateInstance(alert);
-            bootstrapAlert.close();
+        const clearTimer = () => {
+            if (dismissTimer) {
+                clearTimeout(dismissTimer);
+                dismissTimer = null;
+            }
         };
 
-        const timerId = setTimeout(handleDismiss, timeout);
+        const removeAlert = () => {
+            if (alert.dataset.dismissed === 'true') {
+                return;
+            }
+            alert.dataset.dismissed = 'true';
+            alert.classList.remove('show');
+            alert.classList.add('fade');
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        };
 
-        alert.addEventListener('mouseenter', () => clearTimeout(timerId));
+        const startTimer = (timeout = baseTimeout) => {
+            clearTimer();
+            dismissTimer = setTimeout(removeAlert, timeout);
+        };
 
-        alert.addEventListener('mouseleave', () => {
-            setTimeout(handleDismiss, 1500);
-        });
+        const closeButton = alert.querySelector('[data-bs-dismiss="alert"]');
+        if (closeButton) {
+            closeButton.addEventListener('click', () => {
+                clearTimer();
+                removeAlert();
+            });
+        }
+
+        alert.addEventListener('mouseenter', clearTimer);
+        alert.addEventListener('mouseleave', () => startTimer(1500));
+
+        startTimer();
     });
 });
