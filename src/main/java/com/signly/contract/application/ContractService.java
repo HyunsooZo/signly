@@ -123,8 +123,8 @@ public class ContractService {
         );
 
         Contract savedContract = contractRepository.save(contract);
-        logger.info("계약서 생성 완료: contractId={}, signToken={}",
-            savedContract.getId().getValue(), savedContract.getSignToken().value());
+        logger.info("계약서 생성 완료: contractId={}, signToken={}, presetType={}",
+            savedContract.getId().getValue(), savedContract.getSignToken().value(), savedContract.getPresetType());
         return contractDtoMapper.toResponse(savedContract);
     }
 
