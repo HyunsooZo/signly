@@ -228,9 +228,9 @@
                             <i class="bi bi-file-earmark-text me-2"></i>계약서 내용
                         </h5>
                     </div>
-                    <div class="card-body p-0" style="background-color: white !important;">
+                    <div class="card-body p-0 contract-detail-card-body">
                         <!-- HTML 자동 감지를 위해 항상 동일한 컨테이너 사용 -->
-                        <div class="contract-content contract-content--html" id="contractContentHtmlContainer" style="background-color: white !important; color: black !important;"></div>
+                        <div class="contract-content contract-content--html contract-detail-content-white" id="contractContentHtmlContainer"></div>
                     </div>
                 </div>
 
@@ -458,19 +458,19 @@
     <!-- 미리보기 모달 -->
     <div class="modal fade contract-preview-modal" id="previewModal" tabindex="-1">
         <div class="modal-dialog modal-fullscreen-lg-down">
-            <div class="modal-content" style="background-color: white;">
+            <div class="modal-content contract-detail-modal-white">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="bi bi-eye me-2"></i>계약서 미리보기
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4" style="background-color: white;">
+                <div class="modal-body p-4 contract-detail-modal-body-white">
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle me-2"></i>
                         아래는 현재 계약서 내용의 미리보기입니다.
                     </div>
-                    <div class="border rounded p-4 contract-preview-modal-content" id="previewContent" style="background-color: white;">
+                    <div class="border rounded p-4 contract-preview-modal-content contract-detail-modal-body-white" id="previewContent">
                     </div>
                 </div>
                 <div class="modal-footer">

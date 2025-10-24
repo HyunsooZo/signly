@@ -74,6 +74,18 @@
             <c:if test="${not empty selectedTemplate}">
                 <script type="application/json" id="selectedTemplateData">${selectedTemplateContent}</script>
             </c:if>
+            <c:if test="${not empty contractId}">
+                <script type="application/json" id="existingContractData">
+                {
+                    "content": <c:out value='"${fn:escapeXml(contract.content)}"' escapeXml="false"/>,
+                    "secondPartyEmail": "${contract.secondPartyEmail}",
+                    "secondPartyName": "${contract.secondPartyName}",
+                    "firstPartyName": "${contract.firstPartyName}",
+                    "firstPartyEmail": "${contract.firstPartyEmail}",
+                    "firstPartyAddress": "${contract.firstPartyAddress}"
+                }
+                </script>
+            </c:if>
 
             <!-- 프리셋 레이아웃 -->
             <div id="presetLayout">
@@ -1019,6 +1031,66 @@
             document.getElementById('presetFirstPartyAddress').value = ownerInfo.companyName || '';
         }
 
+        // 수정 모드일 때 기존 계약서 데이터를 폼에 적용
+        function applyExistingContractData() {
+            const dataElement = document.getElementById('existingContractData');
+            if (!dataElement) {
+                console.log('[DEBUG] No existing contract data - this is create mode');
+                return;
+            }
+
+            try {
+                const existingData = JSON.parse(dataElement.textContent);
+                console.log('[DEBUG] Applying existing contract data:', existingData);
+
+                // 근로자 이메일 필드 채우기
+                if (existingData.secondPartyEmail) {
+                    const emailField = document.getElementById('presetSecondPartyEmail');
+                    if (emailField) {
+                        emailField.value = existingData.secondPartyEmail;
+                    }
+                }
+
+                // Hidden 필드에 당사자 정보 채우기
+                if (existingData.firstPartyName) {
+                    document.getElementById('presetFirstPartyName').value = existingData.firstPartyName;
+                }
+                if (existingData.firstPartyEmail) {
+                    document.getElementById('presetFirstPartyEmail').value = existingData.firstPartyEmail;
+                }
+                if (existingData.firstPartyAddress) {
+                    document.getElementById('presetFirstPartyAddress').value = existingData.firstPartyAddress;
+                }
+                if (existingData.secondPartyName) {
+                    document.getElementById('presetSecondPartyName').value = existingData.secondPartyName;
+                }
+
+                // 기존 HTML 콘텐츠를 파싱하여 저장된 container로부터 직접 렌더링
+                if (existingData.content) {
+                    // 저장된 HTML을 프리셋 컨테이너에 직접 렌더링
+                    const container = document.getElementById('presetHtmlContainer');
+                    if (container) {
+                        // 기존 content에서 body 내용만 추출
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = existingData.content;
+                        const bodyTag = tempDiv.querySelector('body');
+                        const contentHtml = bodyTag ? bodyTag.innerHTML : existingData.content;
+
+                        // preset-document 클래스와 함께 HTML 설정
+                        container.className = 'preset-document';
+                        container.innerHTML = contentHtml;
+
+                        // 이제 렌더링된 HTML의 텍스트 값들을 입력 필드로 다시 변환
+                        replaceVariablesWithInputs(container);
+
+                        console.log('[DEBUG] Applied existing HTML content to preset container');
+                    }
+                }
+            } catch (error) {
+                console.error('[ERROR] Failed to apply existing contract data:', error);
+            }
+        }
+
         // 프리셋 내용 업데이트 (폼 제출용)
         function updatePresetContent() {
             const container = document.getElementById('presetHtmlContainer');
@@ -1100,6 +1172,9 @@
 
                 // HTML 렌더링
                 renderPresetHtml(rendered, preset.name);
+
+                // 수정 모드인 경우 기존 데이터로 필드 채우기
+                applyExistingContractData();
 
             } catch (error) {
                 console.error('프리셋 로딩 실패:', error);

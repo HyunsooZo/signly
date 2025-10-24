@@ -185,7 +185,7 @@
         <!-- PDF 뷰어 - iframe 사용 (모든 브라우저에서 가장 안정적) -->
         <iframe id="pdfFrame"
                 src="/contracts/${contract.id}/pdf/inline"
-                style="display: none; width: 100%; height: 100%; border: none;">
+                class="pdf-viewer-iframe">
         </iframe>
     </div>
 
