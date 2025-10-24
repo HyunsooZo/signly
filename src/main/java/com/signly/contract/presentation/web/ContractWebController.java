@@ -302,6 +302,17 @@ public class ContractWebController {
                 logger.warn("[DEBUG] Edit form - No preset type found or preset is NONE");
             }
 
+            // 템플릿 정보 조회 (수정 모드에서 읽기 전용으로 표시)
+            if (contract.getTemplateId() != null && !contract.getTemplateId().isEmpty()) {
+                try {
+                    var template = templateService.getTemplate(resolvedUserId, contract.getTemplateId());
+                    model.addAttribute("currentTemplate", template);
+                    logger.info("[DEBUG] Edit form - template loaded: {}", template.getTitle());
+                } catch (Exception e) {
+                    logger.warn("[DEBUG] Edit form - Failed to load template: {}", e.getMessage());
+                }
+            }
+
             model.addAttribute("pageTitle", "계약서 수정");
             model.addAttribute("contract", form);
             model.addAttribute("contractId", contractId);

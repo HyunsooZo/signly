@@ -235,6 +235,21 @@
                                         </select>
                                     </c:when>
                                     <c:otherwise>
+                                        <!-- 수정 모드: 현재 템플릿 정보 표시 (읽기 전용) -->
+                                        <c:if test="${not empty currentTemplate}">
+                                            <div class="alert alert-info mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-file-earmark-text fs-4 me-3"></i>
+                                                    <div>
+                                                        <strong>사용 중인 템플릿:</strong> ${currentTemplate.title}
+                                                        <c:if test="${not empty currentTemplate.description}">
+                                                            <br><small class="text-muted">${currentTemplate.description}</small>
+                                                        </c:if>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </c:if>
+
                                         <div class="mb-3">
                                             <label for="title" class="form-label">계약서 제목 <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control form-control-lg" id="title" name="title"
@@ -1708,8 +1723,19 @@
         // 스크롤 이벤트 리스너 등록
                 
         document.addEventListener('DOMContentLoaded', initializeExpirationInputs);
+
+        // 초기 레이아웃 설정: selectedPreset이나 selectedTemplate이 있으면 해당 레이아웃 표시
         document.addEventListener('DOMContentLoaded', function() {
-            switchToNormalMode();
+            <c:choose>
+                <c:when test="${not empty selectedPreset}">
+                    console.log('[INIT] Preset mode detected, will load preset');
+                    // loadPresetById가 switchToPresetMode()를 호출함
+                </c:when>
+                <c:otherwise>
+                    console.log('[INIT] Normal mode detected, switching to normal layout');
+                    switchToNormalMode();
+                </c:otherwise>
+            </c:choose>
         });
 
         <c:if test="${empty contractId}">
@@ -1731,6 +1757,40 @@
                 if (button) {
                     handleTemplateSelection(button);
                 }
+            }
+        });
+        </c:if>
+
+        // 수정 모드: 기존 content에서 변수를 추출하여 입력 필드로 변환
+        <c:if test="${not empty contractId and empty selectedPreset}">
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[EDIT MODE] Loading existing contract content for editing');
+            const contentTextarea = document.getElementById('content');
+            if (contentTextarea && contentTextarea.value) {
+                // content의 변수들을 추출하여 customVariables에 추가
+                const content = contentTextarea.value;
+                const variableMatches = content.matchAll(/\{([^}]+)\}/g);
+                const detectedVars = new Set();
+
+                for (const match of variableMatches) {
+                    const varName = match[1].trim();
+                    if (varName && !detectedVars.has(varName)) {
+                        detectedVars.add(varName);
+                        if (!customVariables.includes(varName)) {
+                            customVariables.push(varName);
+                        }
+                    }
+                }
+
+                console.log('[EDIT MODE] Detected variables:', customVariables);
+
+                // 변수 입력 필드 렌더링
+                if (customVariables.length > 0) {
+                    renderCustomVariableInputs();
+                }
+
+                // 미리보기 업데이트
+                updateDirectPreview();
             }
         });
         </c:if>
