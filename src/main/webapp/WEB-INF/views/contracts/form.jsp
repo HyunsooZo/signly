@@ -74,17 +74,8 @@
             <c:if test="${not empty selectedTemplate}">
                 <script type="application/json" id="selectedTemplateData">${selectedTemplateContent}</script>
             </c:if>
-            <c:if test="${not empty contractId}">
-                <script type="application/json" id="existingContractData">
-                {
-                    "content": <c:out value='"${fn:escapeXml(contract.content)}"' escapeXml="false"/>,
-                    "secondPartyEmail": "${contract.secondPartyEmail}",
-                    "secondPartyName": "${contract.secondPartyName}",
-                    "firstPartyName": "${contract.firstPartyName}",
-                    "firstPartyEmail": "${contract.firstPartyEmail}",
-                    "firstPartyAddress": "${contract.firstPartyAddress}"
-                }
-                </script>
+            <c:if test="${not empty existingContractJson}">
+                <script type="application/json" id="existingContractData">${existingContractJson}</script>
             </c:if>
 
             <!-- 프리셋 레이아웃 -->
@@ -410,6 +401,25 @@
     <script>
         const contractContentTextarea = document.getElementById('content');
         const currentUserId = document.body?.dataset?.currentUserId || '';
+        const existingContractDataElement = document.getElementById('existingContractData');
+        let existingContractData = null;
+        if (existingContractDataElement) {
+            try {
+                existingContractData = JSON.parse(existingContractDataElement.textContent);
+            } catch (error) {
+                console.error('[ERROR] 기존 계약 데이터 파싱 실패:', error);
+            }
+        }
+        const selectedTemplateDataElement = document.getElementById('selectedTemplateData');
+        let selectedTemplateData = null;
+        if (selectedTemplateDataElement) {
+            try {
+                selectedTemplateData = JSON.parse(selectedTemplateDataElement.textContent);
+            } catch (error) {
+                console.error('[ERROR] 선택된 템플릿 데이터 파싱 실패:', error);
+            }
+        }
+        const hasSelectedPreset = ${not empty selectedPreset ? 'true' : 'false'};
 
         function readOwnerInfo() {
             try {
@@ -705,10 +715,37 @@
 
             // 변수를 입력 필드로 교체
             replaceVariablesWithInputs(container);
+            restoreSavedVariableInputs(container);
 
             // 제목 설정
             document.getElementById('presetLayoutTitle').textContent = presetName || '표준 근로계약서';
             document.getElementById('presetTitleHidden').value = presetName || '표준 근로계약서';
+        }
+
+        let legacyVariableCounter = 0;
+
+        function restoreSavedVariableInputs(container) {
+            const savedSpans = container.querySelectorAll('.contract-variable-underline');
+            savedSpans.forEach(span => {
+                if (span.querySelector('input')) {
+                    return;
+                }
+                let varName = span.getAttribute('data-variable-name');
+                if (!varName) {
+                    varName = 'LEGACY_FIELD_' + (legacyVariableCounter++);
+                    span.setAttribute('data-variable-name', varName);
+                }
+                const value = span.textContent || '';
+                const wrapper = createVariableInput(varName);
+                const input = wrapper.querySelector('input[data-variable-name]');
+                if (input) {
+                    input.value = value;
+                }
+                if (varName) {
+                    customVariableValues[varName] = value;
+                }
+                span.replaceWith(wrapper);
+            });
         }
 
         // 변수를 입력 필드로 교체하는 함수
@@ -831,10 +868,11 @@
 
             const wrapper = document.createElement('span');
             wrapper.className = 'contract-variable-underline';
+            wrapper.setAttribute('data-variable-name', varName);
 
             const input = document.createElement('input');
             input.type = 'text';
-            input.className = 'form-control-plaintext d-inline contract-input-inline';
+            input.className = 'form-control contract-input-inline';
             input.size = inputSize;
             if (maxLength) {
                 input.maxLength = maxLength;
@@ -1041,64 +1079,116 @@
             document.getElementById('presetFirstPartyAddress').value = ownerInfo.companyName || '';
         }
 
-        // 수정 모드일 때 기존 계약서 데이터를 폼에 적용
-        function applyExistingContractData() {
-            const dataElement = document.getElementById('existingContractData');
-            if (!dataElement) {
-                console.log('[DEBUG] No existing contract data - this is create mode');
+        // 저장된 계약 내용에서 변수 값을 추출
+        function extractSavedVariableValues(savedHtml) {
+            if (!savedHtml) {
+                return [];
+            }
+            const decoded = decodeHtmlEntities(savedHtml);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = decoded;
+            const nodes = tempDiv.querySelectorAll('.contract-variable-underline');
+            return Array.from(nodes).map(node => ({
+                name: (node.getAttribute('data-variable-name') || '').trim(),
+                value: (node.textContent || '').trim()
+            }));
+        }
+
+        function fillPresetInputsFromSavedValues(savedValues, attempt = 0) {
+            const container = document.getElementById('presetHtmlContainer');
+            if (!container || attempt > 10) {
+                return;
+            }
+            const inputs = container.querySelectorAll('input[data-variable-name]');
+            if (!inputs.length) {
+                setTimeout(() => fillPresetInputsFromSavedValues(savedValues, attempt + 1), 60);
                 return;
             }
 
-            try {
-                const existingData = JSON.parse(dataElement.textContent);
-                console.log('[DEBUG] Applying existing contract data:', existingData);
+            const valueMap = new Map();
+            savedValues.forEach(entry => {
+                if (entry.name) {
+                    valueMap.set(entry.name.toUpperCase(), entry.value);
+                }
+            });
 
-                // 근로자 이메일 필드 채우기
-                if (existingData.secondPartyEmail) {
-                    const emailField = document.getElementById('presetSecondPartyEmail');
-                    if (emailField) {
-                        emailField.value = existingData.secondPartyEmail;
+            inputs.forEach((input, index) => {
+                const key = (input.getAttribute('data-variable-name') || '').trim();
+                let value = key ? valueMap.get(key.toUpperCase()) : undefined;
+                if (value === undefined && savedValues[index]) {
+                    value = savedValues[index].value;
+                }
+                if (value !== undefined) {
+                    input.value = value;
+                    if (key) {
+                        customVariableValues[key] = value;
                     }
                 }
+            });
 
-                // Hidden 필드에 당사자 정보 채우기
-                if (existingData.firstPartyName) {
-                    document.getElementById('presetFirstPartyName').value = existingData.firstPartyName;
-                }
-                if (existingData.firstPartyEmail) {
-                    document.getElementById('presetFirstPartyEmail').value = existingData.firstPartyEmail;
-                }
-                if (existingData.firstPartyAddress) {
-                    document.getElementById('presetFirstPartyAddress').value = existingData.firstPartyAddress;
-                }
-                if (existingData.secondPartyName) {
-                    document.getElementById('presetSecondPartyName').value = existingData.secondPartyName;
-                }
+            updatePresetContent();
+            updateDirectPreview();
+        }
 
-                // 기존 HTML 콘텐츠를 파싱하여 저장된 container로부터 직접 렌더링
-                if (existingData.content) {
-                    // 저장된 HTML을 프리셋 컨테이너에 직접 렌더링
-                    const container = document.getElementById('presetHtmlContainer');
-                    if (container) {
-                        // 기존 content에서 body 내용만 추출
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = existingData.content;
-                        const bodyTag = tempDiv.querySelector('body');
-                        const contentHtml = bodyTag ? bodyTag.innerHTML : existingData.content;
-
-                        // preset-document 클래스와 함께 HTML 설정
-                        container.className = 'preset-document';
-                        container.innerHTML = contentHtml;
-
-                        // 이제 렌더링된 HTML의 텍스트 값들을 입력 필드로 다시 변환
-                        replaceVariablesWithInputs(container);
-
-                        console.log('[DEBUG] Applied existing HTML content to preset container');
-                    }
-                }
-            } catch (error) {
-                console.error('[ERROR] Failed to apply existing contract data:', error);
+        // 수정 모드일 때 기존 계약서 데이터를 폼에 적용
+        function applyExistingContractData() {
+            if (!existingContractData) {
+                return;
             }
+
+            if (existingContractData.secondPartyEmail) {
+                const emailField = document.getElementById('presetSecondPartyEmail') || document.getElementById('secondPartyEmail');
+                if (emailField) {
+                    emailField.value = existingContractData.secondPartyEmail;
+                }
+            }
+
+            if (existingContractData.firstPartyName) {
+                const target = document.getElementById('presetFirstPartyName') || document.getElementById('firstPartyName');
+                if (target) {
+                    target.value = existingContractData.firstPartyName;
+                }
+            }
+            if (existingContractData.firstPartyEmail) {
+                const target = document.getElementById('presetFirstPartyEmail') || document.getElementById('firstPartyEmail');
+                if (target) {
+                    target.value = existingContractData.firstPartyEmail;
+                }
+            }
+            if (existingContractData.firstPartyAddress) {
+                const target = document.getElementById('presetFirstPartyAddress') || document.getElementById('firstPartyAddress');
+                if (target) {
+                    target.value = existingContractData.firstPartyAddress;
+                }
+            }
+            if (existingContractData.secondPartyName) {
+                const target = document.getElementById('presetSecondPartyName') || document.getElementById('secondPartyName');
+                if (target) {
+                    target.value = existingContractData.secondPartyName;
+                }
+            }
+
+            if (existingContractData.content) {
+                const savedValues = extractSavedVariableValues(existingContractData.content);
+                if (savedValues.length) {
+                    fillPresetInputsFromSavedValues(savedValues);
+                } else if (contractContentTextarea && !contractContentTextarea.value) {
+                    contractContentTextarea.value = decodeHtmlEntities(existingContractData.content);
+                    detectCustomVariables();
+                    updateDirectPreview();
+                }
+            }
+        }
+
+        function loadExistingContractAsPreset() {
+            if (!existingContractData || !existingContractData.content) {
+                return;
+            }
+            const decoded = decodeHtmlEntities(existingContractData.content);
+            switchToPresetMode();
+            const title = existingContractData.title || document.getElementById('presetTitleHidden')?.value || '계약서';
+            renderPresetHtml(decoded, title);
+            applyExistingContractData();
         }
 
         // 프리셋 내용 업데이트 (폼 제출용)
@@ -1113,8 +1203,13 @@
             inputs.forEach(input => {
                 const varName = input.getAttribute('data-variable-name');
                 const value = input.value || '';
-                const textNode = document.createTextNode(value);
-                input.parentNode.replaceChild(textNode, input);
+                const wrapper = input.parentNode;
+                if (wrapper) {
+                    wrapper.setAttribute('data-variable-name', varName || '');
+                    wrapper.textContent = value;
+                } else {
+                    input.replaceWith(document.createTextNode(value));
+                }
 
                 // secondPartyName hidden 필드 업데이트
                 if (varName.toUpperCase() === 'EMPLOYEE' || varName.toUpperCase() === 'EMPLOYEE_NAME') {
@@ -1208,6 +1303,8 @@
 
             // HTML 렌더링
             renderPresetHtml(rendered, templateTitle);
+
+            applyExistingContractData();
         }
 
         function highlightTemplateCard(selectedCard) {
@@ -1721,16 +1818,18 @@
 
         // 초기 레이아웃 설정: selectedPreset이나 selectedTemplate이 있으면 해당 레이아웃 표시
         document.addEventListener('DOMContentLoaded', function() {
-            <c:choose>
-                <c:when test="${not empty selectedPreset}">
-                    console.log('[INIT] Preset mode detected, will load preset');
-                    // loadPresetById가 switchToPresetMode()를 호출함
-                </c:when>
-                <c:otherwise>
-                    console.log('[INIT] Normal mode detected, switching to normal layout');
-                    switchToNormalMode();
-                </c:otherwise>
-            </c:choose>
+            if (selectedTemplateData) {
+                console.log('[INIT] Template edit detected, switching to preset layout');
+                switchToPresetMode();
+            } else if (existingContractData && existingContractData.content) {
+                console.log('[INIT] Existing contract content detected, switching to preset layout');
+                switchToPresetMode();
+            } else if (hasSelectedPreset) {
+                console.log('[INIT] Preset mode detected, will load preset');
+            } else {
+                console.log('[INIT] Normal mode detected, switching to normal layout');
+                switchToNormalMode();
+            }
         });
 
         <c:if test="${empty contractId}">
@@ -1756,49 +1855,22 @@
         });
         </c:if>
 
-        // 수정 모드에서 템플릿 로드 후 저장된 content의 값들을 입력 필드에 채우기
-        <c:if test="${not empty contractId and not empty selectedTemplate}">
+        // 템플릿 선택 후 자동 로드 (수정 모드 포함)
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('[EDIT MODE] Loading template and filling with existing values');
-
-            // 저장된 content HTML
-            const savedContent = `${contract.content}`;
-
-            // 템플릿 로드 대기
-            setTimeout(() => {
-                // 렌더링된 입력 필드들 찾기
-                const inputFields = document.querySelectorAll('[data-variable-field]');
-
-                if (inputFields.length > 0) {
-                    console.log('[EDIT MODE] Found', inputFields.length, 'input fields');
-
-                    // 저장된 HTML을 파싱하여 값 추출
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = savedContent;
-
-                    // 각 입력 필드에 대해 저장된 값 찾아서 채우기
-                    inputFields.forEach(input => {
-                        const varName = input.getAttribute('data-variable-field');
-
-                        // 저장된 HTML에서 같은 변수명을 가진 입력 필드 찾기
-                        const savedInput = tempDiv.querySelector(`[data-variable-field="${varName}"]`);
-
-                        if (savedInput && savedInput.value) {
-                            input.value = savedInput.value;
-                            console.log('[EDIT MODE] Filled field:', varName, '=', savedInput.value);
-                        } else {
-                            // data-variable-field가 없는 경우, 텍스트 노드에서 값 추출 시도
-                            // 이는 이미 렌더링된 HTML에서 실제 값이 들어간 경우
-                            console.log('[EDIT MODE] No saved input for:', varName);
-                        }
-                    });
-
-                    // 미리보기 업데이트
-                    updateDirectPreview();
+            if (selectedTemplateData && selectedTemplateData.renderedHtml) {
+                if (selectedTemplateData.templateId) {
+                    const templateIdInput = document.getElementById('templateId');
+                    if (templateIdInput) {
+                        templateIdInput.value = selectedTemplateData.templateId;
+                    }
                 }
-            }, 500); // 템플릿 렌더링 대기
+                loadTemplateAsPreset(selectedTemplateData.title || '', selectedTemplateData.renderedHtml || '');
+            } else if (existingContractData && existingContractData.content) {
+                loadExistingContractAsPreset();
+            } else if (!hasSelectedPreset) {
+                applyExistingContractData();
+            }
         });
-        </c:if>
 
                 // 페이지 로드 시 selectedPreset 또는 selectedTemplate이 있으면 자동으로 로드
         <c:if test="${not empty selectedPreset}">

@@ -1,5 +1,6 @@
 package com.signly.contract.presentation.web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signly.common.exception.BusinessException;
 import com.signly.common.exception.ValidationException;
 import com.signly.common.security.CurrentUserProvider;
@@ -40,6 +41,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/contracts")
@@ -51,6 +54,7 @@ public class ContractWebController {
     private final TemplateService templateService;
     private final TemplatePresetService templatePresetService;
     private final CurrentUserProvider currentUserProvider;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ContractWebController(ContractService contractService,
                                 ContractPdfService contractPdfService,
@@ -127,8 +131,15 @@ public class ContractWebController {
                 form.setContent(template.getContent());
                 // 템플릿을 프리셋처럼 사용
                 model.addAttribute("selectedTemplate", templateId);
-                model.addAttribute("selectedTemplateTitle", template.getTitle());
-                model.addAttribute("selectedTemplateContent", template.getRenderedHtml());
+                try {
+                    Map<String, Object> templatePayload = new LinkedHashMap<>();
+                    templatePayload.put("templateId", template.getTemplateId());
+                    templatePayload.put("title", template.getTitle());
+                    templatePayload.put("renderedHtml", template.getRenderedHtml());
+                    model.addAttribute("selectedTemplateContent", objectMapper.writeValueAsString(templatePayload));
+                } catch (Exception e) {
+                    logger.warn("[DEBUG] New form - Failed to build template JSON: {}", e.getMessage());
+                }
             }
 
             // 활성 템플릿 목록 로드
@@ -291,6 +302,20 @@ public class ContractWebController {
             form.setSecondPartyAddress(contract.getSecondParty().getOrganizationName());
             form.setExpiresAt(contract.getExpiresAtLocalDateTime());
 
+            try {
+                Map<String, Object> existingContractPayload = new LinkedHashMap<>();
+                existingContractPayload.put("title", contract.getTitle());
+                existingContractPayload.put("content", contract.getContent());
+                existingContractPayload.put("secondPartyEmail", contract.getSecondParty().getEmail());
+                existingContractPayload.put("secondPartyName", contract.getSecondParty().getName());
+                existingContractPayload.put("firstPartyName", contract.getFirstParty().getName());
+                existingContractPayload.put("firstPartyEmail", contract.getFirstParty().getEmail());
+                existingContractPayload.put("firstPartyAddress", contract.getFirstParty().getOrganizationName());
+                model.addAttribute("existingContractJson", objectMapper.writeValueAsString(existingContractPayload));
+            } catch (Exception e) {
+                logger.warn("[DEBUG] Edit form - Failed to build existing contract JSON: {}", e.getMessage());
+            }
+
             // 프리셋 타입 확인 및 설정
             logger.info("[DEBUG] Edit form - contractId: {}, presetType: {}", contractId, contract.getPresetType());
             if (contract.getPresetType() != null && contract.getPresetType() != PresetType.NONE) {
@@ -311,13 +336,11 @@ public class ContractWebController {
                     model.addAttribute("selectedTemplate", template);
 
                     // 템플릿 내용을 JSON으로 전달
-                    String templateJson = String.format(
-                        "{\"templateId\":\"%s\",\"title\":\"%s\",\"renderedHtml\":%s}",
-                        template.getTemplateId(),
-                        template.getTitle().replace("\"", "\\\""),
-                        new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(template.getRenderedHtml())
-                    );
-                    model.addAttribute("selectedTemplateContent", templateJson);
+                    Map<String, Object> templatePayload = new LinkedHashMap<>();
+                    templatePayload.put("templateId", template.getTemplateId());
+                    templatePayload.put("title", template.getTitle());
+                    templatePayload.put("renderedHtml", template.getRenderedHtml());
+                    model.addAttribute("selectedTemplateContent", objectMapper.writeValueAsString(templatePayload));
 
                     logger.info("[DEBUG] Edit form - template loaded as selectedTemplate: {}", template.getTitle());
                 } catch (Exception e) {
