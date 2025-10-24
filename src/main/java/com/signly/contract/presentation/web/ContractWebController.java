@@ -292,10 +292,14 @@ public class ContractWebController {
             form.setExpiresAt(contract.getExpiresAtLocalDateTime());
 
             // 프리셋 타입 확인 및 설정
+            logger.info("[DEBUG] Edit form - contractId: {}, presetType: {}", contractId, contract.getPresetType());
             if (contract.getPresetType() != null && contract.getPresetType() != PresetType.NONE) {
                 String presetValue = contract.getPresetType().toDisplayString();
                 form.setSelectedPreset(presetValue);
                 model.addAttribute("selectedPreset", presetValue);
+                logger.info("[DEBUG] Edit form - selectedPreset set to: {}", presetValue);
+            } else {
+                logger.warn("[DEBUG] Edit form - No preset type found or preset is NONE");
             }
 
             model.addAttribute("pageTitle", "계약서 수정");
