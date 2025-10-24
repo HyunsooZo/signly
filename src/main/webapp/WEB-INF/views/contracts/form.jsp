@@ -1737,9 +1737,17 @@
 
                 // 페이지 로드 시 selectedPreset 또는 selectedTemplate이 있으면 자동으로 로드
         <c:if test="${not empty selectedPreset}">
+        console.log('[DEBUG] selectedPreset found:', '${selectedPreset}');
+        console.log('[DEBUG] contractId found:', '${contractId}');
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('[DEBUG] DOMContentLoaded - Loading preset:', '${selectedPreset}');
             loadPresetById('${selectedPreset}');
         });
+        </c:if>
+        <c:if test="${empty selectedPreset}">
+        console.log('[DEBUG] No selectedPreset found');
+        console.log('[DEBUG] contractId:', '${contractId}');
+        console.log('[DEBUG] contract.presetType:', '${contract.selectedPreset}');
         </c:if>
 
 // 폼 제출 직전 상태 확인
