@@ -302,12 +302,24 @@ public class ContractWebController {
                 logger.warn("[DEBUG] Edit form - No preset type found or preset is NONE");
             }
 
-            // 템플릿 정보 조회 (수정 모드에서 읽기 전용으로 표시)
+            // 템플릿 정보 조회 (수정 모드에서도 템플릿 HTML을 로드하여 작성 화면과 동일하게 표시)
             if (contract.getTemplateId() != null && !contract.getTemplateId().isEmpty()) {
                 try {
                     var template = templateService.getTemplate(resolvedUserId, contract.getTemplateId());
-                    model.addAttribute("currentTemplate", template);
-                    logger.info("[DEBUG] Edit form - template loaded: {}", template.getTitle());
+
+                    // 템플릿을 selectedTemplate으로 설정하여 작성 화면과 동일하게 로드
+                    model.addAttribute("selectedTemplate", template);
+
+                    // 템플릿 내용을 JSON으로 전달
+                    String templateJson = String.format(
+                        "{\"templateId\":\"%s\",\"title\":\"%s\",\"renderedHtml\":%s}",
+                        template.getTemplateId(),
+                        template.getTitle().replace("\"", "\\\""),
+                        new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(template.getRenderedHtml())
+                    );
+                    model.addAttribute("selectedTemplateContent", templateJson);
+
+                    logger.info("[DEBUG] Edit form - template loaded as selectedTemplate: {}", template.getTitle());
                 } catch (Exception e) {
                     logger.warn("[DEBUG] Edit form - Failed to load template: {}", e.getMessage());
                 }

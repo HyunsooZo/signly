@@ -235,33 +235,26 @@
                                         </select>
                                     </c:when>
                                     <c:otherwise>
-                                        <!-- 수정 모드: 현재 템플릿 정보 표시 (읽기 전용) -->
-                                        <c:if test="${not empty currentTemplate}">
-                                            <div class="alert alert-info mb-3">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="bi bi-file-earmark-text fs-4 me-3"></i>
-                                                    <div>
-                                                        <strong>사용 중인 템플릿:</strong> ${currentTemplate.title}
-                                                        <c:if test="${not empty currentTemplate.description}">
-                                                            <br><small class="text-muted">${currentTemplate.description}</small>
-                                                        </c:if>
-                                                    </div>
+                                        <!-- 수정 모드: 템플릿 기반 계약서는 작성 화면과 동일하게 템플릿 렌더링 -->
+                                        <c:choose>
+                                            <c:when test="${not empty selectedTemplate}">
+                                                <!-- 템플릿이 있는 경우: JavaScript에서 selectedTemplateData를 읽어 템플릿 렌더링 -->
+                                                <p class="text-muted">선택된 템플릿의 내용을 확인하고 변수 값을 수정할 수 있습니다.</p>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <!-- 템플릿 없이 직접 작성한 계약서인 경우 -->
+                                                <div class="mb-3">
+                                                    <label for="title" class="form-label">계약서 제목 <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control form-control-lg" id="title" name="title"
+                                                           value="${contract.title}" required maxlength="200"
+                                                           placeholder="계약서 제목을 입력하세요">
                                                 </div>
-                                            </div>
-                                        </c:if>
 
-                                        <div class="mb-3">
-                                            <label for="title" class="form-label">계약서 제목 <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control form-control-lg" id="title" name="title"
-                                                   value="${contract.title}" required maxlength="200"
-                                                   placeholder="계약서 제목을 입력하세요">
-                                        </div>
-
-                                        <div class="mb-3" id="contentSection">
-                                            <label for="content" class="form-label">계약서 내용 <span class="text-danger">*</span></label>
-                                            <textarea class="form-control content-editor" id="content" name="content"
-                                                      rows="15" required placeholder="계약서 내용을 입력하세요...">${contract.content}</textarea>
-                                            <div class="form-text">계약서의 전체 내용을 입력하세요. 변수를 사용하여 동적 값을 설정할 수 있습니다.</div>
+                                                <div class="mb-3" id="contentSection">
+                                                    <label for="content" class="form-label">계약서 내용 <span class="text-danger">*</span></label>
+                                                    <textarea class="form-control content-editor" id="content" name="content"
+                                                              rows="15" required placeholder="계약서 내용을 입력하세요...">${contract.content}</textarea>
+                                                    <div class="form-text">계약서의 전체 내용을 입력하세요. 변수를 사용하여 동적 값을 설정할 수 있습니다.</div>
 
                                             <div class="mt-3" id="customVariablesContainer">
                                                 <label class="form-label d-flex align-items-center gap-2">
@@ -282,9 +275,11 @@
                                                 </div>
                                             </div>
 
-                                            <!-- 프리셋 폼 필드 컨테이너 (동적으로 생성됨) -->
-                                            <div id="presetFormFields"></div>
-                                        </div>
+                                                    <!-- 프리셋 폼 필드 컨테이너 (동적으로 생성됨) -->
+                                                    <div id="presetFormFields"></div>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </c:otherwise>
                                 </c:choose>
                             </div>
@@ -1761,37 +1756,47 @@
         });
         </c:if>
 
-        // 수정 모드: 기존 content에서 변수를 추출하여 입력 필드로 변환
-        <c:if test="${not empty contractId and empty selectedPreset}">
+        // 수정 모드에서 템플릿 로드 후 저장된 content의 값들을 입력 필드에 채우기
+        <c:if test="${not empty contractId and not empty selectedTemplate}">
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('[EDIT MODE] Loading existing contract content for editing');
-            const contentTextarea = document.getElementById('content');
-            if (contentTextarea && contentTextarea.value) {
-                // content의 변수들을 추출하여 customVariables에 추가
-                const content = contentTextarea.value;
-                const variableMatches = content.matchAll(/\{([^}]+)\}/g);
-                const detectedVars = new Set();
+            console.log('[EDIT MODE] Loading template and filling with existing values');
 
-                for (const match of variableMatches) {
-                    const varName = match[1].trim();
-                    if (varName && !detectedVars.has(varName)) {
-                        detectedVars.add(varName);
-                        if (!customVariables.includes(varName)) {
-                            customVariables.push(varName);
+            // 저장된 content HTML
+            const savedContent = `${contract.content}`;
+
+            // 템플릿 로드 대기
+            setTimeout(() => {
+                // 렌더링된 입력 필드들 찾기
+                const inputFields = document.querySelectorAll('[data-variable-field]');
+
+                if (inputFields.length > 0) {
+                    console.log('[EDIT MODE] Found', inputFields.length, 'input fields');
+
+                    // 저장된 HTML을 파싱하여 값 추출
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = savedContent;
+
+                    // 각 입력 필드에 대해 저장된 값 찾아서 채우기
+                    inputFields.forEach(input => {
+                        const varName = input.getAttribute('data-variable-field');
+
+                        // 저장된 HTML에서 같은 변수명을 가진 입력 필드 찾기
+                        const savedInput = tempDiv.querySelector(`[data-variable-field="${varName}"]`);
+
+                        if (savedInput && savedInput.value) {
+                            input.value = savedInput.value;
+                            console.log('[EDIT MODE] Filled field:', varName, '=', savedInput.value);
+                        } else {
+                            // data-variable-field가 없는 경우, 텍스트 노드에서 값 추출 시도
+                            // 이는 이미 렌더링된 HTML에서 실제 값이 들어간 경우
+                            console.log('[EDIT MODE] No saved input for:', varName);
                         }
-                    }
+                    });
+
+                    // 미리보기 업데이트
+                    updateDirectPreview();
                 }
-
-                console.log('[EDIT MODE] Detected variables:', customVariables);
-
-                // 변수 입력 필드 렌더링
-                if (customVariables.length > 0) {
-                    renderCustomVariableInputs();
-                }
-
-                // 미리보기 업데이트
-                updateDirectPreview();
-            }
+            }, 500); // 템플릿 렌더링 대기
         });
         </c:if>
 
