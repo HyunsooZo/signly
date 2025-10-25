@@ -2,10 +2,12 @@ package com.signly.user.domain.model;
 
 import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
+import lombok.Getter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 
+@Getter
 public class User extends AggregateRoot {
 
     private UserId userId;
@@ -20,9 +22,17 @@ public class User extends AggregateRoot {
         super();
     }
 
-    private User(UserId userId, Email email, String encodedPassword, String name,
-                Company company, UserType userType, UserStatus status,
-                LocalDateTime createdAt, LocalDateTime updatedAt) {
+    private User(
+            UserId userId,
+            Email email,
+            String encodedPassword,
+            String name,
+            Company company,
+            UserType userType,
+            UserStatus status,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         super(createdAt, updatedAt);
         this.userId = userId;
         this.email = email;
@@ -33,26 +43,61 @@ public class User extends AggregateRoot {
         this.status = status;
     }
 
-    public static User create(Email email, Password password, String name,
-                             Company company, UserType userType, PasswordEncoder passwordEncoder) {
+    public static User create(
+            Email email,
+            Password password,
+            String name,
+            Company company,
+            UserType userType,
+            PasswordEncoder passwordEncoder
+    ) {
         validateCreateParameters(email, password, name, userType);
 
         UserId userId = UserId.generate();
         String encodedPassword = passwordEncoder.encode(password.getValue());
         UserStatus status = UserStatus.ACTIVE;
 
-        return new User(userId, email, encodedPassword, name, company, userType, status,
-                       LocalDateTime.now(), LocalDateTime.now());
+        return new User(
+                userId,
+                email,
+                encodedPassword,
+                name,
+                company,
+                userType,
+                status,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
     }
 
-    public static User restore(UserId userId, Email email, String encodedPassword, String name,
-                              Company company, UserType userType, UserStatus status,
-                              LocalDateTime createdAt, LocalDateTime updatedAt) {
-        return new User(userId, email, encodedPassword, name, company, userType, status,
-                       createdAt, updatedAt);
+    public static User restore(
+            UserId userId,
+            Email email,
+            String encodedPassword,
+            String name,
+            Company company,
+            UserType userType,
+            UserStatus status,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
+        return new User(
+                userId,
+                email,
+                encodedPassword,
+                name,
+                company,
+                userType,
+                status,
+                createdAt,
+                updatedAt
+        );
     }
 
-    public boolean validatePassword(Password password, PasswordEncoder passwordEncoder) {
+    public boolean validatePassword(
+            Password password,
+            PasswordEncoder passwordEncoder
+    ) {
         return passwordEncoder.matches(password.getValue(), this.encodedPassword);
     }
 
@@ -122,34 +167,6 @@ public class User extends AggregateRoot {
         if (name.trim().length() > 100) {
             throw new ValidationException("이름은 100자를 초과할 수 없습니다");
         }
-    }
-
-    public UserId getUserId() {
-        return userId;
-    }
-
-    public Email getEmail() {
-        return email;
-    }
-
-    public String getEncodedPassword() {
-        return encodedPassword;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Company getCompany() {
-        return company;
-    }
-
-    public UserType getUserType() {
-        return userType;
-    }
-
-    public UserStatus getStatus() {
-        return status;
     }
 
     public boolean isActive() {
