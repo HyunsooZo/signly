@@ -816,10 +816,10 @@
                     numberElement.textContent = clauseIndex + '.';
                 }
                 const clauseContentElement = section.querySelector('.section-clause > [contenteditable="true"]');
-                content = clauseContentElement ? clauseContentElement.innerHTML : '';
+                content = clauseContentElement ? convertVariablesToBrackets(clauseContentElement.innerHTML) : '';
             } else {
                 const editableElement = section.querySelector('[contenteditable="true"]');
-                content = editableElement ? editableElement.innerHTML : '';
+                content = editableElement ? convertVariablesToBrackets(editableElement.innerHTML) : '';
             }
 
             sections.push({

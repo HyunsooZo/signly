@@ -109,14 +109,17 @@ public class HtmlRenderer {
     }
 
     private String renderCustom(String content, Map<String, Object> metadata) {
-        boolean sanitize = metadata == null || !metadata.containsKey("sanitize") ||
-                (Boolean) metadata.get("sanitize");
+        // rawHtml이 true이거나 sanitize가 false면 HTML을 그대로 렌더링
+        boolean hasRawHtml = metadata != null && metadata.containsKey("rawHtml") &&
+                (Boolean) metadata.get("rawHtml");
+        boolean shouldSanitize = metadata == null ||
+                (!metadata.containsKey("sanitize") || (Boolean) metadata.get("sanitize"));
 
-        if (sanitize) {
+        if (hasRawHtml || !shouldSanitize) {
+            return "<section class=\"template-custom\">" + content + "</section>";
+        } else {
             return "<section class=\"template-custom\"><p>" +
                     HtmlUtils.htmlEscape(content) + "</p></section>";
-        } else {
-            return "<section class=\"template-custom\">" + content + "</section>";
         }
     }
 
