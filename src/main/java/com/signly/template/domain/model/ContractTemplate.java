@@ -96,6 +96,118 @@ public class ContractTemplate extends AggregateRoot {
         updateTimestamp();
     }
 
+    public void addSection(TemplateSection section) {
+        if (this.status == TemplateStatus.ACTIVE) {
+            throw new ValidationException("활성화된 템플릿은 수정할 수 없습니다");
+        }
+
+        if (section == null) {
+            throw new ValidationException("섹션은 필수입니다");
+        }
+
+        var sections = new java.util.ArrayList<>(this.content.getSections());
+        sections.add(section);
+
+        this.content = TemplateContent.of(
+            this.content.getMetadata(),
+            sections
+        );
+        this.version++;
+        updateTimestamp();
+    }
+
+    public void updateSection(
+        String sectionId,
+        String newContent
+    ) {
+        if (this.status == TemplateStatus.ACTIVE) {
+            throw new ValidationException("활성화된 템플릿은 수정할 수 없습니다");
+        }
+
+        var sections = new java.util.ArrayList<>(this.content.getSections());
+        boolean found = false;
+
+        for (TemplateSection section : sections) {
+            if (section.getSectionId().equals(sectionId)) {
+                section.setContent(newContent);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            throw new ValidationException("섹션을 찾을 수 없습니다: " + sectionId);
+        }
+
+        this.content = TemplateContent.of(
+            this.content.getMetadata(),
+            sections
+        );
+        this.version++;
+        updateTimestamp();
+    }
+
+    public void reorderSections(java.util.List<String> sectionIds) {
+        if (this.status == TemplateStatus.ACTIVE) {
+            throw new ValidationException("활성화된 템플릿은 수정할 수 없습니다");
+        }
+
+        var sections = new java.util.ArrayList<>(this.content.getSections());
+
+        if (sectionIds.size() != sections.size()) {
+            throw new ValidationException("섹션 ID 개수가 일치하지 않습니다");
+        }
+
+        var reorderedSections = new java.util.ArrayList<TemplateSection>();
+        int order = 0;
+
+        for (String sectionId : sectionIds) {
+            TemplateSection found = sections.stream()
+                .filter(s -> s.getSectionId().equals(sectionId))
+                .findFirst()
+                .orElseThrow(() -> new ValidationException("섹션을 찾을 수 없습니다: " + sectionId));
+
+            found.setOrder(order++);
+            reorderedSections.add(found);
+        }
+
+        this.content = TemplateContent.of(
+            this.content.getMetadata(),
+            reorderedSections
+        );
+        this.version++;
+        updateTimestamp();
+    }
+
+    public void removeSection(String sectionId) {
+        if (this.status == TemplateStatus.ACTIVE) {
+            throw new ValidationException("활성화된 템플릿은 수정할 수 없습니다");
+        }
+
+        var sections = new java.util.ArrayList<>(this.content.getSections());
+        boolean removed = sections.removeIf(s -> s.getSectionId().equals(sectionId));
+
+        if (!removed) {
+            throw new ValidationException("섹션을 찾을 수 없습니다: " + sectionId);
+        }
+
+        if (sections.isEmpty()) {
+            throw new ValidationException("최소 한 개 이상의 섹션이 필요합니다");
+        }
+
+        int order = 0;
+        for (TemplateSection section : sections) {
+            section.setOrder(order++);
+        }
+
+        this.content = TemplateContent.of(
+            this.content.getMetadata(),
+            sections
+        );
+        this.version++;
+        updateTimestamp();
+    }
+
     private static void validateCreateParameters(UserId ownerId, String title, TemplateContent content) {
         if (ownerId == null) {
             throw new ValidationException("소유자 ID는 필수입니다");
