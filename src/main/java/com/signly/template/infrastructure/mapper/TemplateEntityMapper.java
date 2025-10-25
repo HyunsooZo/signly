@@ -33,7 +33,7 @@ public class TemplateEntityMapper {
                 TemplateId.of(entity.getTemplateId()),
                 UserId.of(entity.getOwnerId()),
                 entity.getTitle(),
-                TemplateContent.of(entity.getContent()),
+                TemplateContent.fromJson(entity.getContent()),
                 entity.getVersion(),
                 entity.getStatus(),
                 entity.getCreatedAt(),

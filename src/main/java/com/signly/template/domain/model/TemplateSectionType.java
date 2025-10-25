@@ -1,9 +1,10 @@
 package com.signly.template.domain.model;
 
 public enum TemplateSectionType {
-    HEADER,
+    HEADING,
     PARAGRAPH,
-    DOTTED_BOX,
-    FOOTER,
+    TABLE,
+    IMAGE,
+    DIVIDER,
     CUSTOM
 }
