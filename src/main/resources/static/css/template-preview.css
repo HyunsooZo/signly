@@ -148,3 +148,15 @@ body,
     margin: 15px 0;
     text-align: justify;
 }
+
+.signature-stamp-label {
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+.signature-stamp-label .contract-variable-underline,
+.signature-stamp-wrapper .contract-variable-underline {
+    border-bottom: none !important;
+    padding: 0 !important;
+    min-width: auto !important;
+}

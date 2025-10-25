@@ -116,13 +116,24 @@
             display: inline-block;
             width: 90px;
             text-align: center;
+            text-decoration: none;
+            border-bottom: none;
+        }
+
+        #contractContentHtmlContainer .signature-stamp-label .contract-variable-underline,
+        #previewContent .signature-stamp-label .contract-variable-underline,
+        #contractContentHtmlContainer .signature-stamp-wrapper .contract-variable-underline,
+        #previewContent .signature-stamp-wrapper .contract-variable-underline {
+            border-bottom: none;
+            padding: 0;
+            min-width: auto;
         }
 
         #contractContentHtmlContainer .signature-stamp-wrapper,
         #previewContent .signature-stamp-wrapper {
             position: absolute;
             top: 50%;
-            left: 20px;
+            left: 50%;
             transform: translate(-50%, -50%);
             width: 80px;
             height: 80px;
@@ -757,11 +768,19 @@
                         display: inline-block;
                         width: 90px;
                         text-align: center;
+                        text-decoration: none;
+                        border-bottom: none;
+                    }
+                    #contractContentHtmlContainer .signature-stamp-label .contract-variable-underline,
+                    #contractContentHtmlContainer .signature-stamp-wrapper .contract-variable-underline {
+                        border-bottom: none !important;
+                        padding: 0 !important;
+                        min-width: auto !important;
                     }
                     #contractContentHtmlContainer .signature-stamp-wrapper {
                         position: absolute;
                         top: 50%;
-                        left: 20px;
+                        left: 50%;
                         transform: translate(-50%, -50%);
                         width: 80px;
                         height: 80px;
@@ -975,11 +994,19 @@
                             display: inline-block;
                             width: 90px;
                             text-align: center;
+                            text-decoration: none;
+                            border-bottom: none;
+                        }
+                        #previewContent .signature-stamp-label .contract-variable-underline,
+                        #previewContent .signature-stamp-wrapper .contract-variable-underline {
+                            border-bottom: none !important;
+                            padding: 0 !important;
+                            min-width: auto !important;
                         }
                         #previewContent .signature-stamp-wrapper {
                             position: absolute;
                             top: 50%;
-                            left: 20px;
+                            left: 50%;
                             transform: translate(-50%, -50%);
                             width: 80px;
                             height: 80px;
