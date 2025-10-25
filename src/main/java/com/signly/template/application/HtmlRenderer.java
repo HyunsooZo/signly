@@ -45,22 +45,21 @@ public class HtmlRenderer {
         Map<String, Object> metadata = section.getMetadata();
 
         return switch (section.getType()) {
-            case HEADING -> renderHeading(content, metadata);
+            case HEADER -> renderHeader(content, metadata);
             case PARAGRAPH -> renderParagraph(content, metadata);
-            case TABLE -> renderTable(metadata);
-            case IMAGE -> renderImage(content, metadata);
-            case DIVIDER -> renderDivider(metadata);
+            case DOTTED_BOX -> renderDottedBox(content, metadata);
+            case FOOTER -> renderFooter(content, metadata);
             case CUSTOM -> renderCustom(content, metadata);
         };
     }
 
-    private String renderHeading(String content, Map<String, Object> metadata) {
+    private String renderHeader(String content, Map<String, Object> metadata) {
         int level = metadata != null && metadata.containsKey("level") ?
                 ((Number) metadata.get("level")).intValue() : 1;
         level = Math.max(1, Math.min(6, level));
 
         String alignment = metadata != null && metadata.containsKey("alignment") ?
-                (String) metadata.get("alignment") : "left";
+                (String) metadata.get("alignment") : "center";
 
         String escaped = HtmlUtils.htmlEscape(content);
 
@@ -85,63 +84,28 @@ public class HtmlRenderer {
                 indentClass, alignment, escaped);
     }
 
-    private String renderTable(Map<String, Object> metadata) {
-        if (metadata == null || !metadata.containsKey("headers") || !metadata.containsKey("rows")) {
-            return "<section class=\"template-table\"><p>테이블 데이터가 없습니다</p></section>";
-        }
+    private String renderDottedBox(String content, Map<String, Object> metadata) {
+        String alignment = metadata != null && metadata.containsKey("alignment") ?
+                (String) metadata.get("alignment") : "left";
 
-        @SuppressWarnings("unchecked")
-        List<String> headers = (List<String>) metadata.get("headers");
-        @SuppressWarnings("unchecked")
-        List<List<String>> rows = (List<List<String>>) metadata.get("rows");
+        String escaped = HtmlUtils.htmlEscape(content).replace("\n", "<br>");
 
-        StringBuilder table = new StringBuilder();
-        table.append("<section class=\"template-table\">");
-        table.append("<table class=\"table table-bordered\">");
-
-        table.append("<thead><tr>");
-        for (String header : headers) {
-            table.append("<th>").append(HtmlUtils.htmlEscape(header)).append("</th>");
-        }
-        table.append("</tr></thead>");
-
-        table.append("<tbody>");
-        for (List<String> row : rows) {
-            table.append("<tr>");
-            for (String cell : row) {
-                table.append("<td>").append(HtmlUtils.htmlEscape(cell)).append("</td>");
-            }
-            table.append("</tr>");
-        }
-        table.append("</tbody>");
-
-        table.append("</table>");
-        table.append("</section>");
-
-        return table.toString();
+        return String.format("<section class=\"template-dotted-box\" style=\"text-align: %s; " +
+                        "border: 2px dotted #ccc; padding: 15px; margin: 10px 0;\">" +
+                        "<p>%s</p></section>",
+                alignment, escaped);
     }
 
-    private String renderImage(String content, Map<String, Object> metadata) {
-        String width = metadata != null && metadata.containsKey("width") ?
-                (String) metadata.get("width") : "auto";
-        String height = metadata != null && metadata.containsKey("height") ?
-                (String) metadata.get("height") : "auto";
+    private String renderFooter(String content, Map<String, Object> metadata) {
         String alignment = metadata != null && metadata.containsKey("alignment") ?
                 (String) metadata.get("alignment") : "center";
-        String alt = metadata != null && metadata.containsKey("alt") ?
-                (String) metadata.get("alt") : "이미지";
 
-        return String.format("<section class=\"template-image\" style=\"text-align: %s\">" +
-                        "<img src=\"%s\" alt=\"%s\" style=\"width: %s; height: %s;\"></section>",
-                alignment, HtmlUtils.htmlEscape(content), HtmlUtils.htmlEscape(alt), width, height);
-    }
+        String escaped = HtmlUtils.htmlEscape(content).replace("\n", "<br>");
 
-    private String renderDivider(Map<String, Object> metadata) {
-        String style = metadata != null && metadata.containsKey("style") ?
-                (String) metadata.get("style") : "solid";
-
-        return String.format("<section class=\"template-divider\">" +
-                "<hr style=\"border-style: %s;\"></section>", style);
+        return String.format("<section class=\"template-footer\" style=\"text-align: %s; " +
+                        "margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;\">" +
+                        "<p>%s</p></section>",
+                alignment, escaped);
     }
 
     private String renderCustom(String content, Map<String, Object> metadata) {
