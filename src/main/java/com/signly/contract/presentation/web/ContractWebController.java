@@ -136,6 +136,7 @@ public class ContractWebController {
                     templatePayload.put("templateId", template.getTemplateId());
                     templatePayload.put("title", template.getTitle());
                     templatePayload.put("renderedHtml", template.getRenderedHtml());
+                    templatePayload.put("variables", template.getVariables());
                     model.addAttribute("selectedTemplateContent", objectMapper.writeValueAsString(templatePayload));
                 } catch (Exception e) {
                     logger.warn("[DEBUG] New form - Failed to build template JSON: {}", e.getMessage());
@@ -341,6 +342,7 @@ public class ContractWebController {
                     templatePayload.put("templateId", template.getTemplateId());
                     templatePayload.put("title", template.getTitle());
                     templatePayload.put("renderedHtml", template.getRenderedHtml());
+                    templatePayload.put("variables", template.getVariables());
                     model.addAttribute("selectedTemplateContent", objectMapper.writeValueAsString(templatePayload));
 
                     logger.info("[DEBUG] Edit form - template loaded as selectedTemplate: {}", template.getTitle());

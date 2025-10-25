@@ -1287,8 +1287,9 @@
             }
         }
 
-        function loadTemplateAsPreset(templateTitle, templateHtml) {
+        function loadTemplateAsPreset(templateTitle, templateHtml, templateVariables) {
             console.log('[DEBUG] Loading template as preset:', templateTitle);
+            console.log('[DEBUG] Template variables:', templateVariables);
 
             let rendered = templateHtml || '';
 
@@ -1304,7 +1305,143 @@
             // HTML 렌더링
             renderPresetHtml(rendered, templateTitle);
 
+            // 변수 기반 입력 폼 생성
+            if (templateVariables && Object.keys(templateVariables).length > 0) {
+                renderTemplateVariableForms(templateVariables);
+            }
+
             applyExistingContractData();
+        }
+
+        // 템플릿 변수 기반 입력 폼 생성
+        function renderTemplateVariableForms(variables) {
+            const container = document.getElementById('presetHtmlContainer');
+            if (!container) return;
+
+            console.log('[DEBUG] Rendering variable forms for:', variables);
+
+            // 컨테이너 아래에 변수 입력 섹션 추가
+            let variableSection = document.getElementById('templateVariableSection');
+            if (!variableSection) {
+                variableSection = document.createElement('div');
+                variableSection.id = 'templateVariableSection';
+                variableSection.className = 'card mb-4';
+                variableSection.innerHTML = `
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-sliders2-vertical me-2"></i>변수 값 입력
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3" id="templateVariableFields"></div>
+                    </div>
+                `;
+
+                // presetExpirationCard 이전에 삽입
+                const expirationCard = document.getElementById('presetExpirationCard');
+                if (expirationCard && expirationCard.parentNode) {
+                    expirationCard.parentNode.insertBefore(variableSection, expirationCard);
+                }
+            }
+
+            const fieldsContainer = document.getElementById('templateVariableFields');
+            if (!fieldsContainer) return;
+
+            fieldsContainer.innerHTML = '';
+
+            // 각 변수에 대한 입력 필드 생성
+            Object.entries(variables).forEach(([varName, varDef]) => {
+                const fieldWrapper = document.createElement('div');
+                fieldWrapper.className = 'col-md-6';
+
+                const label = document.createElement('label');
+                label.className = 'form-label';
+                label.textContent = varDef.label || varName;
+                if (varDef.required) {
+                    const requiredSpan = document.createElement('span');
+                    requiredSpan.className = 'text-danger ms-1';
+                    requiredSpan.textContent = '*';
+                    label.appendChild(requiredSpan);
+                }
+
+                let input;
+
+                // 타입에 따라 다른 입력 요소 생성
+                switch (varDef.type) {
+                    case 'DATE':
+                        input = document.createElement('input');
+                        input.type = 'date';
+                        input.className = 'form-control';
+                        break;
+                    case 'EMAIL':
+                        input = document.createElement('input');
+                        input.type = 'email';
+                        input.className = 'form-control';
+                        input.placeholder = varDef.defaultValue || 'example@domain.com';
+                        break;
+                    case 'NUMBER':
+                        input = document.createElement('input');
+                        input.type = 'number';
+                        input.className = 'form-control';
+                        input.placeholder = varDef.defaultValue || '0';
+                        break;
+                    case 'TEXTAREA':
+                        input = document.createElement('textarea');
+                        input.className = 'form-control';
+                        input.rows = 3;
+                        input.placeholder = varDef.defaultValue || '';
+                        break;
+                    default: // TEXT
+                        input = document.createElement('input');
+                        input.type = 'text';
+                        input.className = 'form-control';
+                        input.placeholder = varDef.defaultValue || '';
+                }
+
+                input.id = 'var_' + varName;
+                input.setAttribute('data-variable-name', varName);
+                input.required = varDef.required;
+                if (varDef.defaultValue) {
+                    input.value = varDef.defaultValue;
+                }
+
+                // 입력 시 HTML 컨테이너의 변수 치환
+                input.addEventListener('input', function() {
+                    updateTemplateVariableInHtml(varName, this.value);
+                });
+
+                fieldWrapper.appendChild(label);
+                fieldWrapper.appendChild(input);
+                fieldsContainer.appendChild(fieldWrapper);
+
+                // 기본값이 있으면 즉시 HTML에 반영
+                if (varDef.defaultValue) {
+                    updateTemplateVariableInHtml(varName, varDef.defaultValue);
+                }
+            });
+        }
+
+        // HTML 내의 변수를 실제 값으로 치환
+        function updateTemplateVariableInHtml(varName, value) {
+            const container = document.getElementById('presetHtmlContainer');
+            if (!container) return;
+
+            // {{varName}} 패턴을 찾아서 value로 치환
+            const pattern = new RegExp('\\{\\{' + varName + '\\}\\}', 'g');
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+            const textNodes = [];
+
+            while (walker.nextNode()) {
+                if (walker.currentNode.nodeValue && walker.currentNode.nodeValue.includes('{{' + varName + '}}')) {
+                    textNodes.push(walker.currentNode);
+                }
+            }
+
+            textNodes.forEach(node => {
+                node.nodeValue = node.nodeValue.replace(pattern, value || '');
+            });
+
+            updatePresetContent();
         }
 
         function highlightTemplateCard(selectedCard) {
@@ -1864,7 +2001,11 @@
                         templateIdInput.value = selectedTemplateData.templateId;
                     }
                 }
-                loadTemplateAsPreset(selectedTemplateData.title || '', selectedTemplateData.renderedHtml || '');
+                loadTemplateAsPreset(
+                    selectedTemplateData.title || '',
+                    selectedTemplateData.renderedHtml || '',
+                    selectedTemplateData.variables || {}
+                );
             } else if (existingContractData && existingContractData.content) {
                 loadExistingContractAsPreset();
             } else if (!hasSelectedPreset) {
