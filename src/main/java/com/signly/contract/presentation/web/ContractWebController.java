@@ -182,6 +182,7 @@ public class ContractWebController {
                     form.getTemplateId(),
                     form.getTitle(),
                     form.getContent(),
+                    null,
                     form.getFirstPartyName(),
                     form.getFirstPartyEmail(),
                     form.getFirstPartyAddress(),

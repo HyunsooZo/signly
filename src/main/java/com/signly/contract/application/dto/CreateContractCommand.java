@@ -3,11 +3,13 @@ package com.signly.contract.application.dto;
 import com.signly.contract.domain.model.PresetType;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 public record CreateContractCommand(
     String templateId,
     String title,
     String content,
+    Map<String, String> variableValues,
     String firstPartyName,
     String firstPartyEmail,
     String firstPartyOrganization,
