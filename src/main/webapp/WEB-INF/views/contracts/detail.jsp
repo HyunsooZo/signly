@@ -12,7 +12,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
     <link href="/css/contracts.css" rel="stylesheet">
-    <link href="/css/template-preview.css" rel="stylesheet">
+    <link href="/css/contract-common.css" rel="stylesheet">
     <style>
         /* 표준 근로계약서 스타일 */
         #contractContentHtmlContainer .title,
@@ -875,7 +875,6 @@
 
         function previewContract() {
             const content = contractRawContent;
-            const presetType = presetTypeValue || 'NONE';
             const previewContentEl = document.getElementById('previewContent');
 
             // 기존 미리보기 스타일 제거
@@ -884,8 +883,8 @@
                 existingPreviewStyle.remove();
             }
 
-            // 프리셋인 경우 HTML로 렌더링, 아니면 텍스트로 표시
-            if (presetType !== 'NONE' && presetType !== '') {
+            // 계약 내용이 HTML이면 그대로 렌더링하고, 아니면 텍스트로 표시
+            if (isHtmlPreset) {
                 // 임시 DOM에서 처리
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = content;

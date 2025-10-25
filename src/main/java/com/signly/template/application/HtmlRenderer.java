@@ -63,9 +63,11 @@ public class HtmlRenderer {
 
         String escaped = HtmlUtils.htmlEscape(content);
 
-        return String.format("<section class=\"template-heading\" style=\"text-align: %s\">" +
+        String alignmentClass = getAlignmentClass(alignment);
+
+        return String.format("<section class=\"template-heading%s\">" +
                         "<h%d>%s</h%d></section>",
-                alignment, level, escaped, level);
+                alignmentClass, level, escaped, level);
     }
 
     private String renderParagraph(String content, Map<String, Object> metadata) {
@@ -78,10 +80,11 @@ public class HtmlRenderer {
         String escaped = HtmlUtils.htmlEscape(content).replace("\n", "<br>");
 
         String indentClass = indent ? " template-paragraph-indent" : "";
+        String alignmentClass = getAlignmentClass(alignment);
 
-        return String.format("<section class=\"template-paragraph%s\" style=\"text-align: %s\">" +
+        return String.format("<section class=\"template-paragraph%s%s\">" +
                         "<p>%s</p></section>",
-                indentClass, alignment, escaped);
+                indentClass, alignmentClass, escaped);
     }
 
     private String renderDottedBox(String content, Map<String, Object> metadata) {
@@ -90,10 +93,11 @@ public class HtmlRenderer {
 
         String escaped = HtmlUtils.htmlEscape(content).replace("\n", "<br>");
 
-        return String.format("<section class=\"template-dotted-box\" style=\"text-align: %s; " +
-                        "border: 2px dotted #ccc; padding: 15px; margin: 10px 0;\">" +
+        String alignmentClass = getAlignmentClass(alignment);
+
+        return String.format("<section class=\"template-dotted-box%s\">" +
                         "<p>%s</p></section>",
-                alignment, escaped);
+                alignmentClass, escaped);
     }
 
     private String renderFooter(String content, Map<String, Object> metadata) {
@@ -102,10 +106,11 @@ public class HtmlRenderer {
 
         String escaped = HtmlUtils.htmlEscape(content).replace("\n", "<br>");
 
-        return String.format("<section class=\"template-footer\" style=\"text-align: %s; " +
-                        "margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;\">" +
+        String alignmentClass = getAlignmentClass(alignment);
+
+        return String.format("<section class=\"template-footer%s\">" +
                         "<p>%s</p></section>",
-                alignment, escaped);
+                alignmentClass, escaped);
     }
 
     private String renderCustom(String content, Map<String, Object> metadata) {
@@ -136,5 +141,17 @@ public class HtmlRenderer {
         matcher.appendTail(result);
 
         return result.toString();
+    }
+
+    private String getAlignmentClass(String alignment) {
+        if (alignment == null || alignment.isEmpty()) {
+            return "";
+        }
+        return switch (alignment.toLowerCase()) {
+            case "center" -> " text-center";
+            case "right" -> " text-right";
+            case "justify" -> " text-justify";
+            default -> "";  // left는 기본값이므로 클래스 불필요
+        };
     }
 }

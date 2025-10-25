@@ -12,7 +12,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
     <link href="/css/contracts.css" rel="stylesheet">
-    <link href="/css/template-preview.css" rel="stylesheet">
+    <link href="/css/contract-common.css" rel="stylesheet">
 </head>
 <body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -648,50 +648,7 @@
             console.log('[DEBUG] renderPresetHtml - Input HTML length:', html.length);
             console.log('[DEBUG] renderPresetHtml - First 500 chars:', html.substring(0, 500));
 
-            // 기존 프리셋 스타일 제거
-            const oldPresetStyle = document.getElementById('presetCustomStyle');
-            if (oldPresetStyle) {
-                oldPresetStyle.remove();
-            }
-
-            // <style> 태그를 정규식으로 추출 (innerHTML로는 head 안의 style을 못 찾음)
-            const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-            let combinedCss = '';
-            let match;
-
-            while ((match = styleRegex.exec(html)) !== null) {
-                const cssText = match[1];
-                console.log('[DEBUG] Found style tag, CSS length:', cssText.length);
-
-                // 가장 간단한 방법: body만 교체하고 나머지는 .preset-document 안에서 작동하도록
-                let modifiedCss = cssText.replace(/\bbody\b/g, '.preset-document');
-
-                console.log('[DEBUG] Modified CSS preview:', modifiedCss.substring(0, 500));
-                combinedCss += modifiedCss + '\n';
-            }
-
-            // 스코프 적용된 스타일을 head에 추가
-            if (combinedCss.trim()) {
-                const styleElement = document.createElement('style');
-                styleElement.id = 'presetCustomStyle';
-                styleElement.textContent = combinedCss;
-                document.head.appendChild(styleElement);
-                console.log('[DEBUG] Added CSS, total length:', combinedCss.length);
-
-                // 실제로 적용되었는지 확인
-                setTimeout(() => {
-                    const sectionNumber = document.querySelector('.preset-document .section-number');
-                    if (sectionNumber) {
-                        const computedStyle = window.getComputedStyle(sectionNumber);
-                        console.log('[DEBUG] .section-number font-weight:', computedStyle.fontWeight);
-                        console.log('[DEBUG] .section-number element:', sectionNumber);
-                    } else {
-                        console.log('[DEBUG] .section-number not found');
-                    }
-                }, 100);
-            } else {
-                console.log('[DEBUG] No CSS found!');
-            }
+            // CSS는 통일된 contract-common.css에서 로드하므로 동적 추출 불필요
 
             // body 태그 내용만 추출
             const tempDiv = document.createElement('div');
