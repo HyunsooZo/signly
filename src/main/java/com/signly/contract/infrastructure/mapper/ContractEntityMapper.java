@@ -20,6 +20,7 @@ public class ContractEntityMapper {
             contract.getTemplateId() != null ? contract.getTemplateId().getValue() : null,
             contract.getTitle(),
             contract.getContent().getValue(),
+            null,
             contract.getFirstParty().getName(),
             contract.getFirstParty().getEmail(),
             contract.getFirstParty().getOrganizationName(),
