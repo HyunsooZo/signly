@@ -77,11 +77,29 @@ public class TemplateWebController {
     }
 
     @GetMapping("/new")
-    public String newTemplateForm(Model model) {
-        model.addAttribute("pageTitle", "새 템플릿 생성");
-        model.addAttribute("template", new TemplateForm());
-        model.addAttribute("presets", templatePresetService.getSummaries());
-        return "templates/form";
+    public String newTemplateForm(
+        @RequestHeader(value = "X-User-Id", required = false) String userId,
+        @AuthenticationPrincipal SecurityUser securityUser,
+        HttpServletRequest request,
+        Model model
+    ) {
+        try {
+            String resolvedUserId = currentUserProvider.resolveUserId(
+                securityUser,
+                request,
+                userId,
+                true
+            );
+            model.addAttribute("pageTitle", "새 템플릿 생성");
+            model.addAttribute("template", new TemplateForm());
+            model.addAttribute("presets", templatePresetService.getSummaries());
+            model.addAttribute("currentUserId", resolvedUserId);
+            return "templates/form";
+        } catch (Exception e) {
+            logger.error("템플릿 생성 폼 조회 중 오류 발생", e);
+            model.addAttribute("errorMessage", "템플릿 생성 폼을 불러오는 중 오류가 발생했습니다.");
+            return "redirect:/templates";
+        }
     }
 
     @PostMapping
