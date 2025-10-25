@@ -1400,6 +1400,7 @@
 
                 input.id = 'var_' + varName;
                 input.setAttribute('data-variable-name', varName);
+                input.setAttribute('data-variable-type', varDef.type);
                 input.required = varDef.required;
                 if (varDef.defaultValue) {
                     input.value = varDef.defaultValue;
@@ -1408,6 +1409,11 @@
                 // 입력 시 HTML 컨테이너의 변수 치환
                 input.addEventListener('input', function() {
                     updateTemplateVariableInHtml(varName, this.value);
+                });
+
+                // 클라이언트 측 검증
+                input.addEventListener('blur', function() {
+                    validateVariableInput(this, varDef);
                 });
 
                 fieldWrapper.appendChild(label);
@@ -1442,6 +1448,93 @@
             });
 
             updatePresetContent();
+        }
+
+        // 변수 입력 값 검증
+        function validateVariableInput(input, varDef) {
+            const value = input.value.trim();
+
+            // 유효성 표시 제거
+            input.classList.remove('is-invalid', 'is-valid');
+            const existingFeedback = input.parentElement.querySelector('.invalid-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+
+            // 필수 필드 체크
+            if (varDef.required && !value) {
+                showValidationError(input, varDef.label + '은(는) 필수 입력 항목입니다.');
+                return false;
+            }
+
+            // 값이 있으면 타입별 검증
+            if (value) {
+                let errorMessage = null;
+
+                switch (varDef.type) {
+                    case 'NUMBER':
+                        if (isNaN(value) || !/^-?\d+(\.\d+)?$/.test(value)) {
+                            errorMessage = '숫자만 입력 가능합니다.';
+                        }
+                        break;
+                    case 'EMAIL':
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(value)) {
+                            errorMessage = '올바른 이메일 형식이 아닙니다.';
+                        }
+                        break;
+                    case 'DATE':
+                        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                        if (!dateRegex.test(value)) {
+                            errorMessage = '날짜 형식은 YYYY-MM-DD 이어야 합니다.';
+                        }
+                        break;
+                }
+
+                if (errorMessage) {
+                    showValidationError(input, errorMessage);
+                    return false;
+                }
+            }
+
+            // 검증 통과
+            input.classList.add('is-valid');
+            return true;
+        }
+
+        // 검증 오류 표시
+        function showValidationError(input, message) {
+            input.classList.add('is-invalid');
+
+            const feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            feedback.textContent = message;
+
+            input.parentElement.appendChild(feedback);
+        }
+
+        // 폼 제출 시 모든 변수 검증
+        function validateAllTemplateVariables() {
+            const variableInputs = document.querySelectorAll('[data-variable-name][data-variable-type]');
+            let allValid = true;
+
+            variableInputs.forEach(input => {
+                const varName = input.getAttribute('data-variable-name');
+                const varType = input.getAttribute('data-variable-type');
+                const isRequired = input.hasAttribute('required');
+
+                const varDef = {
+                    label: input.parentElement.querySelector('label')?.textContent.replace('*', '').trim() || varName,
+                    type: varType,
+                    required: isRequired
+                };
+
+                if (!validateVariableInput(input, varDef)) {
+                    allValid = false;
+                }
+            });
+
+            return allValid;
         }
 
         function highlightTemplateCard(selectedCard) {
@@ -1897,6 +1990,14 @@
                         // 프리셋 모드인 경우
                         const presetLayout = document.getElementById('presetLayout');
                         if (presetLayout && presetLayout.style.display !== 'none') {
+                            // 템플릿 변수 검증
+                            if (!validateAllTemplateVariables()) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                alert('입력한 변수 값을 확인해주세요.');
+                                return false;
+                            }
+
                             // 프리셋 콘텐츠 업데이트
                             updatePresetContent();
 

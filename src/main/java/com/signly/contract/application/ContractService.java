@@ -104,6 +104,9 @@ public class ContractService {
             Map<String, String> variableValues = command.variableValues() != null ?
                 command.variableValues() : new HashMap<>();
 
+            // 템플릿 변수 검증
+            validateTemplateVariables(template.getContent(), variableValues);
+
             String renderedHtml = htmlRenderer.render(
                 template.getContent(),
                 variableValues
@@ -491,5 +494,39 @@ public class ContractService {
 
     private String normalizeEmail(String email) {
         return email == null ? null : email.trim().toLowerCase();
+    }
+
+    private void validateTemplateVariables(
+        TemplateContent templateContent,
+        Map<String, String> variableValues
+    ) {
+        Map<String, com.signly.template.domain.model.TemplateVariable> templateVariables =
+            templateContent.getMetadata().getVariables();
+
+        // 필수 변수가 모두 제공되었는지 확인
+        for (Map.Entry<String, com.signly.template.domain.model.TemplateVariable> entry : templateVariables.entrySet()) {
+            String varName = entry.getKey();
+            com.signly.template.domain.model.TemplateVariable varDef = entry.getValue();
+
+            String value = variableValues.get(varName);
+
+            // 필수 변수 확인
+            if (varDef.isRequired() && (value == null || value.trim().isEmpty())) {
+                throw new ValidationException(
+                    String.format("필수 변수 '%s'의 값이 제공되지 않았습니다.", varDef.getLabel())
+                );
+            }
+
+            // 값이 제공된 경우 유효성 검증
+            if (value != null && !value.trim().isEmpty()) {
+                try {
+                    varDef.validateValue(value);
+                } catch (ValidationException e) {
+                    throw new ValidationException(
+                        String.format("변수 '%s'의 값이 유효하지 않습니다: %s", varDef.getLabel(), e.getMessage())
+                    );
+                }
+            }
+        }
     }
 }
