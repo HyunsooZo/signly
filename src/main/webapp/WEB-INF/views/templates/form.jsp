@@ -28,517 +28,1049 @@
     </div>
 </nav>
 
-<div class="container-fluid mt-4">
-    <div class="row">
-        <!-- 왼쪽: 섹션 빌더 -->
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-file-earmark-text"></i> 템플릿 편집
-                    </h5>
-                    <div>
-                        <button class="btn btn-sm btn-outline-primary" onclick="previewTemplate()">
-                            <i class="bi bi-eye"></i> 미리보기
-                        </button>
-                        <button class="btn btn-sm btn-success" onclick="saveTemplate()">
-                            <i class="bi bi-check-circle"></i> 저장
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- 제목 입력 -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">템플릿 제목</label>
-                        <input type="text"
-                               class="form-control form-control-lg"
-                               id="templateTitle"
-                               placeholder="예: 물품 공급 계약서"
-                               value="${template.title}">
-                    </div>
+<div class="builder-container">
+    <!-- 툴바 -->
+    <div class="toolbar">
+        <div class="d-flex align-items-center flex-wrap gap-2">
+            <strong class="me-2 toolbar-label">변수 추가하기:</strong>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYER]')" title="사업주명">
+                <i class="bi bi-person-badge"></i> 사업주명
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[COMPANY_NAME]')" title="사업체명">
+                <i class="bi bi-building"></i> 회사명
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYEE]')" title="근로자명">
+                <i class="bi bi-person"></i> 근로자명
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[CONTRACT_DATE]')" title="계약 체결일">
+                <i class="bi bi-calendar-event"></i> 계약일
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[WORKPLACE]')" title="근무 장소">
+                <i class="bi bi-geo-alt"></i> 근무지
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[JOB_DESCRIPTION]')" title="업무 내용">
+                <i class="bi bi-briefcase"></i> 업무
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[MONTHLY_SALARY]')" title="월급">
+                <i class="bi bi-cash"></i> 월급
+            </button>
+            <button class="toolbar-btn toolbar-btn-sm ms-auto" onclick="showVariableModal()">
+                <i class="bi bi-braces"></i> 더보기
+            </button>
+        </div>
+    </div>
 
-                    <hr>
-
-                    <!-- 섹션 목록 -->
-                    <div id="sectionList" class="section-list">
-                        <!-- 섹션들이 여기에 동적으로 추가됨 -->
-                    </div>
-
-                    <!-- 섹션 추가 버튼 -->
-                    <div class="text-center mt-3">
-                        <div class="btn-group">
-                            <button class="btn btn-outline-primary" onclick="addSection('HEADING')">
-                                <i class="bi bi-type-h1"></i> 제목
-                            </button>
-                            <button class="btn btn-outline-primary" onclick="addSection('PARAGRAPH')">
-                                <i class="bi bi-text-paragraph"></i> 단락
-                            </button>
-                            <button class="btn btn-outline-primary" onclick="addSection('TABLE')">
-                                <i class="bi bi-table"></i> 표
-                            </button>
-                            <button class="btn btn-outline-primary" onclick="addSection('DIVIDER')">
-                                <i class="bi bi-hr"></i> 구분선
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    <!-- 문서 편집 영역 -->
+    <div class="document-container">
+        <div class="document-header">
+            <input type="text"
+                   class="document-title-input"
+                   id="templateTitle"
+                   placeholder="템플릿 제목을 입력하세요"
+                   value="${template.title}">
+            <div class="document-actions">
+                <button class="btn btn-light btn-sm" onclick="previewTemplate()">
+                    <i class="bi bi-eye"></i> 미리보기
+                </button>
+                <button class="btn btn-success btn-sm" onclick="saveTemplate()">
+                    <i class="bi bi-check-circle"></i> 저장
+                </button>
             </div>
         </div>
 
-        <!-- 오른쪽: 변수 관리 -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="bi bi-braces"></i> 변수 관리
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small">
-                        템플릿에서 사용할 변수를 정의하세요.
-                        섹션 내용에 <code>{{변수명}}</code> 형식으로 사용할 수 있습니다.
-                    </p>
-
-                    <!-- 변수 목록 -->
-                    <div id="variableList" class="variable-list mb-3">
-                        <!-- 변수들이 여기에 동적으로 추가됨 -->
-                    </div>
-
-                    <!-- 변수 추가 버튼 -->
-                    <button class="btn btn-sm btn-outline-success w-100" onclick="addVariable()">
-                        <i class="bi bi-plus-circle"></i> 변수 추가
-                    </button>
-                </div>
-            </div>
-
-            <!-- 빠른 삽입 -->
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="bi bi-lightning"></i> 빠른 삽입
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-sm btn-outline-secondary text-start" onclick="insertQuickVariable('party1')">
-                            <i class="bi bi-person"></i> 갑(당사자)
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary text-start" onclick="insertQuickVariable('party2')">
-                            <i class="bi bi-person"></i> 을(상대방)
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary text-start" onclick="insertQuickVariable('contractDate')">
-                            <i class="bi bi-calendar"></i> 계약일
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary text-start" onclick="insertQuickVariable('amount')">
-                            <i class="bi bi-cash"></i> 금액
-                        </button>
-                    </div>
-                </div>
+        <div class="document-body" id="documentBody">
+            <!-- 초기 플레이스홀더 -->
+            <div class="add-section-placeholder" onclick="showAddSectionMenu(this)">
+                <i class="bi bi-plus-circle"></i>
+                <div>여기를 클릭하여 섹션을 추가하세요</div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- 변수 선택 모달 -->
+<div class="modal-backdrop" id="modalBackdrop"></div>
+<div class="variable-modal" id="variableModal">
+    <h5 class="mb-3">변수 선택</h5>
+    <p class="text-muted small">클릭하여 현재 커서 위치에 변수를 삽입합니다</p>
+
+    <div class="mb-3">
+        <strong>근로자 정보</strong>
+        <div class="variable-grid">
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE]')">근로자명</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_ADDRESS]')">근로자 주소</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_PHONE]')">근로자 연락처</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_ID]')">주민등록번호</div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <strong>사업주 정보</strong>
+        <div class="variable-grid">
+            <div class="variable-item" onclick="insertVariable('[EMPLOYER]')">사업주명</div>
+            <div class="variable-item" onclick="insertVariable('[COMPANY_NAME]')">사업체명</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYER_ADDRESS]')">사업장 주소</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYER_PHONE]')">사업장 연락처</div>
+            <div class="variable-item" onclick="insertVariable('[BUSINESS_NUMBER]')">사업자번호</div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <strong>계약 정보</strong>
+        <div class="variable-grid">
+            <div class="variable-item" onclick="insertVariable('[CONTRACT_START_DATE]')">계약 시작일</div>
+            <div class="variable-item" onclick="insertVariable('[CONTRACT_END_DATE]')">계약 종료일</div>
+            <div class="variable-item" onclick="insertVariable('[CONTRACT_DATE]')">계약 체결일</div>
+            <div class="variable-item" onclick="insertVariable('[WORKPLACE]')">근무 장소</div>
+            <div class="variable-item" onclick="insertVariable('[JOB_DESCRIPTION]')">업무 내용</div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <strong>근무 조건</strong>
+        <div class="variable-grid">
+            <div class="variable-item" onclick="insertVariable('[WORK_START_TIME]')">근무 시작시간</div>
+            <div class="variable-item" onclick="insertVariable('[WORK_END_TIME]')">근무 종료시간</div>
+            <div class="variable-item" onclick="insertVariable('[BREAK_START_TIME]')">휴게 시작시간</div>
+            <div class="variable-item" onclick="insertVariable('[BREAK_END_TIME]')">휴게 종료시간</div>
+            <div class="variable-item" onclick="insertVariable('[WORK_DAYS]')">근무일수</div>
+            <div class="variable-item" onclick="insertVariable('[HOLIDAYS]')">휴일</div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <strong>임금 정보</strong>
+        <div class="variable-grid">
+            <div class="variable-item" onclick="insertVariable('[MONTHLY_SALARY]')">월급</div>
+            <div class="variable-item" onclick="insertVariable('[HOURLY_WAGE]')">시급</div>
+            <div class="variable-item" onclick="insertVariable('[BONUS]')">상여금</div>
+            <div class="variable-item" onclick="insertVariable('[OTHER_ALLOWANCES]')">기타 수당</div>
+            <div class="variable-item" onclick="insertVariable('[PAYMENT_DAY]')">임금 지급일</div>
+            <div class="variable-item" onclick="insertVariable('[PAYMENT_METHOD]')">지급 방법</div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <strong>서명</strong>
+        <div class="variable-grid">
+            <div class="variable-item" onclick="insertVariable('[EMPLOYER_SIGNATURE]')">사업주 서명</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_SIGNATURE]')">근로자 서명</div>
+            <div class="variable-item" onclick="insertVariable('[SIGNATURE_DATE]')">서명일</div>
+        </div>
+    </div>
+
+    <div class="text-end mt-4">
+        <button class="btn btn-secondary" onclick="closeVariableModal()">닫기</button>
+    </div>
+</div>
+
+<!-- 플로팅 액션 버튼 -->
+<div class="floating-actions">
+    <div class="floating-btn" onclick="saveTemplate()" title="저장">
+        <i class="bi bi-save"></i>
+    </div>
+    <div class="floating-btn" onclick="previewTemplate()" title="미리보기">
+        <i class="bi bi-eye"></i>
+    </div>
+</div>
+
+<!-- Hidden form for submission -->
+<c:set var="formAction" value="${not empty templateId && templateId ne 'new' ? '/templates/'.concat(templateId) : '/templates'}" />
+<form id="templateForm" method="post" action="${formAction}" class="template-form-hidden">
+    <c:if test="${not empty _csrf}">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+    </c:if>
+    <input type="hidden" name="title" id="formTitle">
+    <input type="hidden" name="sectionsJson" id="sectionsJson">
+</form>
+
 <!-- 미리보기 모달 -->
-<div class="modal fade" id="previewModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-eye"></i> 템플릿 미리보기
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="previewModalLabel">템플릿 미리보기</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
             </div>
-            <div class="modal-body">
-                <div id="previewContent" class="preview-document">
-                    <!-- 미리보기 내용 -->
-                </div>
+            <div class="modal-body p-0">
+                <iframe id="previewFrame" title="템플릿 미리보기" class="preview-iframe"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
             </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/template-builder.js"></script>
 
 <script>
-// 현재 섹션과 변수 데이터
-let sections = [];
-let variables = {};
-let sectionIdCounter = 0;
+    let clauseCounter = 0;
+    let activeElement = null;
+    let sections = [];
 
-// 페이지 로드 시 초기화
-document.addEventListener('DOMContentLoaded', function() {
-    initializeDefaultVariables();
-    renderSections();
-    renderVariables();
-});
+    const FRONTEND_TYPES = new Set(['text', 'clause', 'dotted', 'footer', 'signature', 'html', 'title']);
 
-// 기본 변수 초기화
-function initializeDefaultVariables() {
-    variables = {
-        'party1': {
-            label: '갑(계약자)',
-            type: 'text',
-            required: true,
-            defaultValue: ''
-        },
-        'party2': {
-            label: '을(계약 상대방)',
-            type: 'text',
-            required: true,
-            defaultValue: ''
-        },
-        'contractDate': {
-            label: '계약 일자',
-            type: 'date',
-            required: true,
-            defaultValue: ''
-        },
-        'amount': {
-            label: '금액',
-            type: 'number',
-            required: false,
-            defaultValue: '0'
+    const htmlEntityDecoder = document.createElement('textarea');
+
+    function decodeHtmlEntities(value) {
+        if (!value || typeof value !== 'string') {
+            return value;
         }
-    };
-}
-
-// 섹션 추가
-function addSection(type) {
-    const sectionId = 'section_' + (++sectionIdCounter);
-    const order = sections.length;
-
-    const section = {
-        sectionId: sectionId,
-        type: type,
-        order: order,
-        content: '',
-        metadata: getDefaultMetadata(type),
-        variables: []
-    };
-
-    sections.push(section);
-    renderSections();
-}
-
-// 섹션 타입별 기본 메타데이터
-function getDefaultMetadata(type) {
-    switch(type) {
-        case 'HEADING':
-            return { level: 1, alignment: 'center' };
-        case 'PARAGRAPH':
-            return { indent: false, alignment: 'left' };
-        case 'TABLE':
-            return { headers: ['항목', '내용'], rows: [['', '']] };
-        case 'DIVIDER':
-            return { style: 'solid' };
-        default:
-            return {};
+        const temp = document.createElement('div');
+        temp.innerHTML = value;
+        return temp.textContent || temp.innerText || value;
     }
-}
 
-// 섹션 렌더링
-function renderSections() {
-    const container = document.getElementById('sectionList');
-    container.innerHTML = '';
+    function parseSectionsPayload(raw) {
+        if (!raw) {
+            return [];
+        }
 
-    sections.forEach((section, index) => {
-        const sectionHtml = createSectionHtml(section, index);
-        container.innerHTML += sectionHtml;
-    });
-}
+        let parsed = raw;
 
-// 섹션 HTML 생성
-function createSectionHtml(section, index) {
-    const typeLabel = getSectionTypeLabel(section.type);
-    const typeIcon = getSectionTypeIcon(section.type);
+        if (typeof raw === 'string') {
+            const trimmed = raw.trim();
+            if (!trimmed) {
+                return [];
+            }
+            try {
+                parsed = JSON.parse(trimmed);
+            } catch (error) {
+                console.warn('Failed to parse sections JSON', error);
+                return [];
+            }
+        }
 
-    let html = '<div class="section-card mb-3" data-index="' + index + '">';
-    html += '<div class="section-header">';
-    html += '<div class="d-flex align-items-center">';
-    html += '<i class="bi ' + typeIcon + ' me-2"></i>';
-    html += '<span class="badge bg-secondary">' + typeLabel + '</span>';
-    html += '<span class="ms-2 text-muted small">#' + (index + 1) + '</span>';
-    html += '</div>';
-    html += '<div>';
-    if (index > 0) {
-        html += '<button class="btn btn-sm btn-link" onclick="moveSection(' + index + ', ' + (index - 1) + ')"><i class="bi bi-arrow-up"></i></button>';
+        if (Array.isArray(parsed)) {
+            return parsed;
+        }
+
+        if (parsed && typeof parsed === 'object') {
+            if (Array.isArray(parsed.sections)) {
+                return parsed.sections;
+            }
+            if (Array.isArray(parsed.data)) {
+                return parsed.data;
+            }
+            if (Array.isArray(parsed.content)) {
+                return parsed.content;
+            }
+            if (typeof parsed.sectionsJson === 'string') {
+                return parseSectionsPayload(parsed.sectionsJson);
+            }
+            return [parsed];
+        }
+
+        return [];
     }
-    if (index < sections.length - 1) {
-        html += '<button class="btn btn-sm btn-link" onclick="moveSection(' + index + ', ' + (index + 1) + ')"><i class="bi bi-arrow-down"></i></button>';
-    }
-    html += '<button class="btn btn-sm btn-link text-danger" onclick="removeSection(' + index + ')"><i class="bi bi-trash"></i></button>';
-    html += '</div>';
-    html += '</div>';
-    html += '<div class="section-body">';
-    html += createSectionEditor(section, index);
-    html += '</div>';
-    html += '</div>';
-    return html;
-}
 
-// 섹션 타입별 에디터 생성
-function createSectionEditor(section, index) {
-    let html = '';
-    switch(section.type) {
-        case 'HEADING':
-            html += '<div class="mb-2">';
-            html += '<label class="form-label small">제목 레벨</label>';
-            html += '<select class="form-select form-select-sm" onchange="updateMetadata(' + index + ', \'level\', parseInt(this.value))">';
-            html += '<option value="1"' + (section.metadata.level === 1 ? ' selected' : '') + '>H1 (가장 큼)</option>';
-            html += '<option value="2"' + (section.metadata.level === 2 ? ' selected' : '') + '>H2</option>';
-            html += '<option value="3"' + (section.metadata.level === 3 ? ' selected' : '') + '>H3</option>';
-            html += '</select>';
-            html += '</div>';
-            html += '<div class="mb-2">';
-            html += '<label class="form-label small">정렬</label>';
-            html += '<select class="form-select form-select-sm" onchange="updateMetadata(' + index + ', \'alignment\', this.value)">';
-            html += '<option value="left"' + (section.metadata.alignment === 'left' ? ' selected' : '') + '>왼쪽</option>';
-            html += '<option value="center"' + (section.metadata.alignment === 'center' ? ' selected' : '') + '>가운데</option>';
-            html += '<option value="right"' + (section.metadata.alignment === 'right' ? ' selected' : '') + '>오른쪽</option>';
-            html += '</select>';
-            html += '</div>';
-            html += '<input type="text" class="form-control" placeholder="제목 텍스트 입력 (예: 물품 공급 계약서)"';
-            html += ' value="' + section.content + '" onchange="updateContent(' + index + ', this.value)">';
-            return html;
-        case 'PARAGRAPH':
-            html += '<div class="mb-2">';
-            html += '<label class="form-label small">정렬</label>';
-            html += '<select class="form-select form-select-sm" onchange="updateMetadata(' + index + ', \'alignment\', this.value)">';
-            html += '<option value="left"' + (section.metadata.alignment === 'left' ? ' selected' : '') + '>왼쪽</option>';
-            html += '<option value="center"' + (section.metadata.alignment === 'center' ? ' selected' : '') + '>가운데</option>';
-            html += '<option value="right"' + (section.metadata.alignment === 'right' ? ' selected' : '') + '>오른쪽</option>';
-            html += '<option value="justify"' + (section.metadata.alignment === 'justify' ? ' selected' : '') + '>양쪽 정렬</option>';
-            html += '</select>';
-            html += '</div>';
-            html += '<textarea class="form-control" rows="4" placeholder="본문 내용 입력. 변수는 {{변수명}} 형식으로 입력하세요."';
-            html += ' onchange="updateContent(' + index + ', this.value)">' + section.content + '</textarea>';
-            html += '<div class="form-check mt-2">';
-            html += '<input class="form-check-input" type="checkbox" id="indent' + index + '"';
-            html += (section.metadata.indent ? ' checked' : '') + ' onchange="updateMetadata(' + index + ', \'indent\', this.checked)">';
-            html += '<label class="form-check-label small" for="indent' + index + '">들여쓰기</label>';
-            html += '</div>';
-            return html;
-        case 'TABLE':
-            return '<div class="alert alert-info small">표 기능은 향후 업데이트 예정입니다.</div>';
-        case 'DIVIDER':
-            html += '<div class="mb-2">';
-            html += '<label class="form-label small">구분선 스타일</label>';
-            html += '<select class="form-select form-select-sm" onchange="updateMetadata(' + index + ', \'style\', this.value)">';
-            html += '<option value="solid"' + (section.metadata.style === 'solid' ? ' selected' : '') + '>실선</option>';
-            html += '<option value="dashed"' + (section.metadata.style === 'dashed' ? ' selected' : '') + '>점선</option>';
-            html += '<option value="dotted"' + (section.metadata.style === 'dotted' ? ' selected' : '') + '>점</option>';
-            html += '</select>';
-            html += '</div>';
-            return html;
-        default:
+    function normalizeFrontendType(type, metadata) {
+        metadata = metadata || {};
+        if (metadata && typeof metadata === 'object' && metadata.kind && FRONTEND_TYPES.has(String(metadata.kind).toLowerCase())) {
+            return String(metadata.kind).toLowerCase();
+        }
+        if (!type) {
+            return 'text';
+        }
+        const raw = String(type);
+        const lower = raw.toLowerCase();
+        if (FRONTEND_TYPES.has(lower)) {
+            return lower;
+        }
+        switch (raw.toUpperCase()) {
+            case 'HEADER':
+                return 'title';
+            case 'DOTTED_BOX':
+                return 'dotted';
+            case 'FOOTER':
+                return 'footer';
+            case 'CUSTOM':
+                if (metadata && metadata.signature) {
+                    return 'signature';
+                }
+                if (metadata && metadata.rawHtml) {
+                    return 'html';
+                }
+                return 'text';
+            case 'PARAGRAPH':
+            default:
+                return 'text';
+        }
+    }
+
+    function ensureMetadataForType(type, metadata) {
+        metadata = metadata || {};
+        const base = metadata && typeof metadata === 'object' ? Object.assign({}, metadata) : {};
+        if (type === 'html' || type === 'signature') {
+            base.rawHtml = true;
+        }
+        if (type === 'signature' && base.signature === undefined) {
+            base.signature = true;
+        }
+        if (type === 'title' && base.header === undefined) {
+            base.header = true;
+        }
+        if (!base.kind) {
+            base.kind = type;
+        }
+        return base;
+    }
+
+    function encodeMetadata(metadata) {
+        metadata = metadata || {};
+        try {
+            return encodeURIComponent(JSON.stringify(metadata));
+        } catch (error) {
+            console.warn('Failed to encode metadata', error);
+            return encodeURIComponent('{}');
+        }
+    }
+
+    function ensureString(value) {
+        if (value === null || value === undefined) {
             return '';
-    }
-}
-
-// 유틸리티 함수들
-function getSectionTypeLabel(type) {
-    const labels = {
-        'HEADING': '제목',
-        'PARAGRAPH': '단락',
-        'TABLE': '표',
-        'DIVIDER': '구분선'
-    };
-    return labels[type] || type;
-}
-
-function getSectionTypeIcon(type) {
-    const icons = {
-        'HEADING': 'bi-type-h1',
-        'PARAGRAPH': 'bi-text-paragraph',
-        'TABLE': 'bi-table',
-        'DIVIDER': 'bi-hr'
-    };
-    return icons[type] || 'bi-file';
-}
-
-// 섹션 업데이트
-function updateContent(index, value) {
-    sections[index].content = value;
-}
-
-function updateMetadata(index, key, value) {
-    sections[index].metadata[key] = value;
-}
-
-// 섹션 이동
-function moveSection(fromIndex, toIndex) {
-    const temp = sections[fromIndex];
-    sections[fromIndex] = sections[toIndex];
-    sections[toIndex] = temp;
-
-    sections.forEach((s, i) => s.order = i);
-    renderSections();
-}
-
-// 섹션 삭제
-function removeSection(index) {
-    if(confirm('이 섹션을 삭제하시겠습니까?')) {
-        sections.splice(index, 1);
-        sections.forEach((s, i) => s.order = i);
-        renderSections();
-    }
-}
-
-// 변수 렌더링
-function renderVariables() {
-    const container = document.getElementById('variableList');
-    container.innerHTML = '';
-
-    Object.keys(variables).forEach(key => {
-        const v = variables[key];
-        let html = '<div class="variable-item mb-2">';
-        html += '<div class="d-flex justify-content-between align-items-start">';
-        html += '<div class="flex-grow-1">';
-        html += '<code class="text-primary">{{' + key + '}}</code>';
-        html += '<div class="small text-muted">' + v.label + '</div>';
-        html += '</div>';
-        html += '<button class="btn btn-sm btn-link text-danger p-0" onclick="removeVariable(\'' + key + '\')">';
-        html += '<i class="bi bi-x-circle"></i>';
-        html += '</button>';
-        html += '</div>';
-        html += '</div>';
-        container.innerHTML += html;
-    });
-}
-
-// 변수 추가
-function addVariable() {
-    const name = prompt('변수명을 입력하세요 (영문, 숫자만 가능):');
-    if(!name) return;
-
-    if(!/^[a-zA-Z0-9_]+$/.test(name)) {
-        alert('변수명은 영문, 숫자, 언더스코어만 사용할 수 있습니다.');
-        return;
+        }
+        return typeof value === 'string' ? value : String(value);
     }
 
-    if(variables[name]) {
-        alert('이미 존재하는 변수명입니다.');
-        return;
+    function convertVariablesToBrackets(html) {
+        if (!html) return '';
+        return html.replace(/<span class="template-variable"[^>]*>\s*<span>([^<]+)<\/span>[\s\S]*?<\/span>/g, '[$1]');
     }
 
-    const label = prompt('변수 레이블 (한글 설명):');
-    if(!label) return;
-
-    variables[name] = {
-        label: label,
-        type: 'text',
-        required: false,
-        defaultValue: ''
-    };
-
-    renderVariables();
-}
-
-// 변수 삭제
-function removeVariable(name) {
-    if(confirm('변수 {{' + name + '}}을(를) 삭제하시겠습니까?')) {
-        delete variables[name];
-        renderVariables();
+    function convertBracketsToVariables(html) {
+        if (!html) return '';
+        return html.replace(/\[([A-Z_]+)\]/g, function(match, varName) {
+            return '<span class="template-variable" contenteditable="false">' +
+                   '<span>' + varName + '</span>' +
+                   '<span class="template-variable-remove"></span>' +
+                   '</span>';
+        });
     }
-}
 
-// 빠른 변수 삽입
-function insertQuickVariable(name) {
-    const varText = '{{' + name + '}}';
-    navigator.clipboard.writeText(varText).then(() => {
-        alert(varText + '이(가) 클립보드에 복사되었습니다!');
-    });
-}
-
-// 미리보기
-function previewTemplate() {
-    const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
-    const previewContent = document.getElementById('previewContent');
-
-    let html = '<div class="template-document">';
-    sections.forEach(section => {
-        html += renderSectionPreview(section);
-    });
-    html += '</div>';
-
-    previewContent.innerHTML = html;
-    previewModal.show();
-}
-
-function renderSectionPreview(section) {
-    const content = section.content || '[내용 없음]';
-
-    switch(section.type) {
-        case 'HEADING':
-            const level = section.metadata.level || 1;
-            const align = section.metadata.alignment || 'center';
-            return '<h' + level + ' style="text-align: ' + align + '">' + content + '</h' + level + '>';
-        case 'PARAGRAPH':
-            const pAlign = section.metadata.alignment || 'left';
-            const indent = section.metadata.indent ? 'text-indent: 2em;' : '';
-            return '<p style="text-align: ' + pAlign + '; ' + indent + '">' + content + '</p>';
-        case 'DIVIDER':
-            const style = section.metadata.style || 'solid';
-            return '<hr style="border-style: ' + style + '">';
-        default:
+    function normalizePreviewContent(type, rawContent) {
+        console.debug('[normalizePreviewContent] input:', type, JSON.stringify(rawContent));
+        if (rawContent === null || rawContent === undefined) {
+            console.debug('[normalizePreviewContent] null/undefined -> empty string');
             return '';
-    }
-}
+        }
 
-// 저장
-function saveTemplate() {
-    const title = document.getElementById('templateTitle').value.trim();
+        let value = ensureString(rawContent);
+        console.debug('[normalizePreviewContent] after ensureString:', JSON.stringify(value));
 
-    if(!title) {
-        alert('템플릿 제목을 입력하세요.');
-        return;
-    }
-
-    if(sections.length === 0) {
-        alert('최소 1개 이상의 섹션을 추가하세요.');
-        return;
-    }
-
-    const templateData = {
-        version: '1.0',
-        metadata: {
-            title: title,
-            description: '',
-            createdBy: '',
-            variables: variables
-        },
-        sections: sections
-    };
-
-    const jsonContent = JSON.stringify(templateData);
-
-    fetch('/templates', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            title: title,
-            sectionsJson: jsonContent
-        })
-    })
-    .then(response => {
-        if(response.ok) {
-            alert('템플릿이 저장되었습니다.');
-            window.location.href = '/templates';
-        } else {
-            return response.json().then(err => {
-                throw new Error(err.message || '저장에 실패했습니다.');
+        if (type === 'signature' || type === 'html') {
+            console.debug('[normalizePreviewContent] signature/html - keeping HTML as is');
+            value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, function(match) {
+                return '<span class="blank-line"></span>';
             });
+            value = value.replace(/\[[\w_]+\]/g, '<span class="blank-line"></span>');
+            return value;
         }
-    })
-    .catch(error => {
-        alert('오류: ' + error.message);
+
+        const BLANK_MARKER = '___BLANK_LINE___';
+        value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>\s*<span class="template-variable-remove"[^>]*>[\s\S]*?<\/span>/g, function(match) {
+            return BLANK_MARKER;
+        });
+        value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, function(match) {
+            return BLANK_MARKER;
+        });
+        value = value.replace(/<span class="template-variable-remove"[^>]*>[\s\S]*?<\/span>/g, '');
+
+        value = decodeHtmlEntities(value);
+        console.debug('[normalizePreviewContent] after decodeHtmlEntities:', JSON.stringify(value));
+
+        value = value.replace(new RegExp(BLANK_MARKER, 'g'), '<span class="blank-line"></span>');
+
+        return value;
+    }
+
+    function decodeMetadata(encoded) {
+        if (!encoded) {
+            return {};
+        }
+        try {
+            return JSON.parse(decodeURIComponent(encoded));
+        } catch (error) {
+            console.warn('Failed to decode metadata', error);
+            return {};
+        }
+    }
+
+    function setSectionMetadata(section, metadata) {
+        metadata = metadata || {};
+        section.dataset.metadata = encodeMetadata(metadata);
+    }
+
+    function getSectionMetadata(section) {
+        if (!section || !section.dataset) {
+            return {};
+        }
+        return decodeMetadata(section.dataset.metadata);
+    }
+
+    function coerceMetadata(metadata) {
+        if (!metadata) {
+            return {};
+        }
+        if (typeof metadata === 'string') {
+            const decoded = decodeHtmlEntities(metadata);
+            try {
+                return JSON.parse(decoded);
+            } catch (error) {
+                console.warn('Failed to parse metadata string', error);
+                return {};
+            }
+        }
+        if (typeof metadata === 'object') {
+            return Object.assign({}, metadata);
+        }
+        return {};
+    }
+
+    function mapFrontendTypeToServer(type, metadata) {
+        metadata = metadata || {};
+        switch (type) {
+            case 'title':
+                return 'HEADER';
+            case 'clause':
+            case 'text':
+                return 'PARAGRAPH';
+            case 'dotted':
+                return 'DOTTED_BOX';
+            case 'footer':
+                return 'FOOTER';
+            case 'html':
+                return metadata && metadata.rawHtml ? 'CUSTOM' : 'PARAGRAPH';
+            case 'signature':
+                return 'CUSTOM';
+            default:
+                return 'PARAGRAPH';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadInitialSections();
+        setupEventListeners();
+
+        window.SignlyTemplateEditor = {
+            getSectionsSnapshot: function() {
+                updateSectionsData();
+                return JSON.parse(JSON.stringify(sections));
+            },
+            getPreviewHtml: function() {
+                updateSectionsData();
+                return generatePreviewHtml();
+            }
+        };
     });
-}
+
+    function setupEventListeners() {
+        document.getElementById('documentBody').addEventListener('click', function(e) {
+            const section = e.target.closest('.editable-section');
+            if (section) {
+                setActiveSection(section);
+            }
+        });
+
+        document.getElementById('documentBody').addEventListener('input', function(e) {
+            if (e.target.contentEditable === 'true') {
+                updateSectionContent(e.target);
+            }
+        });
+
+        document.getElementById('modalBackdrop').addEventListener('click', closeVariableModal);
+    }
+
+    function addSection(type, content, afterElement, metadata) {
+        content = content || '';
+        metadata = metadata || {};
+        const section = createSectionElement(type, content, metadata);
+        const documentBody = document.getElementById('documentBody');
+
+        if (afterElement) {
+            afterElement.insertAdjacentElement('afterend', section);
+        } else {
+            const placeholder = documentBody.querySelector('.add-section-placeholder');
+            if (placeholder) {
+                documentBody.insertBefore(section, placeholder);
+            } else {
+                documentBody.appendChild(section);
+            }
+        }
+
+        setActiveSection(section);
+        updateSectionsData();
+    }
+
+    function createSectionElement(type, content, metadata) {
+        content = content || '';
+        metadata = metadata || {};
+        const coercedMetadata = coerceMetadata(metadata);
+        const normalizedType = normalizeFrontendType(type, coercedMetadata);
+        const normalizedMetadata = ensureMetadataForType(normalizedType, coercedMetadata);
+        const section = document.createElement('div');
+        section.className = 'editable-section';
+        section.dataset.type = normalizedType;
+        section.dataset.id = 'section-' + Date.now();
+        setSectionMetadata(section, normalizedMetadata);
+
+        let processedContent = content;
+        if (normalizedType !== 'html' && normalizedType !== 'signature') {
+            // processedContent = convertBracketsToVariables(content || '');
+        } else if (normalizedType === 'signature') {
+            if (content) {
+                processedContent = convertBracketsToVariables(content);
+            }
+        }
+
+        let innerHTML = '';
+
+        switch(normalizedType) {
+            case 'text':
+                innerHTML = '<div contenteditable="true" class="section-text" data-placeholder="텍스트를 입력하세요...">' + (processedContent || '') + '</div>';
+                break;
+
+            case 'title':
+                innerHTML = '<div contenteditable="true" class="section-title" data-placeholder="제목을 입력하세요...">' + (processedContent || '') + '</div>';
+                break;
+
+            case 'clause':
+                clauseCounter++;
+                innerHTML = '<div class="section-clause">' +
+                    '<span class="clause-number">' + clauseCounter + '.</span>' +
+                    '<span contenteditable="true" data-placeholder="조항 내용을 입력하세요...">' + (processedContent || '') + '</span>' +
+                    '</div>';
+                break;
+
+            case 'dotted':
+                innerHTML = '<div contenteditable="true" class="section-dotted-box" data-placeholder="점선 박스 내용을 입력하세요...">' + (processedContent || '') + '</div>';
+                break;
+
+            case 'footer':
+                innerHTML = '<div contenteditable="true" class="section-footer" data-placeholder="꼬릿말을 입력하세요...">' + (processedContent || '') + '</div>';
+                break;
+
+            case 'signature':
+                if (content && processedContent) {
+                    innerHTML = '<div class="section-signature" contenteditable="true">' + processedContent + '</div>';
+                } else {
+                    innerHTML = '<div class="section-signature" contenteditable="true">' +
+                        '<div class="signature-section">' +
+                            '<div class="signature-block">' +
+                                '<div class="signature-line">(사업주) 사업체명: <span class="template-variable" contenteditable="false"><span>COMPANY_NAME</span><span class="template-variable-remove"></span></span></div>' +
+                                '<div class="signature-line signature-line-indent">주소: <span class="template-variable" contenteditable="false"><span>EMPLOYER_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
+                                '<div class="signature-line signature-line--seal signature-line-indent">' +
+                                    '대표자: <span class="template-variable" contenteditable="false"><span>EMPLOYER</span><span class="template-variable-remove"></span></span> ' +
+                                    '<span class="signature-stamp-label">(인)' +
+                                        '<span class="signature-stamp-wrapper"><span class="template-variable" contenteditable="false"><span>EMPLOYER_SIGNATURE_IMAGE</span><span class="template-variable-remove"></span></span></span>' +
+                                    '</span>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="signature-block">' +
+                                '<div class="signature-line">(전화: <span class="template-variable" contenteditable="false"><span>EMPLOYER_PHONE</span><span class="template-variable-remove"></span></span>)</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="employee-signature-section">' +
+                            '<div>(근로자) 주소: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="employee-signature-line">연락처: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_PHONE</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="employee-signature-line">성명: <span class="template-variable" contenteditable="false"><span>EMPLOYEE</span><span class="template-variable-remove"></span></span> (인)</div>' +
+                        '</div>' +
+                    '</div>';
+                }
+                break;
+
+            case 'html':
+                innerHTML = '<div class="html-section">' +
+                    '<textarea class="html-editor" placeholder="HTML 코드를 입력하세요...">' + (content || '') + '</textarea>' +
+                    '<div class="html-preview mt-2"></div>' +
+                    '</div>';
+                break;
+            default:
+                innerHTML = '<div contenteditable="true" class="section-text" data-placeholder="텍스트를 입력하세요...">' + (processedContent || '') + '</div>';
+                break;
+        }
+
+        section.innerHTML = innerHTML + createSectionControls();
+
+        section.querySelectorAll('.template-variable-remove').forEach(function(btn) {
+            btn.onclick = function(e) {
+                e.stopPropagation();
+                btn.parentElement.remove();
+                updateSectionsData();
+            };
+        });
+
+        return section;
+    }
+
+    function createSectionControls() {
+        return '<div class="section-controls">' +
+            '<button class="section-control-btn" onclick="moveSection(this, \'up\')" title="위로">' +
+                '<i class="bi bi-arrow-up"></i>' +
+            '</button>' +
+            '<button class="section-control-btn" onclick="moveSection(this, \'down\')" title="아래로">' +
+                '<i class="bi bi-arrow-down"></i>' +
+            '</button>' +
+            '<button class="section-control-btn" onclick="duplicateSection(this)" title="복사">' +
+                '<i class="bi bi-files"></i>' +
+            '</button>' +
+            '<button class="section-control-btn" onclick="deleteSection(this)" title="삭제">' +
+                '<i class="bi bi-trash"></i>' +
+            '</button>' +
+        '</div>';
+    }
+
+    function createPlaceholder() {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'add-section-placeholder';
+        placeholder.onclick = function() { showAddSectionMenu(this); };
+        placeholder.innerHTML = '<i class="bi bi-plus-circle"></i><div>여기를 클릭하여 섹션을 추가하세요</div>';
+        return placeholder;
+    }
+
+    function setActiveSection(section) {
+        document.querySelectorAll('.editable-section').forEach(function(s) { s.classList.remove('active'); });
+        section.classList.add('active');
+        activeElement = section.querySelector('[contenteditable="true"], .html-editor');
+    }
+
+    function moveSection(button, direction) {
+        const section = button.closest('.editable-section');
+        if (direction === 'up' && section.previousElementSibling && !section.previousElementSibling.classList.contains('add-section-placeholder')) {
+            section.parentNode.insertBefore(section, section.previousElementSibling);
+        } else if (direction === 'down' && section.nextElementSibling && !section.nextElementSibling.classList.contains('add-section-placeholder')) {
+            section.parentNode.insertBefore(section.nextElementSibling, section);
+        }
+        updateSectionsData();
+    }
+
+    function duplicateSection(button) {
+        const section = button.closest('.editable-section');
+        const clone = section.cloneNode(true);
+        clone.dataset.id = 'section-' + Date.now();
+        section.parentNode.insertBefore(clone, section.nextSibling);
+        updateSectionsData();
+    }
+
+    function deleteSection(button) {
+        if (confirm('이 섹션을 삭제하시겠습니까?')) {
+            const section = button.closest('.editable-section');
+            section.remove();
+            updateSectionsData();
+
+            const documentBody = document.getElementById('documentBody');
+            if (documentBody.children.length === 0) {
+                documentBody.appendChild(createPlaceholder());
+            }
+        }
+    }
+
+    function showVariableModal() {
+        document.getElementById('variableModal').classList.add('show');
+        document.getElementById('modalBackdrop').classList.add('show');
+    }
+
+    function closeVariableModal() {
+        document.getElementById('variableModal').classList.remove('show');
+        document.getElementById('modalBackdrop').classList.remove('show');
+    }
+
+    function insertVariable(variable) {
+        if (!activeElement) {
+            alert('먼저 텍스트를 입력할 위치를 클릭해주세요.');
+            return;
+        }
+
+        if (activeElement.contentEditable === 'true') {
+            const selection = window.getSelection();
+            let range;
+
+            if (selection.rangeCount === 0 || !activeElement.contains(selection.anchorNode)) {
+                range = document.createRange();
+                range.selectNodeContents(activeElement);
+                range.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                range = selection.getRangeAt(0);
+            }
+
+            const varSpan = document.createElement('span');
+            varSpan.className = 'template-variable';
+            varSpan.contentEditable = 'false';
+
+            const varText = document.createElement('span');
+            varText.textContent = variable;
+
+            const removeBtn = document.createElement('span');
+            removeBtn.className = 'template-variable-remove';
+            removeBtn.onclick = function(e) {
+                e.stopPropagation();
+                varSpan.remove();
+                updateSectionsData();
+            };
+
+            varSpan.appendChild(varText);
+            varSpan.appendChild(removeBtn);
+
+            range.deleteContents();
+            range.insertNode(varSpan);
+
+            const space = document.createTextNode(' ');
+            range.setStartAfter(varSpan);
+            range.insertNode(space);
+            range.setStartAfter(space);
+            range.collapse(true);
+
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            activeElement.focus();
+        } else if (activeElement.tagName === 'TEXTAREA') {
+            const start = activeElement.selectionStart;
+            const end = activeElement.selectionEnd;
+            const text = activeElement.value;
+            activeElement.value = text.substring(0, start) + variable + text.substring(end);
+            activeElement.selectionStart = activeElement.selectionEnd = start + variable.length;
+            activeElement.focus();
+        }
+
+        closeVariableModal();
+        updateSectionsData();
+    }
+
+    function showAddSectionMenu(placeholder) {
+        const menu = '<div class="add-section-menu">' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'text\', this)">' +
+                '<i class="bi bi-text-left"></i> 텍스트' +
+            '</button>' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'title\', this)">' +
+                '<i class="bi bi-type"></i> 타이틀' +
+            '</button>' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'clause\', this)">' +
+                '<i class="bi bi-list-ol"></i> 조항' +
+            '</button>' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'dotted\', this)">' +
+                '<i class="bi bi-border-style"></i> 점선' +
+            '</button>' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'footer\', this)">' +
+                '<i class="bi bi-text-center"></i> 꼬릿말' +
+            '</button>' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'signature\', this)">' +
+                '<i class="bi bi-pen"></i> 서명란' +
+            '</button>' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'html\', this)">' +
+                '<i class="bi bi-code-slash"></i> HTML' +
+            '</button>' +
+        '</div>';
+        placeholder.innerHTML = menu;
+    }
+
+    function addSectionFromPlaceholder(type, button) {
+        const placeholder = button.closest('.add-section-placeholder');
+        const section = createSectionElement(type);
+        placeholder.insertAdjacentElement('beforebegin', section);
+
+        setActiveSection(section);
+        updateSectionsData();
+    }
+
+    function updateSectionContent(element) {
+        const section = element.closest('.editable-section');
+        if (section) {
+            updateSectionsData();
+        }
+    }
+
+    function updateSectionsData() {
+        const documentBody = document.getElementById('documentBody');
+        sections = [];
+
+        let clauseIndex = 0;
+
+        documentBody.querySelectorAll('.editable-section').forEach(function(section, index) {
+            const existingMetadata = getSectionMetadata(section);
+            const type = normalizeFrontendType(section.dataset.type, existingMetadata);
+            const metadata = ensureMetadataForType(type, existingMetadata);
+            setSectionMetadata(section, metadata);
+            section.dataset.type = type;
+
+            let content = '';
+
+            if (type === 'html') {
+                const textarea = section.querySelector('.html-editor');
+                content = textarea ? textarea.value : '';
+
+                const preview = section.querySelector('.html-preview');
+                if (preview) {
+                    preview.innerHTML = normalizePreviewContent(type, content);
+                }
+            } else if (type === 'signature') {
+                const signatureElement = section.querySelector('.section-signature');
+                content = signatureElement ? convertVariablesToBrackets(signatureElement.innerHTML) : '';
+            } else if (type === 'clause') {
+                clauseIndex++;
+                const numberElement = section.querySelector('.clause-number');
+                if (numberElement) {
+                    numberElement.textContent = clauseIndex + '.';
+                }
+                const clauseContentElement = section.querySelector('.section-clause > [contenteditable="true"]');
+                content = clauseContentElement ? clauseContentElement.innerHTML : '';
+            } else {
+                const editableElement = section.querySelector('[contenteditable="true"]');
+                content = editableElement ? editableElement.innerHTML : '';
+            }
+
+            sections.push({
+                sectionId: section.dataset.id,
+                type: type,
+                order: index,
+                content: content,
+                metadata: metadata
+            });
+        });
+
+        clauseCounter = clauseIndex;
+    }
+
+    function loadInitialSections() {
+        const scriptEl = document.getElementById('initialSections');
+        if (scriptEl) {
+            try {
+                const rawPayload = scriptEl.textContent || '[]';
+                console.debug('[TemplateEditor] raw initial sections payload:', rawPayload.substring(0, 500));
+
+                const sectionsData = parseSectionsPayload(rawPayload);
+                console.debug('[TemplateEditor] parsed sections array:', sectionsData);
+                const documentBody = document.getElementById('documentBody');
+
+                if (sectionsData.length > 0) {
+                    documentBody.innerHTML = '';
+
+                    clauseCounter = 0;
+                    sectionsData.slice().sort(function(a, b) {
+                            const orderA = typeof a.order === 'number' ? a.order : parseInt(a.order, 10) || 0;
+                            const orderB = typeof b.order === 'number' ? b.order : parseInt(b.order, 10) || 0;
+                            return orderA - orderB;
+                        })
+                        .forEach(function(sectionData) {
+                            if (!sectionData) {
+                                return;
+                            }
+                            const metadata = coerceMetadata(sectionData.metadata);
+                            const section = createSectionElement(sectionData.type, sectionData.content, metadata);
+                            section.dataset.id = sectionData.sectionId || ('section-' + Date.now());
+                            documentBody.appendChild(section);
+                        });
+
+                    documentBody.appendChild(createPlaceholder());
+                    updateSectionsData();
+                } else {
+                    if (!documentBody.querySelector('.add-section-placeholder')) {
+                        documentBody.appendChild(createPlaceholder());
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load initial sections:', e);
+            }
+        }
+    }
+
+    function previewTemplate() {
+        updateSectionsData();
+
+        if (sections.length === 0) {
+            alert('미리볼 섹션이 없습니다. 먼저 섹션을 추가해주세요.');
+            return;
+        }
+
+        const previewHtml = generatePreviewHtml(sections);
+        const previewTitle = document.getElementById('templateTitle').value || '제목 없음';
+        const previewFrame = document.getElementById('previewFrame');
+
+        if (previewFrame) {
+            previewFrame.srcdoc = previewHtml;
+
+            const modalElement = document.getElementById('previewModal');
+            const modalTitle = document.getElementById('previewModalLabel');
+            if (modalTitle) {
+                modalTitle.textContent = previewTitle + ' 미리보기';
+            }
+
+            if (modalElement) {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            }
+        }
+    }
+
+    function collectSectionsForPreview() {
+        const documentBody = document.getElementById('documentBody');
+        const sectionElements = Array.from(documentBody.querySelectorAll('.editable-section'))
+            .filter(function(section) { return !section.classList.contains('add-section-placeholder'); });
+
+        return sectionElements.map(function(section, index) {
+            const existingMetadata = getSectionMetadata(section);
+            const type = normalizeFrontendType(section.dataset.type, existingMetadata);
+            let content = '';
+
+            if (type === 'html') {
+                const textarea = section.querySelector('.html-editor');
+                content = normalizePreviewContent(type, textarea ? textarea.value : '');
+            } else if (type === 'signature') {
+                const signatureElement = section.querySelector('.section-signature');
+                content = normalizePreviewContent(type, signatureElement ? signatureElement.innerHTML : '');
+            } else if (type === 'clause') {
+                const clauseContent = section.querySelector('.section-clause span[contenteditable="true"]');
+                content = normalizePreviewContent(type, clauseContent ? clauseContent.innerHTML : '');
+            } else {
+                const editableElement = section.querySelector('[contenteditable="true"]');
+                content = normalizePreviewContent(type, editableElement ? editableElement.innerHTML : '');
+            }
+
+            return {
+                sectionId: section.dataset.id,
+                type: type,
+                order: index,
+                content: content,
+                metadata: existingMetadata
+            };
+        });
+    }
+
+    function generatePreviewHtml(previewSections) {
+        previewSections = previewSections || sections;
+        const title = document.getElementById('templateTitle').value || '제목 없음';
+
+        let bodyContent = '';
+        let clauseIndex = 0;
+
+        previewSections.forEach(function(section) {
+            let rawContent = normalizePreviewContent(section.type, section.content);
+            const codePoints = rawContent ? Array.from(rawContent).map(function(ch) { return ch.charCodeAt(0).toString(16); }) : [];
+            console.debug('[TemplateEditor] rendering section type:', section.type, 'content length:', rawContent ? rawContent.length : 0, 'value:', JSON.stringify(rawContent), 'codes:', codePoints);
+            switch (section.type) {
+                case 'html':
+                    bodyContent += rawContent;
+                    console.debug('[TemplateEditor] appended markup:', rawContent && rawContent.substring ? rawContent.substring(0, 200) : rawContent);
+                    break;
+                case 'signature':
+                    const signatureMarkup = '<div class="section-signature">' + rawContent + '</div>';
+                    console.debug('[TemplateEditor] appended markup:', signatureMarkup.substring(0, 200));
+                    bodyContent += signatureMarkup;
+                    break;
+                case 'clause':
+                    clauseIndex++;
+                    const clauseMarkup = '<div class="section-clause"><span class="clause-number">' + clauseIndex + '.</span> <span>' + rawContent + '</span></div>';
+                    console.debug('[TemplateEditor] appended markup:', clauseMarkup.substring(0, 200));
+                    bodyContent += clauseMarkup;
+                    break;
+                case 'title':
+                    const titleMarkup = '<h2 class="section-title">' + rawContent + '</h2>';
+                    console.debug('[TemplateEditor] appended markup:', titleMarkup.substring(0, 200));
+                    bodyContent += titleMarkup;
+                    break;
+                case 'dotted':
+                    const dottedMarkup = '<div class="section-dotted">' + rawContent + '</div>';
+                    console.debug('[TemplateEditor] appended markup:', dottedMarkup.substring(0, 200));
+                    bodyContent += dottedMarkup;
+                    break;
+                case 'footer':
+                    const footerMarkup = '<div class="section-footer">' + rawContent + '</div>';
+                    console.debug('[TemplateEditor] appended markup:', footerMarkup.substring(0, 200));
+                    bodyContent += footerMarkup;
+                    break;
+                default:
+                    console.debug('[TemplateEditor] default case - rawContent before markup:', JSON.stringify(rawContent), 'type:', typeof rawContent, 'length:', rawContent ? rawContent.length : 'null');
+                    const textMarkup = '<div class="section-text">' + rawContent + '</div>';
+                    console.debug('[TemplateEditor] default case - textMarkup:', textMarkup.substring(0, 200));
+                    console.debug('[TemplateEditor] appended markup:', textMarkup.substring(0, 200));
+                    bodyContent += textMarkup;
+                    break;
+            }
+        });
+
+        console.debug('[TemplateEditor] body content snippet:', bodyContent.substring(0, 500));
+
+        return '<!DOCTYPE html>' +
+        '<html lang="ko">' +
+        '<head>' +
+            '<meta charset="UTF-8">' +
+            '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+            '<title>' + title + '</title>' +
+            '<link rel="stylesheet" href="/css/template-preview.css">' +
+        '</head>' +
+        '<body>' +
+            bodyContent +
+        '</body>' +
+        '</html>';
+    }
+
+    function saveTemplate() {
+        const title = document.getElementById('templateTitle').value;
+
+        if (!title) {
+            alert('템플릿 제목을 입력해주세요.');
+            document.getElementById('templateTitle').focus();
+            return;
+        }
+
+        if (sections.length === 0) {
+            alert('최소 하나 이상의 섹션을 추가해주세요.');
+            return;
+        }
+
+        updateSectionsData();
+
+        document.getElementById('formTitle').value = title;
+
+        const serializedSections = sections.map(function(section, index) {
+            return {
+                sectionId: section.sectionId,
+                type: mapFrontendTypeToServer(section.type, section.metadata),
+                order: index,
+                content: section.content,
+                metadata: section.metadata || {}
+            };
+        });
+
+        document.getElementById('sectionsJson').value = JSON.stringify(serializedSections);
+
+        document.getElementById('templateForm').submit();
+    }
+
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('html-editor')) {
+            const preview = e.target.parentElement.querySelector('.html-preview');
+            if (preview) {
+                preview.innerHTML = e.target.value;
+            }
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            saveTemplate();
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            previewTemplate();
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+            e.preventDefault();
+            showVariableModal();
+        }
+    });
+
 </script>
+
+<c:set var="sectionsJsonRaw" value="${empty template.sectionsJson ? '[]' : template.sectionsJson}" />
+<c:set var="sectionsJsonSafe" value="${fn:replace(sectionsJsonRaw, '</script>', '<&#92;/script>')}" />
+<script id="initialSections" type="application/json"><c:out value="${sectionsJsonSafe}" escapeXml="false" /></script>
 
 </body>
 </html>
