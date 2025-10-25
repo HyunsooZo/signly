@@ -254,83 +254,84 @@ function createSectionHtml(section, index) {
     const typeLabel = getSectionTypeLabel(section.type);
     const typeIcon = getSectionTypeIcon(section.type);
 
-    return `
-        <div class="section-card mb-3" data-index="${index}">
-            <div class="section-header">
-                <div class="d-flex align-items-center">
-                    <i class="bi ${typeIcon} me-2"></i>
-                    <span class="badge bg-secondary">${typeLabel}</span>
-                    <span class="ms-2 text-muted small">#${index + 1}</span>
-                </div>
-                <div>
-                    ${index > 0 ? `<button class="btn btn-sm btn-link" onclick="moveSection(${index}, ${index - 1})"><i class="bi bi-arrow-up"></i></button>` : ''}
-                    ${index < sections.length - 1 ? `<button class="btn btn-sm btn-link" onclick="moveSection(${index}, ${index + 1})"><i class="bi bi-arrow-down"></i></button>` : ''}
-                    <button class="btn btn-sm btn-link text-danger" onclick="removeSection(${index})"><i class="bi bi-trash"></i></button>
-                </div>
-            </div>
-            <div class="section-body">
-                ${createSectionEditor(section, index)}
-            </div>
-        </div>
-    `;
+    let html = '<div class="section-card mb-3" data-index="' + index + '">';
+    html += '<div class="section-header">';
+    html += '<div class="d-flex align-items-center">';
+    html += '<i class="bi ' + typeIcon + ' me-2"></i>';
+    html += '<span class="badge bg-secondary">' + typeLabel + '</span>';
+    html += '<span class="ms-2 text-muted small">#' + (index + 1) + '</span>';
+    html += '</div>';
+    html += '<div>';
+    if (index > 0) {
+        html += '<button class="btn btn-sm btn-link" onclick="moveSection(' + index + ', ' + (index - 1) + ')"><i class="bi bi-arrow-up"></i></button>';
+    }
+    if (index < sections.length - 1) {
+        html += '<button class="btn btn-sm btn-link" onclick="moveSection(' + index + ', ' + (index + 1) + ')"><i class="bi bi-arrow-down"></i></button>';
+    }
+    html += '<button class="btn btn-sm btn-link text-danger" onclick="removeSection(' + index + ')"><i class="bi bi-trash"></i></button>';
+    html += '</div>';
+    html += '</div>';
+    html += '<div class="section-body">';
+    html += createSectionEditor(section, index);
+    html += '</div>';
+    html += '</div>';
+    return html;
 }
 
 // 섹션 타입별 에디터 생성
 function createSectionEditor(section, index) {
+    let html = '';
     switch(section.type) {
         case 'HEADING':
-            return `
-                <div class="mb-2">
-                    <label class="form-label small">제목 레벨</label>
-                    <select class="form-select form-select-sm" onchange="updateMetadata(${index}, 'level', parseInt(this.value))">
-                        <option value="1" ${section.metadata.level === 1 ? 'selected' : ''}>H1 (가장 큼)</option>
-                        <option value="2" ${section.metadata.level === 2 ? 'selected' : ''}>H2</option>
-                        <option value="3" ${section.metadata.level === 3 ? 'selected' : ''}>H3</option>
-                    </select>
-                </div>
-                <div class="mb-2">
-                    <label class="form-label small">정렬</label>
-                    <select class="form-select form-select-sm" onchange="updateMetadata(${index}, 'alignment', this.value)">
-                        <option value="left" ${section.metadata.alignment === 'left' ? 'selected' : ''}>왼쪽</option>
-                        <option value="center" ${section.metadata.alignment === 'center' ? 'selected' : ''}>가운데</option>
-                        <option value="right" ${section.metadata.alignment === 'right' ? 'selected' : ''}>오른쪽</option>
-                    </select>
-                </div>
-                <input type="text" class="form-control" placeholder="제목 텍스트 입력 (예: 물품 공급 계약서)"
-                       value="${section.content}" onchange="updateContent(${index}, this.value)">
-            `;
+            html += '<div class="mb-2">';
+            html += '<label class="form-label small">제목 레벨</label>';
+            html += '<select class="form-select form-select-sm" onchange="updateMetadata(' + index + ', \'level\', parseInt(this.value))">';
+            html += '<option value="1"' + (section.metadata.level === 1 ? ' selected' : '') + '>H1 (가장 큼)</option>';
+            html += '<option value="2"' + (section.metadata.level === 2 ? ' selected' : '') + '>H2</option>';
+            html += '<option value="3"' + (section.metadata.level === 3 ? ' selected' : '') + '>H3</option>';
+            html += '</select>';
+            html += '</div>';
+            html += '<div class="mb-2">';
+            html += '<label class="form-label small">정렬</label>';
+            html += '<select class="form-select form-select-sm" onchange="updateMetadata(' + index + ', \'alignment\', this.value)">';
+            html += '<option value="left"' + (section.metadata.alignment === 'left' ? ' selected' : '') + '>왼쪽</option>';
+            html += '<option value="center"' + (section.metadata.alignment === 'center' ? ' selected' : '') + '>가운데</option>';
+            html += '<option value="right"' + (section.metadata.alignment === 'right' ? ' selected' : '') + '>오른쪽</option>';
+            html += '</select>';
+            html += '</div>';
+            html += '<input type="text" class="form-control" placeholder="제목 텍스트 입력 (예: 물품 공급 계약서)"';
+            html += ' value="' + section.content + '" onchange="updateContent(' + index + ', this.value)">';
+            return html;
         case 'PARAGRAPH':
-            return `
-                <div class="mb-2">
-                    <label class="form-label small">정렬</label>
-                    <select class="form-select form-select-sm" onchange="updateMetadata(${index}, 'alignment', this.value)">
-                        <option value="left" ${section.metadata.alignment === 'left' ? 'selected' : ''}>왼쪽</option>
-                        <option value="center" ${section.metadata.alignment === 'center' ? 'selected' : ''}>가운데</option>
-                        <option value="right" ${section.metadata.alignment === 'right' ? 'selected' : ''}>오른쪽</option>
-                        <option value="justify" ${section.metadata.alignment === 'justify' ? 'selected' : ''}>양쪽 정렬</option>
-                    </select>
-                </div>
-                <textarea class="form-control" rows="4" placeholder="본문 내용 입력. 변수는 {{변수명}} 형식으로 입력하세요."
-                          onchange="updateContent(${index}, this.value)">${section.content}</textarea>
-                <div class="form-check mt-2">
-                    <input class="form-check-input" type="checkbox" id="indent${index}"
-                           ${section.metadata.indent ? 'checked' : ''} onchange="updateMetadata(${index}, 'indent', this.checked)">
-                    <label class="form-check-label small" for="indent${index}">들여쓰기</label>
-                </div>
-            `;
+            html += '<div class="mb-2">';
+            html += '<label class="form-label small">정렬</label>';
+            html += '<select class="form-select form-select-sm" onchange="updateMetadata(' + index + ', \'alignment\', this.value)">';
+            html += '<option value="left"' + (section.metadata.alignment === 'left' ? ' selected' : '') + '>왼쪽</option>';
+            html += '<option value="center"' + (section.metadata.alignment === 'center' ? ' selected' : '') + '>가운데</option>';
+            html += '<option value="right"' + (section.metadata.alignment === 'right' ? ' selected' : '') + '>오른쪽</option>';
+            html += '<option value="justify"' + (section.metadata.alignment === 'justify' ? ' selected' : '') + '>양쪽 정렬</option>';
+            html += '</select>';
+            html += '</div>';
+            html += '<textarea class="form-control" rows="4" placeholder="본문 내용 입력. 변수는 {{변수명}} 형식으로 입력하세요."';
+            html += ' onchange="updateContent(' + index + ', this.value)">' + section.content + '</textarea>';
+            html += '<div class="form-check mt-2">';
+            html += '<input class="form-check-input" type="checkbox" id="indent' + index + '"';
+            html += (section.metadata.indent ? ' checked' : '') + ' onchange="updateMetadata(' + index + ', \'indent\', this.checked)">';
+            html += '<label class="form-check-label small" for="indent' + index + '">들여쓰기</label>';
+            html += '</div>';
+            return html;
         case 'TABLE':
-            return `<div class="alert alert-info small">표 기능은 향후 업데이트 예정입니다.</div>`;
+            return '<div class="alert alert-info small">표 기능은 향후 업데이트 예정입니다.</div>';
         case 'DIVIDER':
-            return `
-                <div class="mb-2">
-                    <label class="form-label small">구분선 스타일</label>
-                    <select class="form-select form-select-sm" onchange="updateMetadata(${index}, 'style', this.value)">
-                        <option value="solid" ${section.metadata.style === 'solid' ? 'selected' : ''}>실선</option>
-                        <option value="dashed" ${section.metadata.style === 'dashed' ? 'selected' : ''}>점선</option>
-                        <option value="dotted" ${section.metadata.style === 'dotted' ? 'selected' : ''}>점</option>
-                    </select>
-                </div>
-            `;
+            html += '<div class="mb-2">';
+            html += '<label class="form-label small">구분선 스타일</label>';
+            html += '<select class="form-select form-select-sm" onchange="updateMetadata(' + index + ', \'style\', this.value)">';
+            html += '<option value="solid"' + (section.metadata.style === 'solid' ? ' selected' : '') + '>실선</option>';
+            html += '<option value="dashed"' + (section.metadata.style === 'dashed' ? ' selected' : '') + '>점선</option>';
+            html += '<option value="dotted"' + (section.metadata.style === 'dotted' ? ' selected' : '') + '>점</option>';
+            html += '</select>';
+            html += '</div>';
+            return html;
         default:
             return '';
     }
@@ -392,19 +393,18 @@ function renderVariables() {
 
     Object.keys(variables).forEach(key => {
         const v = variables[key];
-        container.innerHTML += `
-            <div class="variable-item mb-2">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <code class="text-primary">{{${key}}}</code>
-                        <div class="small text-muted">${v.label}</div>
-                    </div>
-                    <button class="btn btn-sm btn-link text-danger p-0" onclick="removeVariable('${key}')">
-                        <i class="bi bi-x-circle"></i>
-                    </button>
-                </div>
-            </div>
-        `;
+        let html = '<div class="variable-item mb-2">';
+        html += '<div class="d-flex justify-content-between align-items-start">';
+        html += '<div class="flex-grow-1">';
+        html += '<code class="text-primary">{{' + key + '}}</code>';
+        html += '<div class="small text-muted">' + v.label + '</div>';
+        html += '</div>';
+        html += '<button class="btn btn-sm btn-link text-danger p-0" onclick="removeVariable(\'' + key + '\')">';
+        html += '<i class="bi bi-x-circle"></i>';
+        html += '</button>';
+        html += '</div>';
+        html += '</div>';
+        container.innerHTML += html;
     });
 }
 
@@ -438,7 +438,7 @@ function addVariable() {
 
 // 변수 삭제
 function removeVariable(name) {
-    if(confirm(`변수 {{${name}}}을(를) 삭제하시겠습니까?`)) {
+    if(confirm('변수 {{' + name + '}}을(를) 삭제하시겠습니까?')) {
         delete variables[name];
         renderVariables();
     }
@@ -448,7 +448,7 @@ function removeVariable(name) {
 function insertQuickVariable(name) {
     const varText = '{{' + name + '}}';
     navigator.clipboard.writeText(varText).then(() => {
-        alert(`${varText}이(가) 클립보드에 복사되었습니다!`);
+        alert(varText + '이(가) 클립보드에 복사되었습니다!');
     });
 }
 
@@ -474,14 +474,14 @@ function renderSectionPreview(section) {
         case 'HEADING':
             const level = section.metadata.level || 1;
             const align = section.metadata.alignment || 'center';
-            return `<h${level} style="text-align: ${align}">${content}</h${level}>`;
+            return '<h' + level + ' style="text-align: ' + align + '">' + content + '</h' + level + '>';
         case 'PARAGRAPH':
             const pAlign = section.metadata.alignment || 'left';
             const indent = section.metadata.indent ? 'text-indent: 2em;' : '';
-            return `<p style="text-align: ${pAlign}; ${indent}">${content}</p>`;
+            return '<p style="text-align: ' + pAlign + '; ' + indent + '">' + content + '</p>';
         case 'DIVIDER':
             const style = section.metadata.style || 'solid';
-            return `<hr style="border-style: ${style}">`;
+            return '<hr style="border-style: ' + style + '">';
         default:
             return '';
     }

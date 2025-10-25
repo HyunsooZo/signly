@@ -1,7 +1,9 @@
 package com.signly.template.domain.model;
 
 import com.signly.common.exception.ValidationException;
+import lombok.Getter;
 
+@Getter
 public class TemplateVariable {
 
     private final String label;
@@ -9,20 +11,24 @@ public class TemplateVariable {
     private final boolean required;
     private final String defaultValue;
 
-    private TemplateVariable(String label,
-                             TemplateVariableType type,
-                             boolean required,
-                             String defaultValue) {
+    private TemplateVariable(
+            String label,
+            TemplateVariableType type,
+            boolean required,
+            String defaultValue
+    ) {
         this.label = label;
         this.type = type;
         this.required = required;
         this.defaultValue = defaultValue;
     }
 
-    public static TemplateVariable of(String label,
-                                      TemplateVariableType type,
-                                      boolean required,
-                                      String defaultValue) {
+    public static TemplateVariable of(
+            String label,
+            TemplateVariableType type,
+            boolean required,
+            String defaultValue
+    ) {
         if (label == null || label.trim().isEmpty()) {
             throw new ValidationException("변수 레이블은 필수입니다");
         }
@@ -30,22 +36,6 @@ public class TemplateVariable {
             throw new ValidationException("변수 타입은 필수입니다");
         }
         return new TemplateVariable(label, type, required, defaultValue);
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public TemplateVariableType getType() {
-        return type;
-    }
-
-    public boolean isRequired() {
-        return required;
-    }
-
-    public String getDefaultValue() {
-        return defaultValue;
     }
 
     public void validateValue(String value) {

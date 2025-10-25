@@ -3,9 +3,11 @@ package com.signly.template.domain.model;
 import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
 import com.signly.user.domain.model.UserId;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Getter
 public class ContractTemplate extends AggregateRoot {
 
     private TemplateId templateId;
@@ -19,9 +21,16 @@ public class ContractTemplate extends AggregateRoot {
         super();
     }
 
-    private ContractTemplate(TemplateId templateId, UserId ownerId, String title,
-                           TemplateContent content, int version, TemplateStatus status,
-                           LocalDateTime createdAt, LocalDateTime updatedAt) {
+    private ContractTemplate(
+            TemplateId templateId,
+            UserId ownerId,
+            String title,
+            TemplateContent content,
+            int version,
+            TemplateStatus status,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         super(createdAt, updatedAt);
         this.templateId = templateId;
         this.ownerId = ownerId;
@@ -31,22 +40,49 @@ public class ContractTemplate extends AggregateRoot {
         this.status = status;
     }
 
-    public static ContractTemplate create(UserId ownerId, String title, TemplateContent content) {
+    public static ContractTemplate create(
+            UserId ownerId,
+            String title,
+            TemplateContent content
+    ) {
         validateCreateParameters(ownerId, title, content);
 
         TemplateId templateId = TemplateId.generate();
         int initialVersion = 1;
         TemplateStatus initialStatus = TemplateStatus.DRAFT;
 
-        return new ContractTemplate(templateId, ownerId, title, content, initialVersion, initialStatus,
-                                  LocalDateTime.now(), LocalDateTime.now());
+        return new ContractTemplate(
+                templateId,
+                ownerId,
+                title,
+                content,
+                initialVersion,
+                initialStatus,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
     }
 
-    public static ContractTemplate restore(TemplateId templateId, UserId ownerId, String title,
-                                         TemplateContent content, int version, TemplateStatus status,
-                                         LocalDateTime createdAt, LocalDateTime updatedAt) {
-        return new ContractTemplate(templateId, ownerId, title, content, version, status,
-                                   createdAt, updatedAt);
+    public static ContractTemplate restore(
+            TemplateId templateId,
+            UserId ownerId,
+            String title,
+            TemplateContent content,
+            int version,
+            TemplateStatus status,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
+        return new ContractTemplate(
+                templateId,
+                ownerId,
+                title,
+                content,
+                version,
+                status,
+                createdAt,
+                updatedAt
+        );
     }
 
     public void updateContent(TemplateContent newContent) {
@@ -208,7 +244,11 @@ public class ContractTemplate extends AggregateRoot {
         updateTimestamp();
     }
 
-    private static void validateCreateParameters(UserId ownerId, String title, TemplateContent content) {
+    private static void validateCreateParameters(
+            UserId ownerId,
+            String title,
+            TemplateContent content
+    ) {
         if (ownerId == null) {
             throw new ValidationException("소유자 ID는 필수입니다");
         }
@@ -229,30 +269,6 @@ public class ContractTemplate extends AggregateRoot {
         if (content == null) {
             throw new ValidationException("템플릿 내용은 필수입니다");
         }
-    }
-
-    public TemplateId getTemplateId() {
-        return templateId;
-    }
-
-    public UserId getOwnerId() {
-        return ownerId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public TemplateContent getContent() {
-        return content;
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public TemplateStatus getStatus() {
-        return status;
     }
 
     public boolean isActive() {

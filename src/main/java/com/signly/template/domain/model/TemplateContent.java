@@ -7,12 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signly.common.exception.ValidationException;
 import com.signly.common.util.UlidGenerator;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TemplateContent {
@@ -24,9 +19,11 @@ public class TemplateContent {
     private final TemplateMetadata metadata;
     private final List<TemplateSection> sections;
 
-    private TemplateContent(String version,
-                            TemplateMetadata metadata,
-                            List<TemplateSection> sections) {
+    private TemplateContent(
+            String version,
+            TemplateMetadata metadata,
+            List<TemplateSection> sections
+    ) {
         this.version = version;
         this.metadata = metadata;
         this.sections = sections != null ? new ArrayList<>(sections) : new ArrayList<>();
@@ -212,7 +209,7 @@ public class TemplateContent {
     public String renderHtml() {
         return sections.stream()
                 .sorted(Comparator.comparingInt(TemplateSection::getOrder))
-                .map(section -> renderSectionToHtml(section))
+                .map(this::renderSectionToHtml)
                 .collect(Collectors.joining("\n"));
     }
 

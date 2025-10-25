@@ -1,9 +1,11 @@
 package com.signly.template.domain.model;
 
 import com.signly.common.util.UlidGenerator;
+import lombok.Getter;
 
 import java.util.Objects;
 
+@Getter
 public class TemplateId {
 
     private final String value;
@@ -24,10 +26,6 @@ public class TemplateId {
 
     public static TemplateId generate() {
         return new TemplateId(UlidGenerator.generate());
-    }
-
-    public String getValue() {
-        return value;
     }
 
     @Override
