@@ -1035,7 +1035,18 @@
             };
         });
 
-        document.getElementById('sectionsJson').value = JSON.stringify(serializedSections);
+        const templateData = {
+            version: '1.0',
+            metadata: {
+                title: title,
+                description: '',
+                createdBy: '',
+                variables: {}
+            },
+            sections: serializedSections
+        };
+
+        document.getElementById('sectionsJson').value = JSON.stringify(templateData);
 
         document.getElementById('templateForm').submit();
     }
