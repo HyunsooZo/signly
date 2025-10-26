@@ -4,30 +4,11 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} - Signly</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="/css/common.css" rel="stylesheet">
-    <link href="/css/templates.css" rel="stylesheet">
-</head>
+<c:set var="additionalCss" value="${['/css/templates.css']}" />
+<jsp:include page="../common/header.jsp" />
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/home">
-                <i class="bi bi-file-earmark-text me-2"></i>Signly
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/home">대시보드</a>
-                <a class="nav-link active" href="/templates">템플릿</a>
-                <a class="nav-link" href="/contracts">계약서</a>
-                <a class="nav-link" href="/profile/signature">서명 관리</a>
-                <a class="nav-link" href="/logout">로그아웃</a>
-            </div>
-        </div>
-    </nav>
+    <c:set var="currentPage" value="templates" />
+    <jsp:include page="../common/navbar.jsp" />
 
     <div class="container mt-4">
         <div class="row">
@@ -296,8 +277,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/alerts.js"></script>
     <script>
         // HTML 태그 제거 및 텍스트만 추출
         document.addEventListener('DOMContentLoaded', function() {
@@ -387,5 +366,6 @@
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
     </script>
+    <jsp:include page="../common/footer.jsp" />
 </body>
 </html>

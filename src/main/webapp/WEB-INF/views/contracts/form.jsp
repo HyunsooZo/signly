@@ -4,31 +4,11 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} - Signly</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="/css/common.css" rel="stylesheet">
-    <link href="/css/contracts.css" rel="stylesheet">
-    <link href="/css/contract-common.css" rel="stylesheet">
-</head>
+<c:set var="additionalCss" value="${['/css/contracts.css', '/css/contract-common.css']}" />
+<jsp:include page="../common/header.jsp" />
 <body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/home">
-                <i class="bi bi-file-earmark-text me-2"></i>Signly
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/home">대시보드</a>
-                <a class="nav-link" href="/templates">템플릿</a>
-                <a class="nav-link active" href="/contracts">계약서</a>
-                <a class="nav-link" href="/profile/signature">서명 관리</a>
-                <a class="nav-link" href="/logout">로그아웃</a>
-            </div>
-        </div>
-    </nav>
+    <c:set var="currentPage" value="contracts" />
+    <jsp:include page="../common/navbar.jsp" />
 
     <div class="container mt-4">
         <div class="row">
@@ -397,8 +377,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/alerts.js"></script>
     <script>
         const contractContentTextarea = document.getElementById('content');
         const currentUserId = document.body?.dataset?.currentUserId || '';
@@ -2133,5 +2111,6 @@
             }
         });
     </script>
+    <jsp:include page="../common/footer.jsp" />
 </body>
 </html>
