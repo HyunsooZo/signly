@@ -1149,6 +1149,32 @@
             applyExistingContractData();
         }
 
+        // 빈 변수 뒤의 불필요한 텍스트 정리 (예: "부터 까지" → "부터")
+        function cleanupEmptyVariableContext(container) {
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+            const textNodes = [];
+
+            while (walker.nextNode()) {
+                textNodes.push(walker.currentNode);
+            }
+
+            textNodes.forEach(node => {
+                if (!node.nodeValue) return;
+                let text = node.nodeValue;
+
+                // " 부터  까지" 패턴 (종료일이 비어있을 때)
+                text = text.replace(/\s*부터\s+까지/g, ' 부터');
+                // " 까지 " 단독 (앞의 값이 비어있을 때)
+                text = text.replace(/\s+까지\s*/g, '');
+                // 연속된 공백 정리
+                text = text.replace(/\s{2,}/g, ' ');
+
+                if (text !== node.nodeValue) {
+                    node.nodeValue = text;
+                }
+            });
+        }
+
         // 프리셋 내용 업데이트 (폼 제출용)
         function updatePresetContent() {
             const container = document.getElementById('presetHtmlContainer');
@@ -1160,7 +1186,7 @@
 
             inputs.forEach(input => {
                 const varName = input.getAttribute('data-variable-name');
-                const value = input.value || '';
+                const value = (input.value || '').trim(); // 앞뒤 공백 제거
                 const wrapper = input.parentNode;
                 if (wrapper) {
                     wrapper.setAttribute('data-variable-name', varName || '');
@@ -1186,6 +1212,9 @@
                     img.remove();
                 }
             });
+
+            // 빈 변수 뒤의 불필요한 텍스트 정리
+            cleanupEmptyVariableContext(clone);
 
             // Hidden textarea에 HTML 저장
             document.getElementById('presetContentHidden').value = clone.innerHTML;
