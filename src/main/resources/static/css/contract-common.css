@@ -43,7 +43,7 @@ body:not(:has(.navbar)) {
 /* 인트로 */
 .contract-intro {
     text-align: justify;
-    margin: 18px 0;
+    margin: 7px 0;
 }
 
 /* 섹션 공통 */
@@ -54,7 +54,7 @@ body:not(:has(.navbar)) {
 .section-title,
 .section-dotted,
 .section-clause {
-    margin: 16px 0;
+    margin: 7px 0;
 }
 
 .section-text {
@@ -76,6 +76,7 @@ body:not(:has(.navbar)) {
 /* 조항 */
 .section-clause {
     padding-left: 18px;
+    margin: 6px 0;
 }
 
 /* 점선 박스 */
@@ -174,7 +175,7 @@ body,
 
 .template-clause {
     counter-increment: clause-counter;
-    margin: 18px 0;
+    margin: 6px 0;
     padding-left: 18px;
 }
 
@@ -192,7 +193,7 @@ body,
 /* 템플릿 섹션 타입별 스타일 */
 .template-heading,
 .template-header {
-    margin: 24px 0 12px;
+    margin: 12px 0 6px;
 }
 
 .template-heading h1,
@@ -213,7 +214,7 @@ body,
 }
 
 .template-paragraph {
-    margin: 15px 0;
+    margin: 6px 0;
 }
 
 .template-paragraph-indent {
@@ -236,7 +237,7 @@ body,
 }
 
 .template-custom {
-    margin: 16px 0;
+    margin: 6px 0;
 }
 
 /* 서명란 */
@@ -306,6 +307,11 @@ body,
 
 /* PDF 전용 스타일 */
 @media print {
+    /* 안내 문구 숨김 (작성 시에만 표시) */
+    .note {
+        display: none !important;
+    }
+
     /* 변수 밑줄 제거 */
     .contract-variable-underline,
     .blank-line,
