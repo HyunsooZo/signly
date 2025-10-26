@@ -678,7 +678,7 @@
 
     function insertVariable(variable) {
         if (!activeElement) {
-            alert('먼저 텍스트를 입력할 위치를 클릭해주세요.');
+            showAlertModal('먼저 텍스트를 입력할 위치를 클릭해주세요.');
             return;
         }
 
@@ -881,7 +881,7 @@
         updateSectionsData();
 
         if (sections.length === 0) {
-            alert('미리볼 섹션이 없습니다. 먼저 섹션을 추가해주세요.');
+            showAlertModal('미리볼 섹션이 없습니다. 먼저 섹션을 추가해주세요.');
             return;
         }
 
@@ -1011,13 +1011,13 @@
         const title = document.getElementById('templateTitle').value;
 
         if (!title) {
-            alert('템플릿 제목을 입력해주세요.');
+            showAlertModal('템플릿 제목을 입력해주세요.');
             document.getElementById('templateTitle').focus();
             return;
         }
 
         if (sections.length === 0) {
-            alert('최소 하나 이상의 섹션을 추가해주세요.');
+            showAlertModal('최소 하나 이상의 섹션을 추가해주세요.');
             return;
         }
 
@@ -1076,6 +1076,37 @@
             showVariableModal();
         }
     });
+
+    function showAlertModal(message) {
+        const modalHtml = `
+            <div class="modal fade" id="alertModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">알림</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            ${message}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        const existingModal = document.getElementById('alertModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = new bootstrap.Modal(document.getElementById('alertModal'));
+        modal.show();
+        document.getElementById('alertModal').addEventListener('hidden.bs.modal', function () {
+            this.remove();
+        });
+    }
 
 </script>
 

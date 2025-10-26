@@ -47,14 +47,14 @@
 
                 <!-- 알림 메시지 -->
                 <c:if test="${not empty successMessage}">
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
                         <i class="bi bi-check-circle me-2"></i>${successMessage}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
 
                 <c:if test="${not empty errorMessage}">
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
                         <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -297,6 +297,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/alerts.js"></script>
     <script>
         // HTML 태그 제거 및 텍스트만 추출
         document.addEventListener('DOMContentLoaded', function() {

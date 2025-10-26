@@ -48,14 +48,14 @@
 
                 <!-- 알림 메시지 -->
                 <c:if test="${not empty successMessage}">
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
                         <i class="bi bi-check-circle me-2"></i>${successMessage}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
 
                 <c:if test="${not empty errorMessage}">
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
                         <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -398,6 +398,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/alerts.js"></script>
     <script>
         const contractContentTextarea = document.getElementById('content');
         const currentUserId = document.body?.dataset?.currentUserId || '';
@@ -1198,7 +1199,7 @@
                 });
 
                 if (!response.ok) {
-                    alert('표준 양식을 불러오지 못했습니다.');
+                    showAlertModal('표준 양식을 불러오지 못했습니다.');
                     return;
                 }
 
@@ -1240,7 +1241,7 @@
 
             } catch (error) {
                 console.error('프리셋 로딩 실패:', error);
-                alert('표준 양식을 불러오지 못했습니다.');
+                showAlertModal('표준 양식을 불러오지 못했습니다.');
             }
         }
 
@@ -1951,7 +1952,7 @@
                             if (!validateAllTemplateVariables()) {
                                 event.preventDefault();
                                 event.stopPropagation();
-                                alert('입력한 변수 값을 확인해주세요.');
+                                showAlertModal('입력한 변수 값을 확인해주세요.');
                                 return false;
                             }
 
@@ -1990,7 +1991,7 @@
                         if (firstEmail && secondEmail && firstEmail === secondEmail) {
                             event.preventDefault();
                             event.stopPropagation();
-                            alert('갑과 을의 이메일 주소는 달라야 합니다.');
+                            showAlertModal('갑과 을의 이메일 주소는 달라야 합니다.');
                             return false;
                         }
 
@@ -2102,6 +2103,37 @@
                 }, true); // capture phase에서 먼저 실행
             }
         });
+
+        function showAlertModal(message) {
+            const modalHtml = `
+                <div class="modal fade" id="alertModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">알림</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${message}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            const existingModal = document.getElementById('alertModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('alertModal'));
+            modal.show();
+            document.getElementById('alertModal').addEventListener('hidden.bs.modal', function () {
+                this.remove();
+            });
+        }
     </script>
 </body>
 </html>

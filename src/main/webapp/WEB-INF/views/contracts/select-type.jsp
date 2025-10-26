@@ -149,7 +149,7 @@
             const selectedValue = select.value;
 
             if (!selectedValue) {
-                alert('템플릿을 선택해주세요.');
+                showAlertModal('템플릿을 선택해주세요.');
                 return;
             }
 
@@ -160,6 +160,37 @@
             } else if (type === 'template') {
                 window.location.href = '/contracts/new?templateId=' + id;
             }
+        }
+
+        function showAlertModal(message) {
+            const modalHtml = `
+                <div class="modal fade" id="alertModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">알림</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${message}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            const existingModal = document.getElementById('alertModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('alertModal'));
+            modal.show();
+            document.getElementById('alertModal').addEventListener('hidden.bs.modal', function () {
+                this.remove();
+            });
         }
     </script>
 </body>
