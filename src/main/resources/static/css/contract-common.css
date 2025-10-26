@@ -303,3 +303,30 @@ body,
     max-height: 100%;
     opacity: 0.9;
 }
+
+/* PDF 전용 스타일 */
+@media print {
+    /* 변수 밑줄 제거 */
+    .contract-variable-underline,
+    .blank-line,
+    .filled-blank {
+        border-bottom: none !important;
+        text-decoration: none !important;
+    }
+
+    /* 서명 이미지 크기 및 위치 고정 */
+    .signature-stamp-image-element {
+        width: 60px !important;
+        height: auto !important;
+        max-width: 60px !important;
+        max-height: 30px !important;
+        vertical-align: middle !important;
+    }
+
+    /* PDF에서 wrapper의 absolute positioning이 제대로 작동하지 않을 수 있으므로
+       이미지 자체에 마진으로 위치 조정 */
+    .signature-stamp-wrapper .signature-stamp-image-element {
+        margin-left: -30px;
+        margin-top: -15px;
+    }
+}
