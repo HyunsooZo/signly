@@ -14,6 +14,7 @@ import com.signly.contract.application.dto.UpdateContractCommand;
 import com.signly.contract.domain.model.ContractStatus;
 import com.signly.contract.domain.model.GeneratedPdf;
 import com.signly.contract.domain.model.PresetType;
+import com.signly.signature.application.FirstPartySignatureService;
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.dto.TemplateResponse;
 import com.signly.template.application.preset.TemplatePresetService;
@@ -55,6 +56,7 @@ public class ContractWebController extends BaseWebController {
     private final TemplateService templateService;
     private final TemplatePresetService templatePresetService;
     private final CurrentUserProvider currentUserProvider;
+    private final FirstPartySignatureService firstPartySignatureService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ContractWebController(
@@ -62,13 +64,15 @@ public class ContractWebController extends BaseWebController {
             ContractPdfService contractPdfService,
             TemplateService templateService,
             TemplatePresetService templatePresetService,
-            CurrentUserProvider currentUserProvider
+            CurrentUserProvider currentUserProvider,
+            FirstPartySignatureService firstPartySignatureService
     ) {
         this.contractService = contractService;
         this.contractPdfService = contractPdfService;
         this.templateService = templateService;
         this.templatePresetService = templatePresetService;
         this.currentUserProvider = currentUserProvider;
+        this.firstPartySignatureService = firstPartySignatureService;
     }
 
     @GetMapping
@@ -113,11 +117,21 @@ public class ContractWebController extends BaseWebController {
             @RequestHeader(value = "X-User-Id", required = false) String userId,
             @AuthenticationPrincipal SecurityUser securityUser,
             HttpServletRequest request,
-            Model model
+            Model model,
+            RedirectAttributes redirectAttributes
     ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             model.addAttribute("currentUserId", resolvedUserId);
+
+            // 서명 존재 여부 체크
+            if (!firstPartySignatureService.hasSignature(resolvedUserId)) {
+                logger.warn("서명 없이 계약서 생성 시도: userId={}", resolvedUserId);
+                redirectAttributes.addFlashAttribute("errorMessage",
+                    "계약서를 생성하려면 먼저 서명을 등록해야 합니다.");
+                redirectAttributes.addFlashAttribute("showSignatureAlert", true);
+                return "redirect:/profile/signature";
+            }
 
             // preset이나 templateId가 없으면 유형 선택 화면으로 이동
             if (preset == null && templateId == null) {

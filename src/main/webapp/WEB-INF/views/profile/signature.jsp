@@ -125,6 +125,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+
+    <c:if test="${showSignatureAlert}">
+        <script>
+            // 페이지 로드 시 알럿 표시
+            window.addEventListener('DOMContentLoaded', function() {
+                alert('계약서를 생성하려면 먼저 서명을 등록해야 합니다.\n\n아래에서 서명을 작성하고 저장해 주세요.');
+            });
+        </script>
+    </c:if>
+
     <c:if test="${hasSignature}">
         <fmt:formatDate value="${signature.updatedAtDate}" pattern="yyyy-MM-dd'T'HH:mm:ssXXX" var="ownerSignatureUpdatedAt" />
     </c:if>
