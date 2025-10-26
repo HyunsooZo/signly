@@ -123,14 +123,45 @@
         </div>
     </div>
 
+    <!-- 서명 필요 알림 모달 -->
+    <c:if test="${showSignatureAlert}">
+        <div class="modal fade" id="signatureRequiredModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            서명 등록 필요
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">
+                            <strong>계약서를 생성하려면 먼저 서명을 등록해야 합니다.</strong>
+                        </p>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            아래에서 서명을 작성하고 저장해 주세요.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                            <i class="bi bi-pencil-square me-2"></i>확인
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </c:if>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
 
     <c:if test="${showSignatureAlert}">
         <script>
-            // 페이지 로드 시 알럿 표시
+            // 페이지 로드 시 모달 표시
             window.addEventListener('DOMContentLoaded', function() {
-                alert('계약서를 생성하려면 먼저 서명을 등록해야 합니다.\n\n아래에서 서명을 작성하고 저장해 주세요.');
+                const modal = new bootstrap.Modal(document.getElementById('signatureRequiredModal'));
+                modal.show();
             });
         </script>
     </c:if>
