@@ -53,6 +53,9 @@
                 </div>
 
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                <c:if test="${not empty returnUrl}">
+                    <input type="hidden" name="returnUrl" value="${returnUrl}"/>
+                </c:if>
 
                 <button type="submit" class="btn btn-primary btn-auth">로그인</button>
             </form>

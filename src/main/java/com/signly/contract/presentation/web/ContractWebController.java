@@ -5,6 +5,7 @@ import com.signly.common.exception.BusinessException;
 import com.signly.common.exception.ValidationException;
 import com.signly.common.security.CurrentUserProvider;
 import com.signly.common.security.SecurityUser;
+import com.signly.common.web.BaseWebController;
 import com.signly.contract.application.ContractPdfService;
 import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.ContractResponse;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,7 +35,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -46,7 +47,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/contracts")
-public class ContractWebController {
+public class ContractWebController extends BaseWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractWebController.class);
     private final ContractService contractService;
@@ -56,11 +57,13 @@ public class ContractWebController {
     private final CurrentUserProvider currentUserProvider;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ContractWebController(ContractService contractService,
-                                ContractPdfService contractPdfService,
-                                TemplateService templateService,
-                                TemplatePresetService templatePresetService,
-                                CurrentUserProvider currentUserProvider) {
+    public ContractWebController(
+            ContractService contractService,
+            ContractPdfService contractPdfService,
+            TemplateService templateService,
+            TemplatePresetService templatePresetService,
+            CurrentUserProvider currentUserProvider
+    ) {
         this.contractService = contractService;
         this.contractPdfService = contractPdfService;
         this.templateService = templateService;
@@ -69,13 +72,15 @@ public class ContractWebController {
     }
 
     @GetMapping
-    public String contractList(@RequestParam(value = "page", defaultValue = "0") int page,
-                              @RequestParam(value = "size", defaultValue = "10") int size,
-                              @RequestParam(value = "status", required = false) ContractStatus status,
-                              @RequestHeader(value = "X-User-Id", required = false) String userId,
-                              @AuthenticationPrincipal SecurityUser securityUser,
-                              HttpServletRequest request,
-                              Model model) {
+    public String contractList(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "status", required = false) ContractStatus status,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            Model model
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -102,12 +107,14 @@ public class ContractWebController {
     }
 
     @GetMapping("/new")
-    public String newContractForm(@RequestParam(value = "templateId", required = false) String templateId,
-                                 @RequestParam(value = "preset", required = false) String preset,
-                                 @RequestHeader(value = "X-User-Id", required = false) String userId,
-                                 @AuthenticationPrincipal SecurityUser securityUser,
-                                 HttpServletRequest request,
-                                 Model model) {
+    public String newContractForm(
+            @RequestParam(value = "templateId", required = false) String templateId,
+            @RequestParam(value = "preset", required = false) String preset,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            Model model
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             model.addAttribute("currentUserId", resolvedUserId);
@@ -163,13 +170,15 @@ public class ContractWebController {
     }
 
     @PostMapping
-    public String createContract(@Valid @ModelAttribute("contract") ContractForm form,
-                                BindingResult bindingResult,
-                                @RequestHeader(value = "X-User-Id", required = false) String userId,
-                                @AuthenticationPrincipal SecurityUser securityUser,
-                                HttpServletRequest request,
-                                Model model,
-                                RedirectAttributes redirectAttributes) {
+    public String createContract(
+            @Valid @ModelAttribute("contract") ContractForm form,
+            BindingResult bindingResult,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
         String resolvedUserId = null;
         try {
             resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
@@ -223,7 +232,12 @@ public class ContractWebController {
         }
     }
 
-    private String handleFormError(String errorMessage, Model model, ContractForm form, String userId) {
+    private String handleFormError(
+            String errorMessage,
+            Model model,
+            ContractForm form,
+            String userId
+    ) {
         if (form.getExpiresAt() == null) {
             form.setExpiresAt(LocalDateTime.now().plusHours(24));
         }
@@ -260,11 +274,13 @@ public class ContractWebController {
     }
 
     @GetMapping("/{contractId}")
-    public String contractDetail(@PathVariable String contractId,
-                                @RequestHeader(value = "X-User-Id", required = false) String userId,
-                                @AuthenticationPrincipal SecurityUser securityUser,
-                                HttpServletRequest request,
-                                Model model) {
+    public String contractDetail(
+            @PathVariable String contractId,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            Model model
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
@@ -281,11 +297,13 @@ public class ContractWebController {
     }
 
     @GetMapping("/{contractId}/edit")
-    public String editContractForm(@PathVariable String contractId,
-                                  @RequestHeader(value = "X-User-Id", required = false) String userId,
-                                  @AuthenticationPrincipal SecurityUser securityUser,
-                                  HttpServletRequest request,
-                                  Model model) {
+    public String editContractForm(
+            @PathVariable String contractId,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            Model model
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
@@ -366,14 +384,16 @@ public class ContractWebController {
     }
 
     @PostMapping("/{contractId}")
-    public String updateContract(@PathVariable String contractId,
-                                @Valid @ModelAttribute("contract") ContractForm form,
-                                BindingResult bindingResult,
-                                @RequestHeader(value = "X-User-Id", required = false) String userId,
-                                @AuthenticationPrincipal SecurityUser securityUser,
-                                HttpServletRequest request,
-                                Model model,
-                                RedirectAttributes redirectAttributes) {
+    public String updateContract(
+            @PathVariable String contractId,
+            @Valid @ModelAttribute("contract") ContractForm form,
+            BindingResult bindingResult,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
 
@@ -433,11 +453,13 @@ public class ContractWebController {
     }
 
     @PostMapping("/{contractId}/send")
-    public String sendForSigning(@PathVariable String contractId,
-                                @RequestHeader(value = "X-User-Id", required = false) String userId,
-                                @AuthenticationPrincipal SecurityUser securityUser,
-                                HttpServletRequest request,
-                                RedirectAttributes redirectAttributes) {
+    public String sendForSigning(
+            @PathVariable String contractId,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             contractService.sendForSigning(resolvedUserId, contractId);
@@ -451,11 +473,13 @@ public class ContractWebController {
     }
 
     @PostMapping("/{contractId}/resend")
-    public String resendSigningEmail(@PathVariable String contractId,
-                                    @RequestHeader(value = "X-User-Id", required = false) String userId,
-                                    @AuthenticationPrincipal SecurityUser securityUser,
-                                    HttpServletRequest request,
-                                    RedirectAttributes redirectAttributes) {
+    public String resendSigningEmail(
+            @PathVariable String contractId,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             contractService.resendSigningEmail(resolvedUserId, contractId);
@@ -469,11 +493,13 @@ public class ContractWebController {
     }
 
     @PostMapping("/{contractId}/cancel")
-    public String cancelContract(@PathVariable String contractId,
-                                @RequestHeader(value = "X-User-Id", required = false) String userId,
-                                @AuthenticationPrincipal SecurityUser securityUser,
-                                HttpServletRequest request,
-                                RedirectAttributes redirectAttributes) {
+    public String cancelContract(
+            @PathVariable String contractId,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             contractService.cancelContract(resolvedUserId, contractId);
@@ -487,9 +513,11 @@ public class ContractWebController {
     }
 
     @PostMapping("/{contractId}/complete")
-    public String completeContract(@PathVariable String contractId,
-                                  @RequestHeader(value = "X-User-Id", defaultValue = "01ARZ3NDEKTSV4RRFFQ69G5FAV") String userId,
-                                  RedirectAttributes redirectAttributes) {
+    public String completeContract(
+            @PathVariable String contractId,
+            @RequestHeader(value = "X-User-Id", defaultValue = "01ARZ3NDEKTSV4RRFFQ69G5FAV") String userId,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             contractService.completeContract(userId, contractId);
             logger.info("계약서 완료 처리 성공: contractId={}", contractId);
@@ -502,11 +530,13 @@ public class ContractWebController {
     }
 
     @PostMapping("/{contractId}/delete")
-    public String deleteContract(@PathVariable String contractId,
-                                @RequestHeader(value = "X-User-Id", required = false) String userId,
-                                @AuthenticationPrincipal SecurityUser securityUser,
-                                HttpServletRequest request,
-                                RedirectAttributes redirectAttributes) {
+    public String deleteContract(
+            @PathVariable String contractId,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             contractService.deleteContract(resolvedUserId, contractId);
@@ -520,20 +550,22 @@ public class ContractWebController {
     }
 
     @GetMapping("/{contractId}/pdf-view")
-    public String viewPdf(@PathVariable String contractId,
-                         @RequestHeader(value = "X-User-Id", required = false) String userId,
-                         @AuthenticationPrincipal SecurityUser securityUser,
-                         HttpServletRequest request,
-                         Model model) {
+    public String viewPdf(
+            @PathVariable String contractId,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            Model model
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
 
             // SIGNED 또는 COMPLETED 상태가 아니면 접근 불가
             if (contract.getStatus() != ContractStatus.SIGNED &&
-                contract.getStatus() != ContractStatus.COMPLETED) {
+                    contract.getStatus() != ContractStatus.COMPLETED) {
                 logger.warn("서명 완료되지 않은 계약서 PDF 뷰어 접근 시도: contractId={}, status={}",
-                           contractId, contract.getStatus());
+                        contractId, contract.getStatus());
                 model.addAttribute("errorMessage", "서명이 완료된 계약서만 PDF로 볼 수 있습니다.");
                 return "redirect:/contracts/" + contractId;
             }
@@ -550,20 +582,22 @@ public class ContractWebController {
     }
 
     @GetMapping("/{contractId}/pdf/download")
-    public void downloadPdf(@PathVariable String contractId,
-                           @RequestHeader(value = "X-User-Id", required = false) String userId,
-                           @AuthenticationPrincipal SecurityUser securityUser,
-                           HttpServletRequest request,
-                           HttpServletResponse response) throws IOException {
+    public void downloadPdf(
+            @PathVariable String contractId,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
 
             // SIGNED 또는 COMPLETED 상태가 아니면 다운로드 불가
             if (contract.getStatus() != ContractStatus.SIGNED &&
-                contract.getStatus() != ContractStatus.COMPLETED) {
+                    contract.getStatus() != ContractStatus.COMPLETED) {
                 logger.warn("서명 완료되지 않은 계약서 PDF 다운로드 시도: contractId={}, status={}",
-                           contractId, contract.getStatus());
+                        contractId, contract.getStatus());
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "서명이 완료된 계약서만 다운로드할 수 있습니다.");
                 return;
             }
@@ -579,7 +613,7 @@ public class ContractWebController {
             response.setContentType(MediaType.APPLICATION_PDF_VALUE);
             response.setContentLengthLong(pdf.getSizeInBytes());
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                             "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
+                    "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
 
             // PDF 바이트 스트림으로 전송
             try (OutputStream out = response.getOutputStream()) {
@@ -596,20 +630,22 @@ public class ContractWebController {
     }
 
     @GetMapping("/{contractId}/pdf/inline")
-    public void viewPdfInline(@PathVariable String contractId,
-                             @RequestHeader(value = "X-User-Id", required = false) String userId,
-                             @AuthenticationPrincipal SecurityUser securityUser,
-                             HttpServletRequest request,
-                             HttpServletResponse response) throws IOException {
+    public void viewPdfInline(
+            @PathVariable String contractId,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
 
             // SIGNED 또는 COMPLETED 상태가 아니면 조회 불가
             if (contract.getStatus() != ContractStatus.SIGNED &&
-                contract.getStatus() != ContractStatus.COMPLETED) {
+                    contract.getStatus() != ContractStatus.COMPLETED) {
                 logger.warn("서명 완료되지 않은 계약서 PDF 조회 시도: contractId={}, status={}",
-                           contractId, contract.getStatus());
+                        contractId, contract.getStatus());
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "서명이 완료된 계약서만 조회할 수 있습니다.");
                 return;
             }
@@ -625,7 +661,7 @@ public class ContractWebController {
             response.setContentType(MediaType.APPLICATION_PDF_VALUE);
             response.setContentLengthLong(pdf.getSizeInBytes());
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                             "inline; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
+                    "inline; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
 
             // PDF 바이트 스트림으로 전송
             try (OutputStream out = response.getOutputStream()) {
@@ -657,32 +693,52 @@ public class ContractWebController {
 
         private static final DateTimeFormatter EXPIRES_AT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
-        public String getTemplateId() { return templateId; }
-        public void setTemplateId(String templateId) { this.templateId = templateId; }
-        public String getTitle() { return title; }
-        public void setTitle(String title) { this.title = title; }
-        public String getContent() { return content; }
-        public void setContent(String content) { this.content = content; }
-        public String getFirstPartyName() { return firstPartyName; }
-        public void setFirstPartyName(String firstPartyName) { this.firstPartyName = firstPartyName; }
-        public String getFirstPartyEmail() { return firstPartyEmail; }
-        public void setFirstPartyEmail(String firstPartyEmail) { this.firstPartyEmail = firstPartyEmail; }
-        public String getFirstPartyAddress() { return firstPartyAddress; }
-        public void setFirstPartyAddress(String firstPartyAddress) { this.firstPartyAddress = firstPartyAddress; }
-        public String getSecondPartyName() { return secondPartyName; }
-        public void setSecondPartyName(String secondPartyName) { this.secondPartyName = secondPartyName; }
-        public String getSecondPartyEmail() { return secondPartyEmail; }
-        public void setSecondPartyEmail(String secondPartyEmail) { this.secondPartyEmail = secondPartyEmail; }
-        public String getSecondPartyAddress() { return secondPartyAddress; }
-        public void setSecondPartyAddress(String secondPartyAddress) { this.secondPartyAddress = secondPartyAddress; }
-        public LocalDateTime getExpiresAt() { return expiresAt; }
-        public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
+        public String getTemplateId() {return templateId;}
+
+        public void setTemplateId(String templateId) {this.templateId = templateId;}
+
+        public String getTitle() {return title;}
+
+        public void setTitle(String title) {this.title = title;}
+
+        public String getContent() {return content;}
+
+        public void setContent(String content) {this.content = content;}
+
+        public String getFirstPartyName() {return firstPartyName;}
+
+        public void setFirstPartyName(String firstPartyName) {this.firstPartyName = firstPartyName;}
+
+        public String getFirstPartyEmail() {return firstPartyEmail;}
+
+        public void setFirstPartyEmail(String firstPartyEmail) {this.firstPartyEmail = firstPartyEmail;}
+
+        public String getFirstPartyAddress() {return firstPartyAddress;}
+
+        public void setFirstPartyAddress(String firstPartyAddress) {this.firstPartyAddress = firstPartyAddress;}
+
+        public String getSecondPartyName() {return secondPartyName;}
+
+        public void setSecondPartyName(String secondPartyName) {this.secondPartyName = secondPartyName;}
+
+        public String getSecondPartyEmail() {return secondPartyEmail;}
+
+        public void setSecondPartyEmail(String secondPartyEmail) {this.secondPartyEmail = secondPartyEmail;}
+
+        public String getSecondPartyAddress() {return secondPartyAddress;}
+
+        public void setSecondPartyAddress(String secondPartyAddress) {this.secondPartyAddress = secondPartyAddress;}
+
+        public LocalDateTime getExpiresAt() {return expiresAt;}
+
+        public void setExpiresAt(LocalDateTime expiresAt) {this.expiresAt = expiresAt;}
 
         public String getExpiresAtInputValue() {
             return expiresAt != null ? expiresAt.format(EXPIRES_AT_FORMATTER) : "";
         }
 
-        public String getSelectedPreset() { return selectedPreset; }
-        public void setSelectedPreset(String selectedPreset) { this.selectedPreset = selectedPreset; }
+        public String getSelectedPreset() {return selectedPreset;}
+
+        public void setSelectedPreset(String selectedPreset) {this.selectedPreset = selectedPreset;}
     }
 }

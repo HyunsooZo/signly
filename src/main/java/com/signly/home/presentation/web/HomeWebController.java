@@ -2,6 +2,7 @@ package com.signly.home.presentation.web;
 
 import com.signly.common.security.CurrentUserProvider;
 import com.signly.common.security.SecurityUser;
+import com.signly.common.web.BaseWebController;
 import com.signly.home.application.DashboardService;
 import com.signly.home.application.dto.DashboardResponse;
 import org.slf4j.Logger;
@@ -19,14 +20,16 @@ import jakarta.servlet.http.HttpServletRequest;
  * SRP: 뷰 렌더링과 요청/응답 처리만 담당
  */
 @Controller
-public class HomeWebController {
+public class HomeWebController extends BaseWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(HomeWebController.class);
     private final DashboardService dashboardService;
     private final CurrentUserProvider currentUserProvider;
 
-    public HomeWebController(DashboardService dashboardService,
-                             CurrentUserProvider currentUserProvider) {
+    public HomeWebController(
+            DashboardService dashboardService,
+            CurrentUserProvider currentUserProvider
+    ) {
         this.dashboardService = dashboardService;
         this.currentUserProvider = currentUserProvider;
     }
@@ -37,10 +40,12 @@ public class HomeWebController {
     }
 
     @GetMapping("/home")
-    public String home(@RequestHeader(value = "X-User-Id", defaultValue = "01ARZ3NDEKTSV4RRFFQ69G5FAV") String userId,
-                       @AuthenticationPrincipal SecurityUser securityUser,
-                       HttpServletRequest request,
-                       Model model) {
+    public String home(
+            @RequestHeader(value = "X-User-Id", defaultValue = "01ARZ3NDEKTSV4RRFFQ69G5FAV") String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            Model model
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
 
