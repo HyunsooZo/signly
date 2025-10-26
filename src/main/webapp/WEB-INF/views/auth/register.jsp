@@ -134,37 +134,6 @@
             showAlertModal('개인정보처리방침 모달 준비 중입니다.');
         }
 
-        function showAlertModal(message) {
-            const modalHtml = `
-                <div class="modal fade" id="alertModal" tabindex="-1">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">알림</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                ${message}
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            const existingModal = document.getElementById('alertModal');
-            if (existingModal) {
-                existingModal.remove();
-            }
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            const modal = new bootstrap.Modal(document.getElementById('alertModal'));
-            modal.show();
-            document.getElementById('alertModal').addEventListener('hidden.bs.modal', function () {
-                this.remove();
-            });
-        }
-
         // 비밀번호 확인 검증
         document.getElementById('confirmPassword').addEventListener('blur', function() {
             const password = document.getElementById('password').value;
