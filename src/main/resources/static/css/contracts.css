@@ -563,39 +563,7 @@
     }
 }
 
-/* 다크 모드 지원 */
-@media (prefers-color-scheme: dark) {
-    .contract-card {
-        background: rgba(33, 37, 41, 0.95);
-        color: #f8f9fa;
-    }
-
-    .contract-info {
-        background: linear-gradient(135deg, #212529 0%, #343a40 100%);
-        color: #f8f9fa;
-    }
-
-    .contract-content:not(.contract-content--html) {
-        background: linear-gradient(135deg, #212529 0%, #343a40 100%);
-        color: #f8f9fa;
-    }
-
-    /* HTML 프리셋 계약서는 항상 흰색 배경 유지 */
-    .contract-content--html {
-        background-color: #fff !important;
-        color: #000 !important;
-    }
-
-    .info-item:hover {
-        background-color: rgba(79, 172, 254, 0.1);
-    }
-
-    .signature-info {
-        background: linear-gradient(135deg, #212529 0%, #343a40 100%);
-        color: #f8f9fa;
-        border-color: #495057;
-    }
-}
+/* 다크 모드 미사용 - 앱은 라이트 모드만 지원 */
 
 /* 계약서 진행 단계 표시 */
 .contract-progress {
@@ -677,17 +645,54 @@
 
 /* 계약서 변수 입력 스타일 */
 .contract-variable-underline {
-    display: inline-block;
-    border-bottom: 1px solid #dee2e6;
-    padding: 0 2px;
+    display: inline-flex;
+    align-items: center;
+    border-bottom: 1px solid #d0d7de;
+    padding: 2px 4px;
+    margin: 0 2px;
 }
 
 .contract-input-inline {
+    display: inline-block;
+    width: auto;
+    min-width: 80px;
     border: none;
+    background-color: transparent;
     padding: 0;
     margin: 0;
-    height: auto;
-    display: inline;
-    font-size: 13px;
+    box-shadow: none;
+    font-size: 14px;
     font-family: inherit;
+}
+
+.contract-input-inline:focus {
+    border: none;
+    box-shadow: none;
+    background-color: rgba(13, 110, 253, 0.08);
+}
+
+/* 계약서 상세보기 - 흰색 배경 강제 적용 클래스 */
+.contract-detail-card-body {
+    background-color: white !important;
+}
+
+.contract-detail-content-white {
+    background-color: white !important;
+    color: black !important;
+}
+
+.contract-detail-modal-white {
+    background-color: white;
+}
+
+.contract-detail-modal-body-white {
+    background-color: white;
+}
+
+/* PDF 뷰어 iframe 스타일 */
+.pdf-viewer-iframe {
+    display: none;
+    width: 100%;
+    height: 100%;
+    border: none;
 }

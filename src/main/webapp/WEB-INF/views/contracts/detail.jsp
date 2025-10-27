@@ -4,157 +4,14 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} - Signly</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="/css/common.css" rel="stylesheet">
-    <link href="/css/contracts.css" rel="stylesheet">
-    <link href="/css/template-preview.css" rel="stylesheet">
-    <style>
-        /* 표준 근로계약서 스타일 */
-        #contractContentHtmlContainer .title,
-        #previewContent .title {
-            font-size: 24px !important;
-            font-weight: bold !important;
-            text-align: center !important;
-            margin-bottom: 30px !important;
-            text-decoration: underline !important;
-        }
-
-        #contractContentHtmlContainer .contract-intro,
-        #previewContent .contract-intro {
-            text-align: center;
-            margin-bottom: 30px;
-            line-height: 1.4;
-        }
-
-        #contractContentHtmlContainer .section,
-        #previewContent .section {
-            margin-bottom: 15px;
-            line-height: 1.4;
-        }
-
-        #contractContentHtmlContainer .section-number,
-        #previewContent .section-number {
-            font-weight: bold;
-        }
-
-        #contractContentHtmlContainer .contract-variable-underline,
-        #previewContent .contract-variable-underline {
-            display: inline-block;
-            min-width: 50px;
-            border-bottom: 1px solid #000;
-            padding: 0 5px;
-            text-align: center;
-        }
-
-        #contractContentHtmlContainer .wage-section,
-        #previewContent .wage-section {
-            margin-left: 20px;
-            margin-top: 10px;
-        }
-
-        #contractContentHtmlContainer .wage-item,
-        #previewContent .wage-item {
-            margin-bottom: 5px;
-            line-height: 1.4;
-        }
-
-        #contractContentHtmlContainer .indent,
-        #previewContent .indent {
-            margin-left: 20px;
-            line-height: 1.4;
-        }
-
-        #contractContentHtmlContainer .note,
-        #previewContent .note {
-            font-size: 12px;
-            color: #666;
-            margin-left: 20px;
-        }
-
-        #contractContentHtmlContainer .date-section,
-        #previewContent .date-section {
-            text-align: center;
-            margin-top: 40px;
-            margin-bottom: 30px;
-        }
-
-        #contractContentHtmlContainer .signature-section,
-        #previewContent .signature-section {
-            margin-top: 30px;
-        }
-
-        /* 근로자 서명 블록의 과도한 margin-top 제거 */
-        #contractContentHtmlContainer .signature-section + div,
-        #previewContent .signature-section + div {
-            margin-top: 10px !important;
-        }
-
-        #contractContentHtmlContainer .signature-block,
-        #previewContent .signature-block {
-            margin-bottom: 5px;
-        }
-
-        #contractContentHtmlContainer .signature-line,
-        #previewContent .signature-line {
-            line-height: 1.6;
-            position: relative;
-        }
-
-        #contractContentHtmlContainer .signature-line--seal,
-        #previewContent .signature-line--seal {
-            position: relative;
-        }
-
-        #contractContentHtmlContainer .signature-stamp-label,
-        #previewContent .signature-stamp-label {
-            position: relative;
-            display: inline-block;
-            width: 90px;
-            text-align: center;
-        }
-
-        #contractContentHtmlContainer .signature-stamp-wrapper,
-        #previewContent .signature-stamp-wrapper {
-            position: absolute;
-            top: 50%;
-            left: 20px;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #contractContentHtmlContainer .signature-stamp-image-element,
-        #previewContent .signature-stamp-image-element {
-            display: inline-block;
-            max-width: 90px;
-            max-height: 40px;
-            vertical-align: middle;
-        }
-    </style>
-</head>
+<jsp:include page="../common/header.jsp">
+    <jsp:param name="additionalCss" value="/css/contracts.css" />
+    <jsp:param name="additionalCss2" value="/css/contract-common.css" />
+</jsp:include>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/home">
-                <i class="bi bi-file-earmark-text me-2"></i>Signly
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/home">대시보드</a>
-                <a class="nav-link" href="/templates">템플릿</a>
-                <a class="nav-link active" href="/contracts">계약서</a>
-                <a class="nav-link" href="/profile/signature">서명 관리</a>
-                <a class="nav-link" href="/logout">로그아웃</a>
-            </div>
-        </div>
-    </nav>
+    <jsp:include page="../common/navbar.jsp">
+        <jsp:param name="currentPage" value="contracts" />
+    </jsp:include>
 
     <div class="container mt-4">
         <div class="row">
@@ -228,9 +85,9 @@
                             <i class="bi bi-file-earmark-text me-2"></i>계약서 내용
                         </h5>
                     </div>
-                    <div class="card-body p-0" style="background-color: white !important;">
+                    <div class="card-body p-0 contract-detail-card-body">
                         <!-- HTML 자동 감지를 위해 항상 동일한 컨테이너 사용 -->
-                        <div class="contract-content contract-content--html" id="contractContentHtmlContainer" style="background-color: white !important; color: black !important;"></div>
+                        <div class="contract-content contract-content--html contract-detail-content-white" id="contractContentHtmlContainer"></div>
                     </div>
                 </div>
 
@@ -458,19 +315,19 @@
     <!-- 미리보기 모달 -->
     <div class="modal fade contract-preview-modal" id="previewModal" tabindex="-1">
         <div class="modal-dialog modal-fullscreen-lg-down">
-            <div class="modal-content" style="background-color: white;">
+            <div class="modal-content contract-detail-modal-white">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="bi bi-eye me-2"></i>계약서 미리보기
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4" style="background-color: white;">
+                <div class="modal-body p-4 contract-detail-modal-body-white">
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle me-2"></i>
                         아래는 현재 계약서 내용의 미리보기입니다.
                     </div>
-                    <div class="border rounded p-4 contract-preview-modal-content" id="previewContent" style="background-color: white;">
+                    <div class="border rounded p-4 contract-preview-modal-content contract-detail-modal-body-white" id="previewContent">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -521,7 +378,6 @@
 
     <textarea id="contractContentHtml" hidden>${fn:escapeXml(contract.content)}</textarea>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const previewDataElement = document.getElementById('contractPreviewData');
         const previewData = previewDataElement ? previewDataElement.dataset : {};
@@ -685,99 +541,8 @@
                 node.remove();
             });
 
-            // HTML에 스타일이 없는 경우, 기본 계약서 스타일을 추가
-            if (!hasStyles) {
-                const defaultStyles = `
-                    #contractContentHtmlContainer .title {
-                        font-size: 24px !important;
-                        font-weight: bold !important;
-                        text-align: center !important;
-                        margin-bottom: 30px !important;
-                        text-decoration: underline !important;
-                    }
-                    #contractContentHtmlContainer .contract-intro {
-                        text-align: center;
-                        margin-bottom: 30px;
-                        line-height: 1.4;
-                    }
-                    #contractContentHtmlContainer .section {
-                        margin-bottom: 15px !important;
-                        line-height: 1.4 !important;
-                    }
-                    #contractContentHtmlContainer .section-number {
-                        font-weight: bold !important;
-                    }
-                    #contractContentHtmlContainer .contract-variable-underline {
-                        display: inline-block;
-                        min-width: 50px;
-                        border-bottom: 1px solid #000;
-                        padding: 0 5px;
-                        text-align: center;
-                    }
-                    #contractContentHtmlContainer .wage-section {
-                        margin-left: 20px !important;
-                        margin-top: 10px !important;
-                    }
-                    #contractContentHtmlContainer .wage-item {
-                        margin-bottom: 5px !important;
-                        line-height: 1.4 !important;
-                    }
-                    #contractContentHtmlContainer .indent {
-                        margin-left: 20px !important;
-                        line-height: 1.4 !important;
-                    }
-                    #contractContentHtmlContainer .note {
-                        font-size: 12px !important;
-                        color: #666 !important;
-                        margin-left: 20px !important;
-                    }
-                    #contractContentHtmlContainer .date-section {
-                        text-align: center !important;
-                        margin-top: 40px !important;
-                        margin-bottom: 30px !important;
-                    }
-                    #contractContentHtmlContainer .signature-section {
-                        margin-top: 30px !important;
-                    }
-                    #contractContentHtmlContainer .signature-section + div {
-                        margin-top: 10px !important;
-                    }
-                    #contractContentHtmlContainer .signature-block {
-                        margin-bottom: 5px !important;
-                    }
-                    #contractContentHtmlContainer .signature-line {
-                        line-height: 1.6 !important;
-                        position: relative;
-                    }
-                    #contractContentHtmlContainer .signature-line--seal {
-                        position: relative;
-                    }
-                    #contractContentHtmlContainer .signature-stamp-label {
-                        position: relative;
-                        display: inline-block;
-                        width: 90px;
-                        text-align: center;
-                    }
-                    #contractContentHtmlContainer .signature-stamp-wrapper {
-                        position: absolute;
-                        top: 50%;
-                        left: 20px;
-                        transform: translate(-50%, -50%);
-                        width: 80px;
-                        height: 80px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    }
-                    #contractContentHtmlContainer .signature-stamp-image-element {
-                        display: inline-block;
-                        max-width: 90px;
-                        max-height: 40px;
-                        vertical-align: middle;
-                    }
-                `;
-                scopedStyles.push(defaultStyles);
-            }
+            // HTML에 스타일이 없는 경우, 기본 계약서 스타일 (contract-common.css) 사용
+            // Note: contract-common.css가 이미 header.jsp에서 로드되어 있음
 
             const styleElementId = 'contractContentHtmlScopedStyles';
             const existingScopedStyle = document.getElementById(styleElementId);
@@ -875,7 +640,6 @@
 
         function previewContract() {
             const content = contractRawContent;
-            const presetType = presetTypeValue || 'NONE';
             const previewContentEl = document.getElementById('previewContent');
 
             // 기존 미리보기 스타일 제거
@@ -884,8 +648,8 @@
                 existingPreviewStyle.remove();
             }
 
-            // 프리셋인 경우 HTML로 렌더링, 아니면 텍스트로 표시
-            if (presetType !== 'NONE' && presetType !== '') {
+            // 계약 내용이 HTML이면 그대로 렌더링하고, 아니면 텍스트로 표시
+            if (isHtmlPreset) {
                 // 임시 DOM에서 처리
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = content;
@@ -904,99 +668,8 @@
                     tag.remove();
                 });
 
-                // HTML에 스타일이 없는 경우, 기본 계약서 스타일을 추가
-                if (!hasStyles) {
-                    const defaultStyles = `
-                        #previewContent .title {
-                            font-size: 24px !important;
-                            font-weight: bold !important;
-                            text-align: center !important;
-                            margin-bottom: 30px !important;
-                            text-decoration: underline !important;
-                        }
-                        #previewContent .contract-intro {
-                            text-align: center;
-                            margin-bottom: 30px;
-                            line-height: 1.4;
-                        }
-                        #previewContent .section {
-                            margin-bottom: 15px !important;
-                            line-height: 1.4 !important;
-                        }
-                        #previewContent .section-number {
-                            font-weight: bold !important;
-                        }
-                        #previewContent .contract-variable-underline {
-                            display: inline-block;
-                            min-width: 50px;
-                            border-bottom: 1px solid #000;
-                            padding: 0 5px;
-                            text-align: center;
-                        }
-                        #previewContent .wage-section {
-                            margin-left: 20px !important;
-                            margin-top: 10px !important;
-                        }
-                        #previewContent .wage-item {
-                            margin-bottom: 5px !important;
-                            line-height: 1.4 !important;
-                        }
-                        #previewContent .indent {
-                            margin-left: 20px !important;
-                            line-height: 1.4 !important;
-                        }
-                        #previewContent .note {
-                            font-size: 12px !important;
-                            color: #666 !important;
-                            margin-left: 20px !important;
-                        }
-                        #previewContent .date-section {
-                            text-align: center !important;
-                            margin-top: 40px !important;
-                            margin-bottom: 30px !important;
-                        }
-                        #previewContent .signature-section {
-                            margin-top: 30px !important;
-                        }
-                        #previewContent .signature-section + div {
-                            margin-top: 10px !important;
-                        }
-                        #previewContent .signature-block {
-                            margin-bottom: 5px !important;
-                        }
-                        #previewContent .signature-line {
-                            line-height: 1.6 !important;
-                            position: relative;
-                        }
-                        #previewContent .signature-line--seal {
-                            position: relative;
-                        }
-                        #previewContent .signature-stamp-label {
-                            position: relative;
-                            display: inline-block;
-                            width: 90px;
-                            text-align: center;
-                        }
-                        #previewContent .signature-stamp-wrapper {
-                            position: absolute;
-                            top: 50%;
-                            left: 20px;
-                            transform: translate(-50%, -50%);
-                            width: 80px;
-                            height: 80px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                        }
-                        #previewContent .signature-stamp-image-element {
-                            display: inline-block;
-                            max-width: 90px;
-                            max-height: 40px;
-                            vertical-align: middle;
-                        }
-                    `;
-                    scopedStyles.push(defaultStyles);
-                }
+                // HTML에 스타일이 없는 경우, 기본 계약서 스타일 (contract-common.css) 사용
+                // Note: contract-common.css가 이미 header.jsp에서 로드되어 있음
 
                 // body 태그를 div로 변경
                 const bodyTags = tempDiv.querySelectorAll('body');
@@ -1102,5 +775,6 @@
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
     </script>
+    <jsp:include page="../common/footer.jsp" />
 </body>
 </html>

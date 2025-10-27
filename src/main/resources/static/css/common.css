@@ -226,6 +226,15 @@ a:hover {
     position: relative;
     display: inline-block;
     z-index: 1;
+    text-decoration: none;
+    border-bottom: none;
+}
+
+.signature-stamp-label .contract-variable-underline,
+.signature-stamp-wrapper .contract-variable-underline {
+    border-bottom: none !important;
+    padding: 0;
+    min-width: auto;
 }
 
 .signature-stamp-wrapper {

@@ -127,11 +127,11 @@
     <script src="/js/alerts.js"></script>
     <script>
         function openTermsModal() {
-            alert('이용약관 모달 준비 중입니다.');
+            showAlertModal('이용약관 모달 준비 중입니다.');
         }
 
         function openPrivacyModal() {
-            alert('개인정보처리방침 모달 준비 중입니다.');
+            showAlertModal('개인정보처리방침 모달 준비 중입니다.');
         }
 
         // 비밀번호 확인 검증

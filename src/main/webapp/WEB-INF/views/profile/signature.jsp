@@ -4,30 +4,13 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} - Signly</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="/css/common.css" rel="stylesheet">
-    <link href="/css/signature.css" rel="stylesheet">
-</head>
+<jsp:include page="../common/header.jsp">
+    <jsp:param name="additionalCss" value="/css/signature.css" />
+</jsp:include>
 <body class="signature-management-page">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/home">
-                <i class="bi bi-file-earmark-text me-2"></i>Signly
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/home">대시보드</a>
-                <a class="nav-link" href="/templates">템플릿</a>
-                <a class="nav-link" href="/contracts">계약서</a>
-                <a class="nav-link active" href="/profile/signature">서명 관리</a>
-                <a class="nav-link" href="/logout">로그아웃</a>
-            </div>
-        </div>
-    </nav>
+    <jsp:include page="../common/navbar.jsp">
+        <jsp:param name="currentPage" value="signature" />
+    </jsp:include>
 
     <div class="container mt-4">
         <div class="row mb-4">
@@ -40,15 +23,28 @@
             </div>
         </div>
 
+        <c:if test="${showSignatureAlert}">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <h5 class="alert-heading">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>서명 등록 필요
+                </h5>
+                <p class="mb-0">
+                    계약서를 생성하려면 먼저 서명을 등록해야 합니다.
+                    아래에서 서명을 작성하고 저장해 주세요.
+                </p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
+
         <c:if test="${not empty successMessage}">
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
                 <i class="bi bi-check-circle me-2"></i>${successMessage}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
 
         <c:if test="${not empty errorMessage}">
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
                 <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
@@ -123,8 +119,50 @@
         </div>
     </div>
 
+    <!-- 서명 필요 알림 모달 -->
+    <c:if test="${showSignatureAlert}">
+        <div class="modal fade" id="signatureRequiredModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            서명 등록 필요
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">
+                            <strong>계약서를 생성하려면 먼저 서명을 등록해야 합니다.</strong>
+                        </p>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            아래에서 서명을 작성하고 저장해 주세요.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                            <i class="bi bi-pencil-square me-2"></i>확인
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </c:if>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/alerts.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+
+    <c:if test="${showSignatureAlert}">
+        <script>
+            // 페이지 로드 시 모달 표시
+            window.addEventListener('DOMContentLoaded', function() {
+                const modal = new bootstrap.Modal(document.getElementById('signatureRequiredModal'));
+                modal.show();
+            });
+        </script>
+    </c:if>
+
     <c:if test="${hasSignature}">
         <fmt:formatDate value="${signature.updatedAtDate}" pattern="yyyy-MM-dd'T'HH:mm:ssXXX" var="ownerSignatureUpdatedAt" />
     </c:if>
@@ -168,7 +206,7 @@
         form.addEventListener('submit', function (event) {
             if (signaturePad.isEmpty()) {
                 event.preventDefault();
-                alert('서명을 입력한 후 저장해 주세요.');
+                showAlertModal('서명을 입력한 후 저장해 주세요.');
                 return;
             }
             const dataUrl = signaturePad.toDataURL('image/png');
@@ -200,6 +238,6 @@
             }
         })();
     </script>
-
+    <jsp:include page="../common/footer.jsp" />
 </body>
 </html>

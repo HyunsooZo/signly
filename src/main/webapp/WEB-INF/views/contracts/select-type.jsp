@@ -2,30 +2,13 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} - Signly</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="/css/common.css" rel="stylesheet">
-    <link href="/css/contracts.css" rel="stylesheet">
-</head>
+<jsp:include page="../common/header.jsp">
+    <jsp:param name="additionalCss" value="/css/contracts.css" />
+</jsp:include>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/home">
-                <i class="bi bi-file-earmark-text me-2"></i>Signly
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/home">대시보드</a>
-                <a class="nav-link" href="/templates">템플릿</a>
-                <a class="nav-link active" href="/contracts">계약서</a>
-                <a class="nav-link" href="/profile/signature">서명 관리</a>
-                <a class="nav-link" href="/logout">로그아웃</a>
-            </div>
-        </div>
-    </nav>
+    <jsp:include page="../common/navbar.jsp">
+        <jsp:param name="currentPage" value="contracts" />
+    </jsp:include>
 
     <div class="container mt-5">
         <div class="text-center mb-5">
@@ -149,7 +132,7 @@
             const selectedValue = select.value;
 
             if (!selectedValue) {
-                alert('템플릿을 선택해주세요.');
+                showAlertModal('템플릿을 선택해주세요.');
                 return;
             }
 
@@ -162,5 +145,6 @@
             }
         }
     </script>
+    <jsp:include page="../common/footer.jsp" />
 </body>
 </html>

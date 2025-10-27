@@ -74,11 +74,11 @@
 
         function validateForm() {
             if (newPassword.value.length < 8) {
-                alert('비밀번호는 최소 8자 이상이어야 합니다');
+                showAlertModal('비밀번호는 최소 8자 이상이어야 합니다');
                 return false;
             }
             if (newPassword.value !== confirmPassword.value) {
-                alert('비밀번호가 일치하지 않습니다');
+                showAlertModal('비밀번호가 일치하지 않습니다');
                 return false;
             }
             return true;

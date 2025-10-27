@@ -1,25 +1,35 @@
 package com.signly.user.domain.model;
 
 import com.signly.common.exception.ValidationException;
+import lombok.Getter;
 
 import java.util.Objects;
 
 /**
  * 사업장 정보 Value Object
  */
+@Getter
 public class Company {
 
     private final String name;
     private final String phone;
     private final String address;
 
-    private Company(String name, String phone, String address) {
+    private Company(
+            String name,
+            String phone,
+            String address
+    ) {
         this.name = name;
         this.phone = phone;
         this.address = address;
     }
 
-    public static Company of(String name, String phone, String address) {
+    public static Company of(
+            String name,
+            String phone,
+            String address
+    ) {
         validateCompanyName(name);
         validatePhone(phone);
         validateAddress(address);
@@ -47,18 +57,6 @@ public class Company {
         if (address != null && address.trim().length() > 500) {
             throw new ValidationException("사업장 주소는 500자를 초과할 수 없습니다");
         }
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public String getAddress() {
-        return address;
     }
 
     public boolean isEmpty() {

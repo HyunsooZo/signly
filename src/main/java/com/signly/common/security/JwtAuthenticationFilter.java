@@ -41,33 +41,45 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = extractTokenFromRequest(request);
 
-        if (StringUtils.hasText(token) && jwtTokenProvider.isTokenValid(token) && jwtTokenProvider.isAccessToken(token)) {
-            try {
-                String userId = jwtTokenProvider.getUserIdFromToken(token);
-                String email = jwtTokenProvider.getEmailFromToken(token);
+        if (StringUtils.hasText(token)) {
+            log.debug("토큰 발견: {}", token.substring(0, Math.min(20, token.length())) + "...");
 
-                // Redis에서 토큰 검증
-                if (!tokenRedisService.isAccessTokenValid(userId, token)) {
-                    log.warn("Redis에 토큰이 존재하지 않거나 일치하지 않습니다: userId={}", userId);
+            if (!jwtTokenProvider.isTokenValid(token)) {
+                log.warn("토큰이 유효하지 않습니다 (만료되었거나 형식이 잘못됨)");
+            } else if (!jwtTokenProvider.isAccessToken(token)) {
+                log.warn("Access 토큰이 아닙니다 (Refresh 토큰일 수 있음)");
+            } else {
+                try {
+                    String userId = jwtTokenProvider.getUserIdFromToken(token);
+                    String email = jwtTokenProvider.getEmailFromToken(token);
+
+                    // Redis에서 토큰 검증
+                    if (!tokenRedisService.isAccessTokenValid(userId, token)) {
+                        log.warn("Redis에 토큰이 존재하지 않거나 일치하지 않습니다: userId={}", userId);
+                        SecurityContextHolder.clearContext();
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    request.setAttribute("userId", userId);
+                    request.setAttribute("userEmail", email);
+                    request.setAttribute("userType", jwtTokenProvider.getUserTypeFromToken(token));
+
+                    log.debug("인증 성공: userId={}, email={}", userId, email);
+
+                } catch (Exception e) {
+                    log.warn("JWT 토큰 처리 중 오류 발생", e);
                     SecurityContextHolder.clearContext();
-                    filterChain.doFilter(request, response);
-                    return;
                 }
-
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-                Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                request.setAttribute("userId", userId);
-                request.setAttribute("userEmail", email);
-                request.setAttribute("userType", jwtTokenProvider.getUserTypeFromToken(token));
-
-            } catch (Exception e) {
-                log.warn("JWT 토큰 처리 중 오류 발생", e);
-                SecurityContextHolder.clearContext();
             }
+        } else {
+            log.debug("토큰이 없습니다. 요청 URI: {}", request.getRequestURI());
         }
 
         filterChain.doFilter(request, response);

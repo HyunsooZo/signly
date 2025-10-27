@@ -69,6 +69,8 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health").permitAll()
                 // JSP Forward를 위한 뷰 경로는 permitAll (실제 접근은 컨트롤러에서 제어)
                 .requestMatchers("/WEB-INF/views/**").permitAll()
+                // 프로필 관리 페이지는 인증 필요
+                .requestMatchers("/profile/**").authenticated()
                 // 홈, 템플릿, 계약서 페이지는 인증 필요
                 .requestMatchers("/home", "/templates/**", "/contracts/**").authenticated()
                 // 나머지 모든 요청은 인증 필요

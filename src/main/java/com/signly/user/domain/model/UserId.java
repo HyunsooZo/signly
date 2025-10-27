@@ -1,9 +1,11 @@
 package com.signly.user.domain.model;
 
 import com.signly.common.util.UlidGenerator;
+import lombok.Getter;
 
 import java.util.Objects;
 
+@Getter
 public class UserId {
 
     private final String value;
@@ -24,10 +26,6 @@ public class UserId {
 
     public static UserId generate() {
         return new UserId(UlidGenerator.generate());
-    }
-
-    public String getValue() {
-        return value;
     }
 
     @Override

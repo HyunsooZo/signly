@@ -19,8 +19,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Flying Saucer를 사용한 PDF 생성 구현체
@@ -33,10 +31,8 @@ public class HtmlToPdfGenerator implements PdfGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(HtmlToPdfGenerator.class);
     private static final List<String> PDF_CSS_RESOURCES = List.of(
-            "static/css/pdf-contract.css"
+            "static/css/contract-common.css"
     );
-    private static final String PRESET_TEMPLATE_PATH = "presets/templates/standard-employment-contract.html";
-    private static final Pattern STYLE_PATTERN = Pattern.compile("<style>(.*?)</style>", Pattern.DOTALL);
     private static final List<String> FONT_RESOURCES = List.of(
             "fonts/NanumGothic-Regular.ttf",
             "fonts/NanumGothic-Bold.ttf"
@@ -148,8 +144,7 @@ public class HtmlToPdfGenerator implements PdfGenerator {
     }
 
     /**
-     * 계약서 CSS 스타일을 원본 템플릿에서 추출
-     * 템플릿 파일의 <style> 태그 내용을 그대로 사용
+     * 계약서 CSS 스타일을 통일된 contract-common.css에서 로드
      */
     private String getContractCssStyles() {
         StringBuilder cssBuilder = new StringBuilder();
@@ -161,31 +156,11 @@ public class HtmlToPdfGenerator implements PdfGenerator {
         }
 
         if (cssBuilder.length() == 0) {
-            extractCssFromPresetTemplate()
-                    .map(this::adaptCssForPdf)
-                    .ifPresent(css -> appendCss(cssBuilder, css));
+            logger.error("PDF용 통일 CSS(contract-common.css)를 로드하지 못했습니다.");
+            throw new PdfGenerationException("CSS 파일을 찾을 수 없습니다: " + PDF_CSS_RESOURCES);
         }
-
-        if (cssBuilder.length() == 0) {
-            logger.warn("PDF용 CSS를 찾지 못해 기본 스타일을 사용합니다.");
-            return getDefaultCssStyles();
-        }
-
-        // PDF 렌더링 호환을 위한 폴백 스타일 보강
-        appendCss(cssBuilder, "body, .contract-content, .preset-document { font-family: 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', sans-serif; line-height: 1.6; font-size: 13px; }");
-        appendCss(cssBuilder, ".signature-stamp-image-element { width: 90px; height: auto; }");
 
         return cssBuilder.toString();
-    }
-
-    /**
-     * 기본 CSS 스타일 (템플릿 로드 실패 시 대체용)
-     */
-    private String getDefaultCssStyles() {
-        return "body { font-family: 'NanumGothic', 'Nanum Gothic', sans-serif; line-height: 1.6; font-size: 12pt; padding: 20mm; }\n" +
-               ".title { text-align: center; font-size: 20pt; font-weight: bold; margin-bottom: 30pt; }\n" +
-               ".section { margin: 12pt 0; }\n" +
-               ".signature-stamp-image-element { width: 60pt; height: auto; vertical-align: middle; }";
     }
 
     @Override
@@ -205,28 +180,6 @@ public class HtmlToPdfGenerator implements PdfGenerator {
             return Optional.of(StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8));
         } catch (IOException e) {
             logger.error("리소스 로딩 실패: {}", path, e);
-            return Optional.empty();
-        }
-    }
-
-    private Optional<String> extractCssFromPresetTemplate() {
-        ClassPathResource resource = new ClassPathResource(PRESET_TEMPLATE_PATH);
-        if (!resource.exists()) {
-            logger.warn("템플릿 파일을 찾을 수 없습니다: {}", PRESET_TEMPLATE_PATH);
-            return Optional.empty();
-        }
-
-        try (InputStream inputStream = resource.getInputStream()) {
-            String templateHtml = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
-            Matcher matcher = STYLE_PATTERN.matcher(templateHtml);
-            if (matcher.find()) {
-                logger.debug("템플릿에서 CSS 스타일 추출 완료");
-                return Optional.of(matcher.group(1));
-            }
-            logger.warn("템플릿에 <style> 태그가 없어 기본 CSS로 대체합니다.");
-            return Optional.empty();
-        } catch (IOException e) {
-            logger.error("템플릿 CSS 추출 실패", e);
             return Optional.empty();
         }
     }

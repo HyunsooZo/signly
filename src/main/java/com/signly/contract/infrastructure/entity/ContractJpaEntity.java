@@ -38,6 +38,9 @@ public class ContractJpaEntity extends BaseEntity {
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "template_data", columnDefinition = "JSON")
+    private String templateData;
+
     @Column(name = "first_party_name", nullable = false, length = 100)
     private String firstPartyName;
 
@@ -75,17 +78,30 @@ public class ContractJpaEntity extends BaseEntity {
 
     protected ContractJpaEntity() {}
 
-    public ContractJpaEntity(String id, String creatorId, String templateId, String title,
-                           String content, String firstPartyName, String firstPartyEmail,
-                           String firstPartyOrganization, String secondPartyName,
-                           String secondPartyEmail, String secondPartyOrganization,
-                           ContractStatus status, String signToken, LocalDateTime expiresAt,
-                           PresetType presetType) {
+    public ContractJpaEntity(
+        String id,
+        String creatorId,
+        String templateId,
+        String title,
+        String content,
+        String templateData,
+        String firstPartyName,
+        String firstPartyEmail,
+        String firstPartyOrganization,
+        String secondPartyName,
+        String secondPartyEmail,
+        String secondPartyOrganization,
+        ContractStatus status,
+        String signToken,
+        LocalDateTime expiresAt,
+        PresetType presetType
+    ) {
         this.id = id;
         this.creatorId = creatorId;
         this.templateId = templateId;
         this.title = title;
         this.content = content;
+        this.templateData = templateData;
         this.firstPartyName = firstPartyName;
         this.firstPartyEmail = firstPartyEmail;
         this.firstPartyOrganization = firstPartyOrganization;
@@ -124,6 +140,14 @@ public class ContractJpaEntity extends BaseEntity {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getTemplateData() {
+        return templateData;
+    }
+
+    public void setTemplateData(String templateData) {
+        this.templateData = templateData;
     }
 
     public String getFirstPartyName() {

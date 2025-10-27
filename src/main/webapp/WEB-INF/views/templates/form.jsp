@@ -3,30 +3,13 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} - Signly</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="/css/template-builder.css" rel="stylesheet">
-</head>
+<jsp:include page="../common/header.jsp">
+    <jsp:param name="additionalCss" value="/css/template-builder.css" />
+</jsp:include>
 <body>
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/home">
-            <i class="bi bi-file-earmark-text me-2"></i>Signly
-        </a>
-        <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/home">대시보드</a>
-            <a class="nav-link active" href="/templates">템플릿</a>
-            <a class="nav-link" href="/contracts">계약서</a>
-            <a class="nav-link" href="/profile/signature">서명 관리</a>
-            <a class="nav-link" href="/logout">로그아웃</a>
-        </div>
-    </div>
-</nav>
+    <jsp:include page="../common/navbar.jsp">
+        <jsp:param name="currentPage" value="templates" />
+    </jsp:include>
 
 <div class="builder-container">
     <!-- 툴바 -->
@@ -202,8 +185,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
     let clauseCounter = 0;
     let activeElement = null;
@@ -265,7 +246,8 @@
         return [];
     }
 
-    function normalizeFrontendType(type, metadata = {}) {
+    function normalizeFrontendType(type, metadata) {
+        metadata = metadata || {};
         if (metadata && typeof metadata === 'object' && metadata.kind && FRONTEND_TYPES.has(String(metadata.kind).toLowerCase())) {
             return String(metadata.kind).toLowerCase();
         }
@@ -298,8 +280,9 @@
         }
     }
 
-    function ensureMetadataForType(type, metadata = {}) {
-        const base = metadata && typeof metadata === 'object' ? { ...metadata } : {};
+    function ensureMetadataForType(type, metadata) {
+        metadata = metadata || {};
+        const base = metadata && typeof metadata === 'object' ? Object.assign({}, metadata) : {};
         if (type === 'html' || type === 'signature') {
             base.rawHtml = true;
         }
@@ -315,7 +298,8 @@
         return base;
     }
 
-    function encodeMetadata(metadata = {}) {
+    function encodeMetadata(metadata) {
+        metadata = metadata || {};
         try {
             return encodeURIComponent(JSON.stringify(metadata));
         } catch (error) {
@@ -331,18 +315,13 @@
         return typeof value === 'string' ? value : String(value);
     }
 
-    // 변수 span을 [VARIABLE_NAME] 형식으로 변환
     function convertVariablesToBrackets(html) {
         if (!html) return '';
-
-        // <span class="template-variable"><span>VARIABLE_NAME</span>...</span> 형태를 [VARIABLE_NAME]으로 변환
         return html.replace(/<span class="template-variable"[^>]*>\s*<span>([^<]+)<\/span>[\s\S]*?<\/span>/g, '[$1]');
     }
 
-    // [VARIABLE_NAME] 형식을 변수 span으로 변환
     function convertBracketsToVariables(html) {
         if (!html) return '';
-
         return html.replace(/\[([A-Z_]+)\]/g, function(match, varName) {
             return '<span class="template-variable" contenteditable="false">' +
                    '<span>' + varName + '</span>' +
@@ -351,7 +330,6 @@
         });
     }
 
-    // 수정된 normalizePreviewContent 함수 - 단순화
     function normalizePreviewContent(type, rawContent) {
         console.debug('[normalizePreviewContent] input:', type, JSON.stringify(rawContent));
         if (rawContent === null || rawContent === undefined) {
@@ -362,25 +340,19 @@
         let value = ensureString(rawContent);
         console.debug('[normalizePreviewContent] after ensureString:', JSON.stringify(value));
 
-        // signature와 html 타입은 HTML을 그대로 유지
         if (type === 'signature' || type === 'html') {
             console.debug('[normalizePreviewContent] signature/html - keeping HTML as is');
-            // 변수를 밑줄로 변환 (span 형식)
             value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, function(match) {
                 return '<span class="blank-line"></span>';
             });
-            // [VARIABLE_NAME] 형식도 밑줄로 변환
             value = value.replace(/\[[\w_]+\]/g, '<span class="blank-line"></span>');
             return value;
         }
 
-        // 변수를 임시 마커로 치환
         const BLANK_MARKER = '___BLANK_LINE___';
-        // X 버튼도 함께 제거
         value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>\s*<span class="template-variable-remove"[^>]*>[\s\S]*?<\/span>/g, function(match) {
             return BLANK_MARKER;
         });
-        // 혹시 순서가 다르거나 중첩된 경우를 위해 별도로도 제거
         value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, function(match) {
             return BLANK_MARKER;
         });
@@ -389,10 +361,8 @@
         value = decodeHtmlEntities(value);
         console.debug('[normalizePreviewContent] after decodeHtmlEntities:', JSON.stringify(value));
 
-        // 마커를 밑줄 HTML로 복원
         value = value.replace(new RegExp(BLANK_MARKER, 'g'), '<span class="blank-line"></span>');
 
-        // placeholder 텍스트는 그대로 유지
         return value;
     }
 
@@ -408,7 +378,8 @@
         }
     }
 
-    function setSectionMetadata(section, metadata = {}) {
+    function setSectionMetadata(section, metadata) {
+        metadata = metadata || {};
         section.dataset.metadata = encodeMetadata(metadata);
     }
 
@@ -433,12 +404,13 @@
             }
         }
         if (typeof metadata === 'object') {
-            return { ...metadata };
+            return Object.assign({}, metadata);
         }
         return {};
     }
 
-    function mapFrontendTypeToServer(type, metadata = {}) {
+    function mapFrontendTypeToServer(type, metadata) {
+        metadata = metadata || {};
         switch (type) {
             case 'title':
                 return 'HEADER';
@@ -458,26 +430,23 @@
         }
     }
 
-    // 초기화
     document.addEventListener('DOMContentLoaded', function() {
         loadInitialSections();
         setupEventListeners();
 
         window.SignlyTemplateEditor = {
-            getSectionsSnapshot() {
+            getSectionsSnapshot: function() {
                 updateSectionsData();
                 return JSON.parse(JSON.stringify(sections));
             },
-            getPreviewHtml() {
+            getPreviewHtml: function() {
                 updateSectionsData();
                 return generatePreviewHtml();
             }
         };
     });
 
-    // 이벤트 리스너 설정
     function setupEventListeners() {
-        // 문서 클릭시 활성 요소 추적
         document.getElementById('documentBody').addEventListener('click', function(e) {
             const section = e.target.closest('.editable-section');
             if (section) {
@@ -485,26 +454,24 @@
             }
         });
 
-        // 콘텐츠 변경 감지
         document.getElementById('documentBody').addEventListener('input', function(e) {
             if (e.target.contentEditable === 'true') {
                 updateSectionContent(e.target);
             }
         });
 
-        // 모달 백드롭 클릭시 닫기
         document.getElementById('modalBackdrop').addEventListener('click', closeVariableModal);
     }
 
-    // 섹션 추가
-    function addSection(type, content = '', afterElement = null, metadata = {}) {
+    function addSection(type, content, afterElement, metadata) {
+        content = content || '';
+        metadata = metadata || {};
         const section = createSectionElement(type, content, metadata);
         const documentBody = document.getElementById('documentBody');
 
         if (afterElement) {
             afterElement.insertAdjacentElement('afterend', section);
         } else {
-            // 플레이스홀더 앞에 삽입
             const placeholder = documentBody.querySelector('.add-section-placeholder');
             if (placeholder) {
                 documentBody.insertBefore(section, placeholder);
@@ -517,8 +484,9 @@
         updateSectionsData();
     }
 
-    // 섹션 요소 생성
-    function createSectionElement(type, content = '', metadata = {}) {
+    function createSectionElement(type, content, metadata) {
+        content = content || '';
+        metadata = metadata || {};
         const coercedMetadata = coerceMetadata(metadata);
         const normalizedType = normalizeFrontendType(type, coercedMetadata);
         const normalizedMetadata = ensureMetadataForType(normalizedType, coercedMetadata);
@@ -528,12 +496,10 @@
         section.dataset.id = 'section-' + Date.now();
         setSectionMetadata(section, normalizedMetadata);
 
-        // [VARIABLE_NAME] 형식을 변수 span으로 복원
         let processedContent = content;
         if (normalizedType !== 'html' && normalizedType !== 'signature') {
             // processedContent = convertBracketsToVariables(content || '');
         } else if (normalizedType === 'signature') {
-            // 서명란은 기본 템플릿 사용 (content가 있으면 그대로 사용)
             if (content) {
                 processedContent = convertBracketsToVariables(content);
             }
@@ -552,7 +518,6 @@
 
             case 'clause':
                 clauseCounter++;
-                // 조항은 번호를 자동 생성하고 내용만 복원
                 innerHTML = '<div class="section-clause">' +
                     '<span class="clause-number">' + clauseCounter + '.</span>' +
                     '<span contenteditable="true" data-placeholder="조항 내용을 입력하세요...">' + (processedContent || '') + '</span>' +
@@ -569,10 +534,8 @@
 
             case 'signature':
                 if (content && processedContent) {
-                    // 저장된 서명란이 있으면 복원
                     innerHTML = '<div class="section-signature" contenteditable="true">' + processedContent + '</div>';
                 } else {
-                    // 기본 서명란 템플릿
                     innerHTML = '<div class="section-signature" contenteditable="true">' +
                         '<div class="signature-section">' +
                             '<div class="signature-block">' +
@@ -611,8 +574,7 @@
 
         section.innerHTML = innerHTML + createSectionControls();
 
-        // 변수 제거 버튼에 이벤트 추가
-        section.querySelectorAll('.template-variable-remove').forEach(btn => {
+        section.querySelectorAll('.template-variable-remove').forEach(function(btn) {
             btn.onclick = function(e) {
                 e.stopPropagation();
                 btn.parentElement.remove();
@@ -623,44 +585,37 @@
         return section;
     }
 
-    // 섹션 컨트롤 버튼 생성
     function createSectionControls() {
-        return `
-        <div class="section-controls">
-            <button class="section-control-btn" onclick="moveSection(this, 'up')" title="위로">
-                <i class="bi bi-arrow-up"></i>
-            </button>
-            <button class="section-control-btn" onclick="moveSection(this, 'down')" title="아래로">
-                <i class="bi bi-arrow-down"></i>
-            </button>
-            <button class="section-control-btn" onclick="duplicateSection(this)" title="복사">
-                <i class="bi bi-files"></i>
-            </button>
-            <button class="section-control-btn" onclick="deleteSection(this)" title="삭제">
-                <i class="bi bi-trash"></i>
-            </button>
-        </div>`;
+        return '<div class="section-controls">' +
+            '<button class="section-control-btn" onclick="moveSection(this, \'up\')" title="위로">' +
+                '<i class="bi bi-arrow-up"></i>' +
+            '</button>' +
+            '<button class="section-control-btn" onclick="moveSection(this, \'down\')" title="아래로">' +
+                '<i class="bi bi-arrow-down"></i>' +
+            '</button>' +
+            '<button class="section-control-btn" onclick="duplicateSection(this)" title="복사">' +
+                '<i class="bi bi-files"></i>' +
+            '</button>' +
+            '<button class="section-control-btn" onclick="deleteSection(this)" title="삭제">' +
+                '<i class="bi bi-trash"></i>' +
+            '</button>' +
+        '</div>';
     }
 
-    // 플레이스홀더 생성
     function createPlaceholder() {
         const placeholder = document.createElement('div');
         placeholder.className = 'add-section-placeholder';
         placeholder.onclick = function() { showAddSectionMenu(this); };
-        placeholder.innerHTML = `
-        <i class="bi bi-plus-circle"></i>
-        <div>여기를 클릭하여 섹션을 추가하세요</div>`;
+        placeholder.innerHTML = '<i class="bi bi-plus-circle"></i><div>여기를 클릭하여 섹션을 추가하세요</div>';
         return placeholder;
     }
 
-    // 활성 섹션 설정
     function setActiveSection(section) {
-        document.querySelectorAll('.editable-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.editable-section').forEach(function(s) { s.classList.remove('active'); });
         section.classList.add('active');
         activeElement = section.querySelector('[contenteditable="true"], .html-editor');
     }
 
-    // 섹션 이동
     function moveSection(button, direction) {
         const section = button.closest('.editable-section');
         if (direction === 'up' && section.previousElementSibling && !section.previousElementSibling.classList.contains('add-section-placeholder')) {
@@ -671,7 +626,6 @@
         updateSectionsData();
     }
 
-    // 섹션 복사
     function duplicateSection(button) {
         const section = button.closest('.editable-section');
         const clone = section.cloneNode(true);
@@ -680,14 +634,12 @@
         updateSectionsData();
     }
 
-    // 섹션 삭제
     function deleteSection(button) {
         if (confirm('이 섹션을 삭제하시겠습니까?')) {
             const section = button.closest('.editable-section');
             section.remove();
             updateSectionsData();
 
-            // 모든 섹션이 삭제되면 플레이스홀더 추가
             const documentBody = document.getElementById('documentBody');
             if (documentBody.children.length === 0) {
                 documentBody.appendChild(createPlaceholder());
@@ -695,35 +647,30 @@
         }
     }
 
-    // 변수 모달 표시
     function showVariableModal() {
         document.getElementById('variableModal').classList.add('show');
         document.getElementById('modalBackdrop').classList.add('show');
     }
 
-    // 변수 모달 닫기
     function closeVariableModal() {
         document.getElementById('variableModal').classList.remove('show');
         document.getElementById('modalBackdrop').classList.remove('show');
     }
 
-    // 변수 삽입
     function insertVariable(variable) {
         if (!activeElement) {
-            alert('먼저 텍스트를 입력할 위치를 클릭해주세요.');
+            showAlertModal('먼저 텍스트를 입력할 위치를 클릭해주세요.');
             return;
         }
 
         if (activeElement.contentEditable === 'true') {
-            // contenteditable 요소
             const selection = window.getSelection();
             let range;
 
-            // range가 없거나 activeElement 밖에 있으면 새로 생성
             if (selection.rangeCount === 0 || !activeElement.contains(selection.anchorNode)) {
                 range = document.createRange();
                 range.selectNodeContents(activeElement);
-                range.collapse(false); // 끝으로 이동
+                range.collapse(false);
                 selection.removeAllRanges();
                 selection.addRange(range);
             } else {
@@ -751,7 +698,6 @@
             range.deleteContents();
             range.insertNode(varSpan);
 
-            // 변수 뒤에 공백 추가 (커서가 변수 뒤로 이동하도록)
             const space = document.createTextNode(' ');
             range.setStartAfter(varSpan);
             range.insertNode(space);
@@ -761,10 +707,8 @@
             selection.removeAllRanges();
             selection.addRange(range);
 
-            // 포커스 유지
             activeElement.focus();
         } else if (activeElement.tagName === 'TEXTAREA') {
-            // textarea 요소 (HTML 편집기)
             const start = activeElement.selectionStart;
             const end = activeElement.selectionEnd;
             const text = activeElement.value;
@@ -777,37 +721,33 @@
         updateSectionsData();
     }
 
-    // 섹션 추가 메뉴 표시
     function showAddSectionMenu(placeholder) {
-        const menu = `
-        <div class="add-section-menu">
-            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('text', this)">
-                <i class="bi bi-text-left"></i> 텍스트
-            </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('title', this)">
-                <i class="bi bi-type"></i> 타이틀
-            </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('clause', this)">
-                <i class="bi bi-list-ol"></i> 조항
-            </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('dotted', this)">
-                <i class="bi bi-border-style"></i> 점선
-            </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('footer', this)">
-                <i class="bi bi-text-center"></i> 꼬릿말
-            </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('signature', this)">
-                <i class="bi bi-pen"></i> 서명란
-            </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder('html', this)">
-                <i class="bi bi-code-slash"></i> HTML
-            </button>
-        </div>
-    `;
+        const menu = '<div class="add-section-menu">' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'text\', this)">' +
+                '<i class="bi bi-text-left"></i> 텍스트' +
+            '</button>' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'title\', this)">' +
+                '<i class="bi bi-type"></i> 타이틀' +
+            '</button>' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'clause\', this)">' +
+                '<i class="bi bi-list-ol"></i> 조항' +
+            '</button>' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'dotted\', this)">' +
+                '<i class="bi bi-border-style"></i> 점선' +
+            '</button>' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'footer\', this)">' +
+                '<i class="bi bi-text-center"></i> 꼬릿말' +
+            '</button>' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'signature\', this)">' +
+                '<i class="bi bi-pen"></i> 서명란' +
+            '</button>' +
+            '<button class="toolbar-btn toolbar-btn-sm" onclick="addSectionFromPlaceholder(\'html\', this)">' +
+                '<i class="bi bi-code-slash"></i> HTML' +
+            '</button>' +
+        '</div>';
         placeholder.innerHTML = menu;
     }
 
-    // 플레이스홀더에서 섹션 추가
     function addSectionFromPlaceholder(type, button) {
         const placeholder = button.closest('.add-section-placeholder');
         const section = createSectionElement(type);
@@ -817,7 +757,6 @@
         updateSectionsData();
     }
 
-    // 섹션 내용 업데이트
     function updateSectionContent(element) {
         const section = element.closest('.editable-section');
         if (section) {
@@ -825,14 +764,13 @@
         }
     }
 
-    // 섹션 데이터 업데이트
     function updateSectionsData() {
         const documentBody = document.getElementById('documentBody');
         sections = [];
 
         let clauseIndex = 0;
 
-        documentBody.querySelectorAll('.editable-section').forEach((section, index) => {
+        documentBody.querySelectorAll('.editable-section').forEach(function(section, index) {
             const existingMetadata = getSectionMetadata(section);
             const type = normalizeFrontendType(section.dataset.type, existingMetadata);
             const metadata = ensureMetadataForType(type, existingMetadata);
@@ -858,7 +796,6 @@
                 if (numberElement) {
                     numberElement.textContent = clauseIndex + '.';
                 }
-                // 조항 내용만 저장 (번호 제외)
                 const clauseContentElement = section.querySelector('.section-clause > [contenteditable="true"]');
                 content = clauseContentElement ? clauseContentElement.innerHTML : '';
             } else {
@@ -878,7 +815,6 @@
         clauseCounter = clauseIndex;
     }
 
-    // 초기 섹션 로드
     function loadInitialSections() {
         const scriptEl = document.getElementById('initialSections');
         if (scriptEl) {
@@ -894,13 +830,12 @@
                     documentBody.innerHTML = '';
 
                     clauseCounter = 0;
-                    [...sectionsData]
-                        .sort((a, b) => {
+                    sectionsData.slice().sort(function(a, b) {
                             const orderA = typeof a.order === 'number' ? a.order : parseInt(a.order, 10) || 0;
                             const orderB = typeof b.order === 'number' ? b.order : parseInt(b.order, 10) || 0;
                             return orderA - orderB;
                         })
-                        .forEach(sectionData => {
+                        .forEach(function(sectionData) {
                             if (!sectionData) {
                                 return;
                             }
@@ -910,11 +845,9 @@
                             documentBody.appendChild(section);
                         });
 
-                    // 섹션 로드 후 플레이스홀더 추가
                     documentBody.appendChild(createPlaceholder());
                     updateSectionsData();
                 } else {
-                    // 섹션이 없을 때도 플레이스홀더 표시
                     if (!documentBody.querySelector('.add-section-placeholder')) {
                         documentBody.appendChild(createPlaceholder());
                     }
@@ -925,23 +858,19 @@
         }
     }
 
-    // 템플릿 미리보기
-    // 템플릿 미리보기
     function previewTemplate() {
         updateSectionsData();
 
-        // sections 배열이 비어있는지 확인
         if (sections.length === 0) {
-            alert('미리볼 섹션이 없습니다. 먼저 섹션을 추가해주세요.');
+            showAlertModal('미리볼 섹션이 없습니다. 먼저 섹션을 추가해주세요.');
             return;
         }
 
-        const previewHtml = generatePreviewHtml(sections);  // sections 직접 전달
+        const previewHtml = generatePreviewHtml(sections);
         const previewTitle = document.getElementById('templateTitle').value || '제목 없음';
         const previewFrame = document.getElementById('previewFrame');
 
         if (previewFrame) {
-            // srcdoc 속성 사용
             previewFrame.srcdoc = previewHtml;
 
             const modalElement = document.getElementById('previewModal');
@@ -957,13 +886,12 @@
         }
     }
 
-    // 미리보기 HTML 생성
     function collectSectionsForPreview() {
         const documentBody = document.getElementById('documentBody');
         const sectionElements = Array.from(documentBody.querySelectorAll('.editable-section'))
-            .filter(section => !section.classList.contains('add-section-placeholder'));
+            .filter(function(section) { return !section.classList.contains('add-section-placeholder'); });
 
-        return sectionElements.map((section, index) => {
+        return sectionElements.map(function(section, index) {
             const existingMetadata = getSectionMetadata(section);
             const type = normalizeFrontendType(section.dataset.type, existingMetadata);
             let content = '';
@@ -984,23 +912,24 @@
 
             return {
                 sectionId: section.dataset.id,
-                type,
+                type: type,
                 order: index,
-                content,
+                content: content,
                 metadata: existingMetadata
             };
         });
     }
 
-    function generatePreviewHtml(previewSections = sections) {
+    function generatePreviewHtml(previewSections) {
+        previewSections = previewSections || sections;
         const title = document.getElementById('templateTitle').value || '제목 없음';
 
         let bodyContent = '';
         let clauseIndex = 0;
 
-        previewSections.forEach(section => {
+        previewSections.forEach(function(section) {
             let rawContent = normalizePreviewContent(section.type, section.content);
-            const codePoints = rawContent ? Array.from(rawContent).map(ch => ch.charCodeAt(0).toString(16)) : [];
+            const codePoints = rawContent ? Array.from(rawContent).map(function(ch) { return ch.charCodeAt(0).toString(16); }) : [];
             console.debug('[TemplateEditor] rendering section type:', section.type, 'content length:', rawContent ? rawContent.length : 0, 'value:', JSON.stringify(rawContent), 'codes:', codePoints);
             switch (section.type) {
                 case 'html':
@@ -1035,7 +964,6 @@
                     break;
                 default:
                     console.debug('[TemplateEditor] default case - rawContent before markup:', JSON.stringify(rawContent), 'type:', typeof rawContent, 'length:', rawContent ? rawContent.length : 'null');
-                    // 템플릿 리터럴 대신 문자열 연결 사용
                     const textMarkup = '<div class="section-text">' + rawContent + '</div>';
                     console.debug('[TemplateEditor] default case - textMarkup:', textMarkup.substring(0, 200));
                     console.debug('[TemplateEditor] appended markup:', textMarkup.substring(0, 200));
@@ -1052,7 +980,7 @@
             '<meta charset="UTF-8">' +
             '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
             '<title>' + title + '</title>' +
-            '<link rel="stylesheet" href="/css/template-preview.css">' +
+            '<link rel="stylesheet" href="/css/contract-common.css">' +
         '</head>' +
         '<body>' +
             bodyContent +
@@ -1060,41 +988,50 @@
         '</html>';
     }
 
-    // 템플릿 저장
     function saveTemplate() {
         const title = document.getElementById('templateTitle').value;
 
         if (!title) {
-            alert('템플릿 제목을 입력해주세요.');
+            showAlertModal('템플릿 제목을 입력해주세요.');
             document.getElementById('templateTitle').focus();
             return;
         }
 
         if (sections.length === 0) {
-            alert('최소 하나 이상의 섹션을 추가해주세요.');
+            showAlertModal('최소 하나 이상의 섹션을 추가해주세요.');
             return;
         }
 
         updateSectionsData();
 
-        // 폼 데이터 설정
         document.getElementById('formTitle').value = title;
 
-        const serializedSections = sections.map((section, index) => ({
-            sectionId: section.sectionId,
-            type: mapFrontendTypeToServer(section.type, section.metadata),
-            order: index,
-            content: section.content,
-            metadata: section.metadata || {}
-        }));
+        const serializedSections = sections.map(function(section, index) {
+            return {
+                sectionId: section.sectionId,
+                type: mapFrontendTypeToServer(section.type, section.metadata),
+                order: index,
+                content: section.content,
+                metadata: section.metadata || {}
+            };
+        });
 
-        document.getElementById('sectionsJson').value = JSON.stringify(serializedSections);
+        const templateData = {
+            version: '1.0',
+            metadata: {
+                title: title,
+                description: '',
+                createdBy: '',
+                variables: {}
+            },
+            sections: serializedSections
+        };
 
-        // 폼 제출
+        document.getElementById('sectionsJson').value = JSON.stringify(templateData);
+
         document.getElementById('templateForm').submit();
     }
 
-    // HTML 편집기 실시간 미리보기
     document.addEventListener('input', function(e) {
         if (e.target.classList.contains('html-editor')) {
             const preview = e.target.parentElement.querySelector('.html-preview');
@@ -1104,33 +1041,29 @@
         }
     });
 
-    // 키보드 단축키
     document.addEventListener('keydown', function(e) {
-        // Ctrl/Cmd + S: 저장
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
             e.preventDefault();
             saveTemplate();
         }
 
-        // Ctrl/Cmd + P: 미리보기
         if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
             e.preventDefault();
             previewTemplate();
         }
 
-        // Ctrl/Cmd + B: 변수 삽입
         if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
             e.preventDefault();
             showVariableModal();
         }
     });
 
-    // 초기 섹션 데이터 (서버에서 전달된 경우)
 </script>
 
 <c:set var="sectionsJsonRaw" value="${empty template.sectionsJson ? '[]' : template.sectionsJson}" />
 <c:set var="sectionsJsonSafe" value="${fn:replace(sectionsJsonRaw, '</script>', '<&#92;/script>')}" />
 <script id="initialSections" type="application/json"><c:out value="${sectionsJsonSafe}" escapeXml="false" /></script>
 
+<jsp:include page="../common/footer.jsp" />
 </body>
 </html>

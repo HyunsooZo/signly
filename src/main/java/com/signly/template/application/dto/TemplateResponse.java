@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 public class TemplateResponse {
@@ -27,6 +28,7 @@ public class TemplateResponse {
     private final List<TemplateSectionDto> sections;
     private final String renderedHtml;
     private final String previewText;
+    private final Map<String, TemplateVariableDto> variables;
 
     @JsonCreator
     public TemplateResponse(
@@ -40,7 +42,8 @@ public class TemplateResponse {
             @JsonProperty("updatedAt") LocalDateTime updatedAt,
             @JsonProperty("sections") List<TemplateSectionDto> sections,
             @JsonProperty("renderedHtml") String renderedHtml,
-            @JsonProperty("previewText") String previewText
+            @JsonProperty("previewText") String previewText,
+            @JsonProperty("variables") Map<String, TemplateVariableDto> variables
     ) {
         this.templateId = templateId;
         this.ownerId = ownerId;
@@ -53,6 +56,7 @@ public class TemplateResponse {
         this.sections = sections;
         this.renderedHtml = renderedHtml;
         this.previewText = previewText;
+        this.variables = variables;
     }
 
     @JsonProperty("content")

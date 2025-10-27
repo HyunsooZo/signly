@@ -11,7 +11,12 @@ public class TemplateField {
     private final boolean required;
     private final String placeholder;
 
-    private TemplateField(String fieldName, String fieldType, boolean required, String placeholder) {
+    private TemplateField(
+            String fieldName,
+            String fieldType,
+            boolean required,
+            String placeholder
+    ) {
         validateFieldName(fieldName);
         validateFieldType(fieldType);
 
@@ -21,7 +26,12 @@ public class TemplateField {
         this.placeholder = placeholder;
     }
 
-    public static TemplateField of(String fieldName, String fieldType, boolean required, String placeholder) {
+    public static TemplateField of(
+            String fieldName,
+            String fieldType,
+            boolean required,
+            String placeholder
+    ) {
         return new TemplateField(fieldName, fieldType, required, placeholder);
     }
 

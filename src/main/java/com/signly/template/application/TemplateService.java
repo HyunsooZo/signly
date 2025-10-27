@@ -50,7 +50,7 @@ public class TemplateService {
             throw new ValidationException("이미 같은 제목의 템플릿이 존재합니다");
         }
 
-        TemplateContent content = TemplateContent.of(command.sectionsJson());
+        TemplateContent content = TemplateContent.fromJson(command.sectionsJson());
         ContractTemplate template = ContractTemplate.create(userIdObj, command.title(), content);
 
         ContractTemplate savedTemplate = templateRepository.save(template);
@@ -70,7 +70,7 @@ public class TemplateService {
         }
 
         template.updateTitle(command.title());
-        TemplateContent newContent = TemplateContent.of(command.sectionsJson());
+        TemplateContent newContent = TemplateContent.fromJson(command.sectionsJson());
         template.updateContent(newContent);
 
         ContractTemplate updatedTemplate = templateRepository.save(template);

@@ -4,31 +4,14 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} - Signly</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="/css/common.css" rel="stylesheet">
-    <link href="/css/contracts.css" rel="stylesheet">
-    <link href="/css/template-preview.css" rel="stylesheet">
-</head>
+<jsp:include page="../common/header.jsp">
+    <jsp:param name="additionalCss" value="/css/contracts.css" />
+    <jsp:param name="additionalCss2" value="/css/contract-common.css" />
+</jsp:include>
 <body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/home">
-                <i class="bi bi-file-earmark-text me-2"></i>Signly
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/home">대시보드</a>
-                <a class="nav-link" href="/templates">템플릿</a>
-                <a class="nav-link active" href="/contracts">계약서</a>
-                <a class="nav-link" href="/profile/signature">서명 관리</a>
-                <a class="nav-link" href="/logout">로그아웃</a>
-            </div>
-        </div>
-    </nav>
+    <jsp:include page="../common/navbar.jsp">
+        <jsp:param name="currentPage" value="contracts" />
+    </jsp:include>
 
     <div class="container mt-4">
         <div class="row">
@@ -48,14 +31,14 @@
 
                 <!-- 알림 메시지 -->
                 <c:if test="${not empty successMessage}">
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
                         <i class="bi bi-check-circle me-2"></i>${successMessage}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
 
                 <c:if test="${not empty errorMessage}">
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
                         <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -73,6 +56,9 @@
             <input type="hidden" id="templateId" name="templateId" value="${contract.templateId}">
             <c:if test="${not empty selectedTemplate}">
                 <script type="application/json" id="selectedTemplateData">${selectedTemplateContent}</script>
+            </c:if>
+            <c:if test="${not empty existingContractJson}">
+                <script type="application/json" id="existingContractData">${existingContractJson}</script>
             </c:if>
 
             <!-- 프리셋 레이아웃 -->
@@ -223,18 +209,26 @@
                                         </select>
                                     </c:when>
                                     <c:otherwise>
-                                        <div class="mb-3">
-                                            <label for="title" class="form-label">계약서 제목 <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control form-control-lg" id="title" name="title"
-                                                   value="${contract.title}" required maxlength="200"
-                                                   placeholder="계약서 제목을 입력하세요">
-                                        </div>
+                                        <!-- 수정 모드: 템플릿 기반 계약서는 작성 화면과 동일하게 템플릿 렌더링 -->
+                                        <c:choose>
+                                            <c:when test="${not empty selectedTemplate}">
+                                                <!-- 템플릿이 있는 경우: JavaScript에서 selectedTemplateData를 읽어 템플릿 렌더링 -->
+                                                <p class="text-muted">선택된 템플릿의 내용을 확인하고 변수 값을 수정할 수 있습니다.</p>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <!-- 템플릿 없이 직접 작성한 계약서인 경우 -->
+                                                <div class="mb-3">
+                                                    <label for="title" class="form-label">계약서 제목 <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control form-control-lg" id="title" name="title"
+                                                           value="${contract.title}" required maxlength="200"
+                                                           placeholder="계약서 제목을 입력하세요">
+                                                </div>
 
-                                        <div class="mb-3" id="contentSection">
-                                            <label for="content" class="form-label">계약서 내용 <span class="text-danger">*</span></label>
-                                            <textarea class="form-control content-editor" id="content" name="content"
-                                                      rows="15" required placeholder="계약서 내용을 입력하세요...">${contract.content}</textarea>
-                                            <div class="form-text">계약서의 전체 내용을 입력하세요. 변수를 사용하여 동적 값을 설정할 수 있습니다.</div>
+                                                <div class="mb-3" id="contentSection">
+                                                    <label for="content" class="form-label">계약서 내용 <span class="text-danger">*</span></label>
+                                                    <textarea class="form-control content-editor" id="content" name="content"
+                                                              rows="15" required placeholder="계약서 내용을 입력하세요...">${contract.content}</textarea>
+                                                    <div class="form-text">계약서의 전체 내용을 입력하세요. 변수를 사용하여 동적 값을 설정할 수 있습니다.</div>
 
                                             <div class="mt-3" id="customVariablesContainer">
                                                 <label class="form-label d-flex align-items-center gap-2">
@@ -255,9 +249,11 @@
                                                 </div>
                                             </div>
 
-                                            <!-- 프리셋 폼 필드 컨테이너 (동적으로 생성됨) -->
-                                            <div id="presetFormFields"></div>
-                                        </div>
+                                                    <!-- 프리셋 폼 필드 컨테이너 (동적으로 생성됨) -->
+                                                    <div id="presetFormFields"></div>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </c:otherwise>
                                 </c:choose>
                             </div>
@@ -384,10 +380,28 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const contractContentTextarea = document.getElementById('content');
         const currentUserId = document.body?.dataset?.currentUserId || '';
+        const existingContractDataElement = document.getElementById('existingContractData');
+        let existingContractData = null;
+        if (existingContractDataElement) {
+            try {
+                existingContractData = JSON.parse(existingContractDataElement.textContent);
+            } catch (error) {
+                console.error('[ERROR] 기존 계약 데이터 파싱 실패:', error);
+            }
+        }
+        const selectedTemplateDataElement = document.getElementById('selectedTemplateData');
+        let selectedTemplateData = null;
+        if (selectedTemplateDataElement) {
+            try {
+                selectedTemplateData = JSON.parse(selectedTemplateDataElement.textContent);
+            } catch (error) {
+                console.error('[ERROR] 선택된 템플릿 데이터 파싱 실패:', error);
+            }
+        }
+        const hasSelectedPreset = ${not empty selectedPreset ? 'true' : 'false'};
 
         function readOwnerInfo() {
             try {
@@ -616,50 +630,7 @@
             console.log('[DEBUG] renderPresetHtml - Input HTML length:', html.length);
             console.log('[DEBUG] renderPresetHtml - First 500 chars:', html.substring(0, 500));
 
-            // 기존 프리셋 스타일 제거
-            const oldPresetStyle = document.getElementById('presetCustomStyle');
-            if (oldPresetStyle) {
-                oldPresetStyle.remove();
-            }
-
-            // <style> 태그를 정규식으로 추출 (innerHTML로는 head 안의 style을 못 찾음)
-            const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-            let combinedCss = '';
-            let match;
-
-            while ((match = styleRegex.exec(html)) !== null) {
-                const cssText = match[1];
-                console.log('[DEBUG] Found style tag, CSS length:', cssText.length);
-
-                // 가장 간단한 방법: body만 교체하고 나머지는 .preset-document 안에서 작동하도록
-                let modifiedCss = cssText.replace(/\bbody\b/g, '.preset-document');
-
-                console.log('[DEBUG] Modified CSS preview:', modifiedCss.substring(0, 500));
-                combinedCss += modifiedCss + '\n';
-            }
-
-            // 스코프 적용된 스타일을 head에 추가
-            if (combinedCss.trim()) {
-                const styleElement = document.createElement('style');
-                styleElement.id = 'presetCustomStyle';
-                styleElement.textContent = combinedCss;
-                document.head.appendChild(styleElement);
-                console.log('[DEBUG] Added CSS, total length:', combinedCss.length);
-
-                // 실제로 적용되었는지 확인
-                setTimeout(() => {
-                    const sectionNumber = document.querySelector('.preset-document .section-number');
-                    if (sectionNumber) {
-                        const computedStyle = window.getComputedStyle(sectionNumber);
-                        console.log('[DEBUG] .section-number font-weight:', computedStyle.fontWeight);
-                        console.log('[DEBUG] .section-number element:', sectionNumber);
-                    } else {
-                        console.log('[DEBUG] .section-number not found');
-                    }
-                }, 100);
-            } else {
-                console.log('[DEBUG] No CSS found!');
-            }
+            // CSS는 통일된 contract-common.css에서 로드하므로 동적 추출 불필요
 
             // body 태그 내용만 추출
             const tempDiv = document.createElement('div');
@@ -683,10 +654,37 @@
 
             // 변수를 입력 필드로 교체
             replaceVariablesWithInputs(container);
+            restoreSavedVariableInputs(container);
 
             // 제목 설정
             document.getElementById('presetLayoutTitle').textContent = presetName || '표준 근로계약서';
             document.getElementById('presetTitleHidden').value = presetName || '표준 근로계약서';
+        }
+
+        let legacyVariableCounter = 0;
+
+        function restoreSavedVariableInputs(container) {
+            const savedSpans = container.querySelectorAll('.contract-variable-underline');
+            savedSpans.forEach(span => {
+                if (span.querySelector('input')) {
+                    return;
+                }
+                let varName = span.getAttribute('data-variable-name');
+                if (!varName) {
+                    varName = 'LEGACY_FIELD_' + (legacyVariableCounter++);
+                    span.setAttribute('data-variable-name', varName);
+                }
+                const value = span.textContent || '';
+                const wrapper = createVariableInput(varName);
+                const input = wrapper.querySelector('input[data-variable-name]');
+                if (input) {
+                    input.value = value;
+                }
+                if (varName) {
+                    customVariableValues[varName] = value;
+                }
+                span.replaceWith(wrapper);
+            });
         }
 
         // 변수를 입력 필드로 교체하는 함수
@@ -809,10 +807,11 @@
 
             const wrapper = document.createElement('span');
             wrapper.className = 'contract-variable-underline';
+            wrapper.setAttribute('data-variable-name', varName);
 
             const input = document.createElement('input');
             input.type = 'text';
-            input.className = 'form-control-plaintext d-inline contract-input-inline';
+            input.className = 'form-control contract-input-inline';
             input.size = inputSize;
             if (maxLength) {
                 input.maxLength = maxLength;
@@ -1019,6 +1018,144 @@
             document.getElementById('presetFirstPartyAddress').value = ownerInfo.companyName || '';
         }
 
+        // 저장된 계약 내용에서 변수 값을 추출
+        function extractSavedVariableValues(savedHtml) {
+            if (!savedHtml) {
+                return [];
+            }
+            const decoded = decodeHtmlEntities(savedHtml);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = decoded;
+            const nodes = tempDiv.querySelectorAll('.contract-variable-underline');
+            return Array.from(nodes).map(node => ({
+                name: (node.getAttribute('data-variable-name') || '').trim(),
+                value: (node.textContent || '').trim()
+            }));
+        }
+
+        function fillPresetInputsFromSavedValues(savedValues, attempt = 0) {
+            const container = document.getElementById('presetHtmlContainer');
+            if (!container || attempt > 10) {
+                return;
+            }
+            const inputs = container.querySelectorAll('input[data-variable-name]');
+            if (!inputs.length) {
+                setTimeout(() => fillPresetInputsFromSavedValues(savedValues, attempt + 1), 60);
+                return;
+            }
+
+            const valueMap = new Map();
+            savedValues.forEach(entry => {
+                if (entry.name) {
+                    valueMap.set(entry.name.toUpperCase(), entry.value);
+                }
+            });
+
+            inputs.forEach((input, index) => {
+                const key = (input.getAttribute('data-variable-name') || '').trim();
+                let value = key ? valueMap.get(key.toUpperCase()) : undefined;
+                if (value === undefined && savedValues[index]) {
+                    value = savedValues[index].value;
+                }
+                if (value !== undefined) {
+                    input.value = value;
+                    if (key) {
+                        customVariableValues[key] = value;
+                    }
+                }
+            });
+
+            updatePresetContent();
+            updateDirectPreview();
+        }
+
+        // 수정 모드일 때 기존 계약서 데이터를 폼에 적용
+        function applyExistingContractData() {
+            if (!existingContractData) {
+                return;
+            }
+
+            if (existingContractData.secondPartyEmail) {
+                const emailField = document.getElementById('presetSecondPartyEmail') || document.getElementById('secondPartyEmail');
+                if (emailField) {
+                    emailField.value = existingContractData.secondPartyEmail;
+                }
+            }
+
+            if (existingContractData.firstPartyName) {
+                const target = document.getElementById('presetFirstPartyName') || document.getElementById('firstPartyName');
+                if (target) {
+                    target.value = existingContractData.firstPartyName;
+                }
+            }
+            if (existingContractData.firstPartyEmail) {
+                const target = document.getElementById('presetFirstPartyEmail') || document.getElementById('firstPartyEmail');
+                if (target) {
+                    target.value = existingContractData.firstPartyEmail;
+                }
+            }
+            if (existingContractData.firstPartyAddress) {
+                const target = document.getElementById('presetFirstPartyAddress') || document.getElementById('firstPartyAddress');
+                if (target) {
+                    target.value = existingContractData.firstPartyAddress;
+                }
+            }
+            if (existingContractData.secondPartyName) {
+                const target = document.getElementById('presetSecondPartyName') || document.getElementById('secondPartyName');
+                if (target) {
+                    target.value = existingContractData.secondPartyName;
+                }
+            }
+
+            if (existingContractData.content) {
+                const savedValues = extractSavedVariableValues(existingContractData.content);
+                if (savedValues.length) {
+                    fillPresetInputsFromSavedValues(savedValues);
+                } else if (contractContentTextarea && !contractContentTextarea.value) {
+                    contractContentTextarea.value = decodeHtmlEntities(existingContractData.content);
+                    detectCustomVariables();
+                    updateDirectPreview();
+                }
+            }
+        }
+
+        function loadExistingContractAsPreset() {
+            if (!existingContractData || !existingContractData.content) {
+                return;
+            }
+            const decoded = decodeHtmlEntities(existingContractData.content);
+            switchToPresetMode();
+            const title = existingContractData.title || document.getElementById('presetTitleHidden')?.value || '계약서';
+            renderPresetHtml(decoded, title);
+            applyExistingContractData();
+        }
+
+        // 빈 변수 뒤의 불필요한 텍스트 정리 (예: "부터 까지" → "부터")
+        function cleanupEmptyVariableContext(container) {
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+            const textNodes = [];
+
+            while (walker.nextNode()) {
+                textNodes.push(walker.currentNode);
+            }
+
+            textNodes.forEach(node => {
+                if (!node.nodeValue) return;
+                let text = node.nodeValue;
+
+                // " 부터  까지" 패턴 (종료일이 비어있을 때)
+                text = text.replace(/\s*부터\s+까지/g, ' 부터');
+                // " 까지 " 단독 (앞의 값이 비어있을 때)
+                text = text.replace(/\s+까지\s*/g, '');
+                // 연속된 공백 정리
+                text = text.replace(/\s{2,}/g, ' ');
+
+                if (text !== node.nodeValue) {
+                    node.nodeValue = text;
+                }
+            });
+        }
+
         // 프리셋 내용 업데이트 (폼 제출용)
         function updatePresetContent() {
             const container = document.getElementById('presetHtmlContainer');
@@ -1030,9 +1167,14 @@
 
             inputs.forEach(input => {
                 const varName = input.getAttribute('data-variable-name');
-                const value = input.value || '';
-                const textNode = document.createTextNode(value);
-                input.parentNode.replaceChild(textNode, input);
+                const value = (input.value || '').trim(); // 앞뒤 공백 제거
+                const wrapper = input.parentNode;
+                if (wrapper) {
+                    wrapper.setAttribute('data-variable-name', varName || '');
+                    wrapper.textContent = value;
+                } else {
+                    input.replaceWith(document.createTextNode(value));
+                }
 
                 // secondPartyName hidden 필드 업데이트
                 if (varName.toUpperCase() === 'EMPLOYEE' || varName.toUpperCase() === 'EMPLOYEE_NAME') {
@@ -1052,6 +1194,9 @@
                 }
             });
 
+            // 빈 변수 뒤의 불필요한 텍스트 정리
+            cleanupEmptyVariableContext(clone);
+
             // Hidden textarea에 HTML 저장
             document.getElementById('presetContentHidden').value = clone.innerHTML;
         }
@@ -1064,7 +1209,7 @@
                 });
 
                 if (!response.ok) {
-                    alert('표준 양식을 불러오지 못했습니다.');
+                    showAlertModal('표준 양식을 불러오지 못했습니다.');
                     return;
                 }
 
@@ -1101,14 +1246,18 @@
                 // HTML 렌더링
                 renderPresetHtml(rendered, preset.name);
 
+                // 수정 모드인 경우 기존 데이터로 필드 채우기
+                applyExistingContractData();
+
             } catch (error) {
                 console.error('프리셋 로딩 실패:', error);
-                alert('표준 양식을 불러오지 못했습니다.');
+                showAlertModal('표준 양식을 불러오지 못했습니다.');
             }
         }
 
-        function loadTemplateAsPreset(templateTitle, templateHtml) {
+        function loadTemplateAsPreset(templateTitle, templateHtml, templateVariables) {
             console.log('[DEBUG] Loading template as preset:', templateTitle);
+            console.log('[DEBUG] Template variables:', templateVariables);
 
             let rendered = templateHtml || '';
 
@@ -1123,6 +1272,237 @@
 
             // HTML 렌더링
             renderPresetHtml(rendered, templateTitle);
+
+            // 변수 기반 입력 폼 생성
+            if (templateVariables && Object.keys(templateVariables).length > 0) {
+                renderTemplateVariableForms(templateVariables);
+            }
+
+            applyExistingContractData();
+        }
+
+        // 템플릿 변수 기반 입력 폼 생성
+        function renderTemplateVariableForms(variables) {
+            const container = document.getElementById('presetHtmlContainer');
+            if (!container) return;
+
+            console.log('[DEBUG] Rendering variable forms for:', variables);
+
+            // 컨테이너 아래에 변수 입력 섹션 추가
+            let variableSection = document.getElementById('templateVariableSection');
+            if (!variableSection) {
+                variableSection = document.createElement('div');
+                variableSection.id = 'templateVariableSection';
+                variableSection.className = 'card mb-4';
+                variableSection.innerHTML = `
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-sliders2-vertical me-2"></i>변수 값 입력
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3" id="templateVariableFields"></div>
+                    </div>
+                `;
+
+                // presetExpirationCard 이전에 삽입
+                const expirationCard = document.getElementById('presetExpirationCard');
+                if (expirationCard && expirationCard.parentNode) {
+                    expirationCard.parentNode.insertBefore(variableSection, expirationCard);
+                }
+            }
+
+            const fieldsContainer = document.getElementById('templateVariableFields');
+            if (!fieldsContainer) return;
+
+            fieldsContainer.innerHTML = '';
+
+            // 각 변수에 대한 입력 필드 생성
+            Object.entries(variables).forEach(([varName, varDef]) => {
+                const fieldWrapper = document.createElement('div');
+                fieldWrapper.className = 'col-md-6';
+
+                const label = document.createElement('label');
+                label.className = 'form-label';
+                label.textContent = varDef.label || varName;
+                if (varDef.required) {
+                    const requiredSpan = document.createElement('span');
+                    requiredSpan.className = 'text-danger ms-1';
+                    requiredSpan.textContent = '*';
+                    label.appendChild(requiredSpan);
+                }
+
+                let input;
+
+                // 타입에 따라 다른 입력 요소 생성
+                switch (varDef.type) {
+                    case 'DATE':
+                        input = document.createElement('input');
+                        input.type = 'date';
+                        input.className = 'form-control';
+                        break;
+                    case 'EMAIL':
+                        input = document.createElement('input');
+                        input.type = 'email';
+                        input.className = 'form-control';
+                        input.placeholder = varDef.defaultValue || 'example@domain.com';
+                        break;
+                    case 'NUMBER':
+                        input = document.createElement('input');
+                        input.type = 'number';
+                        input.className = 'form-control';
+                        input.placeholder = varDef.defaultValue || '0';
+                        break;
+                    case 'TEXTAREA':
+                        input = document.createElement('textarea');
+                        input.className = 'form-control';
+                        input.rows = 3;
+                        input.placeholder = varDef.defaultValue || '';
+                        break;
+                    default: // TEXT
+                        input = document.createElement('input');
+                        input.type = 'text';
+                        input.className = 'form-control';
+                        input.placeholder = varDef.defaultValue || '';
+                }
+
+                input.id = 'var_' + varName;
+                input.setAttribute('data-variable-name', varName);
+                input.setAttribute('data-variable-type', varDef.type);
+                input.required = varDef.required;
+                if (varDef.defaultValue) {
+                    input.value = varDef.defaultValue;
+                }
+
+                // 입력 시 HTML 컨테이너의 변수 치환
+                input.addEventListener('input', function() {
+                    updateTemplateVariableInHtml(varName, this.value);
+                });
+
+                // 클라이언트 측 검증
+                input.addEventListener('blur', function() {
+                    validateVariableInput(this, varDef);
+                });
+
+                fieldWrapper.appendChild(label);
+                fieldWrapper.appendChild(input);
+                fieldsContainer.appendChild(fieldWrapper);
+
+                // 기본값이 있으면 즉시 HTML에 반영
+                if (varDef.defaultValue) {
+                    updateTemplateVariableInHtml(varName, varDef.defaultValue);
+                }
+            });
+        }
+
+        // HTML 내의 변수를 실제 값으로 치환
+        function updateTemplateVariableInHtml(varName, value) {
+            const container = document.getElementById('presetHtmlContainer');
+            if (!container) return;
+
+            // {{varName}} 패턴을 찾아서 value로 치환
+            const pattern = new RegExp('\\{\\{' + varName + '\\}\\}', 'g');
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+            const textNodes = [];
+
+            while (walker.nextNode()) {
+                if (walker.currentNode.nodeValue && walker.currentNode.nodeValue.includes('{{' + varName + '}}')) {
+                    textNodes.push(walker.currentNode);
+                }
+            }
+
+            textNodes.forEach(node => {
+                node.nodeValue = node.nodeValue.replace(pattern, value || '');
+            });
+
+            updatePresetContent();
+        }
+
+        // 변수 입력 값 검증
+        function validateVariableInput(input, varDef) {
+            const value = input.value.trim();
+
+            // 유효성 표시 제거
+            input.classList.remove('is-invalid', 'is-valid');
+            const existingFeedback = input.parentElement.querySelector('.invalid-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+
+            // 필수 필드 체크
+            if (varDef.required && !value) {
+                showValidationError(input, varDef.label + '은(는) 필수 입력 항목입니다.');
+                return false;
+            }
+
+            // 값이 있으면 타입별 검증
+            if (value) {
+                let errorMessage = null;
+
+                switch (varDef.type) {
+                    case 'NUMBER':
+                        if (isNaN(value) || !/^-?\d+(\.\d+)?$/.test(value)) {
+                            errorMessage = '숫자만 입력 가능합니다.';
+                        }
+                        break;
+                    case 'EMAIL':
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(value)) {
+                            errorMessage = '올바른 이메일 형식이 아닙니다.';
+                        }
+                        break;
+                    case 'DATE':
+                        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                        if (!dateRegex.test(value)) {
+                            errorMessage = '날짜 형식은 YYYY-MM-DD 이어야 합니다.';
+                        }
+                        break;
+                }
+
+                if (errorMessage) {
+                    showValidationError(input, errorMessage);
+                    return false;
+                }
+            }
+
+            // 검증 통과
+            input.classList.add('is-valid');
+            return true;
+        }
+
+        // 검증 오류 표시
+        function showValidationError(input, message) {
+            input.classList.add('is-invalid');
+
+            const feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            feedback.textContent = message;
+
+            input.parentElement.appendChild(feedback);
+        }
+
+        // 폼 제출 시 모든 변수 검증
+        function validateAllTemplateVariables() {
+            const variableInputs = document.querySelectorAll('[data-variable-name][data-variable-type]');
+            let allValid = true;
+
+            variableInputs.forEach(input => {
+                const varName = input.getAttribute('data-variable-name');
+                const varType = input.getAttribute('data-variable-type');
+                const isRequired = input.hasAttribute('required');
+
+                const varDef = {
+                    label: input.parentElement.querySelector('label')?.textContent.replace('*', '').trim() || varName,
+                    type: varType,
+                    required: isRequired
+                };
+
+                if (!validateVariableInput(input, varDef)) {
+                    allValid = false;
+                }
+            });
+
+            return allValid;
         }
 
         function highlightTemplateCard(selectedCard) {
@@ -1578,6 +1958,14 @@
                         // 프리셋 모드인 경우
                         const presetLayout = document.getElementById('presetLayout');
                         if (presetLayout && presetLayout.style.display !== 'none') {
+                            // 템플릿 변수 검증
+                            if (!validateAllTemplateVariables()) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                showAlertModal('입력한 변수 값을 확인해주세요.');
+                                return false;
+                            }
+
                             // 프리셋 콘텐츠 업데이트
                             updatePresetContent();
 
@@ -1613,7 +2001,7 @@
                         if (firstEmail && secondEmail && firstEmail === secondEmail) {
                             event.preventDefault();
                             event.stopPropagation();
-                            alert('갑과 을의 이메일 주소는 달라야 합니다.');
+                            showAlertModal('갑과 을의 이메일 주소는 달라야 합니다.');
                             return false;
                         }
 
@@ -1633,8 +2021,21 @@
         // 스크롤 이벤트 리스너 등록
                 
         document.addEventListener('DOMContentLoaded', initializeExpirationInputs);
+
+        // 초기 레이아웃 설정: selectedPreset이나 selectedTemplate이 있으면 해당 레이아웃 표시
         document.addEventListener('DOMContentLoaded', function() {
-            switchToNormalMode();
+            if (selectedTemplateData) {
+                console.log('[INIT] Template edit detected, switching to preset layout');
+                switchToPresetMode();
+            } else if (existingContractData && existingContractData.content) {
+                console.log('[INIT] Existing contract content detected, switching to preset layout');
+                switchToPresetMode();
+            } else if (hasSelectedPreset) {
+                console.log('[INIT] Preset mode detected, will load preset');
+            } else {
+                console.log('[INIT] Normal mode detected, switching to normal layout');
+                switchToNormalMode();
+            }
         });
 
         <c:if test="${empty contractId}">
@@ -1660,11 +2061,40 @@
         });
         </c:if>
 
+        // 템플릿 선택 후 자동 로드 (수정 모드 포함)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (selectedTemplateData && selectedTemplateData.renderedHtml) {
+                if (selectedTemplateData.templateId) {
+                    const templateIdInput = document.getElementById('templateId');
+                    if (templateIdInput) {
+                        templateIdInput.value = selectedTemplateData.templateId;
+                    }
+                }
+                loadTemplateAsPreset(
+                    selectedTemplateData.title || '',
+                    selectedTemplateData.renderedHtml || '',
+                    selectedTemplateData.variables || {}
+                );
+            } else if (existingContractData && existingContractData.content) {
+                loadExistingContractAsPreset();
+            } else if (!hasSelectedPreset) {
+                applyExistingContractData();
+            }
+        });
+
                 // 페이지 로드 시 selectedPreset 또는 selectedTemplate이 있으면 자동으로 로드
         <c:if test="${not empty selectedPreset}">
+        console.log('[DEBUG] selectedPreset found:', '${selectedPreset}');
+        console.log('[DEBUG] contractId found:', '${contractId}');
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('[DEBUG] DOMContentLoaded - Loading preset:', '${selectedPreset}');
             loadPresetById('${selectedPreset}');
         });
+        </c:if>
+        <c:if test="${empty selectedPreset}">
+        console.log('[DEBUG] No selectedPreset found');
+        console.log('[DEBUG] contractId:', '${contractId}');
+        console.log('[DEBUG] contract.presetType:', '${contract.selectedPreset}');
         </c:if>
 
 // 폼 제출 직전 상태 확인
@@ -1684,5 +2114,6 @@
             }
         });
     </script>
+    <jsp:include page="../common/footer.jsp" />
 </body>
 </html>

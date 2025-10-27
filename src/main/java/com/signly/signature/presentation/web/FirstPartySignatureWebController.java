@@ -3,6 +3,7 @@ package com.signly.signature.presentation.web;
 import com.signly.common.exception.ValidationException;
 import com.signly.common.security.CurrentUserProvider;
 import com.signly.common.security.SecurityUser;
+import com.signly.common.web.BaseWebController;
 import com.signly.signature.application.FirstPartySignatureService;
 import com.signly.signature.application.dto.FirstPartySignatureResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,25 +19,29 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-public class FirstPartySignatureWebController {
+public class FirstPartySignatureWebController extends BaseWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(FirstPartySignatureWebController.class);
 
     private final FirstPartySignatureService firstPartySignatureService;
     private final CurrentUserProvider currentUserProvider;
 
-    public FirstPartySignatureWebController(FirstPartySignatureService firstPartySignatureService,
-                                            CurrentUserProvider currentUserProvider) {
+    public FirstPartySignatureWebController(
+            FirstPartySignatureService firstPartySignatureService,
+            CurrentUserProvider currentUserProvider
+    ) {
         this.firstPartySignatureService = firstPartySignatureService;
         this.currentUserProvider = currentUserProvider;
     }
 
     @GetMapping("/profile/signature")
-    public String viewSignature(@RequestHeader(value = "X-User-Id", required = false) String userId,
-                                @AuthenticationPrincipal SecurityUser securityUser,
-                                HttpServletRequest request,
-                                Model model,
-                                RedirectAttributes redirectAttributes) {
+    public String viewSignature(
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             model.addAttribute("pageTitle", "서명 관리");
@@ -59,11 +64,13 @@ public class FirstPartySignatureWebController {
     }
 
     @PostMapping("/profile/signature")
-    public String uploadSignature(@RequestHeader(value = "X-User-Id", required = false) String userId,
-                                  @AuthenticationPrincipal SecurityUser securityUser,
-                                  HttpServletRequest request,
-                                  @RequestParam("signatureData") String signatureData,
-                                  RedirectAttributes redirectAttributes) {
+    public String uploadSignature(
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request,
+            @RequestParam("signatureData") String signatureData,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             firstPartySignatureService.uploadSignature(resolvedUserId, signatureData);

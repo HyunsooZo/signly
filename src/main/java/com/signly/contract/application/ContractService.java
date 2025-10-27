@@ -13,7 +13,9 @@ import com.signly.signature.application.FirstPartySignatureService;
 import com.signly.signature.application.SignatureService;
 import com.signly.signature.application.dto.CreateSignatureCommand;
 import com.signly.signature.domain.repository.SignatureRepository;
+import com.signly.template.application.HtmlRenderer;
 import com.signly.template.domain.model.ContractTemplate;
+import com.signly.template.domain.model.TemplateContent;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.template.domain.repository.TemplateRepository;
 import com.signly.user.domain.model.User;
@@ -29,7 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,6 +50,7 @@ public class ContractService {
     private final FirstPartySignatureService firstPartySignatureService;
     private final SignatureRepository signatureRepository;
     private final SignatureService signatureService;
+    private final HtmlRenderer htmlRenderer;
 
     public ContractService(
             ContractRepository contractRepository,
@@ -55,7 +60,8 @@ public class ContractService {
             EmailNotificationService emailNotificationService,
             FirstPartySignatureService firstPartySignatureService,
             SignatureRepository signatureRepository,
-            SignatureService signatureService
+            SignatureService signatureService,
+            HtmlRenderer htmlRenderer
     ) {
         this.contractRepository = contractRepository;
         this.userRepository = userRepository;
@@ -65,6 +71,7 @@ public class ContractService {
         this.firstPartySignatureService = firstPartySignatureService;
         this.signatureRepository = signatureRepository;
         this.signatureService = signatureService;
+        this.htmlRenderer = htmlRenderer;
     }
 
     public ContractResponse createContract(
@@ -84,6 +91,8 @@ public class ContractService {
         }
 
         TemplateId templateId = StringUtils.hasText(command.templateId()) ? TemplateId.of(command.templateId().trim()) : null;
+        ContractContent content;
+
         if (templateId != null) {
             ContractTemplate template = templateRepository.findById(templateId)
                     .orElseThrow(() -> new NotFoundException("템플릿을 찾을 수 없습니다"));
@@ -91,10 +100,24 @@ public class ContractService {
             if (!template.getOwnerId().equals(userIdObj)) {
                 throw new ForbiddenException("해당 템플릿을 사용할 권한이 없습니다");
             }
-        }
 
-        String sanitizedContent = ContractHtmlSanitizer.sanitize(command.content());
-        ContractContent content = ContractContent.of(sanitizedContent);
+            Map<String, String> variableValues = command.variableValues() != null ?
+                command.variableValues() : new HashMap<>();
+
+            // 템플릿 변수 검증
+            validateTemplateVariables(template.getContent(), variableValues);
+
+            String renderedHtml = htmlRenderer.render(
+                template.getContent(),
+                variableValues
+            );
+
+            String sanitizedContent = ContractHtmlSanitizer.sanitize(renderedHtml);
+            content = ContractContent.of(sanitizedContent);
+        } else {
+            String sanitizedContent = ContractHtmlSanitizer.sanitize(command.content());
+            content = ContractContent.of(sanitizedContent);
+        }
         PartyInfo firstParty = PartyInfo.of(
                 command.firstPartyName(),
                 command.firstPartyEmail(),
@@ -123,8 +146,8 @@ public class ContractService {
         );
 
         Contract savedContract = contractRepository.save(contract);
-        logger.info("계약서 생성 완료: contractId={}, signToken={}",
-            savedContract.getId().getValue(), savedContract.getSignToken().value());
+        logger.info("계약서 생성 완료: contractId={}, signToken={}, presetType={}",
+            savedContract.getId().getValue(), savedContract.getSignToken().value(), savedContract.getPresetType());
         return contractDtoMapper.toResponse(savedContract);
     }
 
@@ -471,5 +494,39 @@ public class ContractService {
 
     private String normalizeEmail(String email) {
         return email == null ? null : email.trim().toLowerCase();
+    }
+
+    private void validateTemplateVariables(
+        TemplateContent templateContent,
+        Map<String, String> variableValues
+    ) {
+        Map<String, com.signly.template.domain.model.TemplateVariable> templateVariables =
+            templateContent.getMetadata().getVariables();
+
+        // 필수 변수가 모두 제공되었는지 확인
+        for (Map.Entry<String, com.signly.template.domain.model.TemplateVariable> entry : templateVariables.entrySet()) {
+            String varName = entry.getKey();
+            com.signly.template.domain.model.TemplateVariable varDef = entry.getValue();
+
+            String value = variableValues.get(varName);
+
+            // 필수 변수 확인
+            if (varDef.isRequired() && (value == null || value.trim().isEmpty())) {
+                throw new ValidationException(
+                    String.format("필수 변수 '%s'의 값이 제공되지 않았습니다.", varDef.getLabel())
+                );
+            }
+
+            // 값이 제공된 경우 유효성 검증
+            if (value != null && !value.trim().isEmpty()) {
+                try {
+                    varDef.validateValue(value);
+                } catch (ValidationException e) {
+                    throw new ValidationException(
+                        String.format("변수 '%s'의 값이 유효하지 않습니다: %s", varDef.getLabel(), e.getMessage())
+                    );
+                }
+            }
+        }
     }
 }

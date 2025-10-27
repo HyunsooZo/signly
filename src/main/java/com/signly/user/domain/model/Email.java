@@ -1,8 +1,11 @@
 package com.signly.user.domain.model;
 
+import lombok.Getter;
+
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+@Getter
 public class Email {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
@@ -26,10 +29,6 @@ public class Email {
 
     public static Email of(String value) {
         return new Email(value);
-    }
-
-    public String getValue() {
-        return value;
     }
 
     @Override

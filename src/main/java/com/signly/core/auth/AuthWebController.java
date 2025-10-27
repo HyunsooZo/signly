@@ -29,24 +29,41 @@ public class AuthWebController {
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
 
-    public AuthWebController(AuthService authService, UserService userService, EmailService emailService) {
+    public AuthWebController(
+            AuthService authService,
+            UserService userService,
+            EmailService emailService
+    ) {
         this.authService = authService;
         this.userService = userService;
         this.emailService = emailService;
     }
 
     @GetMapping("/login")
-    public String loginForm() {
+    public String loginForm(
+            @RequestParam(required = false) String returnUrl,
+            @RequestParam(required = false) String error,
+            Model model
+    ) {
+        if (returnUrl != null) {
+            model.addAttribute("returnUrl", returnUrl);
+        }
+        if (error != null) {
+            model.addAttribute("errorMessage", error);
+        }
         return "auth/login";
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String email,
-                       @RequestParam String password,
-                       @RequestParam(required = false) boolean rememberMe,
-                       HttpServletResponse response,
-                       Model model,
-                       RedirectAttributes redirectAttributes) {
+    public String login(
+            @RequestParam String email,
+            @RequestParam String password,
+            @RequestParam(required = false) boolean rememberMe,
+            @RequestParam(required = false) String returnUrl,
+            HttpServletResponse response,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             LoginRequest request = new LoginRequest(email, password);
             LoginResponse loginResponse = authService.login(request);
@@ -74,12 +91,18 @@ public class AuthWebController {
 
             logger.info("로그인 성공: {}", email);
             redirectAttributes.addFlashAttribute("successMessage", "로그인되었습니다.");
-            return "redirect:/home";
+
+            // returnUrl이 있으면 해당 페이지로, 없으면 /home으로 리다이렉트
+            String redirectUrl = (returnUrl != null && !returnUrl.isEmpty()) ? returnUrl : "/home";
+            return "redirect:" + redirectUrl;
 
         } catch (Exception e) {
             logger.warn("로그인 실패: {} - {}", email, e.getMessage());
             model.addAttribute("errorMessage", "이메일 또는 비밀번호가 올바르지 않습니다.");
             model.addAttribute("email", email);
+            if (returnUrl != null) {
+                model.addAttribute("returnUrl", returnUrl);
+            }
             return "auth/login";
         }
     }
@@ -90,9 +113,11 @@ public class AuthWebController {
     }
 
     @PostMapping("/logout")
-    public String logout(@AuthenticationPrincipal SecurityUser securityUser,
-                        HttpServletResponse response,
-                        RedirectAttributes redirectAttributes) {
+    public String logout(
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes
+    ) {
         // Redis에서 토큰 삭제
         if (securityUser != null) {
             String userId = securityUser.getUser().getUserId().getValue();
@@ -123,10 +148,12 @@ public class AuthWebController {
     }
 
     @PostMapping("/forgot-password")
-    public String forgotPassword(@RequestParam String email,
-                                 HttpServletRequest request,
-                                 Model model,
-                                 RedirectAttributes redirectAttributes) {
+    public String forgotPassword(
+            @RequestParam String email,
+            HttpServletRequest request,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             logger.info("비밀번호 재설정 요청: {}", email);
 
@@ -141,7 +168,7 @@ public class AuthWebController {
 
             logger.info("비밀번호 재설정 이메일 발송 완료: {}", email);
             redirectAttributes.addFlashAttribute("successMessage",
-                "비밀번호 재설정 링크를 이메일로 발송했습니다. 이메일을 확인해주세요.");
+                    "비밀번호 재설정 링크를 이메일로 발송했습니다. 이메일을 확인해주세요.");
             return "redirect:/forgot-password";
 
         } catch (Exception e) {
@@ -153,7 +180,10 @@ public class AuthWebController {
     }
 
     @GetMapping("/reset-password")
-    public String resetPasswordForm(@RequestParam String token, Model model) {
+    public String resetPasswordForm(
+            @RequestParam String token,
+            Model model
+    ) {
         try {
             // 토큰 유효성 검증
             String email = userService.getUserEmailByResetToken(token);
@@ -168,11 +198,13 @@ public class AuthWebController {
     }
 
     @PostMapping("/reset-password")
-    public String resetPassword(@RequestParam String token,
-                               @RequestParam String newPassword,
-                               @RequestParam String confirmPassword,
-                               Model model,
-                               RedirectAttributes redirectAttributes) {
+    public String resetPassword(
+            @RequestParam String token,
+            @RequestParam String newPassword,
+            @RequestParam String confirmPassword,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             if (!newPassword.equals(confirmPassword)) {
                 throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
@@ -182,7 +214,7 @@ public class AuthWebController {
 
             logger.info("비밀번호 재설정 완료");
             redirectAttributes.addFlashAttribute("successMessage",
-                "비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인해주세요.");
+                    "비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인해주세요.");
             return "redirect:/login";
 
         } catch (Exception e) {
