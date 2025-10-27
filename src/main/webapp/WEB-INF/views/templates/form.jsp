@@ -3,11 +3,13 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
-<c:set var="additionalCss" value="/css/template-builder.css" />
-<jsp:include page="../common/header.jsp" />
+<jsp:include page="../common/header.jsp">
+    <jsp:param name="additionalCss" value="/css/template-builder.css" />
+</jsp:include>
 <body>
-    <c:set var="currentPage" value="templates" />
-    <jsp:include page="../common/navbar.jsp" />
+    <jsp:include page="../common/navbar.jsp">
+        <jsp:param name="currentPage" value="templates" />
+    </jsp:include>
 
 <div class="builder-container">
     <!-- 툴바 -->

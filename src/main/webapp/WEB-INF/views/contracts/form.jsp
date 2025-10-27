@@ -4,12 +4,14 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
-<c:set var="additionalCss" value="/css/contracts.css" />
-<c:set var="additionalCss2" value="/css/contract-common.css" />
-<jsp:include page="../common/header.jsp" />
+<jsp:include page="../common/header.jsp">
+    <jsp:param name="additionalCss" value="/css/contracts.css" />
+    <jsp:param name="additionalCss2" value="/css/contract-common.css" />
+</jsp:include>
 <body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
-    <c:set var="currentPage" value="contracts" />
-    <jsp:include page="../common/navbar.jsp" />
+    <jsp:include page="../common/navbar.jsp">
+        <jsp:param name="currentPage" value="contracts" />
+    </jsp:include>
 
     <div class="container mt-4">
         <div class="row">

@@ -3,11 +3,13 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="ko">
-<c:set var="additionalCss" value="/css/dashboard.css" />
-<jsp:include page="../common/header.jsp" />
+<jsp:include page="../common/header.jsp">
+    <jsp:param name="additionalCss" value="/css/dashboard.css" />
+</jsp:include>
 <body>
-    <c:set var="currentPage" value="home" />
-    <jsp:include page="../common/navbar.jsp" />
+    <jsp:include page="../common/navbar.jsp">
+        <jsp:param name="currentPage" value="home" />
+    </jsp:include>
 
     <div class="container mt-4">
         <!-- 헤더 -->

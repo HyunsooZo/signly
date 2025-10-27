@@ -2,11 +2,13 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="ko">
-<c:set var="additionalCss" value="/css/contracts.css" />
-<jsp:include page="../common/header.jsp" />
+<jsp:include page="../common/header.jsp">
+    <jsp:param name="additionalCss" value="/css/contracts.css" />
+</jsp:include>
 <body>
-    <c:set var="currentPage" value="contracts" />
-    <jsp:include page="../common/navbar.jsp" />
+    <jsp:include page="../common/navbar.jsp">
+        <jsp:param name="currentPage" value="contracts" />
+    </jsp:include>
 
     <div class="container mt-5">
         <div class="text-center mb-5">

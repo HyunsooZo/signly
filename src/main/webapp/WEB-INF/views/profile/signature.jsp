@@ -4,11 +4,13 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
-<c:set var="additionalCss" value="/css/signature.css" />
-<jsp:include page="../common/header.jsp" />
+<jsp:include page="../common/header.jsp">
+    <jsp:param name="additionalCss" value="/css/signature.css" />
+</jsp:include>
 <body class="signature-management-page">
-    <c:set var="currentPage" value="signature" />
-    <jsp:include page="../common/navbar.jsp" />
+    <jsp:include page="../common/navbar.jsp">
+        <jsp:param name="currentPage" value="signature" />
+    </jsp:include>
 
     <div class="container mt-4">
         <div class="row mb-4">
