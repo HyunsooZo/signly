@@ -4,7 +4,7 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
-<c:set var="additionalCss" value="${['/css/templates.css']}" />
+<c:set var="additionalCss" value="/css/templates.css" />
 <jsp:include page="../common/header.jsp" />
 <body>
     <c:set var="currentPage" value="templates" />

@@ -4,7 +4,7 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
-<c:set var="additionalCss" value="${['/css/signature.css']}" />
+<c:set var="additionalCss" value="/css/signature.css" />
 <jsp:include page="../common/header.jsp" />
 <body class="signature-management-page">
     <c:set var="currentPage" value="signature" />

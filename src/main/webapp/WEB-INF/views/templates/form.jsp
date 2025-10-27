@@ -3,7 +3,7 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
-<c:set var="additionalCss" value="${['/css/template-builder.css']}" />
+<c:set var="additionalCss" value="/css/template-builder.css" />
 <jsp:include page="../common/header.jsp" />
 <body>
     <c:set var="currentPage" value="templates" />

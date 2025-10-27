@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="ko">
-<c:set var="additionalCss" value="${['/css/contracts.css']}" />
+<c:set var="additionalCss" value="/css/contracts.css" />
 <jsp:include page="../common/header.jsp" />
 <body>
     <c:set var="currentPage" value="contracts" />
