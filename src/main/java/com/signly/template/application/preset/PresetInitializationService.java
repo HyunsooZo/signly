@@ -29,13 +29,11 @@ public class PresetInitializationService {
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void initializePresets() {
-        // 표준근로계약서 프리셋이 없으면 생성
-        if (templateRepository.findByIsPresetTrueAndPresetId("standard-employment-contract").isEmpty()) {
-            createStandardEmploymentContractPreset();
-        }
+        // 표준근로계약서 프리셋 생성 또는 업데이트
+        createOrUpdateStandardEmploymentContractPreset();
     }
 
-    private void createStandardEmploymentContractPreset() {
+    private void createOrUpdateStandardEmploymentContractPreset() {
         try {
             Resource resource = resourceLoader.getResource("classpath:presets/templates/standard-employment-contract.html");
             String html;
@@ -49,21 +47,34 @@ public class PresetInitializationService {
                     escapeJson(html)
             );
 
-            TemplateEntity preset = new TemplateEntity(
-                    "01JB0000000000000000000001", // ULID 형식의 고정 ID for preset
-                    null, // owner_id is null for presets
-                    "표준 근로계약서",
-                    jsonContent,
-                    1,
-                    TemplateStatus.ACTIVE,
-                    true, // is_preset
-                    "standard-employment-contract", // preset_id
-                    LocalDateTime.now(),
-                    LocalDateTime.now()
-            );
+            // 기존 프리셋 찾기
+            var existingPreset = templateRepository.findByIsPresetTrueAndPresetId("standard-employment-contract");
 
-            templateRepository.save(preset);
-            System.out.println("✅ 표준 근로계약서 프리셋이 생성되었습니다.");
+            if (existingPreset.isPresent()) {
+                // 기존 프리셋 업데이트
+                TemplateEntity preset = existingPreset.get();
+                preset.setContent(jsonContent);
+                preset.setUpdatedAt(LocalDateTime.now());
+                templateRepository.save(preset);
+                System.out.println("✅ 표준 근로계약서 프리셋이 업데이트되었습니다.");
+            } else {
+                // 새 프리셋 생성
+                TemplateEntity preset = new TemplateEntity(
+                        "01JB0000000000000000000001", // ULID 형식의 고정 ID for preset
+                        null, // owner_id is null for presets
+                        "표준 근로계약서",
+                        jsonContent,
+                        1,
+                        TemplateStatus.ACTIVE,
+                        true, // is_preset
+                        "standard-employment-contract", // preset_id
+                        LocalDateTime.now(),
+                        LocalDateTime.now()
+                );
+
+                templateRepository.save(preset);
+                System.out.println("✅ 표준 근로계약서 프리셋이 생성되었습니다.");
+            }
         } catch (IOException e) {
             throw new RuntimeException("Failed to load standard employment contract preset", e);
         }

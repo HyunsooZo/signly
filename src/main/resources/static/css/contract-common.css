@@ -250,10 +250,49 @@ body,
     display: flex;
     justify-content: space-between;
     margin-top: 30px;
+    /* Flying Saucer를 위한 fallback: float 레이아웃 */
+    width: 100%;
+    overflow: hidden;
 }
 
 .signature-block {
-    width: 200px;
+    width: 280px;
+    /* Flying Saucer를 위한 fallback: float로 좌우 배치 */
+    float: left;
+}
+
+.signature-block--employee {
+    /* 근로자 - 왼쪽 끝 */
+    margin-left: 0;
+}
+
+.signature-block--employer {
+    /* 사업주 - 오른쪽 끝 */
+    margin-left: auto;
+}
+
+/* Flying Saucer용: float 레이아웃에서 양 끝으로 */
+.signature-block--employee {
+    float: left;
+    margin-left: 0;
+}
+
+.signature-block--employer {
+    float: right;
+    margin-right: 0;
+}
+
+/* Flexbox를 지원하는 브라우저에서는 float 무시 */
+@supports (display: flex) {
+    .signature-block {
+        float: none;
+    }
+    .signature-block--employee {
+        float: none;
+    }
+    .signature-block--employer {
+        float: none;
+    }
 }
 
 .signature-line {
@@ -307,6 +346,24 @@ body,
 
 /* PDF 전용 스타일 */
 @media print {
+    /* 페이지 여백 및 크기 최적화 */
+    body {
+        margin: 0;
+        padding: 15mm;
+        max-width: 100%;
+    }
+
+    /* 빈 페이지 방지 */
+    * {
+        page-break-after: auto;
+        page-break-before: auto;
+    }
+
+    .signature-section {
+        page-break-inside: avoid;
+        page-break-after: avoid;
+    }
+
     /* 안내 문구 숨김 (작성 시에만 표시) */
     .note {
         display: none !important;
@@ -320,19 +377,38 @@ body,
         text-decoration: none !important;
     }
 
-    /* 서명 이미지 크기 및 위치 고정 */
+    /* PDF에서 서명 섹션 레이아웃 재정의 */
+    .signature-stamp-label {
+        display: inline-block;
+        width: 80px;
+        height: 40px;
+        text-align: center;
+        vertical-align: middle;
+        position: relative;
+        margin-left: 8px;
+        color: transparent; /* (인) 텍스트를 투명하게 하여 이미지만 표시 */
+    }
+
+    .signature-stamp-wrapper {
+        position: relative !important;
+        transform: none !important;
+        display: inline-block !important;
+        width: 80px !important;
+        height: 40px !important;
+        vertical-align: middle !important;
+        text-align: center !important;
+        line-height: 40px !important;
+        margin-left: -80px !important; /* label의 width만큼 왼쪽으로 이동하여 (인) 위에 오버레이 */
+    }
+
+    /* 서명 이미지 크기 및 위치 - (인) 텍스트 위에 중앙 배치 */
     .signature-stamp-image-element {
         width: 60px !important;
         height: auto !important;
         max-width: 60px !important;
-        max-height: 30px !important;
+        max-height: 35px !important;
         vertical-align: middle !important;
-    }
-
-    /* PDF에서 wrapper의 absolute positioning이 제대로 작동하지 않을 수 있으므로
-       이미지 자체에 마진으로 위치 조정 */
-    .signature-stamp-wrapper .signature-stamp-image-element {
-        margin-left: -30px;
-        margin-top: -15px;
+        display: inline-block !important;
+        margin: 0 auto !important;
     }
 }
