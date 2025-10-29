@@ -37,22 +37,30 @@ public class EmailOutboxScheduler {
 
             logger.info("이메일 Outbox 처리 시작: {} 건", pendingEmails.size());
 
+            int successCount = 0;
+            int failureCount = 0;
+
             for (EmailOutbox outbox : pendingEmails) {
-                processEmail(outbox);
+                if (processEmail(outbox)) {
+                    successCount++;
+                } else {
+                    failureCount++;
+                }
             }
 
-            logger.info("이메일 Outbox 처리 완료: {} 건", pendingEmails.size());
+            logger.info("이메일 Outbox 처리 완료: {} 건 (성공: {}, 실패: {})",
+                    pendingEmails.size(), successCount, failureCount);
 
         } catch (Exception e) {
             logger.error("이메일 Outbox 처리 중 오류 발생", e);
         }
     }
 
-    private void processEmail(EmailOutbox outbox) {
+    private boolean processEmail(EmailOutbox outbox) {
         try {
             if (!outbox.canRetry()) {
                 logger.warn("재시도 불가한 이메일: id={}", outbox.getId().getValue());
-                return;
+                return false;
             }
 
             EmailRequest request = new EmailRequest(
@@ -73,6 +81,8 @@ public class EmailOutboxScheduler {
                     outbox.getId().getValue(), outbox.getRecipientEmail(),
                     outbox.getAttachments().size());
 
+            return true;
+
         } catch (Exception e) {
             // 발송 실패
             logger.error("이메일 발송 실패: id={}, recipient={}",
@@ -80,6 +90,8 @@ public class EmailOutboxScheduler {
 
             outbox.markAsFailed(e.getMessage());
             outboxRepository.save(outbox);
+
+            return false;
         }
     }
 }
