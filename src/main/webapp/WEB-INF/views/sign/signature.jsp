@@ -147,7 +147,27 @@
         </div>
 
         <!-- 서명 패드 -->
-        <div id="signaturePadContainer"></div>
+        <div id="signaturePadContainer">
+            <div class="signature-pad">
+                <div class="signature-header">
+                    <h3 class="signature-title">전자서명을 입력해 주세요</h3>
+                    <span class="signature-required">*</span>
+                </div>
+                <div class="signature-canvas-container">
+                    <canvas class="signature-canvas"></canvas>
+                    <div class="signature-placeholder">여기에 서명해 주세요</div>
+                </div>
+                <div class="signature-controls">
+                    <button type="button" class="btn btn-secondary signature-clear">
+                        다시 서명
+                    </button>
+                    <button type="button" class="btn btn-primary signature-submit" disabled>
+                        서명 확인
+                    </button>
+                </div>
+                <div class="signature-error" style="display: none;"></div>
+            </div>
+        </div>
 
         <!-- 서명 완료 액션 -->
         <div class="signature-actions text-center mt-4">
@@ -228,13 +248,12 @@
 
     <!-- JavaScript -->
     <script src="<c:url value='/js/common.js' />"></script>
-    <script src="<c:url value='/js/signature-canvas.js' />"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
 
     <script>
         const signingDataElement = document.getElementById('signingData');
         const signingDataset = signingDataElement ? signingDataElement.dataset : {};
 
-        // 계약서 정보
         const contractData = {
             id: signingDataset.contractId || '',
             token: signingDataset.token || '',
@@ -246,38 +265,150 @@
         const csrfParam = '${_csrf.parameterName}';
         const csrfToken = '${_csrf.token}';
 
-        // 서명 패드 초기화
         let signaturePad;
+        let signatureCanvas;
+        let signaturePlaceholder;
+        let signatureSubmitButton;
+        let signatureClearButton;
+        let isInitialized = false;
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             initSignaturePad();
             bindEvents();
         });
 
-        /**
-         * 서명 패드 초기화
-         */
         function initSignaturePad() {
-            const container = document.getElementById('signaturePadContainer');
+            // 이미 초기화되었으면 무시
+            if (isInitialized) {
+                return;
+            }
 
-            signaturePad = new SignaturePad(container, {
-                title: '전자서명을 입력해 주세요',
-                clearButtonText: '다시 서명',
-                submitButtonText: '서명 확인',
-                required: true
+            const container = document.getElementById('signaturePadContainer');
+            if (!container) {
+                return;
+            }
+
+            signatureCanvas = container.querySelector('.signature-canvas');
+            signaturePlaceholder = container.querySelector('.signature-placeholder');
+            signatureSubmitButton = container.querySelector('.signature-submit');
+            signatureClearButton = container.querySelector('.signature-clear');
+
+            signaturePad = new window.SignaturePad(signatureCanvas, {
+                backgroundColor: 'rgba(0, 0, 0, 0)',
+                penColor: '#1d4ed8',
+                minWidth: 0.8,
+                maxWidth: 2.5
             });
 
-            // 서명 패드 이벤트
-            container.addEventListener('signatureSubmit', handleSignatureSubmit);
-            container.addEventListener('signatureClear', handleSignatureClear);
+            signaturePad.onBegin = () => {
+                hidePlaceholder();
+                updateSignatureState();
+            };
+
+            signaturePad.onEnd = () => {
+                updateSignatureState();
+            };
+
+            resizeSignatureCanvas();
+
+            // 이전 리스너 제거 후 새로 추가
+            window.removeEventListener('resize', resizeSignatureCanvas);
+            window.addEventListener('resize', resizeSignatureCanvas);
+
+            // 브라우저 환경에서도 서명 시작/완료 감지를 위한 추가 이벤트 리스너
+            // resizeSignatureCanvas 이후에 추가해야 canvas가 준비된 상태
+            signatureCanvas.addEventListener('mousedown', () => hidePlaceholder());
+            signatureCanvas.addEventListener('touchstart', () => hidePlaceholder());
+            signatureCanvas.addEventListener('mouseup', () => updateSignatureState());
+            signatureCanvas.addEventListener('touchend', () => updateSignatureState());
+
+            if (signatureClearButton) {
+                signatureClearButton.addEventListener('click', () => {
+                    signaturePad.clear();
+                    showPlaceholder();
+                    updateSignatureState();
+                    handleSignatureClear();
+                });
+            }
+
+            if (signatureSubmitButton) {
+                signatureSubmitButton.addEventListener('click', () => {
+                    if (signaturePad.isEmpty()) {
+                        Signly.showAlert('서명을 입력해 주세요.', 'warning');
+                        return;
+                    }
+
+                    const signatureData = signaturePad.toDataURL('image/png');
+                    handleSignatureSubmit(signatureData);
+                });
+            }
+
+            isInitialized = true;
+            updateSignatureState();
+
+            updateSignatureState();
+            isInitialized = true;
         }
 
-        /**
-         * 이벤트 바인딩
-         */
+        function resizeSignatureCanvas() {
+            if (!signaturePad || !signatureCanvas) {
+                return;
+            }
+
+            const existingData = signaturePad.isEmpty() ? null : signaturePad.toDataURL('image/png');
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            const parent = signatureCanvas.parentElement;
+            const width = Math.min(parent.clientWidth || 600, 600);
+            const height = Math.max(220, Math.min(parent.clientHeight || 280, 320));
+
+            signatureCanvas.width = width * ratio;
+            signatureCanvas.height = height * ratio;
+            signatureCanvas.getContext('2d').scale(ratio, ratio);
+            signatureCanvas.style.width = width + 'px';
+            signatureCanvas.style.height = height + 'px';
+
+            signaturePad.clear();
+
+            if (existingData) {
+                signaturePad.fromDataURL(existingData);
+                hidePlaceholder();
+            } else {
+                showPlaceholder();
+            }
+
+            updateSignatureState();
+        }
+
+        function updateSignatureState() {
+            if (!signatureSubmitButton) {
+                return;
+            }
+
+            const isEmpty = !signaturePad || signaturePad.isEmpty();
+            signatureSubmitButton.disabled = isEmpty;
+
+            // 서명 완료 버튼도 같이 업데이트
+            const completeBtn = document.getElementById('completeSigningBtn');
+            if (completeBtn) {
+                completeBtn.disabled = isEmpty;
+            }
+        }
+
+        function hidePlaceholder() {
+            if (signaturePlaceholder) {
+                signaturePlaceholder.style.display = 'none';
+            }
+        }
+
+        function showPlaceholder() {
+            if (signaturePlaceholder) {
+                signaturePlaceholder.style.display = '';
+            }
+        }
+
         function bindEvents() {
-            // 서명 완료 버튼
-            document.getElementById('completeSigningBtn').addEventListener('click', function() {
+            const completeBtn = document.getElementById('completeSigningBtn');
+            completeBtn.addEventListener('click', () => {
                 if (signaturePad && !signaturePad.isEmpty()) {
                     showSignatureConfirmModal();
                 } else {
@@ -285,42 +416,29 @@
                 }
             });
 
-            // 모달 취소 버튼
             document.getElementById('cancelSignBtn').addEventListener('click', closeModal);
-
-            // 최종 서명 버튼
             document.getElementById('finalSignBtn').addEventListener('click', submitSignature);
         }
 
-        /**
-         * 서명 제출 핸들러
-         */
-        function handleSignatureSubmit(event) {
-            const signatureData = event.detail.signatureData;
-
-            if (signatureData) {
-                document.getElementById('completeSigningBtn').disabled = false;
-                Signly.showAlert('서명이 입력되었습니다. 서명 완료 버튼을 클릭해 주세요.', 'success');
+        function handleSignatureSubmit(signatureData) {
+            if (!signatureData) {
+                return;
             }
+
+            document.getElementById('completeSigningBtn').disabled = false;
+            Signly.showAlert('서명이 입력되었습니다. 서명 완료 버튼을 클릭해 주세요.', 'success');
         }
 
-        /**
-         * 서명 지우기 핸들러
-         */
         function handleSignatureClear() {
             document.getElementById('completeSigningBtn').disabled = true;
         }
 
-        /**
-         * 서명 확인 모달 표시
-         */
         function showSignatureConfirmModal() {
-            const signatureData = signaturePad.getSignatureData();
+            const signatureData = signaturePad ? signaturePad.toDataURL('image/png') : null;
 
             if (signatureData) {
                 document.getElementById('signaturePreviewImage').src = signatureData;
 
-                // 모달 표시 (Bootstrap 또는 커스텀 모달)
                 const modal = document.getElementById('signatureConfirmModal');
                 modal.classList.add('show');
                 modal.style.display = 'block';
@@ -328,9 +446,6 @@
             }
         }
 
-        /**
-         * 서명 제출
-         */
         async function submitSignature() {
             const finalSignBtn = document.getElementById('finalSignBtn');
             const originalHtml = finalSignBtn.innerHTML;
@@ -339,7 +454,11 @@
                 finalSignBtn.disabled = true;
                 finalSignBtn.innerHTML = '<span class="spinner"></span> 서명 처리중...';
 
-                const signatureData = signaturePad.getSignatureData();
+                const signatureData = signaturePad ? signaturePad.toDataURL('image/png') : null;
+                if (!signatureData) {
+                    throw new Error('서명 데이터가 존재하지 않습니다.');
+                }
+
                 const payload = new URLSearchParams();
                 payload.append('signatureData', signatureData);
                 payload.append('signerName', contractData.signerName);
@@ -380,9 +499,6 @@
             }
         }
 
-        /**
-         * 모달 닫기
-         */
         function closeModal() {
             const modal = document.getElementById('signatureConfirmModal');
             modal.classList.remove('show');
@@ -390,21 +506,18 @@
             document.body.classList.remove('modal-open');
         }
 
-        // 모달 백드롭 클릭 시 닫기
         document.getElementById('signatureConfirmModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
             }
         });
 
-        // ESC 키로 모달 닫기
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeModal();
             }
         });
 
-        // 페이지 이탈 경고
         window.addEventListener('beforeunload', function(e) {
             if (signaturePad && !signaturePad.isEmpty()) {
                 e.preventDefault();
