@@ -5,6 +5,7 @@
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
     <jsp:param name="additionalCss" value="/css/templates.css" />
+    <jsp:param name="additionalCss2" value="/css/modal.css" />
 </jsp:include>
 <body>
     <jsp:include page="../common/navbar.jsp">
@@ -298,25 +299,37 @@
         }
 
         function activateTemplate() {
-            if (confirm('템플릿을 활성화하시겠습니까?')) {
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = '/templates/${template.templateId}/activate';
-                appendCsrfField(form);
-                document.body.appendChild(form);
-                form.submit();
-            }
+            showConfirmModal(
+                '템플릿을 활성화하시겠습니까?',
+                function() {
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/templates/${template.templateId}/activate';
+                    appendCsrfField(form);
+                    document.body.appendChild(form);
+                    form.submit();
+                },
+                '활성화',
+                '취소',
+                'btn-success'
+            );
         }
 
         function archiveTemplate() {
-            if (confirm('템플릿을 보관하시겠습니까?')) {
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = '/templates/${template.templateId}/archive';
-                appendCsrfField(form);
-                document.body.appendChild(form);
-                form.submit();
-            }
+            showConfirmModal(
+                '템플릿을 보관하시겠습니까?',
+                function() {
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/templates/${template.templateId}/archive';
+                    appendCsrfField(form);
+                    document.body.appendChild(form);
+                    form.submit();
+                },
+                '보관',
+                '취소',
+                'btn-warning'
+            );
         }
 
         function deleteTemplate() {

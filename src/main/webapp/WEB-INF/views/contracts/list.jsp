@@ -5,6 +5,7 @@
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
     <jsp:param name="additionalCss" value="/css/contracts.css" />
+    <jsp:param name="additionalCss2" value="/css/modal.css" />
 </jsp:include>
 <body>
     <jsp:include page="../common/navbar.jsp">
@@ -316,14 +317,20 @@
         }
 
         function sendForSigning(contractId) {
-            if (confirm('계약서 서명 요청을 보내시겠습니까?')) {
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = '/contracts/' + contractId + '/send';
-                appendCsrfField(form);
-                document.body.appendChild(form);
-                form.submit();
-            }
+            showConfirmModal(
+                '계약서 서명 요청을 보내시겠습니까?',
+                function() {
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/contracts/' + contractId + '/send';
+                    appendCsrfField(form);
+                    document.body.appendChild(form);
+                    form.submit();
+                },
+                '전송',
+                '취소',
+                'btn-primary'
+            );
         }
 
         function cancelContract(contractId) {

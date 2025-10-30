@@ -7,6 +7,7 @@
 <jsp:include page="../common/header.jsp">
     <jsp:param name="additionalCss" value="/css/contracts.css" />
     <jsp:param name="additionalCss2" value="/css/contract-common.css" />
+    <jsp:param name="additionalCss3" value="/css/modal.css" />
 </jsp:include>
 <body>
     <jsp:include page="../common/navbar.jsp">
@@ -728,47 +729,71 @@
         });
 
         function sendForSigning() {
-            if (confirm('계약서 서명 요청을 전송하시겠습니까?')) {
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = '/contracts/${contract.id}/send';
-                appendCsrfField(form);
-                document.body.appendChild(form);
-                form.submit();
-            }
+            showConfirmModal(
+                '계약서 서명 요청을 전송하시겠습니까?',
+                function() {
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/contracts/${contract.id}/send';
+                    appendCsrfField(form);
+                    document.body.appendChild(form);
+                    form.submit();
+                },
+                '전송',
+                '취소',
+                'btn-primary'
+            );
         }
 
         function resendSigningEmail() {
-            if (confirm('서명 요청 이메일을 다시 전송하시겠습니까?')) {
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = '/contracts/${contract.id}/resend';
-                appendCsrfField(form);
-                document.body.appendChild(form);
-                form.submit();
-            }
+            showConfirmModal(
+                '서명 요청 이메일을 다시 전송하시겠습니까?',
+                function() {
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/contracts/${contract.id}/resend';
+                    appendCsrfField(form);
+                    document.body.appendChild(form);
+                    form.submit();
+                },
+                '재전송',
+                '취소',
+                'btn-warning'
+            );
         }
 
         function cancelContract() {
-            if (confirm('계약서를 취소하시겠습니까? 취소된 계약서는 더 이상 서명할 수 없습니다.')) {
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = '/contracts/${contract.id}/cancel';
-                appendCsrfField(form);
-                document.body.appendChild(form);
-                form.submit();
-            }
+            showConfirmModal(
+                '계약서를 취소하시겠습니까? 취소된 계약서는 더 이상 서명할 수 없습니다.',
+                function() {
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/contracts/${contract.id}/cancel';
+                    appendCsrfField(form);
+                    document.body.appendChild(form);
+                    form.submit();
+                },
+                '취소',
+                '닫기',
+                'btn-danger'
+            );
         }
 
         function completeContract() {
-            if (confirm('계약을 완료하시겠습니까?')) {
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = '/contracts/${contract.id}/complete';
-                appendCsrfField(form);
-                document.body.appendChild(form);
-                form.submit();
-            }
+            showConfirmModal(
+                '계약을 완료하시겠습니까?',
+                function() {
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/contracts/${contract.id}/complete';
+                    appendCsrfField(form);
+                    document.body.appendChild(form);
+                    form.submit();
+                },
+                '완료',
+                '취소',
+                'btn-success'
+            );
         }
 
         function deleteContract() {

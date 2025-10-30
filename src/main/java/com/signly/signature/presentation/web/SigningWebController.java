@@ -103,26 +103,14 @@ public class SigningWebController {
                                  HttpServletRequest request) {
         try {
             logger.info("서명 처리 요청: token={}, signerEmail={}", token, signerEmail);
-            ContractResponse contract = contractService.getContractByToken(token);
 
             String ipAddress = getClientIpAddress(request);
             String userAgent = request.getHeader("User-Agent");
 
-            // 1. SignatureService를 통해 서명 데이터 저장 (contract_signatures 테이블)
-            CreateSignatureCommand command = new CreateSignatureCommand(
-                    contract.getId(),
-                    signatureData,
-                    signerEmail,
-                    signerName,
-                    ipAddress,
-                    userAgent
-            );
-            SignatureResponse signature = signatureService.createSignature(command);
+            // Contract 상태 업데이트 및 서명 처리
+            ContractResponse contract = contractService.processSignature(token, signerEmail, signerName, signatureData, ipAddress);
 
-            // 2. Contract 상태 업데이트 (markSignedBy 사용)
-            contractService.processSignature(token, signerEmail, signerName, signatureData, ipAddress);
-
-            logger.info("서명 처리 완료: contractId={}, signatureId={}", contract.getId(), signature.signatureId());
+            logger.info("서명 처리 완료: contractId={}", contract.getId());
 
             return "{\"success\": true, \"message\": \"서명이 완료되었습니다.\"}";
 

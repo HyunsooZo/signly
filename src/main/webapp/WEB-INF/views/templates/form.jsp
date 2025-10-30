@@ -5,6 +5,7 @@
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
     <jsp:param name="additionalCss" value="/css/template-builder.css" />
+    <jsp:param name="additionalCss2" value="/css/modal.css" />
 </jsp:include>
 <body>
     <jsp:include page="../common/navbar.jsp">
@@ -635,16 +636,22 @@
     }
 
     function deleteSection(button) {
-        if (confirm('이 섹션을 삭제하시겠습니까?')) {
-            const section = button.closest('.editable-section');
-            section.remove();
-            updateSectionsData();
+        showConfirmModal(
+            '이 섹션을 삭제하시겠습니까?',
+            function() {
+                const section = button.closest('.editable-section');
+                section.remove();
+                updateSectionsData();
 
-            const documentBody = document.getElementById('documentBody');
-            if (documentBody.children.length === 0) {
-                documentBody.appendChild(createPlaceholder());
-            }
-        }
+                const documentBody = document.getElementById('documentBody');
+                if (documentBody.children.length === 0) {
+                    documentBody.appendChild(createPlaceholder());
+                }
+            },
+            '삭제',
+            '취소',
+            'btn-danger'
+        );
     }
 
     function showVariableModal() {

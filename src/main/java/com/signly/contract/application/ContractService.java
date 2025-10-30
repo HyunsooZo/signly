@@ -422,31 +422,41 @@ public class ContractService {
         Contract contract = contractRepository.findBySignToken(signToken)
                 .orElseThrow(() -> new NotFoundException("유효하지 않은 서명 링크입니다"));
 
-        // 모든 당사자가 서명을 완료했는지 확인 (contract_signatures 테이블에서 확인)
         ContractId contractId = contract.getId();
+
+        // 서명 데이터 저장 (contract_signatures 테이블)
+        CreateSignatureCommand command = new CreateSignatureCommand(
+                contractId.getValue(),
+                signatureData,
+                signerEmail,
+                signerName,
+                ipAddress,
+                null  // userAgent는 null로 설정
+        );
+        signatureService.createSignature(command);
+
+        // 모든 당사자가 서명을 완료했는지 확인
         boolean firstPartySigned = signatureRepository.existsByContractIdAndSignerEmail(
                 contractId, normalizeEmail(contract.getFirstParty().getEmail()));
         boolean secondPartySigned = signatureRepository.existsByContractIdAndSignerEmail(
                 contractId, normalizeEmail(contract.getSecondParty().getEmail()));
 
-        // 현재 서명하는 사람이 어느 당사자인지 확인하여 서명 후 상태 결정
-        boolean allSignaturesComplete;
-        if (normalizeEmail(signerEmail).equals(normalizeEmail(contract.getFirstParty().getEmail()))) {
-            // firstParty가 서명하는 경우, secondParty도 서명했으면 완료
-            allSignaturesComplete = secondPartySigned;
-        } else {
-            // secondParty가 서명하는 경우, firstParty도 서명했으면 완료
-            allSignaturesComplete = firstPartySigned;
-        }
+        boolean allSignaturesComplete = firstPartySigned && secondPartySigned;
 
-        // 서명 검증 및 상태 업데이트 (서명 데이터는 SignatureService에서 별도 저장)
+        // 서명 검증 및 상태 업데이트
         contract.markSignedBy(normalizeEmail(signerEmail), allSignaturesComplete);
         Contract savedContract = contractRepository.save(contract);
 
         // 모든 당사자의 서명이 완료되면 양측에 완료 이메일 발송
         if (allSignaturesComplete) {
             logger.info("모든 서명 완료, 완료 알림 이메일 발송: contractId={}", contract.getId().getValue());
-            emailNotificationService.sendContractCompleted(savedContract);
+            try {
+                emailNotificationService.sendContractCompleted(savedContract);
+            } catch (Exception emailEx) {
+                // 이메일 발송 실패해도 서명 처리는 완료되어야 함
+                logger.error("완료 알림 이메일 발송 중 오류 발생 (서명 처리는 완료됨): contractId={}",
+                        contract.getId().getValue(), emailEx);
+            }
         }
 
         return contractDtoMapper.toResponse(savedContract);

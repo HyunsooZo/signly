@@ -44,6 +44,73 @@ function showAlertModal(message) {
     bsModal.show();
 }
 
+/**
+ * 공통 확인 모달 표시 함수
+ * @param {string} message - 표시할 메시지
+ * @param {function} onConfirm - 확인 버튼 클릭 시 실행될 콜백 함수
+ * @param {string} confirmText - 확인 버튼 텍스트 (기본값: '확인')
+ * @param {string} cancelText - 취소 버튼 텍스트 (기본값: '취소')
+ * @param {string} confirmClass - 확인 버튼 클래스 (기본값: 'btn-primary')
+ */
+function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText = '취소', confirmClass = 'btn-primary') {
+    // 기존 모달이 있으면 재사용, 없으면 생성
+    let modal = document.getElementById('commonConfirmModal');
+
+    if (!modal) {
+        const modalHtml = `
+            <div class="modal fade" id="commonConfirmModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">확인</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="commonConfirmModalBody">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="commonConfirmCancelBtn">${cancelText}</button>
+                            <button type="button" class="btn ${confirmClass}" id="commonConfirmOkBtn">${confirmText}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        modal = document.getElementById('commonConfirmModal');
+
+        // 모달이 닫힐 때 정리
+        modal.addEventListener('hidden.bs.modal', function () {
+            // backdrop 제거 (혹시 남아있을 경우)
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+        });
+    }
+
+    // 메시지 업데이트
+    const modalBody = document.getElementById('commonConfirmModalBody');
+    modalBody.textContent = message;
+
+    // 버튼 텍스트 업데이트
+    const confirmBtn = document.getElementById('commonConfirmOkBtn');
+    const cancelBtn = document.getElementById('commonConfirmCancelBtn');
+    confirmBtn.textContent = confirmText;
+    cancelBtn.textContent = cancelText;
+    confirmBtn.className = `btn ${confirmClass}`;
+
+    // 확인 버튼 이벤트 리스너 설정
+    confirmBtn.onclick = function() {
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        bsModal.hide();
+        if (typeof onConfirm === 'function') {
+            onConfirm();
+        }
+    };
+
+    // 모달 표시
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const autoDismissAlerts = document.querySelectorAll('[data-auto-dismiss="true"]');
 

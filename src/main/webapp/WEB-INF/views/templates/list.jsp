@@ -6,6 +6,7 @@
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
     <jsp:param name="additionalCss" value="/css/templates.css" />
+    <jsp:param name="additionalCss2" value="/css/modal.css" />
 </jsp:include>
 <body>
     <jsp:include page="../common/navbar.jsp">
@@ -155,9 +156,9 @@
                                                                     <c:if test="${not empty _csrf}">
                                                                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                                                     </c:if>
-                                                                    <button type="submit"
+                                                                    <button type="button"
                                                                             class="btn btn-outline-success"
-                                                                            onclick="return confirm('템플릿을 활성화하시겠습니까?');"
+                                                                            onclick="activateTemplate('${template.templateId}')"
                                                                             title="활성화">
                                                                         <i class="bi bi-check-circle"></i>
                                                                     </button>
@@ -168,9 +169,9 @@
                                                                     <c:if test="${not empty _csrf}">
                                                                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                                                     </c:if>
-                                                                    <button type="submit"
+                                                                    <button type="button"
                                                                             class="btn btn-outline-warning"
-                                                                            onclick="return confirm('템플릿을 보관하시겠습니까?');"
+                                                                            onclick="archiveTemplate('${template.templateId}')"
                                                                             title="보관">
                                                                         <i class="bi bi-archive"></i>
                                                                     </button>
@@ -351,15 +352,27 @@
         }
 
         function activateTemplate(templateId) {
-            if (confirm('템플릿을 활성화하시겠습니까?')) {
-                submitPost('/templates/' + templateId + '/activate');
-            }
+            showConfirmModal(
+                '템플릿을 활성화하시겠습니까?',
+                function() {
+                    submitPost('/templates/' + templateId + '/activate');
+                },
+                '활성화',
+                '취소',
+                'btn-success'
+            );
         }
 
         function archiveTemplate(templateId) {
-            if (confirm('템플릿을 보관하시겠습니까?')) {
-                submitPost('/templates/' + templateId + '/archive');
-            }
+            showConfirmModal(
+                '템플릿을 보관하시겠습니까?',
+                function() {
+                    submitPost('/templates/' + templateId + '/archive');
+                },
+                '보관',
+                '취소',
+                'btn-warning'
+            );
         }
 
         function deleteTemplate(templateId, templateName) {

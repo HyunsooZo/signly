@@ -86,7 +86,8 @@ public class ContractRepositoryImpl implements ContractRepository {
 
     @Override
     public List<Contract> findExpiredContracts(LocalDateTime currentTime) {
-        List<ContractStatus> statuses = List.of(ContractStatus.PENDING, ContractStatus.SIGNED);
+        // SIGNED 상태는 제외 - 양측 서명이 완료된 계약은 만료 처리하지 않음
+        List<ContractStatus> statuses = List.of(ContractStatus.PENDING);
         List<ContractJpaEntity> entities = jpaRepository.findExpiredContracts(statuses, currentTime);
         return entities.stream()
                 .map(entityMapper::toDomain)
