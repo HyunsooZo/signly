@@ -655,20 +655,28 @@
 .contract-input-inline {
     display: inline-block;
     width: auto;
-    min-width: 80px;
-    border: none;
-    background-color: transparent;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
+    min-width: 120px;
+    padding: 0.375rem 0.75rem;
     font-size: 14px;
     font-family: inherit;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    background-color: #fff;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    vertical-align: middle;
+    margin: 0 2px;
 }
 
 .contract-input-inline:focus {
-    border: none;
-    box-shadow: none;
-    background-color: rgba(13, 110, 253, 0.08);
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    background-color: #fff;
+}
+
+.contract-input-inline::placeholder {
+    color: #6c757d;
+    opacity: 0.6;
 }
 
 /* 계약서 상세보기 - 흰색 배경 강제 적용 클래스 */

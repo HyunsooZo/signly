@@ -155,31 +155,3 @@
     }
 }
 
-/* 다크모드 대비 (향후 확장용) */
-@media (prefers-color-scheme: dark) {
-    .modal-content {
-        background-color: #2d3748;
-        color: #e2e8f0;
-    }
-    
-    .modal-header {
-        border-bottom-color: #4a5568;
-    }
-    
-    .modal-footer {
-        border-top-color: #4a5568;
-    }
-    
-    #commonAlertModal .modal-header {
-        background-color: #4a5568;
-    }
-    
-    #commonConfirmModal .modal-header {
-        background-color: #744210;
-        border-bottom-color: #975a16;
-    }
-    
-    #commonConfirmModal .modal-title {
-        color: #fef3c7;
-    }
-}
