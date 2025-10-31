@@ -100,7 +100,7 @@ app:
   jwt:
     secret: ${JWT_SECRET:mySecretKeyForJWTSignatureServiceSecureKey123456789012345678901234567890SignlyESignatureService}
     access-token-validity-in-ms: ${ACCESS_TOKEN_VALIDITY:3600000} # 1시간
-    refresh-token-validity-in-ms: ${REFRESH_TOKEN_VALIDITY:86400000} # 24시간
+    refresh-token-validity-in-ms: ${REFRESH_TOKEN_VALIDITY:2592000000} # 30일 (쿠키와 일치)
 
   file:
     upload-dir: ${UPLOAD_DIR:./uploads}
