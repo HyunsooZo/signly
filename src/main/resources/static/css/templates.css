@@ -480,27 +480,7 @@
     }
 }
 
-/* 다크 모드 지원 */
-@media (prefers-color-scheme: dark) {
-    .template-card {
-        background: rgba(33, 37, 41, 0.95);
-        color: #f8f9fa;
-    }
 
-    .template-info {
-        background: linear-gradient(135deg, #212529 0%, #343a40 100%);
-        color: #f8f9fa;
-    }
-
-    .template-content {
-        background: linear-gradient(135deg, #212529 0%, #343a40 100%);
-        color: #f8f9fa;
-    }
-
-    .info-item:hover {
-        background-color: rgba(102, 126, 234, 0.1);
-    }
-}
 
 /* 템플릿 변수 밑줄 표시 */
 .template-variable-underline {

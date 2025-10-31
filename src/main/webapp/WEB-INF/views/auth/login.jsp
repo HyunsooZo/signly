@@ -70,33 +70,12 @@
         </div>
     </div>
 
-    <div class="demo-section">
-        <div class="demo-card">
-            <h5>데모 계정</h5>
-            <div class="demo-accounts">
-                <div class="demo-account">
-                    <strong>사업자 계정:</strong><br>
-                    owner@example.com / password123!
-                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillDemo('owner@example.com', 'password123!')">입력</button>
-                </div>
-                <div class="demo-account">
-                    <strong>계약자 계정:</strong><br>
-                    contractor@example.com / password123!
-                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillDemo('contractor@example.com', 'password123!')">입력</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/common.js"></script>
     <script src="/js/alerts.js"></script>
     <script>
-        function fillDemo(email, password) {
-            document.getElementById('email').value = email;
-            document.getElementById('password').value = password;
-        }
-
         // Enter 키로 로그인 처리
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
