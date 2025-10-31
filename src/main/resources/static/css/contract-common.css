@@ -248,7 +248,7 @@ body,
 
 .signature-section {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     margin-top: 30px;
     /* Flying Saucer를 위한 fallback: float 레이아웃 */
     width: 100%;
@@ -256,7 +256,7 @@ body,
 }
 
 .signature-block {
-    width: 280px;
+    width: 50%;
     /* Flying Saucer를 위한 fallback: float로 좌우 배치 */
     float: left;
 }
@@ -264,22 +264,27 @@ body,
 .signature-block--employee {
     /* 근로자 - 왼쪽 끝 */
     margin-left: 0;
+    text-align: left;
 }
 
 .signature-block--employer {
     /* 사업주 - 오른쪽 끝 */
     margin-left: auto;
+    text-align: left;
 }
 
 /* Flying Saucer용: float 레이아웃에서 양 끝으로 */
 .signature-block--employee {
     float: left;
     margin-left: 0;
+    width: 50%;
 }
 
 .signature-block--employer {
     float: right;
     margin-right: 0;
+    width: 50%;
+    text-align: left;
 }
 
 /* Flexbox를 지원하는 브라우저에서는 float 무시 */
