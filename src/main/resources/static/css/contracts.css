@@ -1,7 +1,7 @@
 /* 계약서 관리 페이지 스타일 */
 
 .contract-container {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     padding-top: 2rem;
 }
@@ -22,7 +22,7 @@
 
 /* 계약서 목록 테이블 스타일 */
 .table-hover tbody tr:hover {
-    background-color: rgba(79, 172, 254, 0.05);
+    background-color: rgba(102, 126, 234, 0.05);
     transition: background-color 0.2s ease;
 }
 
@@ -54,8 +54,8 @@
 }
 
 .contract-form .form-control:focus {
-    border-color: #4facfe;
-    box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
 .contract-form .form-control-lg {
@@ -105,8 +105,8 @@
 }
 
 .content-editor:focus {
-    border-color: #4facfe;
-    box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
 /* 계약서 빌더 레이아웃 */
@@ -353,9 +353,9 @@
 }
 
 .contract-type-card:hover {
-    border-color: #0d6efd;
+    border-color: #667eea;
     transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
 .contract-type-icon {
@@ -406,20 +406,20 @@
     border-radius: 20px;
     margin: 0 2px;
     border: 2px solid #e9ecef;
-    color: #4facfe;
+    color: #667eea;
     transition: all 0.2s ease;
 }
 
 .pagination .page-link:hover {
-    background-color: #4facfe;
-    border-color: #4facfe;
+    background-color: #667eea;
+    border-color: #667eea;
     color: white;
     transform: translateY(-1px);
 }
 
 .pagination .page-item.active .page-link {
-    background-color: #4facfe;
-    border-color: #4facfe;
+    background-color: #667eea;
+    border-color: #667eea;
 }
 
 /* 모달 스타일 */
@@ -432,7 +432,7 @@
 .modal-header {
     border-bottom: 1px solid #f0f0f0;
     border-radius: 15px 15px 0 0;
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
 }
 
@@ -597,7 +597,7 @@
 }
 
 .progress-step.active::after {
-    background-color: #4facfe;
+    background-color: #667eea;
 }
 
 .progress-icon {
@@ -616,7 +616,7 @@
 }
 
 .progress-step.active .progress-icon {
-    background-color: #4facfe;
+    background-color: #667eea;
     color: white;
 }
 
@@ -632,7 +632,7 @@
 }
 
 .progress-step.active .progress-label {
-    color: #4facfe;
+    color: #667eea;
     font-weight: 600;
 }
 
@@ -668,9 +668,9 @@
 }
 
 .contract-input-inline:focus {
-    border-color: #86b7fe;
+    border-color: #667eea;
     outline: 0;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
     background-color: #fff;
 }
 
