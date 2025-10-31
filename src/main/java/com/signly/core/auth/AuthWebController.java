@@ -11,11 +11,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import java.util.Arrays;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -65,17 +68,26 @@ public class AuthWebController {
 
     @PostMapping("/login")
     public String login(
-            @RequestParam String email,
-            @RequestParam String password,
+            @Valid @ModelAttribute LoginRequest loginRequest,
+            BindingResult bindingResult,
             @RequestParam(required = false) boolean rememberMe,
             @RequestParam(required = false) String returnUrl,
             HttpServletResponse response,
             Model model,
             RedirectAttributes redirectAttributes
     ) {
+        // 유효성 검증 실패 시
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("errorMessage", bindingResult.getFieldError().getDefaultMessage());
+            model.addAttribute("email", loginRequest.email());
+            if (returnUrl != null) {
+                model.addAttribute("returnUrl", returnUrl);
+            }
+            return "auth/login";
+        }
+
         try {
-            LoginRequest request = new LoginRequest(email, password);
-            LoginResponse loginResponse = authService.login(request);
+            LoginResponse loginResponse = authService.login(loginRequest);
 
             // 환경별 보안 설정
             boolean isProduction = Arrays.asList(environment.getActiveProfiles()).contains("prod");
@@ -108,15 +120,15 @@ public class AuthWebController {
                 }
                 refreshCookie.setMaxAge(30 * 24 * 60 * 60); // 30일
                 response.addCookie(refreshCookie);
-                logger.info("자동 로그인 활성화: {}", email);
+                logger.info("자동 로그인 활성화: {}", loginRequest.email());
             } else {
-                logger.info("자동 로그인 비활성화: {}", email);
+                logger.info("자동 로그인 비활성화: {}", loginRequest.email());
             }
 
             // Redis에 액세스 토큰 저장
             tokenRedisService.saveAccessToken(loginResponse.userId(), loginResponse.accessToken());
             
-            logger.info("로그인 성공: {}", email);
+            logger.info("로그인 성공: {}", loginRequest.email());
             redirectAttributes.addFlashAttribute("successMessage", "로그인되었습니다.");
 
             // returnUrl이 있으면 해당 페이지로, 없으면 /home으로 리다이렉트
@@ -124,9 +136,9 @@ public class AuthWebController {
             return "redirect:" + redirectUrl;
 
         } catch (Exception e) {
-            logger.warn("로그인 실패: {} - {}", email, e.getMessage());
+            logger.warn("로그인 실패: {} - {}", loginRequest.email(), e.getMessage());
             model.addAttribute("errorMessage", "이메일 또는 비밀번호가 올바르지 않습니다.");
-            model.addAttribute("email", email);
+            model.addAttribute("email", loginRequest.email());
             if (returnUrl != null) {
                 model.addAttribute("returnUrl", returnUrl);
             }

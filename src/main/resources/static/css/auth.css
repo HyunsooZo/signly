@@ -89,6 +89,15 @@ body {
 
 .form-control.is-invalid {
     border-color: #dc3545;
+    background-image: none;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    animation: shake 0.5s ease-in-out;
+}
+
+.form-control.is-valid {
+    border-color: #198754;
+    background-image: none;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
 }
 
 .form-text {
@@ -101,6 +110,34 @@ body {
     color: #dc3545;
     font-size: 0.875rem;
     margin-top: 4px;
+}
+
+/* 한글 입력 경고 스타일 */
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #dc3545;
+    animation: shake 0.5s ease-in-out;
+}
+
+/* 한글 경고 애니메이션 */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* 비밀번호 필드 강조 */
+#password.is-invalid {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
 }
 
 .form-check {
