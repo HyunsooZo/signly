@@ -8,6 +8,7 @@ import com.signly.contract.application.mapper.ContractDtoMapper;
 import com.signly.contract.application.support.ContractHtmlSanitizer;
 import com.signly.contract.domain.model.*;
 import com.signly.contract.domain.repository.ContractRepository;
+import com.signly.contract.domain.service.ContractSigningService;
 import com.signly.notification.application.EmailNotificationService;
 import com.signly.signature.application.FirstPartySignatureService;
 import com.signly.signature.application.SignatureService;
@@ -51,6 +52,7 @@ public class ContractService {
     private final SignatureRepository signatureRepository;
     private final SignatureService signatureService;
     private final HtmlRenderer htmlRenderer;
+    private final ContractSigningService contractSigningService;
 
     public ContractService(
             ContractRepository contractRepository,
@@ -61,7 +63,8 @@ public class ContractService {
             FirstPartySignatureService firstPartySignatureService,
             SignatureRepository signatureRepository,
             SignatureService signatureService,
-            HtmlRenderer htmlRenderer
+            HtmlRenderer htmlRenderer,
+            ContractSigningService contractSigningService
     ) {
         this.contractRepository = contractRepository;
         this.userRepository = userRepository;
@@ -72,6 +75,7 @@ public class ContractService {
         this.signatureRepository = signatureRepository;
         this.signatureService = signatureService;
         this.htmlRenderer = htmlRenderer;
+        this.contractSigningService = contractSigningService;
     }
 
     public ContractResponse createContract(
@@ -254,8 +258,17 @@ public class ContractService {
         Contract contract = contractRepository.findById(contractIdObj)
                 .orElseThrow(() -> new NotFoundException("계약서를 찾을 수 없습니다"));
 
-        contract.sign(signerEmail, command.signerName(), command.signatureData(), command.ipAddress());
+        ContractSigningService.SigningRequest request = new ContractSigningService.SigningRequest(
+                signerEmail, command.signerName(), command.signatureData(), command.ipAddress());
+        
+        ContractSigningService.SigningResult result = contractSigningService.processSigning(contract, request);
         Contract savedContract = contractRepository.save(contract);
+        
+        // Send completion email if all signatures are complete
+        if (result.isFullySigned()) {
+            emailNotificationService.sendContractCompleted(savedContract);
+        }
+        
         return contractDtoMapper.toResponse(savedContract);
     }
 
@@ -435,20 +448,15 @@ public class ContractService {
         );
         signatureService.createSignature(command);
 
-        // 모든 당사자가 서명을 완료했는지 확인
-        boolean firstPartySigned = signatureRepository.existsByContractIdAndSignerEmail(
-                contractId, normalizeEmail(contract.getFirstParty().getEmail()));
-        boolean secondPartySigned = signatureRepository.existsByContractIdAndSignerEmail(
-                contractId, normalizeEmail(contract.getSecondParty().getEmail()));
-
-        boolean allSignaturesComplete = firstPartySigned && secondPartySigned;
-
-        // 서명 검증 및 상태 업데이트
-        contract.markSignedBy(normalizeEmail(signerEmail), allSignaturesComplete);
+        // 서명 처리 및 상태 업데이트
+        ContractSigningService.SigningRequest request = new ContractSigningService.SigningRequest(
+                signerEmail, signerName, signatureData, ipAddress);
+        
+        ContractSigningService.SigningResult result = contractSigningService.processSigning(contract, request);
         Contract savedContract = contractRepository.save(contract);
 
         // 모든 당사자의 서명이 완료되면 양측에 완료 이메일 발송
-        if (allSignaturesComplete) {
+        if (result.isFullySigned()) {
             logger.info("모든 서명 완료, 완료 알림 이메일 발송: contractId={}", contract.getId().getValue());
             try {
                 emailNotificationService.sendContractCompleted(savedContract);
