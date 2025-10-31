@@ -539,7 +539,12 @@
                 } else {
                     innerHTML = '<div class="section-signature" contenteditable="true">' +
                         '<div class="signature-section">' +
-                            '<div class="signature-block">' +
+                            '<div class="signature-block signature-block--employee">' +
+                                '<div class="signature-line">(근로자) 주소: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
+                                '<div class="signature-line">연락처: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_PHONE</span><span class="template-variable-remove"></span></span></div>' +
+                                '<div class="signature-line">성명: <span class="template-variable" contenteditable="false"><span>EMPLOYEE</span><span class="template-variable-remove"></span></span> (인)</div>' +
+                            '</div>' +
+                            '<div class="signature-block signature-block--employer">' +
                                 '<div class="signature-line">(사업주) 사업체명: <span class="template-variable" contenteditable="false"><span>COMPANY_NAME</span><span class="template-variable-remove"></span></span></div>' +
                                 '<div class="signature-line signature-line-indent">주소: <span class="template-variable" contenteditable="false"><span>EMPLOYER_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
                                 '<div class="signature-line signature-line--seal signature-line-indent">' +
@@ -548,15 +553,8 @@
                                         '<span class="signature-stamp-wrapper"><span class="template-variable" contenteditable="false"><span>EMPLOYER_SIGNATURE_IMAGE</span><span class="template-variable-remove"></span></span></span>' +
                                     '</span>' +
                                 '</div>' +
-                            '</div>' +
-                            '<div class="signature-block">' +
                                 '<div class="signature-line">(전화: <span class="template-variable" contenteditable="false"><span>EMPLOYER_PHONE</span><span class="template-variable-remove"></span></span>)</div>' +
                             '</div>' +
-                        '</div>' +
-                        '<div class="employee-signature-section">' +
-                            '<div>(근로자) 주소: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
-                            '<div class="employee-signature-line">연락처: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_PHONE</span><span class="template-variable-remove"></span></span></div>' +
-                            '<div class="employee-signature-line">성명: <span class="template-variable" contenteditable="false"><span>EMPLOYEE</span><span class="template-variable-remove"></span></span> (인)</div>' +
                         '</div>' +
                     '</div>';
                 }
