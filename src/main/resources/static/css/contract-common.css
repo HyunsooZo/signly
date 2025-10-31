@@ -248,7 +248,7 @@ body,
 
 .signature-section {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     margin-top: 30px;
     /* Flying Saucer를 위한 fallback: float 레이아웃 */
     width: 100%;
@@ -269,7 +269,7 @@ body,
 
 .signature-block--employer {
     /* 사업주 - 오른쪽 끝 */
-    margin-left: auto;
+    margin-left: 0;
     text-align: left;
 }
 
