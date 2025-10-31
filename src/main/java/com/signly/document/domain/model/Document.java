@@ -17,8 +17,20 @@ public class Document extends AggregateRoot {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Document(DocumentId id, ContractId contractId, UserId uploadedBy,
-                   DocumentType type, FileMetadata metadata, String storagePath) {
+    protected Document() {
+        // for JPA and reflection
+        this.id = null;
+        this.contractId = null;
+        this.uploadedBy = null;
+        this.type = null;
+        this.metadata = null;
+        this.storagePath = null;
+        this.createdAt = null;
+        this.updatedAt = null;
+    }
+
+    private Document(DocumentId id, ContractId contractId, UserId uploadedBy,
+                    DocumentType type, FileMetadata metadata, String storagePath) {
         this.id = id;
         this.contractId = contractId;
         this.uploadedBy = uploadedBy;

@@ -25,9 +25,27 @@ public class Contract extends AggregateRoot {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Contract(ContractId id, UserId creatorId, TemplateId templateId,
-                    String title, ContractContent content, PartyInfo firstParty,
-                    PartyInfo secondParty, LocalDateTime expiresAt, PresetType presetType) {
+    protected Contract() {
+        // for JPA and reflection
+        this.id = null;
+        this.creatorId = null;
+        this.templateId = null;
+        this.title = null;
+        this.content = null;
+        this.firstParty = null;
+        this.secondParty = null;
+        this.status = null;
+        this.signatures = null;
+        this.signToken = null;
+        this.expiresAt = null;
+        this.presetType = null;
+        this.createdAt = null;
+        this.updatedAt = null;
+    }
+
+    private Contract(ContractId id, UserId creatorId, TemplateId templateId,
+                     String title, ContractContent content, PartyInfo firstParty,
+                     PartyInfo secondParty, LocalDateTime expiresAt, PresetType presetType) {
         this.id = id;
         this.creatorId = creatorId;
         this.templateId = templateId;
