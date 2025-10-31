@@ -60,28 +60,21 @@ public class TemplateWebController extends BaseWebController {
             HttpServletRequest request,
             Model model
     ) {
-        try {
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+        return handleOperation(() -> {
+            String resolvedUserId = resolveUserId(currentUserProvider, securityUser, request, userId, true);
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
             Page<TemplateResponse> templates = status != null ?
                     templateService.getTemplatesByOwnerAndStatus(resolvedUserId, status, pageRequest) :
                     templateService.getTemplatesByOwner(resolvedUserId, pageRequest);
 
-            model.addAttribute("pageTitle", "템플릿 관리");
+            addPageTitle(model, "템플릿 관리");
             model.addAttribute("templates", templates);
             model.addAttribute("currentStatus", status);
             model.addAttribute("statuses", TemplateStatus.values());
 
             return "templates/list";
-        } catch (com.signly.common.exception.UnauthorizedException e) {
-            // 인증 예외는 WebExceptionHandler가 처리하도록 다시 던짐
-            throw e;
-        } catch (Exception e) {
-            logger.error("템플릿 목록 조회 중 오류 발생", e);
-            model.addAttribute("errorMessage", "템플릿 목록을 불러오는 중 오류가 발생했습니다.");
-            return "templates/list";
-        }
+        }, "템플릿 목록 조회", "templates/list", model, "템플릿 목록을 불러오는 중 오류가 발생했습니다.");
     }
 
     @GetMapping("/new")
@@ -91,23 +84,14 @@ public class TemplateWebController extends BaseWebController {
             HttpServletRequest request,
             Model model
     ) {
-        try {
-            String resolvedUserId = currentUserProvider.resolveUserId(
-                    securityUser,
-                    request,
-                    userId,
-                    true
-            );
-            model.addAttribute("pageTitle", "새 템플릿 생성");
+        return handleOperation(() -> {
+            String resolvedUserId = resolveUserId(currentUserProvider, securityUser, request, userId, true);
+            addPageTitle(model, "새 템플릿 생성");
             model.addAttribute("template", new TemplateForm());
             model.addAttribute("presets", templatePresetService.getSummaries());
             model.addAttribute("currentUserId", resolvedUserId);
             return "templates/form";
-        } catch (Exception e) {
-            logger.error("템플릿 생성 폼 조회 중 오류 발생", e);
-            model.addAttribute("errorMessage", "템플릿 생성 폼을 불러오는 중 오류가 발생했습니다.");
-            return "redirect:/templates";
-        }
+        }, "템플릿 생성 폼 조회", "redirect:/templates", model, "템플릿 생성 폼을 불러오는 중 오류가 발생했습니다.");
     }
 
     @PostMapping
@@ -120,41 +104,21 @@ public class TemplateWebController extends BaseWebController {
             Model model,
             RedirectAttributes redirectAttributes
     ) {
-        try {
-            if (bindingResult.hasErrors()) {
-                model.addAttribute("pageTitle", "새 템플릿 생성");
-                model.addAttribute("presets", templatePresetService.getSummaries());
-                return "templates/form";
-            }
+        if (bindingResult.hasErrors()) {
+            addPageTitle(model, "새 템플릿 생성");
+            model.addAttribute("presets", templatePresetService.getSummaries());
+            return "templates/form";
+        }
 
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+        return handleOperation(() -> {
+            String resolvedUserId = resolveUserId(currentUserProvider, securityUser, request, userId, true);
             CreateTemplateCommand command = new CreateTemplateCommand(form.getTitle(), form.getSectionsJson());
             TemplateResponse response = templateService.createTemplate(resolvedUserId, command);
 
             logger.info("템플릿 생성 성공: {} (ID: {})", response.getTitle(), response.getTemplateId());
-            redirectAttributes.addFlashAttribute("successMessage", "템플릿이 성공적으로 생성되었습니다.");
+            addSuccessMessage(redirectAttributes, "템플릿이 성공적으로 생성되었습니다.");
             return "redirect:/templates";
-
-        } catch (ValidationException e) {
-            logger.warn("템플릿 생성 유효성 검사 실패: {}", e.getMessage());
-            model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("presets", templatePresetService.getSummaries());
-            model.addAttribute("pageTitle", "새 템플릿 생성");
-            return "templates/form";
-
-        } catch (BusinessException e) {
-            logger.warn("템플릿 생성 비즈니스 로직 실패: {}", e.getMessage());
-            model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("pageTitle", "새 템플릿 생성");
-            return "templates/form";
-
-        } catch (Exception e) {
-            logger.error("템플릿 생성 중 예상치 못한 오류 발생", e);
-            model.addAttribute("errorMessage", "템플릿 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-            model.addAttribute("presets", templatePresetService.getSummaries());
-            model.addAttribute("pageTitle", "새 템플릿 생성");
-            return "templates/form";
-        }
+        }, "템플릿 생성", "templates/form", model, "템플릿 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
     }
 
     @GetMapping("/{templateId}")

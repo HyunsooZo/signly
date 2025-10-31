@@ -633,24 +633,7 @@
     }
 }
 
-/* 다크 모드 지원 (향후 확장) */
-@media (prefers-color-scheme: dark) {
-    .signature-canvas-container {
-        background-color: #1a1a1a;
-        background-image:
-            linear-gradient(90deg, #333 1px, transparent 1px),
-            linear-gradient(#333 1px, transparent 1px);
-    }
 
-    .signature-canvas {
-        background-color: #2a2a2a;
-        border-color: #555;
-    }
-
-    .signature-placeholder {
-        color: #999;
-    }
-}
 
 /* 애니메이션 */
 @keyframes signature-success {

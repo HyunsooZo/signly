@@ -85,8 +85,8 @@ public class ContractWebController extends BaseWebController {
             HttpServletRequest request,
             Model model
     ) {
-        try {
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+        return handleOperation(() -> {
+            String resolvedUserId = resolveUserId(currentUserProvider, securityUser, request, userId, true);
             PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
             // 상태 필터링이 있으면 상태별로 조회, 없으면 전체 조회
@@ -97,17 +97,13 @@ public class ContractWebController extends BaseWebController {
                 contracts = contractService.getContractsByCreator(resolvedUserId, pageRequest);
             }
 
-            model.addAttribute("pageTitle", "계약서 관리");
+            addPageTitle(model, "계약서 관리");
             model.addAttribute("contracts", contracts);
             model.addAttribute("currentStatus", status);
             model.addAttribute("statuses", ContractStatus.values());
 
             return "contracts/list";
-        } catch (Exception e) {
-            logger.error("계약서 목록 조회 중 오류 발생", e);
-            model.addAttribute("errorMessage", "계약서 목록을 불러오는 중 오류가 발생했습니다.");
-            return "contracts/list";
-        }
+        }, "계약서 목록 조회", "contracts/list", model, "계약서 목록을 불러오는 중 오류가 발생했습니다.");
     }
 
     @GetMapping("/new")
@@ -193,14 +189,14 @@ public class ContractWebController extends BaseWebController {
             Model model,
             RedirectAttributes redirectAttributes
     ) {
-        String resolvedUserId = null;
-        try {
-            resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+        String resolvedUserId = resolveUserId(currentUserProvider, securityUser, request, userId, true);
 
-            if (bindingResult.hasErrors()) {
-                logger.warn("계약서 폼 검증 실패: {}", bindingResult.getAllErrors());
-                return handleFormError("입력값을 확인해주세요.", model, form, resolvedUserId);
-            }
+        if (bindingResult.hasErrors()) {
+            logger.warn("계약서 폼 검증 실패: {}", bindingResult.getAllErrors());
+            return handleFormError("입력값을 확인해주세요.", model, form, resolvedUserId);
+        }
+
+        return handleOperation(() -> {
             PresetType presetType = PresetType.fromString(form.getSelectedPreset());
             CreateContractCommand command = new CreateContractCommand(
                     form.getTemplateId(),
@@ -218,32 +214,10 @@ public class ContractWebController extends BaseWebController {
             );
 
             ContractResponse response = contractService.createContract(resolvedUserId, command);
-
             logger.info("계약서 생성 성공: {} (ID: {})", response.getTitle(), response.getId());
-            redirectAttributes.addFlashAttribute("successMessage", "계약서가 성공적으로 생성되었습니다.");
+            addSuccessMessage(redirectAttributes, "계약서가 성공적으로 생성되었습니다.");
             return "redirect:/contracts";
-
-        } catch (ValidationException e) {
-            logger.warn("계약서 생성 유효성 검사 실패: {}", e.getMessage());
-            if (resolvedUserId == null) {
-                resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
-            }
-            return handleFormError(e.getMessage(), model, form, resolvedUserId);
-
-        } catch (BusinessException e) {
-            logger.warn("계약서 생성 비즈니스 로직 실패: {}", e.getMessage());
-            if (resolvedUserId == null) {
-                resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
-            }
-            return handleFormError(e.getMessage(), model, form, resolvedUserId);
-
-        } catch (Exception e) {
-            logger.error("계약서 생성 중 예상치 못한 오류 발생", e);
-            if (resolvedUserId == null) {
-                resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
-            }
-            return handleFormError("계약서 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", model, form, resolvedUserId);
-        }
+        }, "계약서 생성", "contracts/form", model, null);
     }
 
     private String handleFormError(
@@ -256,8 +230,8 @@ public class ContractWebController extends BaseWebController {
             form.setExpiresAt(LocalDateTime.now().plusHours(24));
         }
 
-        model.addAttribute("errorMessage", errorMessage);
-        model.addAttribute("pageTitle", "새 계약서 생성");
+        addErrorMessage(model, errorMessage);
+        addPageTitle(model, "새 계약서 생성");
         model.addAttribute("contract", form);
         model.addAttribute("presets", templatePresetService.getSummaries());
         if (userId != null) {
@@ -474,16 +448,12 @@ public class ContractWebController extends BaseWebController {
             HttpServletRequest request,
             RedirectAttributes redirectAttributes
     ) {
-        try {
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+        return handleOperationWithRedirect(() -> {
+            String resolvedUserId = resolveUserId(currentUserProvider, securityUser, request, userId, true);
             contractService.sendForSigning(resolvedUserId, contractId);
             logger.info("계약서 서명 요청 전송 성공: contractId={}", contractId);
-            redirectAttributes.addFlashAttribute("successMessage", "계약서 서명 요청이 전송되었습니다.");
-        } catch (Exception e) {
-            logger.error("계약서 서명 요청 전송 중 오류 발생: contractId={}", contractId, e);
-            redirectAttributes.addFlashAttribute("errorMessage", "서명 요청 전송 중 오류가 발생했습니다.");
-        }
-        return "redirect:/contracts/" + contractId;
+            addSuccessMessage(redirectAttributes, "계약서 서명 요청이 전송되었습니다.");
+        }, "계약서 서명 요청 전송", "/contracts/" + contractId, redirectAttributes, "서명 요청 전송 중 오류가 발생했습니다.");
     }
 
     @PostMapping("/{contractId}/resend")
@@ -494,16 +464,12 @@ public class ContractWebController extends BaseWebController {
             HttpServletRequest request,
             RedirectAttributes redirectAttributes
     ) {
-        try {
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+        return handleOperationWithRedirect(() -> {
+            String resolvedUserId = resolveUserId(currentUserProvider, securityUser, request, userId, true);
             contractService.resendSigningEmail(resolvedUserId, contractId);
             logger.info("계약서 서명 요청 재전송 성공: contractId={}", contractId);
-            redirectAttributes.addFlashAttribute("successMessage", "서명 요청 이메일을 재전송했습니다.");
-        } catch (Exception e) {
-            logger.error("계약서 서명 요청 재전송 중 오류 발생: contractId={}", contractId, e);
-            redirectAttributes.addFlashAttribute("errorMessage", "서명 요청 재전송 중 오류가 발생했습니다.");
-        }
-        return "redirect:/contracts/" + contractId;
+            addSuccessMessage(redirectAttributes, "서명 요청 이메일을 재전송했습니다.");
+        }, "계약서 서명 요청 재전송", "/contracts/" + contractId, redirectAttributes, "서명 요청 재전송 중 오류가 발생했습니다.");
     }
 
     @PostMapping("/{contractId}/cancel")
@@ -514,16 +480,12 @@ public class ContractWebController extends BaseWebController {
             HttpServletRequest request,
             RedirectAttributes redirectAttributes
     ) {
-        try {
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+        return handleOperationWithRedirect(() -> {
+            String resolvedUserId = resolveUserId(currentUserProvider, securityUser, request, userId, true);
             contractService.cancelContract(resolvedUserId, contractId);
             logger.info("계약서 취소 성공: contractId={}", contractId);
-            redirectAttributes.addFlashAttribute("successMessage", "계약서가 취소되었습니다.");
-        } catch (Exception e) {
-            logger.error("계약서 취소 중 오류 발생: contractId={}", contractId, e);
-            redirectAttributes.addFlashAttribute("errorMessage", "계약서 취소 중 오류가 발생했습니다.");
-        }
-        return "redirect:/contracts/" + contractId;
+            addSuccessMessage(redirectAttributes, "계약서가 취소되었습니다.");
+        }, "계약서 취소", "/contracts/" + contractId, redirectAttributes, "계약서 취소 중 오류가 발생했습니다.");
     }
 
     @PostMapping("/{contractId}/complete")
@@ -532,15 +494,11 @@ public class ContractWebController extends BaseWebController {
             @RequestHeader(value = "X-User-Id", defaultValue = "01ARZ3NDEKTSV4RRFFQ69G5FAV") String userId,
             RedirectAttributes redirectAttributes
     ) {
-        try {
+        return handleOperationWithRedirect(() -> {
             contractService.completeContract(userId, contractId);
             logger.info("계약서 완료 처리 성공: contractId={}", contractId);
-            redirectAttributes.addFlashAttribute("successMessage", "계약서가 완료되었습니다.");
-        } catch (Exception e) {
-            logger.error("계약서 완료 처리 중 오류 발생: contractId={}", contractId, e);
-            redirectAttributes.addFlashAttribute("errorMessage", "계약서 완료 처리 중 오류가 발생했습니다.");
-        }
-        return "redirect:/contracts/" + contractId;
+            addSuccessMessage(redirectAttributes, "계약서가 완료되었습니다.");
+        }, "계약서 완료 처리", "/contracts/" + contractId, redirectAttributes, "계약서 완료 처리 중 오류가 발생했습니다.");
     }
 
     @PostMapping("/{contractId}/delete")
@@ -551,16 +509,12 @@ public class ContractWebController extends BaseWebController {
             HttpServletRequest request,
             RedirectAttributes redirectAttributes
     ) {
-        try {
-            String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
+        return handleOperationWithRedirect(() -> {
+            String resolvedUserId = resolveUserId(currentUserProvider, securityUser, request, userId, true);
             contractService.deleteContract(resolvedUserId, contractId);
             logger.info("계약서 삭제 성공: contractId={}", contractId);
-            redirectAttributes.addFlashAttribute("successMessage", "계약서가 삭제되었습니다.");
-        } catch (Exception e) {
-            logger.error("계약서 삭제 중 오류 발생: contractId={}", contractId, e);
-            redirectAttributes.addFlashAttribute("errorMessage", "계약서 삭제 중 오류가 발생했습니다.");
-        }
-        return "redirect:/contracts";
+            addSuccessMessage(redirectAttributes, "계약서가 삭제되었습니다.");
+        }, "계약서 삭제", "/contracts", redirectAttributes, "계약서 삭제 중 오류가 발생했습니다.");
     }
 
     @GetMapping("/{contractId}/pdf-view")

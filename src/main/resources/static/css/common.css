@@ -3,8 +3,13 @@
 /* CSS 변수 정의 */
 :root {
     /* 컬러 팔레트 */
-    --primary-color: #2563eb;
-    --primary-hover: #1d4ed8;
+    --primary-color: #667eea;
+    --primary-hover: #764ba2;
+    
+    /* Bootstrap 변수 오버라이드 */
+    --bs-primary: #667eea !important;
+    --bs-primary-rgb: 102, 126, 234 !important;
+    --bs-primary-hover: #764ba2 !important;
     --secondary-color: #64748b;
     --success-color: #059669;
     --warning-color: #d97706;
@@ -58,13 +63,13 @@ body {
 
 /* 링크 기본 스타일 */
 a {
-    color: var(--primary-color);
+    color: var(--bs-primary);
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
 a:hover {
-    color: var(--primary-hover);
+    color: var(--bs-primary-hover);
 }
 
 /* 버튼 공통 스타일 */
@@ -85,7 +90,7 @@ a:hover {
 
 .btn:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.1);
 }
 
 .btn:disabled {
@@ -95,12 +100,12 @@ a:hover {
 
 /* 버튼 변형 */
 .btn-primary {
-    background-color: var(--primary-color);
+    background-color: var(--bs-primary);
     color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-    background-color: var(--primary-hover);
+    background-color: var(--bs-primary-hover);
     color: white;
 }
 
@@ -116,12 +121,12 @@ a:hover {
 
 .btn-outline {
     background-color: transparent;
-    border-color: var(--primary-color);
-    color: var(--primary-color);
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
 }
 
 .btn-outline:hover:not(:disabled) {
-    background-color: var(--primary-color);
+    background-color: var(--bs-primary);
     color: white;
 }
 
@@ -173,8 +178,8 @@ a:hover {
 
 .form-control:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.1);
 }
 
 .form-control.is-invalid {
@@ -303,7 +308,7 @@ a:hover {
 .logo-text {
     font-size: var(--font-size-xl);
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--bs-primary);
 }
 
 .header-nav .nav-list {
@@ -331,7 +336,7 @@ a:hover {
 }
 
 .nav-link:hover {
-    color: var(--primary-color);
+    color: var(--bs-primary);
     background-color: var(--gray-50);
 }
 
@@ -372,7 +377,7 @@ a:hover {
 
 .dropdown-item:hover {
     background-color: var(--gray-50);
-    color: var(--primary-color);
+    color: var(--bs-primary);
 }
 
 .dropdown-divider {
@@ -513,7 +518,7 @@ a:hover {
 }
 
 .social-link:hover {
-    background-color: var(--primary-color);
+    background-color: var(--bs-primary);
 }
 
 .footer-title {
@@ -757,7 +762,7 @@ a:hover {
 }
 
 .badge-primary {
-    background-color: var(--primary-color);
+    background-color: var(--bs-primary);
     color: white;
 }
 
@@ -786,13 +791,13 @@ a:hover {
 .text-left { text-align: left; }
 .text-right { text-align: right; }
 
-.text-primary { color: var(--primary-color); }
+.text-primary { color: var(--bs-primary); }
 .text-success { color: var(--success-color); }
 .text-warning { color: var(--warning-color); }
 .text-danger { color: var(--danger-color); }
 .text-muted { color: var(--gray-500); }
 
-.bg-primary { background-color: var(--primary-color); }
+.bg-primary { background-color: var(--bs-primary) !important; }
 .bg-light { background-color: var(--gray-100); }
 .bg-white { background-color: white; }
 
@@ -872,7 +877,7 @@ a:hover {
     width: 20px;
     height: 20px;
     border: 2px solid var(--gray-300);
-    border-top: 2px solid var(--primary-color);
+    border-top: 2px solid var(--bs-primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }

@@ -110,13 +110,21 @@ body,
     margin-top: 30px;
     display: table;
     table-layout: fixed;
-    border-spacing: 40px 0;
+    border-spacing: 0 0;
 }
 
 .signature-block {
     display: table-cell;
     vertical-align: top;
     width: 50%;
+}
+
+.signature-block--employee {
+    text-align: left;
+}
+
+.signature-block--employer {
+    text-align: left;
 }
 
 .signature-line {

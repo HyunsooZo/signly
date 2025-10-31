@@ -25,9 +25,27 @@ public class Contract extends AggregateRoot {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Contract(ContractId id, UserId creatorId, TemplateId templateId,
-                    String title, ContractContent content, PartyInfo firstParty,
-                    PartyInfo secondParty, LocalDateTime expiresAt, PresetType presetType) {
+    protected Contract() {
+        // for JPA and reflection
+        this.id = null;
+        this.creatorId = null;
+        this.templateId = null;
+        this.title = null;
+        this.content = null;
+        this.firstParty = null;
+        this.secondParty = null;
+        this.status = null;
+        this.signatures = null;
+        this.signToken = null;
+        this.expiresAt = null;
+        this.presetType = null;
+        this.createdAt = null;
+        this.updatedAt = null;
+    }
+
+    private Contract(ContractId id, UserId creatorId, TemplateId templateId,
+                     String title, ContractContent content, PartyInfo firstParty,
+                     PartyInfo secondParty, LocalDateTime expiresAt, PresetType presetType) {
         this.id = id;
         this.creatorId = creatorId;
         this.templateId = templateId;
@@ -132,51 +150,33 @@ public class Contract extends AggregateRoot {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void sign(String signerEmail, String signerName, String signatureData, String ipAddress) {
-        if (!status.canSign()) {
-            throw new ValidationException("서명 대기 상태에서만 서명할 수 있습니다");
-        }
-
-        if (isExpired()) {
-            expire();
-            throw new ValidationException("만료된 계약서에는 서명할 수 없습니다");
-        }
-
-        if (!isValidSigner(signerEmail)) {
-            throw new ValidationException("해당 계약서에 서명할 권한이 없습니다");
-        }
-
-        if (hasSignedBy(signerEmail)) {
-            throw new ValidationException("이미 서명한 계약서입니다");
-        }
-
-        Signature signature = Signature.create(signerEmail, signerName, signatureData, ipAddress);
+    /**
+     * 서명 추가 (단순한 데이터 추가만 담당)
+     * 복잡한 비즈니스 로직은 ContractSigningService에서 처리
+     */
+    public void addSignature(Signature signature) {
+        validateCanAddSignature();
         this.signatures.add(signature);
         this.updatedAt = LocalDateTime.now();
-
-        if (isFullySigned()) {
-            this.status = ContractStatus.SIGNED;
-        }
     }
 
     /**
-     * 서명 검증 및 상태 업데이트 (서명 데이터는 외부에서 관리)
-     * SignatureService에서 이미 서명 데이터를 저장한 후 호출됨
+     * 모든 서명이 완료된 상태로 변경
      */
-    public void markSignedBy(String signerEmail, boolean allSignaturesComplete) {
+    public void markAsFullySigned() {
         if (!status.canSign()) {
-            throw new ValidationException("서명 대기 상태에서만 서명할 수 있습니다");
+            throw new ValidationException("서명 대기 상태에서만 완료할 수 있습니다");
         }
+        this.status = ContractStatus.SIGNED;
+        this.updatedAt = LocalDateTime.now();
+    }
 
-        if (isExpired()) {
-            expire();
-            throw new ValidationException("만료된 계약서에는 서명할 수 없습니다");
-        }
-
-        if (!isValidSigner(signerEmail)) {
-            throw new ValidationException("해당 계약서에 서명할 권한이 없습니다");
-        }
-
+    /**
+     * @deprecated ContractSigningService.markSignedBy 사용 권장
+     * 하위 호환성을 위해 유지
+     */
+    @Deprecated
+    public void markSignedBy(String signerEmail, boolean allSignaturesComplete) {
         this.updatedAt = LocalDateTime.now();
 
         if (allSignaturesComplete) {
@@ -208,17 +208,35 @@ public class Contract extends AggregateRoot {
         this.updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * 서명 추가 가능 여부 검증
+     */
+    private void validateCanAddSignature() {
+        if (!status.canSign()) {
+            throw new ValidationException("서명 대기 상태에서만 서명할 수 있습니다");
+        }
+    }
+
+    /**
+     * 서명자 권한 확인
+     */
     private boolean isValidSigner(String email) {
         return firstParty.getEmail().equals(email.trim().toLowerCase()) ||
                secondParty.getEmail().equals(email.trim().toLowerCase());
     }
 
+    /**
+     * 특정 이메일로 서명했는지 확인
+     */
     private boolean hasSignedBy(String email) {
         return signatures.stream()
                 .anyMatch(signature -> signature.isSignedBy(email));
     }
 
-    private boolean isFullySigned() {
+    /**
+     * 모든 당사자가 서명했는지 확인
+     */
+    public boolean isFullySigned() {
         return hasSignedBy(firstParty.getEmail()) && hasSignedBy(secondParty.getEmail());
     }
 

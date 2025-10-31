@@ -256,7 +256,6 @@ body,
 }
 
 .signature-block {
-    width: 280px;
     /* Flying Saucer를 위한 fallback: float로 좌우 배치 */
     float: left;
 }
@@ -264,22 +263,30 @@ body,
 .signature-block--employee {
     /* 근로자 - 왼쪽 끝 */
     margin-left: 0;
+    text-align: left;
+    flex: 1; /* 남은 공간 차지 */
 }
 
 .signature-block--employer {
     /* 사업주 - 오른쪽 끝 */
-    margin-left: auto;
+    margin-left: 0;
+    width: fit-content; /* 내부 요소들에 딱 맞는 너비 */
+    text-align: left; /* 내부 요소 좌측 정렬 */
+    margin-left: auto; /* 최 우측 정렬 */
 }
 
 /* Flying Saucer용: float 레이아웃에서 양 끝으로 */
 .signature-block--employee {
     float: left;
     margin-left: 0;
+    width: auto;
 }
 
 .signature-block--employer {
     float: right;
     margin-right: 0;
+    width: fit-content; /* 내부 요소들에 딱 맞는 너비 */
+    text-align: left;
 }
 
 /* Flexbox를 지원하는 브라우저에서는 float 무시 */
@@ -289,15 +296,23 @@ body,
     }
     .signature-block--employee {
         float: none;
+        flex: 1; /* 남은 공간 차지 */
     }
     .signature-block--employer {
         float: none;
+        width: fit-content; /* 내부 요소들에 딱 맞는 너비 */
+        text-align: left;
+        margin-left: auto; /* 최 우측 정렬 */
     }
 }
 
 .signature-line {
     margin: 5px 0;
+    max-width: fit-content;
+    width: fit-content;
 }
+
+
 
 .signature-line--seal {
     position: relative;

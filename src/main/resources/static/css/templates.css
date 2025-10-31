@@ -75,7 +75,7 @@
 }
 
 .template-form .form-control:focus {
-    border-color: #667eea;
+    border-color: var(--primary-color);
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
@@ -126,7 +126,7 @@
 }
 
 .content-editor:focus {
-    border-color: #667eea;
+    border-color: var(--primary-color);
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
@@ -333,14 +333,14 @@
 }
 
 .preview-modal-header {
-    border-bottom: 2px solid #0d6efd;
+    border-bottom: 2px solid var(--primary-color);
     padding-bottom: 15px;
     margin-bottom: 30px;
 }
 
 .preview-modal-title {
     margin: 0;
-    color: #0d6efd;
+    color: var(--primary-color);
     font-size: 1.5rem;
 }
 
@@ -353,8 +353,8 @@
 
 .template-variable-tag {
     display: inline-block;
-    background-color: #e9f2ff;
-    color: #1d4ed8;
+    background-color: rgba(102, 126, 234, 0.1);
+    color: var(--primary-color);
     padding: 0.35rem 0.6rem;
     border-radius: 6px;
     margin: 0.15rem;
@@ -367,20 +367,20 @@
     border-radius: 20px;
     margin: 0 2px;
     border: 2px solid #e9ecef;
-    color: #667eea;
+    color: var(--primary-color);
     transition: all 0.2s ease;
 }
 
 .pagination .page-link:hover {
-    background-color: #667eea;
-    border-color: #667eea;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
     color: white;
     transform: translateY(-1px);
 }
 
 .pagination .page-item.active .page-link {
-    background-color: #667eea;
-    border-color: #667eea;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 /* 모달 스타일 */
@@ -393,7 +393,7 @@
 .modal-header {
     border-bottom: 1px solid #f0f0f0;
     border-radius: 15px 15px 0 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
     color: white;
 }
 
@@ -480,27 +480,7 @@
     }
 }
 
-/* 다크 모드 지원 */
-@media (prefers-color-scheme: dark) {
-    .template-card {
-        background: rgba(33, 37, 41, 0.95);
-        color: #f8f9fa;
-    }
 
-    .template-info {
-        background: linear-gradient(135deg, #212529 0%, #343a40 100%);
-        color: #f8f9fa;
-    }
-
-    .template-content {
-        background: linear-gradient(135deg, #212529 0%, #343a40 100%);
-        color: #f8f9fa;
-    }
-
-    .info-item:hover {
-        background-color: rgba(102, 126, 234, 0.1);
-    }
-}
 
 /* 템플릿 변수 밑줄 표시 */
 .template-variable-underline {

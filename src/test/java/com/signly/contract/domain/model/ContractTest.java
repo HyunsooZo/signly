@@ -1,6 +1,7 @@
 package com.signly.contract.domain.model;
 
 import com.signly.common.exception.ValidationException;
+import com.signly.contract.domain.service.ContractSigningService;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
 import org.junit.jupiter.api.BeforeEach;
@@ -148,7 +149,11 @@ class ContractTest {
         Contract contract = Contract.create(creatorId, templateId, title, content, firstParty, secondParty, expiresAt);
         contract.sendForSigning();
 
-        contract.sign("first@example.com", "홍길동", "서명데이터", "192.168.1.1");
+        ContractSigningService signingService = new ContractSigningService();
+        ContractSigningService.SigningRequest request = new ContractSigningService.SigningRequest(
+                "first@example.com", "홍길동", "서명데이터", "192.168.1.1");
+        
+        signingService.processSigning(contract, request);
 
         assertThat(contract.getSignatures()).hasSize(1);
         assertThat(contract.getSignatures().get(0).getSignerEmail()).isEqualTo("first@example.com");
@@ -159,8 +164,14 @@ class ContractTest {
         Contract contract = Contract.create(creatorId, templateId, title, content, firstParty, secondParty, expiresAt);
         contract.sendForSigning();
 
-        contract.sign("first@example.com", "홍길동", "서명데이터1", "192.168.1.1");
-        contract.sign("second@example.com", "김철수", "서명데이터2", "192.168.1.2");
+        ContractSigningService signingService = new ContractSigningService();
+        ContractSigningService.SigningRequest request1 = new ContractSigningService.SigningRequest(
+                "first@example.com", "홍길동", "서명데이터1", "192.168.1.1");
+        ContractSigningService.SigningRequest request2 = new ContractSigningService.SigningRequest(
+                "second@example.com", "김철수", "서명데이터2", "192.168.1.2");
+        
+        signingService.processSigning(contract, request1);
+        signingService.processSigning(contract, request2);
 
         assertThat(contract.getStatus()).isEqualTo(ContractStatus.SIGNED);
         assertThat(contract.getSignatures()).hasSize(2);
@@ -170,8 +181,15 @@ class ContractTest {
     void 서명완료_상태에서_완료할_수_있다() {
         Contract contract = Contract.create(creatorId, templateId, title, content, firstParty, secondParty, expiresAt);
         contract.sendForSigning();
-        contract.sign("first@example.com", "홍길동", "서명데이터1", "192.168.1.1");
-        contract.sign("second@example.com", "김철수", "서명데이터2", "192.168.1.2");
+        
+        ContractSigningService signingService = new ContractSigningService();
+        ContractSigningService.SigningRequest request1 = new ContractSigningService.SigningRequest(
+                "first@example.com", "홍길동", "서명데이터1", "192.168.1.1");
+        ContractSigningService.SigningRequest request2 = new ContractSigningService.SigningRequest(
+                "second@example.com", "김철수", "서명데이터2", "192.168.1.2");
+        
+        signingService.processSigning(contract, request1);
+        signingService.processSigning(contract, request2);
 
         contract.complete();
 
@@ -224,7 +242,11 @@ class ContractTest {
 
         assertThat(contract.getPendingSigners()).containsExactlyInAnyOrder("first@example.com", "second@example.com");
 
-        contract.sign("first@example.com", "홍길동", "서명데이터", "192.168.1.1");
+        ContractSigningService signingService = new ContractSigningService();
+        ContractSigningService.SigningRequest request = new ContractSigningService.SigningRequest(
+                "first@example.com", "홍길동", "서명데이터", "192.168.1.1");
+        
+        signingService.processSigning(contract, request);
 
         assertThat(contract.getPendingSigners()).containsExactly("second@example.com");
     }
@@ -234,7 +256,11 @@ class ContractTest {
         Contract contract = Contract.create(creatorId, templateId, title, content, firstParty, secondParty, expiresAt);
         contract.sendForSigning();
 
-        assertThatThrownBy(() -> contract.sign("unauthorized@example.com", "무권한자", "서명데이터", "192.168.1.1"))
+        ContractSigningService signingService = new ContractSigningService();
+        ContractSigningService.SigningRequest request = new ContractSigningService.SigningRequest(
+                "unauthorized@example.com", "무권한자", "서명데이터", "192.168.1.1");
+        
+        assertThatThrownBy(() -> signingService.processSigning(contract, request))
                 .isInstanceOf(ValidationException.class)
                 .hasMessage("해당 계약서에 서명할 권한이 없습니다");
     }
@@ -243,9 +269,16 @@ class ContractTest {
     void 이미_서명한_사용자가_다시_서명하면_예외가_발생한다() {
         Contract contract = Contract.create(creatorId, templateId, title, content, firstParty, secondParty, expiresAt);
         contract.sendForSigning();
-        contract.sign("first@example.com", "홍길동", "서명데이터", "192.168.1.1");
-
-        assertThatThrownBy(() -> contract.sign("first@example.com", "홍길동", "서명데이터2", "192.168.1.1"))
+        
+        ContractSigningService signingService = new ContractSigningService();
+        ContractSigningService.SigningRequest request1 = new ContractSigningService.SigningRequest(
+                "first@example.com", "홍길동", "서명데이터", "192.168.1.1");
+        ContractSigningService.SigningRequest request2 = new ContractSigningService.SigningRequest(
+                "first@example.com", "홍길동", "서명데이터2", "192.168.1.1");
+        
+        signingService.processSigning(contract, request1);
+        
+        assertThatThrownBy(() -> signingService.processSigning(contract, request2))
                 .isInstanceOf(ValidationException.class)
                 .hasMessage("이미 서명한 계약서입니다");
     }

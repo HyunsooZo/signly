@@ -68,7 +68,7 @@
 
 /* 배경색 변형 */
 .stats-card.bg-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
 }
 
 .stats-card.bg-success {
@@ -142,7 +142,7 @@
 }
 
 .recent-item:hover {
-    background-color: rgba(102, 126, 234, 0.02);
+    background-color: rgba(102, 126, 234, 0.05);
     border-radius: 8px;
     margin: 0 -0.75rem;
     padding-left: 0.75rem;
@@ -180,7 +180,7 @@
 }
 
 .recent-item-content h6 a:hover {
-    color: #667eea;
+    color: var(--primary-color);
 }
 
 .recent-item-status {
@@ -371,11 +371,11 @@
     }
 
     .recent-item-content h6 a:hover {
-        color: #2563eb;
+        color: var(--primary-color);
     }
 
     .recent-item:hover {
-        background-color: rgba(37, 99, 235, 0.05);
+        background-color: rgba(102, 126, 234, 0.05);
     }
 
     .text-muted {
