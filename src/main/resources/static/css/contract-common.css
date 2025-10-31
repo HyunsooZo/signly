@@ -270,7 +270,7 @@ body,
 .signature-block--employer {
     /* 사업주 - 오른쪽 끝 */
     margin-left: 0;
-    text-align: left;
+    text-align: right;
 }
 
 /* Flying Saucer용: float 레이아웃에서 양 끝으로 */
@@ -284,7 +284,7 @@ body,
     float: right;
     margin-right: 0;
     width: 50%;
-    text-align: left;
+    text-align: right;
 }
 
 /* Flexbox를 지원하는 브라우저에서는 float 무시 */
@@ -298,10 +298,20 @@ body,
     .signature-block--employer {
         float: none;
     }
+    
+    .signature-block--employer .signature-line {
+        display: inline-block;
+        text-align: left;
+    }
 }
 
 .signature-line {
     margin: 5px 0;
+}
+
+.signature-block--employer .signature-line {
+    display: inline-block;
+    text-align: left;
 }
 
 .signature-line--seal {
