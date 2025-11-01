@@ -113,32 +113,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String extractTokenFromRequest(HttpServletRequest request) {
+        // Authorization 헤더에서 토큰 추출
         String bearerToken = request.getHeader("Authorization");
-
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
 
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("authToken".equals(cookie.getName()) && StringUtils.hasText(cookie.getValue())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-
-        return null;
+        // 쿠키에서 토큰 추출
+        return extractCookieValue(request, "authToken");
     }
 
     /**
      * 리프레시 토큰 추출
      */
     private String extractRefreshTokenFromRequest(HttpServletRequest request) {
+        return extractCookieValue(request, "refreshToken");
+    }
+
+    /**
+     * 쿠키에서 특정 이름의 값 추출 (중복 제거를 위한 공통 메서드)
+     */
+    private String extractCookieValue(HttpServletRequest request, String cookieName) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("refreshToken".equals(cookie.getName()) && StringUtils.hasText(cookie.getValue())) {
+                if (cookieName.equals(cookie.getName()) && StringUtils.hasText(cookie.getValue())) {
                     return cookie.getValue();
                 }
             }

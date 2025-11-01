@@ -9,7 +9,9 @@ import java.time.LocalDateTime;
 @Table(name = "signatures", indexes = {
     @Index(name = "idx_signature_contract_id", columnList = "contract_id"),
     @Index(name = "idx_signature_signer_email", columnList = "signer_email"),
-    @Index(name = "idx_signature_signed_at", columnList = "signed_at")
+    @Index(name = "idx_signature_signed_at", columnList = "signed_at"),
+    @Index(name = "idx_signature_contract_signer", columnList = "contract_id, signer_email"),
+    @Index(name = "idx_signature_contract_signed", columnList = "contract_id, signed_at")
 })
 public class SignatureJpaEntity extends BaseEntity {
 
