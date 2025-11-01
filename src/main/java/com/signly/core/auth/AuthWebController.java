@@ -70,7 +70,7 @@ public class AuthWebController {
     public String login(
             @Valid @ModelAttribute LoginRequest loginRequest,
             BindingResult bindingResult,
-            @RequestParam(required = false) boolean rememberMe,
+            @RequestParam(required = false, defaultValue = "false") boolean rememberMe,
             @RequestParam(required = false) String returnUrl,
             HttpServletResponse response,
             Model model,
