@@ -61,6 +61,9 @@ dependencies {
     // PDF generation
     implementation 'org.xhtmlrenderer:flying-saucer-pdf:9.5.1'
     implementation 'org.xhtmlrenderer:flying-saucer-core:9.5.1'
+    
+    // HTML parsing
+    implementation 'org.jsoup:jsoup:1.17.2'
 }
 
 tasks.named('test') {
