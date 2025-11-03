@@ -13,10 +13,6 @@ import com.signly.template.application.preset.PresetSection;
 import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.application.preset.TemplatePresetSummary;
 import com.signly.template.domain.model.TemplateStatus;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -255,93 +251,13 @@ public class TemplateWebController extends BaseWebController {
     @ResponseBody
     public ResponseEntity<TemplatePresetSectionsResponse> getPresetSections(@PathVariable String presetId) {
         return templatePresetService.getPreset(presetId)
-                .map(preset -> {
-                    java.util.List<PresetSection> sections;
-                    
-                    // 단일 섹션에 rawHtml이 있는 경우 파싱 필요
-                    if (preset.sections().size() == 1) {
-                        PresetSection singleSection = preset.sections().get(0);
-                        java.util.Map<String, Object> metadata = singleSection.metadata();
-                        
-                        if (metadata != null && Boolean.TRUE.equals(metadata.get("rawHtml"))) {
-                            // HTML을 여러 섹션으로 파싱
-                            sections = parseHtmlToSections(singleSection.content());
-                        } else {
-                            // 일반적인 경우 그대로 사용
-                            sections = preset.sections();
-                        }
-                    } else {
-                        // 이미 여러 섹션으로 분리된 경우
-                        sections = preset.sections();
-                    }
-                    
-                    return ResponseEntity.ok(
-                            new TemplatePresetSectionsResponse(preset.id(), preset.name(), sections)
-                    );
-                })
+                .map(preset -> ResponseEntity.ok(
+                        new TemplatePresetSectionsResponse(preset.id(), preset.name(), preset.sections())
+                ))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    private java.util.List<PresetSection> parseHtmlToSections(String html) {
-        java.util.List<PresetSection> sections = new java.util.ArrayList<>();
-        
-        try {
-            // Jsoup 사용하여 HTML 파싱
-            Document doc = Jsoup.parse(html);
-            int order = 0;
-            
-            // title 클래스 → title 섹션
-            Elements titleElements = doc.select(".title");
-            for (Element element : titleElements) {
-                sections.add(createSection("title", element.text(), order++, java.util.Map.of("kind", "title")));
-            }
-            
-            // contract-intro 클래스 → text 섹션
-            Elements introElements = doc.select(".contract-intro");
-            for (Element element : introElements) {
-                sections.add(createSection("text", element.text(), order++, java.util.Map.of("kind", "text")));
-            }
-            
-            // section 클래스 → clause 섹션 (번호 추출)
-            Elements sectionElements = doc.select(".section");
-            for (Element element : sectionElements) {
-                String content = element.text();
-                String type = element.select(".section-number").isEmpty() ? "text" : "clause";
-                sections.add(createSection(type, content, order++, java.util.Map.of("kind", type)));
-            }
-            
-            // date-section 클래스 → text 섹션
-            Elements dateElements = doc.select(".date-section");
-            for (Element element : dateElements) {
-                sections.add(createSection("text", element.text(), order++, java.util.Map.of("kind", "text")));
-            }
-            
-            // signature-section 클래스 → signature 섹션
-            Elements signatureElements = doc.select(".signature-section");
-            for (Element element : signatureElements) {
-                String content = element.html(); // HTML 구조 유지
-                sections.add(createSection("signature", content, order++, 
-                    java.util.Map.of("kind", "signature", "signature", true)));
-            }
-            
-        } catch (Exception e) {
-            logger.error("Failed to parse HTML to sections", e);
-            // 실패 시 단일 섹션으로 fallback
-            sections.add(createSection("text", html, 0, java.util.Map.of("kind", "text")));
-        }
-        
-        return sections;
-    }
-    
-    private PresetSection createSection(String type, String content, int order, java.util.Map<String, Object> metadata) {
-        return new PresetSection(
-                "preset-section-" + order,
-                type,
-                order,
-                content,
-                metadata
-        );
-    }
+
 
     private record TemplatePresetSectionsResponse(String id, String name, 
                                                   java.util.List<com.signly.template.application.preset.PresetSection> sections) {}
