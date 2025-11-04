@@ -340,16 +340,50 @@
         return typeof value === 'string' ? value : String(value);
     }
 
+    // 변수명 한글 매핑
+    const VARIABLE_DISPLAY_NAMES = {
+        'EMPLOYER': '사업주',
+        'EMPLOYEE': '근로자',
+        'WORKPLACE': '근무장소',
+        'CONTRACT_START_DATE': '시작일',
+        'CONTRACT_END_DATE': '종료일',
+        'JOB_DESCRIPTION': '업무내용',
+        'WORK_START_TIME': '근무시작',
+        'WORK_END_TIME': '근무종료',
+        'BREAK_START_TIME': '휴게시작',
+        'BREAK_END_TIME': '휴게종료',
+        'WORK_DAYS': '근무일수',
+        'HOLIDAYS': '휴일',
+        'MONTHLY_SALARY': '월급',
+        'BONUS': '상여금',
+        'OTHER_ALLOWANCES': '기타수당',
+        'PAYMENT_DAY': '지급일',
+        'PAYMENT_METHOD': '지급방법',
+        'CONTRACT_DATE': '계약일',
+        'EMPLOYEE_ADDRESS': '근로자주소',
+        'EMPLOYEE_PHONE': '근로자연락처',
+        'COMPANY_NAME': '회사명',
+        'EMPLOYER_ADDRESS': '사업주주소',
+        'EMPLOYER_PHONE': '사업주전화',
+        'EMPLOYEE_SIGNATURE_IMAGE': '근로자서명',
+        'EMPLOYER_SIGNATURE_IMAGE': '사업주서명'
+    };
+
+    function getDisplayName(varName) {
+        return VARIABLE_DISPLAY_NAMES[varName] || varName;
+    }
+
     function convertVariablesToBrackets(html) {
         if (!html) return '';
-        return html.replace(/<span class="template-variable"[^>]*>\s*<span>([^<]+)<\/span>[\s\S]*?<\/span>/g, '[$1]');
+        return html.replace(/<span class="template-variable"[^>]*data-var-name="([^"]+)"[^>]*>[\s\S]*?<\/span>/g, '[$1]');
     }
 
     function convertBracketsToVariables(html) {
         if (!html) return '';
         return html.replace(/\[([A-Z_]+)\]/g, function(match, varName) {
-            return '<span class="template-variable" contenteditable="false">' +
-                   '<span>' + varName + '</span>' +
+            const displayName = getDisplayName(varName);
+            return '<span class="template-variable" contenteditable="false" data-var-name="' + varName + '">' +
+                   '<span>' + displayName + '</span>' +
                    '<span class="template-variable-remove"></span>' +
                    '</span>';
         });
@@ -710,9 +744,10 @@
             const varSpan = document.createElement('span');
             varSpan.className = 'template-variable';
             varSpan.contentEditable = 'false';
+            varSpan.setAttribute('data-var-name', variable);
 
             const varText = document.createElement('span');
-            varText.textContent = variable;
+            varText.textContent = getDisplayName(variable);
 
             const removeBtn = document.createElement('span');
             removeBtn.className = 'template-variable-remove';
