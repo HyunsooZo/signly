@@ -4,10 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signly.template.infrastructure.entity.TemplateEntity;
 import com.signly.template.infrastructure.repository.TemplateJpaRepository;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -53,8 +49,10 @@ public class TemplatePresetService {
         try {
             // rawHtml 체크
             if (isRawHtmlFormat(entity)) {
+                // rawHtml 포맷인 경우 원본 HTML을 그대로 반환
                 return parseHtmlToSections(entity.getContent());
             } else {
+                // 일반 JSON 섹션 포맷
                 return parseJsonSections(entity.getContent());
             }
         } catch (Exception e) {
@@ -101,53 +99,46 @@ public class TemplatePresetService {
                 .toList();
     }
 
-    private List<PresetSection> parseHtmlToSections(String html) {
+    private List<PresetSection> parseHtmlToSections(String jsonContent) {
         List<PresetSection> sections = new ArrayList<>();
-        
+
         try {
-            // Jsoup 사용하여 HTML 파싱
-            Document doc = Jsoup.parse(html);
-            int order = 0;
-            
-            // title 클래스 → title 섹션
-            Elements titleElements = doc.select(".title");
-            for (Element element : titleElements) {
-                sections.add(createSection("title", element.text(), order++, Map.of("kind", "title")));
+            // JSON에서 content 필드를 추출 (원본 HTML)
+            List<Map<String, Object>> sectionsData = objectMapper.readValue(
+                    jsonContent,
+                    new TypeReference<List<Map<String, Object>>>() {}
+            );
+
+            if (!sectionsData.isEmpty()) {
+                Map<String, Object> firstSection = sectionsData.get(0);
+                String htmlContent = (String) firstSection.get("content");
+
+                if (htmlContent != null && !htmlContent.isBlank()) {
+                    // 원본 HTML을 그대로 단일 섹션으로 반환
+                    Map<String, Object> metadata = (Map<String, Object>) firstSection.get("metadata");
+                    if (metadata == null) {
+                        metadata = Map.of("rawHtml", true);
+                    }
+
+                    sections.add(new PresetSection(
+                            "preset-section-0",
+                            "CUSTOM",
+                            0,
+                            htmlContent,
+                            metadata
+                    ));
+                    return sections;
+                }
             }
-            
-            // contract-intro 클래스 → text 섹션
-            Elements introElements = doc.select(".contract-intro");
-            for (Element element : introElements) {
-                sections.add(createSection("text", element.text(), order++, Map.of("kind", "text")));
-            }
-            
-            // section 클래스 → clause 섹션 (번호 추출)
-            Elements sectionElements = doc.select(".section");
-            for (Element element : sectionElements) {
-                String content = element.text();
-                String type = element.select(".section-number").isEmpty() ? "text" : "clause";
-                sections.add(createSection(type, content, order++, Map.of("kind", type)));
-            }
-            
-            // date-section 클래스 → text 섹션
-            Elements dateElements = doc.select(".date-section");
-            for (Element element : dateElements) {
-                sections.add(createSection("text", element.text(), order++, Map.of("kind", "text")));
-            }
-            
-            // signature-section 클래스 → signature 섹션
-            Elements signatureElements = doc.select(".signature-section");
-            for (Element element : signatureElements) {
-                String content = element.html(); // HTML 구조 유지
-                sections.add(createSection("signature", content, order++, 
-                    Map.of("kind", "signature", "signature", true)));
-            }
-            
+
+            // 기본 fallback
+            sections.add(createSection("text", jsonContent, 0, Map.of("kind", "text")));
+
         } catch (Exception e) {
             // 실패 시 단일 섹션으로 fallback
-            sections.add(createSection("text", html, 0, Map.of("kind", "text")));
+            sections.add(createSection("text", jsonContent, 0, Map.of("kind", "text")));
         }
-        
+
         return sections;
     }
     
