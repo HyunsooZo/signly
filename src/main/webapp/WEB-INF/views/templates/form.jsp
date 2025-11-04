@@ -723,8 +723,15 @@
     }
 
     function closeVariableModal() {
-        document.getElementById('variableModal').classList.remove('show');
-        document.getElementById('modalBackdrop').classList.remove('show');
+        const modal = document.getElementById('variableModal');
+        const backdrop = document.getElementById('modalBackdrop');
+        
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        if (backdrop) {
+            backdrop.classList.remove('show');
+        }
     }
 
     function insertVariable(variable) {
