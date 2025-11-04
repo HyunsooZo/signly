@@ -750,10 +750,10 @@
             const varSpan = document.createElement('span');
             varSpan.className = 'template-variable';
             varSpan.contentEditable = 'false';
-            varSpan.setAttribute('data-var-name', variable);
+            varSpan.setAttribute('data-var-name', variable.replace(/[\[\]]/g, ''));
 
             const varText = document.createElement('span');
-            varText.textContent = getDisplayName(variable);
+            varText.textContent = getDisplayName(variable.replace(/[\[\]]/g, ''));
 
             const removeBtn = document.createElement('span');
             removeBtn.className = 'template-variable-remove';
