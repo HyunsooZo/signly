@@ -41,23 +41,23 @@
     <div class="toolbar">
         <div class="d-flex align-items-center flex-wrap gap-2">
             <strong class="me-2 toolbar-label">변수 추가하기:</strong>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYER]')" title="사업주명">
-                <i class="bi bi-person-badge"></i> 사업주명
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYER]')" title="사업주">
+                <i class="bi bi-person-badge"></i> 사업주
             </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[COMPANY_NAME]')" title="사업체명">
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[COMPANY_NAME]')" title="회사명">
                 <i class="bi bi-building"></i> 회사명
             </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYEE]')" title="근로자명">
-                <i class="bi bi-person"></i> 근로자명
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYEE]')" title="근로자">
+                <i class="bi bi-person"></i> 근로자
             </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[CONTRACT_DATE]')" title="계약 체결일">
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[CONTRACT_DATE]')" title="계약일">
                 <i class="bi bi-calendar-event"></i> 계약일
             </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[WORKPLACE]')" title="근무 장소">
-                <i class="bi bi-geo-alt"></i> 근무지
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[WORKPLACE]')" title="근무장소">
+                <i class="bi bi-geo-alt"></i> 근무장소
             </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[JOB_DESCRIPTION]')" title="업무 내용">
-                <i class="bi bi-briefcase"></i> 업무
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[JOB_DESCRIPTION]')" title="업무내용">
+                <i class="bi bi-briefcase"></i> 업무내용
             </button>
             <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[MONTHLY_SALARY]')" title="월급">
                 <i class="bi bi-cash"></i> 월급
@@ -105,9 +105,9 @@
     <div class="mb-3">
         <strong>근로자 정보</strong>
         <div class="variable-grid">
-            <div class="variable-item" onclick="insertVariable('[EMPLOYEE]')">근로자명</div>
-            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_ADDRESS]')">근로자 주소</div>
-            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_PHONE]')">근로자 연락처</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE]')">근로자</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_ADDRESS]')">근로자주소</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_PHONE]')">근로자연락처</div>
             <div class="variable-item" onclick="insertVariable('[EMPLOYEE_ID]')">주민등록번호</div>
         </div>
     </div>
@@ -115,10 +115,10 @@
     <div class="mb-3">
         <strong>사업주 정보</strong>
         <div class="variable-grid">
-            <div class="variable-item" onclick="insertVariable('[EMPLOYER]')">사업주명</div>
-            <div class="variable-item" onclick="insertVariable('[COMPANY_NAME]')">사업체명</div>
-            <div class="variable-item" onclick="insertVariable('[EMPLOYER_ADDRESS]')">사업장 주소</div>
-            <div class="variable-item" onclick="insertVariable('[EMPLOYER_PHONE]')">사업장 연락처</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYER]')">사업주</div>
+            <div class="variable-item" onclick="insertVariable('[COMPANY_NAME]')">회사명</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYER_ADDRESS]')">사업주주소</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYER_PHONE]')">사업주전화</div>
             <div class="variable-item" onclick="insertVariable('[BUSINESS_NUMBER]')">사업자번호</div>
         </div>
     </div>
@@ -126,21 +126,21 @@
     <div class="mb-3">
         <strong>계약 정보</strong>
         <div class="variable-grid">
-            <div class="variable-item" onclick="insertVariable('[CONTRACT_START_DATE]')">계약 시작일</div>
-            <div class="variable-item" onclick="insertVariable('[CONTRACT_END_DATE]')">계약 종료일</div>
-            <div class="variable-item" onclick="insertVariable('[CONTRACT_DATE]')">계약 체결일</div>
-            <div class="variable-item" onclick="insertVariable('[WORKPLACE]')">근무 장소</div>
-            <div class="variable-item" onclick="insertVariable('[JOB_DESCRIPTION]')">업무 내용</div>
+            <div class="variable-item" onclick="insertVariable('[CONTRACT_START_DATE]')">시작일</div>
+            <div class="variable-item" onclick="insertVariable('[CONTRACT_END_DATE]')">종료일</div>
+            <div class="variable-item" onclick="insertVariable('[CONTRACT_DATE]')">계약일</div>
+            <div class="variable-item" onclick="insertVariable('[WORKPLACE]')">근무장소</div>
+            <div class="variable-item" onclick="insertVariable('[JOB_DESCRIPTION]')">업무내용</div>
         </div>
     </div>
 
     <div class="mb-3">
         <strong>근무 조건</strong>
         <div class="variable-grid">
-            <div class="variable-item" onclick="insertVariable('[WORK_START_TIME]')">근무 시작시간</div>
-            <div class="variable-item" onclick="insertVariable('[WORK_END_TIME]')">근무 종료시간</div>
-            <div class="variable-item" onclick="insertVariable('[BREAK_START_TIME]')">휴게 시작시간</div>
-            <div class="variable-item" onclick="insertVariable('[BREAK_END_TIME]')">휴게 종료시간</div>
+            <div class="variable-item" onclick="insertVariable('[WORK_START_TIME]')">근무시작</div>
+            <div class="variable-item" onclick="insertVariable('[WORK_END_TIME]')">근무종료</div>
+            <div class="variable-item" onclick="insertVariable('[BREAK_START_TIME]')">휴게시작</div>
+            <div class="variable-item" onclick="insertVariable('[BREAK_END_TIME]')">휴게종료</div>
             <div class="variable-item" onclick="insertVariable('[WORK_DAYS]')">근무일수</div>
             <div class="variable-item" onclick="insertVariable('[HOLIDAYS]')">휴일</div>
         </div>
@@ -152,17 +152,17 @@
             <div class="variable-item" onclick="insertVariable('[MONTHLY_SALARY]')">월급</div>
             <div class="variable-item" onclick="insertVariable('[HOURLY_WAGE]')">시급</div>
             <div class="variable-item" onclick="insertVariable('[BONUS]')">상여금</div>
-            <div class="variable-item" onclick="insertVariable('[OTHER_ALLOWANCES]')">기타 수당</div>
-            <div class="variable-item" onclick="insertVariable('[PAYMENT_DAY]')">임금 지급일</div>
-            <div class="variable-item" onclick="insertVariable('[PAYMENT_METHOD]')">지급 방법</div>
+            <div class="variable-item" onclick="insertVariable('[OTHER_ALLOWANCES]')">기타수당</div>
+            <div class="variable-item" onclick="insertVariable('[PAYMENT_DAY]')">지급일</div>
+            <div class="variable-item" onclick="insertVariable('[PAYMENT_METHOD]')">지급방법</div>
         </div>
     </div>
 
     <div class="mb-3">
         <strong>서명</strong>
         <div class="variable-grid">
-            <div class="variable-item" onclick="insertVariable('[EMPLOYER_SIGNATURE]')">사업주 서명</div>
-            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_SIGNATURE]')">근로자 서명</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYER_SIGNATURE]')">사업주서명</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_SIGNATURE]')">근로자서명</div>
             <div class="variable-item" onclick="insertVariable('[SIGNATURE_DATE]')">서명일</div>
         </div>
     </div>
@@ -366,7 +366,13 @@
         'EMPLOYER_ADDRESS': '사업주주소',
         'EMPLOYER_PHONE': '사업주전화',
         'EMPLOYEE_SIGNATURE_IMAGE': '근로자서명',
-        'EMPLOYER_SIGNATURE_IMAGE': '사업주서명'
+        'EMPLOYER_SIGNATURE_IMAGE': '사업주서명',
+        'EMPLOYEE_ID': '주민등록번호',
+        'BUSINESS_NUMBER': '사업자번호',
+        'HOURLY_WAGE': '시급',
+        'EMPLOYER_SIGNATURE': '사업주서명',
+        'EMPLOYEE_SIGNATURE': '근로자서명',
+        'SIGNATURE_DATE': '서명일'
     };
 
     function getDisplayName(varName) {
