@@ -208,4 +208,64 @@ public class EmailNotificationService {
             logger.error("계약서 만료 알림 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
         }
     }
+
+    @Transactional
+    public void sendExpirationWarning(
+            Contract contract,
+            int daysLeft
+    ) {
+        try {
+            String signingUrl = baseUrl + "/sign/" + contract.getSignToken().value();
+
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("contractTitle", contract.getTitle());
+            variables.put("signerName", contract.getSecondParty().getName());
+            variables.put("daysLeft", daysLeft);
+            variables.put("expiresAt", contract.getExpiresAt());
+            variables.put("contractUrl", signingUrl);
+            variables.put("companyName", companyName);
+
+            EmailOutbox outbox = EmailOutbox.create(
+                    EmailTemplate.EXPIRATION_WARNING,
+                    contract.getSecondParty().getEmail(),
+                    contract.getSecondParty().getName(),
+                    variables
+            );
+
+            outboxRepository.save(outbox);
+            logger.info("계약서 만료 임박 알림 이메일을 Outbox에 저장: contractId={}, daysLeft={}",
+                    contract.getId().getValue(), daysLeft);
+
+        } catch (Exception e) {
+            logger.error("계약서 만료 임박 알림 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
+        }
+    }
+
+    @Transactional
+    public void sendContractReminder(Contract contract) {
+        try {
+            String signingUrl = baseUrl + "/sign/" + contract.getSignToken().value();
+
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("contractTitle", contract.getTitle());
+            variables.put("signerName", contract.getSecondParty().getName());
+            variables.put("sentAt", contract.getUpdatedAt());
+            variables.put("expiresAt", contract.getExpiresAt());
+            variables.put("contractUrl", signingUrl);
+            variables.put("companyName", companyName);
+
+            EmailOutbox outbox = EmailOutbox.create(
+                    EmailTemplate.CONTRACT_REMINDER,
+                    contract.getSecondParty().getEmail(),
+                    contract.getSecondParty().getName(),
+                    variables
+            );
+
+            outboxRepository.save(outbox);
+            logger.info("계약서 서명 독촉 이메일을 Outbox에 저장: contractId={}", contract.getId().getValue());
+
+        } catch (Exception e) {
+            logger.error("계약서 서명 독촉 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
+        }
+    }
 }
