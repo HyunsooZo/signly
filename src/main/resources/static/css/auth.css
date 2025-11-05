@@ -89,6 +89,15 @@ body {
 
 .form-control.is-invalid {
     border-color: #dc3545;
+    background-image: none;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    animation: shake 0.5s ease-in-out;
+}
+
+.form-control.is-valid {
+    border-color: #198754;
+    background-image: none;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
 }
 
 .form-text {
@@ -101,6 +110,150 @@ body {
     color: #dc3545;
     font-size: 0.875rem;
     margin-top: 4px;
+}
+
+/* 한글 입력 경고 스타일 */
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #dc3545;
+    animation: shake 0.5s ease-in-out;
+}
+
+/* 한글 경고 애니메이션 */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* 비밀번호 필드 강조 */
+#password.is-invalid {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+/* 키보드 표시기 스타일 */
+.keyboard-indicator {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.3s ease-out;
+}
+
+.indicator-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 4px;
+}
+
+.indicator-status {
+    color: #28a745;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.indicator-keys {
+    display: flex;
+    gap: 4px;
+}
+
+.indicator-keys .key {
+    background: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-family: monospace;
+    font-size: 0.7rem;
+    color: #495057;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 입력 상태 텍스트 스타일 */
+.form-text.text-success {
+    color: #28a745 !important;
+    font-weight: 500;
+}
+
+.form-text.text-warning {
+    color: #ffc107 !important;
+    font-weight: 500;
+}
+
+/* 비밀번호 필드 컨테이너 상대 위치 */
+.form-group {
+    position: relative;
+}
+
+/* 영문 전용 모드 시 강조 */
+.form-control[style*="ime-mode: disabled"] {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+/* 모바일 키보드 표시기 */
+@media (max-width: 768px) {
+    .keyboard-indicator {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin-top: 0;
+        z-index: 9999;
+    }
+}
+
+/* 접근성 - 스크린 리더용 */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* 포커스 강조 */
+.form-control:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* 입력 모드 변경 애니메이션 */
+.form-control {
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    transform: translateY(-1px);
 }
 
 .form-check {

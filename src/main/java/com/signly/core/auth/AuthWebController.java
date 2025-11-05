@@ -2,6 +2,7 @@ package com.signly.core.auth;
 
 import com.signly.common.email.EmailService;
 import com.signly.common.security.SecurityUser;
+import com.signly.common.security.TokenRedisService;
 import com.signly.core.auth.dto.LoginRequest;
 import com.signly.core.auth.dto.LoginResponse;
 import com.signly.user.application.UserService;
@@ -10,10 +11,15 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import java.util.Arrays;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -25,6 +31,8 @@ public class AuthWebController {
     private final AuthService authService;
     private final UserService userService;
     private final EmailService emailService;
+    private final TokenRedisService tokenRedisService;
+    private final Environment environment;
 
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
@@ -32,11 +40,15 @@ public class AuthWebController {
     public AuthWebController(
             AuthService authService,
             UserService userService,
-            EmailService emailService
+            EmailService emailService,
+            TokenRedisService tokenRedisService,
+            Environment environment
     ) {
         this.authService = authService;
         this.userService = userService;
         this.emailService = emailService;
+        this.tokenRedisService = tokenRedisService;
+        this.environment = environment;
     }
 
     @GetMapping("/login")
@@ -56,40 +68,67 @@ public class AuthWebController {
 
     @PostMapping("/login")
     public String login(
-            @RequestParam String email,
-            @RequestParam String password,
-            @RequestParam(required = false) boolean rememberMe,
+            @Valid @ModelAttribute LoginRequest loginRequest,
+            BindingResult bindingResult,
+            @RequestParam(required = false, defaultValue = "false") boolean rememberMe,
             @RequestParam(required = false) String returnUrl,
             HttpServletResponse response,
             Model model,
             RedirectAttributes redirectAttributes
     ) {
-        try {
-            LoginRequest request = new LoginRequest(email, password);
-            LoginResponse loginResponse = authService.login(request);
+        // 유효성 검증 실패 시
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("errorMessage", bindingResult.getFieldError().getDefaultMessage());
+            model.addAttribute("email", loginRequest.email());
+            if (returnUrl != null) {
+                model.addAttribute("returnUrl", returnUrl);
+            }
+            return "auth/login";
+        }
 
-            // JWT 액세스 토큰을 쿠키에 저장
+        try {
+            LoginResponse loginResponse = authService.login(loginRequest);
+
+            // 환경별 보안 설정
+            boolean isProduction = Arrays.asList(environment.getActiveProfiles()).contains("prod");
+            
+            // JWT 액세스 토큰을 쿠키에 저장 (보안 강화)
             Cookie authCookie = new Cookie("authToken", loginResponse.accessToken());
-            authCookie.setHttpOnly(false); // JavaScript에서 접근 가능하도록
-            authCookie.setSecure(false); // 개발환경에서는 false, 프로덕션에서는 true
+            authCookie.setHttpOnly(true); // XSS 방어를 위해 JavaScript 접근 차단
+            authCookie.setSecure(isProduction); // 프로덕션에서만 HTTPS 강제
             authCookie.setPath("/");
+            // SameSite는 Servlet 4.0+에서 지원, 하위 버전에서는 Response Header로 처리
+            if (isProduction) {
+                response.setHeader("Set-Cookie", 
+                    String.format("%s; Path=/; HttpOnly; Secure; SameSite=Strict", 
+                        authCookie.getName() + "=" + authCookie.getValue()));
+            }
             authCookie.setMaxAge(60 * 60); // 1시간
             response.addCookie(authCookie);
 
             // 자동 로그인 체크 시에만 리프레시 토큰을 쿠키에 저장
             if (rememberMe) {
                 Cookie refreshCookie = new Cookie("refreshToken", loginResponse.refreshToken());
-                refreshCookie.setHttpOnly(false); // JavaScript에서 접근 가능하도록
-                refreshCookie.setSecure(false);
+                refreshCookie.setHttpOnly(true); // XSS 방어
+                refreshCookie.setSecure(isProduction); // 프로덕션에서만 HTTPS 강제
                 refreshCookie.setPath("/");
+                // SameSite는 Servlet 4.0+에서 지원, 하위 버전에서는 Response Header로 처리
+                if (isProduction) {
+                    response.setHeader("Set-Cookie", 
+                        String.format("%s; Path=/; HttpOnly; Secure; SameSite=Strict", 
+                            refreshCookie.getName() + "=" + refreshCookie.getValue()));
+                }
                 refreshCookie.setMaxAge(30 * 24 * 60 * 60); // 30일
                 response.addCookie(refreshCookie);
-                logger.info("자동 로그인 활성화: {}", email);
+                logger.info("자동 로그인 활성화: {}", loginRequest.email());
             } else {
-                logger.info("자동 로그인 비활성화: {}", email);
+                logger.info("자동 로그인 비활성화: {}", loginRequest.email());
             }
 
-            logger.info("로그인 성공: {}", email);
+            // Redis에 액세스 토큰 저장
+            tokenRedisService.saveAccessToken(loginResponse.userId(), loginResponse.accessToken());
+            
+            logger.info("로그인 성공: {}", loginRequest.email());
             redirectAttributes.addFlashAttribute("successMessage", "로그인되었습니다.");
 
             // returnUrl이 있으면 해당 페이지로, 없으면 /home으로 리다이렉트
@@ -97,9 +136,9 @@ public class AuthWebController {
             return "redirect:" + redirectUrl;
 
         } catch (Exception e) {
-            logger.warn("로그인 실패: {} - {}", email, e.getMessage());
+            logger.warn("로그인 실패: {} - {}", loginRequest.email(), e.getMessage());
             model.addAttribute("errorMessage", "이메일 또는 비밀번호가 올바르지 않습니다.");
-            model.addAttribute("email", email);
+            model.addAttribute("email", loginRequest.email());
             if (returnUrl != null) {
                 model.addAttribute("returnUrl", returnUrl);
             }

@@ -2,7 +2,6 @@ package com.signly.common.domain;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @MappedSuperclass
 public abstract class BaseEntity {
@@ -35,16 +34,5 @@ public abstract class BaseEntity {
         return updatedAt;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BaseEntity that = (BaseEntity) o;
-        return Objects.equals(createdAt, that.createdAt);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(createdAt);
-    }
+    // equals/hashCode는 서브클래스에서 ID 기반으로 구현해야 함
 }

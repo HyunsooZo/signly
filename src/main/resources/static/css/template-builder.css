@@ -23,6 +23,234 @@ body {
     padding: 30px 15px;
 }
 
+/* 프리셋 템플릿 선택 영역 */
+.preset-section {
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    overflow: hidden;
+}
+
+.preset-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.preset-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.preset-title i {
+    font-size: 1.2rem;
+}
+
+.preset-content {
+    padding: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    transition: max-height 0.3s ease;
+}
+
+.preset-content.collapsed {
+    max-height: 0;
+    padding: 0 20px;
+}
+
+.preset-loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--secondary-color);
+}
+
+.preset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.preset-card {
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.preset-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0,102,204,0.15);
+    transform: translateY(-2px);
+}
+
+.preset-card.selected {
+    border-color: var(--primary-color);
+    background: #f8f9ff;
+}
+
+.preset-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.preset-card-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.preset-card-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+    margin: 0;
+}
+
+.preset-card-description {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 12px;
+}
+
+.preset-card-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.preset-card-preview {
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+}
+
+.preset-card-button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.preset-card-button:hover {
+    background: #0052a3;
+}
+
+.preset-empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--secondary-color);
+}
+
+.preset-empty i {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .preset-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .preset-header {
+        padding: 15px;
+    }
+    
+    .preset-content {
+        padding: 15px;
+        max-height: 300px;
+    }
+    
+    .preset-card {
+        padding: 12px;
+    }
+    
+    .preset-card-header {
+        gap: 8px;
+    }
+    
+    .preset-card-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    .preset-card-title {
+        font-size: 0.95rem;
+    }
+    
+    .preset-card-description {
+        font-size: 0.85rem;
+    }
+    
+    .preset-card-button {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .builder-container {
+        padding: 15px 10px;
+    }
+    
+    .preset-section {
+        margin-bottom: 15px;
+    }
+    
+    .preset-header {
+        padding: 12px;
+    }
+    
+    .preset-title {
+        font-size: 1rem;
+    }
+    
+    .preset-content {
+        padding: 12px;
+        max-height: 250px;
+    }
+    
+    .preset-card {
+        padding: 10px;
+    }
+    
+    .preset-card-action {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+    
+    .preset-card-button {
+        width: 100%;
+        padding: 8px;
+    }
+}
+
 /* 툴바 */
 .toolbar {
     background: white;
@@ -308,10 +536,16 @@ body {
     color: #d2691e;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     margin: 0 2px;
     cursor: default;
     transition: all 0.2s;
+    font-size: 13px;
+}
+
+.template-variable > span:first-child {
+    color: #d2691e;
+    font-weight: 600;
 }
 
 .template-variable:hover {
@@ -320,14 +554,19 @@ body {
 
 .template-variable-remove {
     cursor: pointer;
-    font-size: 16px;
+    font-size: 12px;
     line-height: 1;
-    padding: 0 2px;
-    margin-left: 2px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(210, 105, 30, 0.2);
+    border-radius: 50%;
     color: #d2691e;
     font-weight: bold;
     opacity: 0.7;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
 }
 
 .template-variable-remove::after {
@@ -336,6 +575,7 @@ body {
 
 .template-variable-remove:hover {
     opacity: 1;
+    background: rgba(210, 105, 30, 0.3);
     color: #c0392b;
 }
 

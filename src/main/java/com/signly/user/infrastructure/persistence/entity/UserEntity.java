@@ -7,7 +7,13 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+    @Index(name = "idx_user_email", columnList = "email"),
+    @Index(name = "idx_user_status", columnList = "status"),
+    @Index(name = "idx_user_type", columnList = "user_type"),
+    @Index(name = "idx_user_status_type", columnList = "status, user_type"),
+    @Index(name = "idx_user_created_at", columnList = "created_at")
+})
 public class UserEntity {
 
     @Id

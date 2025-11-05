@@ -2,17 +2,15 @@ package com.signly.user.domain.model;
 
 import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
-import lombok.Getter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 
-@Getter
 public class User extends AggregateRoot {
 
     private UserId userId;
     private Email email;
-    private String encodedPassword;
+    private EncodedPassword encodedPassword;
     private String name;
     private Company company;
     private UserType userType;
@@ -25,7 +23,7 @@ public class User extends AggregateRoot {
     private User(
             UserId userId,
             Email email,
-            String encodedPassword,
+            EncodedPassword encodedPassword,
             String name,
             Company company,
             UserType userType,
@@ -54,7 +52,7 @@ public class User extends AggregateRoot {
         validateCreateParameters(email, password, name, userType);
 
         UserId userId = UserId.generate();
-        String encodedPassword = passwordEncoder.encode(password.getValue());
+        EncodedPassword encodedPassword = EncodedPassword.from(password, passwordEncoder);
         UserStatus status = UserStatus.ACTIVE;
 
         return new User(
@@ -81,10 +79,11 @@ public class User extends AggregateRoot {
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
+        EncodedPassword password = EncodedPassword.of(encodedPassword);
         return new User(
                 userId,
                 email,
-                encodedPassword,
+                password,
                 name,
                 company,
                 userType,
@@ -98,7 +97,7 @@ public class User extends AggregateRoot {
             Password password,
             PasswordEncoder passwordEncoder
     ) {
-        return passwordEncoder.matches(password.getValue(), this.encodedPassword);
+        return this.encodedPassword.matches(password, passwordEncoder);
     }
 
     public boolean canCreateTemplate() {
@@ -138,12 +137,12 @@ public class User extends AggregateRoot {
         if (!validatePassword(oldPassword, passwordEncoder)) {
             throw new ValidationException("기존 비밀번호가 일치하지 않습니다");
         }
-        this.encodedPassword = passwordEncoder.encode(newPassword.getValue());
+        this.encodedPassword = EncodedPassword.from(newPassword, passwordEncoder);
         updateTimestamp();
     }
 
     public void resetPassword(Password newPassword, PasswordEncoder passwordEncoder) {
-        this.encodedPassword = passwordEncoder.encode(newPassword.getValue());
+        this.encodedPassword = EncodedPassword.from(newPassword, passwordEncoder);
         updateTimestamp();
     }
 
@@ -171,5 +170,40 @@ public class User extends AggregateRoot {
 
     public boolean isActive() {
         return this.status == UserStatus.ACTIVE;
+    }
+    
+    // 캡슐화를 위한 명시적 접근자 메서드
+    public UserId getUserId() {
+        return userId;
+    }
+    
+    public Email getEmail() {
+        return email;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public Company getCompany() {
+        return company;
+    }
+    
+    public UserType getUserType() {
+        return userType;
+    }
+    
+    public UserStatus getStatus() {
+        return status;
+    }
+    
+    /**
+     * 인코딩된 비밀번호 값을 반환
+     * 주로 영속성 계층에서 사용하며, 도메인 로직에서는 직접 사용을 최소화해야 함
+     * 
+     * @return 인코딩된 비밀번호 문자열
+     */
+    public String getEncodedPassword() {
+        return encodedPassword.getValue();
     }
 }

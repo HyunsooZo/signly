@@ -4,115 +4,46 @@
 
 const AuthManager = {
     /**
-     * 액세스 토큰을 쿠키에서 가져오기
-     */
-    getAccessToken() {
-        return Signly.Cookie.get('authToken');
-    },
-
-    /**
-     * 리프레시 토큰을 쿠키에서 가져오기
-     */
-    getRefreshToken() {
-        return Signly.Cookie.get('refreshToken');
-    },
-
-    /**
-     * 토큰 저장
-     */
-    setTokens(accessToken, refreshToken, expiresIn) {
-        // 액세스 토큰 (1시간)
-        const accessTokenExpiry = expiresIn ? expiresIn / 1000 / 60 / 60 / 24 : 1/24; // 밀리초를 일로 변환
-        Signly.Cookie.set('authToken', accessToken, accessTokenExpiry);
-
-        // 리프레시 토큰 (자동 로그인 활성화 시에만 저장, 30일)
-        if (refreshToken) {
-            Signly.Cookie.set('refreshToken', refreshToken, 30);
-        }
-    },
-
-    /**
-     * 토큰 삭제
+     * 토큰 삭제 (서버에서 HttpOnly 쿠키로 처리하므로 클라이언트에서 직접 삭제 불필요)
      */
     clearTokens() {
-        Signly.Cookie.delete('authToken');
-        Signly.Cookie.delete('refreshToken');
+        // HttpOnly 쿠키는 서버에서만 삭제 가능
+        // 로그아웃 API 호출로 처리
     },
 
     /**
-     * 액세스 토큰 갱신
-     */
-    async refreshAccessToken() {
-        const refreshToken = this.getRefreshToken();
-
-        // 자동 로그인이 비활성화된 경우 (리프레시 토큰 없음)
-        if (!refreshToken) {
-            console.log('리프레시 토큰이 없습니다. 자동 로그인이 비활성화되어 있습니다.');
-            throw new Error('자동 로그인이 비활성화되어 있습니다');
-        }
-
-        try {
-            const response = await fetch('/api/auth/refresh', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ refreshToken })
-            });
-
-            if (!response.ok) {
-                throw new Error('토큰 갱신 실패');
-            }
-
-            const data = await response.json();
-
-            // 새로운 액세스 토큰과 리프레시 토큰 모두 저장 (무제한 자동 로그인)
-            this.setTokens(data.accessToken, data.refreshToken, data.expiresIn);
-
-            console.log('토큰 갱신 성공 (자동 로그인 연장)');
-            return data.accessToken;
-        } catch (error) {
-            console.error('토큰 갱신 중 오류:', error);
-            this.clearTokens();
-            throw error;
-        }
-    },
-
-    /**
-     * 인증된 요청 보내기 (자동 토큰 갱신 포함)
+     * 인증된 요청 보내기 (서버 필터에서 자동 토큰 갱신 처리)
      */
     async authenticatedFetch(url, options = {}) {
-        let token = this.getAccessToken();
-
-        // 첫 번째 시도
-        const makeRequest = async (authToken) => {
-            const headers = {
-                ...options.headers,
-                'Authorization': `Bearer ${authToken}`
-            };
-
-            return fetch(url, {
-                ...options,
-                headers
-            });
+        const headers = {
+            ...options.headers,
+            'Content-Type': 'application/json'
         };
 
         try {
-            let response = await makeRequest(token);
+            const response = await fetch(url, {
+                ...options,
+                credentials: 'include', // HttpOnly 쿠키 자동 전송
+                headers
+            });
 
-            // 401 응답이면 토큰 갱신 후 재시도
+            // 401 응답 시 로그인 페이지로 이동 (서버에서 자동 갱신 실패한 경우)
             if (response.status === 401) {
-                console.log('액세스 토큰 만료, 갱신 시도...');
-
+                let errorMessage = '인증이 필요합니다';
                 try {
-                    token = await this.refreshAccessToken();
-                    console.log('토큰 갱신 성공, 요청 재시도...');
-                    response = await makeRequest(token);
-                } catch (refreshError) {
-                    console.error('토큰 갱신 실패, 로그인 페이지로 이동');
-                    this.redirectToLogin();
-                    throw refreshError;
+                    const errorData = await response.json();
+                    if (errorData.error === 'TOKEN_REFRESH_FAILED') {
+                        errorMessage = '세션이 만료되었습니다. 다시 로그인해주세요.';
+                    } else if (errorData.error === 'NO_REFRESH_TOKEN') {
+                        errorMessage = '자동 로그인이 만료되었습니다. 다시 로그인해주세요.';
+                    }
+                } catch (e) {
+                    // JSON 파싱 실패 시 기본 메시지 사용
                 }
+                
+                console.log('인증 실패:', errorMessage);
+                this.redirectToLogin();
+                throw new Error(errorMessage);
             }
 
             return response;
@@ -132,20 +63,9 @@ const AuthManager = {
     },
 
     /**
-     * 로그인 상태 확인
-     */
-    isAuthenticated() {
-        return !!this.getAccessToken();
-    },
-
-    /**
-     * 자동 로그인 체크 (페이지 로드 시)
+     * 로그인 상태 확인 (서버 필터에서 처리하므로 단순화)
      */
     async checkAuthStatus() {
-        if (!this.isAuthenticated()) {
-            return false;
-        }
-
         try {
             // 간단한 인증 체크 API 호출
             const response = await this.authenticatedFetch('/api/users/profile');
