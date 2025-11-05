@@ -326,6 +326,99 @@ function showAlert(message, type = 'info') {
 }
 
 /**
+ * 확인 모달 표시
+ */
+function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText = '취소', confirmClass = 'btn-primary') {
+    const modalId = 'confirmModal-' + Date.now();
+    
+    const modalHtml = `
+        <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmModalLabel">확인</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${message}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${cancelText}</button>
+                        <button type="button" class="btn ${confirmClass}" id="confirmBtn">${confirmText}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 기존 모달 제거
+    const existingModals = document.querySelectorAll('[id^="confirmModal-"]');
+    existingModals.forEach(modal => modal.remove());
+    
+    // 새 모달 추가
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    const modalElement = document.getElementById(modalId);
+    const modal = new bootstrap.Modal(modalElement);
+    
+    // 확인 버튼 이벤트
+    modalElement.querySelector('#confirmBtn').addEventListener('click', () => {
+        if (onConfirm) onConfirm();
+        modal.hide();
+    });
+    
+    // 모달이 닫힐 때 DOM에서 제거
+    modalElement.addEventListener('hidden.bs.modal', () => {
+        modalElement.remove();
+    });
+    
+    modal.show();
+}
+
+/**
+ * 알림 모달 표시 (간단한 확인용)
+ */
+function showAlertModal(message, title = '알림', buttonText = '확인') {
+    const modalId = 'alertModal-' + Date.now();
+    
+    const modalHtml = `
+        <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="alertModalLabel">${title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${message}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">${buttonText}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 기존 모달 제거
+    const existingModals = document.querySelectorAll('[id^="alertModal-"]');
+    existingModals.forEach(modal => modal.remove());
+    
+    // 새 모달 추가
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    const modalElement = document.getElementById(modalId);
+    const modal = new bootstrap.Modal(modalElement);
+    
+    // 모달이 닫힐 때 DOM에서 제거
+    modalElement.addEventListener('hidden.bs.modal', () => {
+        modalElement.remove();
+    });
+    
+    modal.show();
+}
+
+/**
  * 알림 컨테이너 생성
  */
 function createAlertContainer() {
@@ -435,8 +528,15 @@ const Utils = {
 window.Signly = {
     sendRequest,
     showAlert,
+    showConfirmModal,
+    showAlertModal,
     showLoadingSpinner,
     hideLoadingSpinner,
     Cookie,
     Utils
 };
+
+// 개별 함수도 전역으로 노출 (기존 코드 호환성)
+window.showAlert = showAlert;
+window.showConfirmModal = showConfirmModal;
+window.showAlertModal = showAlertModal;

@@ -171,19 +171,6 @@ public class Contract extends AggregateRoot {
         this.updatedAt = LocalDateTime.now();
     }
 
-    /**
-     * @deprecated ContractSigningService.markSignedBy 사용 권장
-     * 하위 호환성을 위해 유지
-     */
-    @Deprecated
-    public void markSignedBy(String signerEmail, boolean allSignaturesComplete) {
-        this.updatedAt = LocalDateTime.now();
-
-        if (allSignaturesComplete) {
-            this.status = ContractStatus.SIGNED;
-        }
-    }
-
     public void complete() {
         if (!status.canComplete()) {
             throw new ValidationException("서명 완료 상태에서만 완료할 수 있습니다");

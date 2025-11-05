@@ -8,7 +8,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "documents")
+@Table(name = "documents", indexes = {
+    @Index(name = "idx_contract_id", columnList = "contract_id"),
+    @Index(name = "idx_uploaded_by", columnList = "uploaded_by"),
+    @Index(name = "idx_type", columnList = "type"),
+    @Index(name = "idx_contract_type", columnList = "contract_id, type"),
+    @Index(name = "idx_created_at", columnList = "created_at")
+})
 public class DocumentJpaEntity {
     @Id
     @Column(name = "id", length = 26)

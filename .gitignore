@@ -44,3 +44,4 @@ logs/
 *.log
 
 uploads/
+/.amazonq/

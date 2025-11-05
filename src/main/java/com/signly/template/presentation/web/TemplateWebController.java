@@ -247,6 +247,21 @@ public class TemplateWebController extends BaseWebController {
         return ResponseEntity.ok(templatePresetService.getSummaries());
     }
 
+    @GetMapping("/presets/{presetId}/sections")
+    @ResponseBody
+    public ResponseEntity<TemplatePresetSectionsResponse> getPresetSections(@PathVariable String presetId) {
+        return templatePresetService.getPreset(presetId)
+                .map(preset -> ResponseEntity.ok(
+                        new TemplatePresetSectionsResponse(preset.id(), preset.name(), preset.sections())
+                ))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
+
+    private record TemplatePresetSectionsResponse(String id, String name, 
+                                                  java.util.List<com.signly.template.application.preset.PresetSection> sections) {}
+
     @PostMapping("/{templateId}/activate")
     public String activateTemplate(
             @PathVariable String templateId,

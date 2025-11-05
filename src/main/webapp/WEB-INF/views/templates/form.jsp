@@ -13,27 +13,51 @@
     </jsp:include>
 
 <div class="builder-container">
+    <!-- 프리셋 템플릿 선택 영역 -->
+    <div class="preset-section" id="presetSection">
+        <div class="preset-header">
+            <h5 class="preset-title">
+                <i class="bi bi-lightning-charge"></i>
+                프리셋 템플릿으로 시작하기
+            </h5>
+            <button class="btn btn-sm btn-outline-secondary" onclick="togglePresetSection()">
+                <i class="bi bi-chevron-up" id="presetToggleIcon"></i>
+            </button>
+        </div>
+        <div class="preset-content" id="presetContent">
+            <div class="preset-loading" id="presetLoading">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">로딩 중...</span>
+                </div>
+                프리셋 템플릿을 불러오는 중...
+            </div>
+            <div class="preset-grid" id="presetGrid" style="display: none;">
+                <!-- 프리셋 카드들이 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+    </div>
+
     <!-- 툴바 -->
     <div class="toolbar">
         <div class="d-flex align-items-center flex-wrap gap-2">
             <strong class="me-2 toolbar-label">변수 추가하기:</strong>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYER]')" title="사업주명">
-                <i class="bi bi-person-badge"></i> 사업주명
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYER]')" title="사업주">
+                <i class="bi bi-person-badge"></i> 사업주
             </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[COMPANY_NAME]')" title="사업체명">
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[COMPANY_NAME]')" title="회사명">
                 <i class="bi bi-building"></i> 회사명
             </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYEE]')" title="근로자명">
-                <i class="bi bi-person"></i> 근로자명
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYEE]')" title="근로자">
+                <i class="bi bi-person"></i> 근로자
             </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[CONTRACT_DATE]')" title="계약 체결일">
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[CONTRACT_DATE]')" title="계약일">
                 <i class="bi bi-calendar-event"></i> 계약일
             </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[WORKPLACE]')" title="근무 장소">
-                <i class="bi bi-geo-alt"></i> 근무지
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[WORKPLACE]')" title="근무장소">
+                <i class="bi bi-geo-alt"></i> 근무장소
             </button>
-            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[JOB_DESCRIPTION]')" title="업무 내용">
-                <i class="bi bi-briefcase"></i> 업무
+            <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[JOB_DESCRIPTION]')" title="업무내용">
+                <i class="bi bi-briefcase"></i> 업무내용
             </button>
             <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[MONTHLY_SALARY]')" title="월급">
                 <i class="bi bi-cash"></i> 월급
@@ -81,9 +105,9 @@
     <div class="mb-3">
         <strong>근로자 정보</strong>
         <div class="variable-grid">
-            <div class="variable-item" onclick="insertVariable('[EMPLOYEE]')">근로자명</div>
-            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_ADDRESS]')">근로자 주소</div>
-            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_PHONE]')">근로자 연락처</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE]')">근로자</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_ADDRESS]')">근로자주소</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_PHONE]')">근로자연락처</div>
             <div class="variable-item" onclick="insertVariable('[EMPLOYEE_ID]')">주민등록번호</div>
         </div>
     </div>
@@ -91,10 +115,10 @@
     <div class="mb-3">
         <strong>사업주 정보</strong>
         <div class="variable-grid">
-            <div class="variable-item" onclick="insertVariable('[EMPLOYER]')">사업주명</div>
-            <div class="variable-item" onclick="insertVariable('[COMPANY_NAME]')">사업체명</div>
-            <div class="variable-item" onclick="insertVariable('[EMPLOYER_ADDRESS]')">사업장 주소</div>
-            <div class="variable-item" onclick="insertVariable('[EMPLOYER_PHONE]')">사업장 연락처</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYER]')">사업주</div>
+            <div class="variable-item" onclick="insertVariable('[COMPANY_NAME]')">회사명</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYER_ADDRESS]')">사업주주소</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYER_PHONE]')">사업주전화</div>
             <div class="variable-item" onclick="insertVariable('[BUSINESS_NUMBER]')">사업자번호</div>
         </div>
     </div>
@@ -102,21 +126,21 @@
     <div class="mb-3">
         <strong>계약 정보</strong>
         <div class="variable-grid">
-            <div class="variable-item" onclick="insertVariable('[CONTRACT_START_DATE]')">계약 시작일</div>
-            <div class="variable-item" onclick="insertVariable('[CONTRACT_END_DATE]')">계약 종료일</div>
-            <div class="variable-item" onclick="insertVariable('[CONTRACT_DATE]')">계약 체결일</div>
-            <div class="variable-item" onclick="insertVariable('[WORKPLACE]')">근무 장소</div>
-            <div class="variable-item" onclick="insertVariable('[JOB_DESCRIPTION]')">업무 내용</div>
+            <div class="variable-item" onclick="insertVariable('[CONTRACT_START_DATE]')">시작일</div>
+            <div class="variable-item" onclick="insertVariable('[CONTRACT_END_DATE]')">종료일</div>
+            <div class="variable-item" onclick="insertVariable('[CONTRACT_DATE]')">계약일</div>
+            <div class="variable-item" onclick="insertVariable('[WORKPLACE]')">근무장소</div>
+            <div class="variable-item" onclick="insertVariable('[JOB_DESCRIPTION]')">업무내용</div>
         </div>
     </div>
 
     <div class="mb-3">
         <strong>근무 조건</strong>
         <div class="variable-grid">
-            <div class="variable-item" onclick="insertVariable('[WORK_START_TIME]')">근무 시작시간</div>
-            <div class="variable-item" onclick="insertVariable('[WORK_END_TIME]')">근무 종료시간</div>
-            <div class="variable-item" onclick="insertVariable('[BREAK_START_TIME]')">휴게 시작시간</div>
-            <div class="variable-item" onclick="insertVariable('[BREAK_END_TIME]')">휴게 종료시간</div>
+            <div class="variable-item" onclick="insertVariable('[WORK_START_TIME]')">근무시작</div>
+            <div class="variable-item" onclick="insertVariable('[WORK_END_TIME]')">근무종료</div>
+            <div class="variable-item" onclick="insertVariable('[BREAK_START_TIME]')">휴게시작</div>
+            <div class="variable-item" onclick="insertVariable('[BREAK_END_TIME]')">휴게종료</div>
             <div class="variable-item" onclick="insertVariable('[WORK_DAYS]')">근무일수</div>
             <div class="variable-item" onclick="insertVariable('[HOLIDAYS]')">휴일</div>
         </div>
@@ -128,17 +152,17 @@
             <div class="variable-item" onclick="insertVariable('[MONTHLY_SALARY]')">월급</div>
             <div class="variable-item" onclick="insertVariable('[HOURLY_WAGE]')">시급</div>
             <div class="variable-item" onclick="insertVariable('[BONUS]')">상여금</div>
-            <div class="variable-item" onclick="insertVariable('[OTHER_ALLOWANCES]')">기타 수당</div>
-            <div class="variable-item" onclick="insertVariable('[PAYMENT_DAY]')">임금 지급일</div>
-            <div class="variable-item" onclick="insertVariable('[PAYMENT_METHOD]')">지급 방법</div>
+            <div class="variable-item" onclick="insertVariable('[OTHER_ALLOWANCES]')">기타수당</div>
+            <div class="variable-item" onclick="insertVariable('[PAYMENT_DAY]')">지급일</div>
+            <div class="variable-item" onclick="insertVariable('[PAYMENT_METHOD]')">지급방법</div>
         </div>
     </div>
 
     <div class="mb-3">
         <strong>서명</strong>
         <div class="variable-grid">
-            <div class="variable-item" onclick="insertVariable('[EMPLOYER_SIGNATURE]')">사업주 서명</div>
-            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_SIGNATURE]')">근로자 서명</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYER_SIGNATURE]')">사업주서명</div>
+            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_SIGNATURE]')">근로자서명</div>
             <div class="variable-item" onclick="insertVariable('[SIGNATURE_DATE]')">서명일</div>
         </div>
     </div>
@@ -316,16 +340,56 @@
         return typeof value === 'string' ? value : String(value);
     }
 
+    // 변수명 한글 매핑
+    const VARIABLE_DISPLAY_NAMES = {
+        'EMPLOYER': '사업주',
+        'EMPLOYEE': '근로자',
+        'WORKPLACE': '근무장소',
+        'CONTRACT_START_DATE': '시작일',
+        'CONTRACT_END_DATE': '종료일',
+        'JOB_DESCRIPTION': '업무내용',
+        'WORK_START_TIME': '근무시작',
+        'WORK_END_TIME': '근무종료',
+        'BREAK_START_TIME': '휴게시작',
+        'BREAK_END_TIME': '휴게종료',
+        'WORK_DAYS': '근무일수',
+        'HOLIDAYS': '휴일',
+        'MONTHLY_SALARY': '월급',
+        'BONUS': '상여금',
+        'OTHER_ALLOWANCES': '기타수당',
+        'PAYMENT_DAY': '지급일',
+        'PAYMENT_METHOD': '지급방법',
+        'CONTRACT_DATE': '계약일',
+        'EMPLOYEE_ADDRESS': '근로자주소',
+        'EMPLOYEE_PHONE': '근로자연락처',
+        'COMPANY_NAME': '회사명',
+        'EMPLOYER_ADDRESS': '사업주주소',
+        'EMPLOYER_PHONE': '사업주전화',
+        'EMPLOYEE_SIGNATURE_IMAGE': '근로자서명',
+        'EMPLOYER_SIGNATURE_IMAGE': '사업주서명',
+        'EMPLOYEE_ID': '주민등록번호',
+        'BUSINESS_NUMBER': '사업자번호',
+        'HOURLY_WAGE': '시급',
+        'EMPLOYER_SIGNATURE': '사업주서명',
+        'EMPLOYEE_SIGNATURE': '근로자서명',
+        'SIGNATURE_DATE': '서명일'
+    };
+
+    function getDisplayName(varName) {
+        return VARIABLE_DISPLAY_NAMES[varName] || varName;
+    }
+
     function convertVariablesToBrackets(html) {
         if (!html) return '';
-        return html.replace(/<span class="template-variable"[^>]*>\s*<span>([^<]+)<\/span>[\s\S]*?<\/span>/g, '[$1]');
+        return html.replace(/<span class="template-variable"[^>]*data-var-name="([^"]+)"[^>]*>[\s\S]*?<\/span>/g, '[$1]');
     }
 
     function convertBracketsToVariables(html) {
         if (!html) return '';
         return html.replace(/\[([A-Z_]+)\]/g, function(match, varName) {
-            return '<span class="template-variable" contenteditable="false">' +
-                   '<span>' + varName + '</span>' +
+            const displayName = getDisplayName(varName);
+            return '<span class="template-variable" contenteditable="false" data-var-name="' + varName + '">' +
+                   '<span>' + displayName + '</span>' +
                    '<span class="template-variable-remove"></span>' +
                    '</span>';
         });
@@ -434,6 +498,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         loadInitialSections();
         setupEventListeners();
+        loadPresetTemplates();
 
         window.SignlyTemplateEditor = {
             getSectionsSnapshot: function() {
@@ -658,8 +723,15 @@
     }
 
     function closeVariableModal() {
-        document.getElementById('variableModal').classList.remove('show');
-        document.getElementById('modalBackdrop').classList.remove('show');
+        const modal = document.getElementById('variableModal');
+        const backdrop = document.getElementById('modalBackdrop');
+        
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        if (backdrop) {
+            backdrop.classList.remove('show');
+        }
     }
 
     function insertVariable(variable) {
@@ -685,9 +757,10 @@
             const varSpan = document.createElement('span');
             varSpan.className = 'template-variable';
             varSpan.contentEditable = 'false';
+            varSpan.setAttribute('data-var-name', variable.replace(/[\[\]]/g, ''));
 
             const varText = document.createElement('span');
-            varText.textContent = variable;
+            varText.textContent = getDisplayName(variable.replace(/[\[\]]/g, ''));
 
             const removeBtn = document.createElement('span');
             removeBtn.className = 'template-variable-remove';
@@ -1035,6 +1108,162 @@
         document.getElementById('sectionsJson').value = JSON.stringify(templateData);
 
         document.getElementById('templateForm').submit();
+    }
+
+    // 프리셋 템플릿 관련 함수들
+    function loadPresetTemplates() {
+        fetch('/templates/presets')
+            .then(response => response.json())
+            .then(presets => {
+                displayPresetTemplates(presets);
+            })
+            .catch(error => {
+                console.error('Failed to load preset templates:', error);
+                displayPresetError();
+            });
+    }
+
+    function displayPresetTemplates(presets) {
+        const loading = document.getElementById('presetLoading');
+        const grid = document.getElementById('presetGrid');
+        
+        loading.style.display = 'none';
+        grid.style.display = 'grid';
+        
+        if (presets.length === 0) {
+            grid.innerHTML = '<div class="preset-empty">' +
+                '<i class="bi bi-inbox"></i>' +
+                '<div>사용 가능한 프리셋 템플릿이 없습니다</div>' +
+                '</div>';
+            return;
+        }
+        
+        grid.innerHTML = presets.map(preset => createPresetCard(preset)).join('');
+    }
+
+    function displayPresetError() {
+        const loading = document.getElementById('presetLoading');
+        const grid = document.getElementById('presetGrid');
+        
+        loading.style.display = 'none';
+        grid.style.display = 'grid';
+        grid.innerHTML = '<div class="preset-empty">' +
+            '<i class="bi bi-exclamation-triangle"></i>' +
+            '<div>프리셋 템플릿을 불러오는 중 오류가 발생했습니다</div>' +
+            '</div>';
+    }
+
+    function createPresetCard(preset) {
+        return '<div class="preset-card" data-preset-id="' + preset.id + '">' +
+            '<div class="preset-card-header">' +
+                '<div class="preset-card-icon">' +
+                    '<i class="bi bi-file-text"></i>' +
+                '</div>' +
+                '<h6 class="preset-card-title">' + preset.name + '</h6>' +
+            '</div>' +
+            '<div class="preset-card-description">' +
+                '미리 만들어진 템플릿을 기반으로 빠르게 시작할 수 있습니다' +
+            '</div>' +
+            '<div class="preset-card-action">' +
+                '<span class="preset-card-preview">클릭하여 미리보기</span>' +
+                '<button class="preset-card-button" onclick="loadPresetTemplate(\'' + preset.id + '\', \'' + preset.name + '\')">' +
+                    '선택하여 시작하기' +
+                '</button>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function loadPresetTemplate(presetId, presetName) {
+        // 현재 작업 내용이 있는지 확인
+        if (sections.length > 0 || document.getElementById('templateTitle').value.trim()) {
+            showConfirmModal(
+                '현재 작업 중인 내용이 있습니다. 프리셋 템플릿을 로드하면 현재 내용이 초기화됩니다. 계속하시겠습니까?',
+                function() {
+                    performPresetLoad(presetId, presetName);
+                },
+                '로드',
+                '취소',
+                'btn-primary'
+            );
+        } else {
+            performPresetLoad(presetId, presetName);
+        }
+    }
+
+    function performPresetLoad(presetId, presetName) {
+        fetch('/templates/presets/' + presetId + '/sections')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load preset template');
+                }
+                return response.json();
+            })
+            .then(data => {
+                loadPresetSections(data.sections, presetName);
+            })
+            .catch(error => {
+                console.error('Failed to load preset sections:', error);
+                showAlertModal('프리셋 템플릿을 불러오는 중 오류가 발생했습니다.');
+            });
+    }
+
+    function loadPresetSections(presetSections, presetName) {
+        // clauseCounter 초기화
+        clauseCounter = 0;
+        
+        // 현재 섹션들 모두 제거
+        const documentBody = document.getElementById('documentBody');
+        documentBody.innerHTML = '';
+        
+        // 템플릿 제목 설정
+        document.getElementById('templateTitle').value = presetName;
+        
+        // 프리셋 섹션들을 빌더에 추가
+        presetSections.forEach(function(sectionData) {
+            const metadata = coerceMetadata(sectionData.metadata);
+            
+            // 변수들을 템플릿 변수 형식으로 변환
+            let content = sectionData.content;
+            if (sectionData.type !== 'html' && sectionData.type !== 'signature') {
+                content = convertBracketsToVariables(content);
+            }
+            
+            const section = createSectionElement(sectionData.type, content, metadata);
+            section.dataset.id = sectionData.sectionId || ('section-' + Date.now() + '-' + Math.random());
+            documentBody.appendChild(section);
+        });
+        
+        // 플레이스홀더 추가
+        documentBody.appendChild(createPlaceholder());
+        
+        // 섹션 데이터 업데이트
+        updateSectionsData();
+        
+        // 성공 메시지 표시
+        showAlertModal('프리셋 템플릿이 성공적으로 로드되었습니다. 필요에 맞게 수정하여 사용하세요.');
+        
+        // 프리셋 섹션 접기
+        collapsePresetSection();
+    }
+
+    function togglePresetSection() {
+        const content = document.getElementById('presetContent');
+        const icon = document.getElementById('presetToggleIcon');
+        
+        if (content.classList.contains('collapsed')) {
+            content.classList.remove('collapsed');
+            icon.className = 'bi bi-chevron-up';
+        } else {
+            content.classList.add('collapsed');
+            icon.className = 'bi bi-chevron-down';
+        }
+    }
+
+    function collapsePresetSection() {
+        const content = document.getElementById('presetContent');
+        const icon = document.getElementById('presetToggleIcon');
+        content.classList.add('collapsed');
+        icon.className = 'bi bi-chevron-down';
     }
 
     document.addEventListener('input', function(e) {

@@ -17,7 +17,10 @@ import java.util.List;
     @Index(name = "idx_contract_first_party_email", columnList = "first_party_email"),
     @Index(name = "idx_contract_second_party_email", columnList = "second_party_email"),
     @Index(name = "idx_contract_expires_at", columnList = "expires_at"),
-    @Index(name = "idx_contract_sign_token", columnList = "sign_token")
+    @Index(name = "idx_contract_sign_token", columnList = "sign_token"),
+    @Index(name = "idx_contract_creator_status", columnList = "creator_id, status"),
+    @Index(name = "idx_contract_status_expires", columnList = "status, expires_at"),
+    @Index(name = "idx_contract_party_emails", columnList = "first_party_email, second_party_email")
 })
 public class ContractJpaEntity extends BaseEntity {
 

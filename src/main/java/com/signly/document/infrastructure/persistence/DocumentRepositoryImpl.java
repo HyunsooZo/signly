@@ -61,20 +61,25 @@ public class DocumentRepositoryImpl implements DocumentRepository {
 
     @Override
     public List<Document> findByContractIdAndType(ContractId contractId, DocumentType type) {
-        return jpaRepository.findByContractIdOrderByCreatedAtDesc(contractId.getValue())
-            .stream()
-            .map(mapper::toDomain)
-            .filter(doc -> doc.getType() == type)
-            .toList();
+        return jpaRepository.findByContractIdAndTypeOrderByCreatedAtDesc(
+                    contractId.getValue(), 
+                    type.name()
+                )
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override
     public boolean existsByContractIdAndType(ContractId contractId, DocumentType type) {
-        return !findByContractIdAndType(contractId, type).isEmpty();
+        return jpaRepository.existsByContractIdAndType(
+                    contractId.getValue(), 
+                    type.name()
+                );
     }
 
     @Override
     public long countByContractId(ContractId contractId) {
-        return findByContractId(contractId).size();
+        return jpaRepository.countByContractId(contractId.getValue());
     }
 }
