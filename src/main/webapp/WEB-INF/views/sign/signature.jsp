@@ -137,14 +137,12 @@
         </div>
 
         <!-- 계약서 내용 -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h3 class="mb-0">계약서 내용</h3>
-            </div>
-            <div class="card-body p-0">
-                <div class="contract-content contract-content--html" id="contractContentHtmlContainer">
-                    ${contract.content}
-                </div>
+        <div class="contract-content">
+            <h2 class="contract-title">
+                <c:out value="${contract.title}" />
+            </h2>
+            <div class="contract-body">
+                ${contract.content}
             </div>
         </div>
 
