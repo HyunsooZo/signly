@@ -12,6 +12,7 @@
 
     <!-- CSS -->
     <link href="<c:url value='/css/common.css' />" rel="stylesheet">
+    <link href="<c:url value='/css/contract-common.css' />" rel="stylesheet">
     <link href="<c:url value='/css/signature.css' />" rel="stylesheet">
 
     <!-- 메타 태그 -->
@@ -141,7 +142,7 @@
             <h2 class="contract-title">
                 <c:out value="${contract.title}" />
             </h2>
-            <div class="contract-body">
+            <div class="contract-body contract-content--html" id="contractContentContainer" style="background-color: white; color: black; padding: 2rem;">
                 ${contract.content}
             </div>
         </div>
