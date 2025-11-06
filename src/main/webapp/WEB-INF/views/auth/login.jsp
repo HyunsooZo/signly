@@ -77,7 +77,7 @@
                 </div>
 
                 <div class="form-group form-check">
-                    <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+                    <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe" checked>
                     <label class="form-check-label" for="rememberMe">
                         자동 로그인
                     </label>
