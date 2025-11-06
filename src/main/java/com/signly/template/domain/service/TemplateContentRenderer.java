@@ -3,6 +3,8 @@ package com.signly.template.domain.service;
 import com.signly.template.domain.model.TemplateSection;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -10,6 +12,8 @@ import java.util.stream.Collectors;
  * SRP: 템플릿 콘텐츠를 다양한 형식으로 렌더링 담당
  */
 public class TemplateContentRenderer {
+
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\[([^\\]]+)\\]");
 
     /**
      * 섹션 목록을 HTML로 렌더링
@@ -37,7 +41,44 @@ public class TemplateContentRenderer {
      */
     private String renderSectionToHtml(TemplateSection section) {
         String content = section.getContent();
+        content = convertVariablesToUnderlines(content);
         return "<section class=\"template-section\" data-type=\"" + section.getType() + "\">" +
                 "<p>" + content + "</p></section>";
+    }
+
+    /**
+     * 변수 [변수명]을 빈 밑줄로 변환
+     */
+    private String convertVariablesToUnderlines(String content) {
+        if (content == null) {
+            return "";
+        }
+        
+        Matcher matcher = VARIABLE_PATTERN.matcher(content);
+        StringBuffer result = new StringBuffer();
+        
+        while (matcher.find()) {
+            String variableName = matcher.group(1);
+            String replacement = "<span class=\"blank-line\" data-variable-name=\"" + 
+                               escapeHtml(variableName) + "\"></span>";
+            matcher.appendReplacement(result, replacement);
+        }
+        matcher.appendTail(result);
+        
+        return result.toString();
+    }
+
+    /**
+     * HTML 특수문자 이스케이프
+     */
+    private String escapeHtml(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#39;");
     }
 }

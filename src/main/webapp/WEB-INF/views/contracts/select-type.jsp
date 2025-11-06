@@ -28,17 +28,15 @@
                          onclick="selectPreset('${preset.id}')"
                          data-template-id="${preset.id}"
                          data-template-type="preset">
-                        <div class="template-card-header">
-                            <div class="template-icon">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </div>
-                            <div class="template-badge preset-badge">기본</div>
-                        </div>
                         <div class="template-card-body">
-                            <h5 class="template-title">${preset.name}</h5>
                             <div class="template-preview" data-preset-id="${preset.id}">
+                                <div class="template-preview-badge preset-badge">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    기본
+                                </div>
                                 <p class="text-muted small">미리보기 로딩 중...</p>
                             </div>
+                            <h5 class="template-title">${preset.name}</h5>
                         </div>
                     </div>
                 </div>
@@ -49,15 +47,13 @@
             <!-- 새 템플릿 만들기 카드 -->
             <div class="col-md-6 col-lg-3">
                 <a href="/templates/new" class="template-card template-card-new">
-                    <div class="template-card-header">
-                        <div class="template-icon">
-                            <i class="bi bi-plus-circle"></i>
-                        </div>
-                        <div class="template-badge new-badge">새로 만들기</div>
-                    </div>
                     <div class="template-card-body">
+                        <div class="template-preview">
+                            <div class="new-template-icon">
+                                <i class="bi bi-plus-circle"></i>
+                            </div>
+                        </div>
                         <h5 class="template-title">새 템플릿 만들기</h5>
-                        <p class="template-description">나만의 템플릿을 만들어 계약서를 생성하세요</p>
                     </div>
                 </a>
             </div>
@@ -89,14 +85,14 @@
                     if (response.ok) {
                         const data = await response.json();
                         if (data.renderedHtml) {
-                            div.innerHTML = data.renderedHtml;
+                            div.innerHTML = '<div class="template-preview-badge preset-badge"><i class="bi bi-file-earmark-text"></i> 기본</div>' + data.renderedHtml;
                         } else {
-                            div.innerHTML = '<p class="text-muted small">미리보기 없음</p>';
+                            div.innerHTML = '<div class="template-preview-badge preset-badge"><i class="bi bi-file-earmark-text"></i> 기본</div><p class="text-muted small">미리보기 없음</p>';
                         }
                     }
                 } catch (error) {
                     console.error('프리셋 미리보기 로드 실패:', error);
-                    div.innerHTML = '<p class="text-muted small">미리보기 로드 실패</p>';
+                    div.innerHTML = '<div class="template-preview-badge preset-badge"><i class="bi bi-file-earmark-text"></i> 기본</div><p class="text-muted small">미리보기 로드 실패</p>';
                 }
             }
         }
@@ -136,33 +132,21 @@
                      onclick="selectUserTemplate('\${template.templateId}')"
                      data-template-id="\${template.templateId}"
                      data-template-type="user">
-                    <div class="template-card-header">
-                        <div class="template-icon">
-                            <i class="bi bi-file-earmark-text"></i>
-                        </div>
-                        <div class="template-badge user-badge">내 템플릿</div>
-                    </div>
                     <div class="template-card-body">
-                        <h5 class="template-title">\${template.title}</h5>
-                        <div class="template-preview"></div>
-                        <div class="template-meta">
-                            <small class="text-muted">
-                                <i class="bi bi-clock me-1"></i>
-                                <span class="template-date"></span>
-                            </small>
+                        <div class="template-preview">
+                            <div class="template-preview-badge user-badge">
+                                <i class="bi bi-file-earmark-text"></i>
+                                내 템플릿
+                            </div>
                         </div>
+                        <h5 class="template-title">\${template.title}</h5>
                     </div>
                 </div>
             `;
             
-            const dateSpan = col.querySelector('.template-date');
-            if (dateSpan && template.updatedAt) {
-                dateSpan.textContent = formatDate(template.updatedAt);
-            }
-            
             const previewDiv = col.querySelector('.template-preview');
             if (previewDiv && template.renderedHtml) {
-                previewDiv.innerHTML = template.renderedHtml;
+                previewDiv.innerHTML = '<div class="template-preview-badge user-badge"><i class="bi bi-file-earmark-text"></i> 내 템플릿</div>' + template.renderedHtml;
             }
             
             return col;
