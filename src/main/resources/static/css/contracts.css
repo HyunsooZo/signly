@@ -667,6 +667,58 @@
     align-items: center;
 }
 
+.template-footer {
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.template-meta-info small {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.template-actions {
+    padding-top: 0.5rem;
+}
+
+.template-actions .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+}
+
+/* 템플릿 상태 뱃지 - 미리보기 영역 중앙 하단 */
+.template-status-badge {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.template-status-badge .badge {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    line-height: normal !important;
+}
+
+.template-status-badge .bg-secondary {
+    background-color: rgba(108, 117, 125, 0.85) !important;
+}
+
+.template-status-badge .bg-success {
+    background-color: rgba(25, 135, 84, 0.85) !important;
+}
+
+.template-status-badge .bg-warning {
+    background-color: rgba(255, 193, 7, 0.85) !important;
+    color: #000 !important;
+}
+
 /* 섹션 제목 스타일 */
 .mb-5 h4 {
     font-weight: 700;
