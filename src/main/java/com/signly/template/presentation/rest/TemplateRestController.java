@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,6 +45,21 @@ public class TemplateRestController {
                 templateService.getTemplatesByOwner(userId, pageable);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "프리셋 템플릿 목록 조회", description = "사용 가능한 프리셋 템플릿 목록을 조회합니다")
+    @GetMapping("/presets")
+    public ResponseEntity<List<Map<String, Object>>> getPresetTemplates() {
+        List<Map<String, Object>> presets = presetService.getSummaries().stream()
+                .map(summary -> {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("presetId", summary.getId());
+                    response.put("title", summary.getName());
+                    response.put("description", summary.getDescription());
+                    return response;
+                })
+                .toList();
+        return ResponseEntity.ok(presets);
     }
 
     @Operation(summary = "프리셋 템플릿 상세 조회", description = "프리셋 템플릿의 상세 정보를 조회합니다")

@@ -1,7 +1,7 @@
 package com.signly.template.application.preset;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.signly.template.domain.model.TemplateStatus;
+import com.signly.template.domain.model.*;
+import com.signly.template.domain.model.TemplateSectionType;
 import com.signly.template.infrastructure.entity.TemplateEntity;
 import com.signly.template.infrastructure.repository.TemplateJpaRepository;
 import org.jsoup.Jsoup;
@@ -26,16 +26,13 @@ public class PresetInitializationService {
 
     private final TemplateJpaRepository templateRepository;
     private final ResourceLoader resourceLoader;
-    private final ObjectMapper objectMapper;
 
     public PresetInitializationService(
             TemplateJpaRepository templateRepository, 
-            ResourceLoader resourceLoader,
-            ObjectMapper objectMapper
+            ResourceLoader resourceLoader
     ) {
         this.templateRepository = templateRepository;
         this.resourceLoader = resourceLoader;
-        this.objectMapper = objectMapper;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -53,11 +50,9 @@ public class PresetInitializationService {
                 html = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
             }
 
-            // Parse HTML into sections
-            List<Map<String, Object>> sections = parseEmploymentContractToSections(html);
-            
-            // Convert to JSON
-            String jsonContent = objectMapper.writeValueAsString(sections);
+            // Parse HTML into TemplateContent using domain model
+            TemplateContent templateContent = parseEmploymentContractToTemplateContent(html);
+            String jsonContent = templateContent.toJson();
 
             // 기존 프리셋 찾기
             var existingPreset = templateRepository.findByIsPresetTrueAndPresetId("standard-employment-contract");
@@ -76,7 +71,7 @@ public class PresetInitializationService {
                         null, // owner_id is null for presets
                         "표준 근로계약서",
                         jsonContent,
-                        sections.size(),
+                        templateContent.getSections().size(),
                         TemplateStatus.ACTIVE,
                         true, // is_preset
                         "standard-employment-contract", // preset_id
@@ -92,19 +87,20 @@ public class PresetInitializationService {
         }
     }
 
-    private List<Map<String, Object>> parseEmploymentContractToSections(String html) {
-        List<Map<String, Object>> sections = new ArrayList<>();
+    private TemplateContent parseEmploymentContractToTemplateContent(String html) {
+        List<TemplateSection> sections = new ArrayList<>();
         Document doc = Jsoup.parse(html);
         
         // Extract title
         Elements titleElements = doc.select("div.title");
         if (!titleElements.isEmpty()) {
-            Map<String, Object> titleSection = createSection(
+            TemplateSection titleSection = TemplateSection.of(
                 "preset-sec-title", 
-                "TITLE", 
+                TemplateSectionType.HEADER, 
                 0, 
                 titleElements.first().outerHtml(),
-                Map.of("preset", true, "title", "표준근로계약서")
+                Map.of("preset", true, "title", "표준근로계약서"),
+                new ArrayList<>()
             );
             sections.add(titleSection);
         }
@@ -112,12 +108,13 @@ public class PresetInitializationService {
         // Extract intro paragraph
         Elements introElements = doc.select("div.contract-intro");
         if (!introElements.isEmpty()) {
-            Map<String, Object> introSection = createSection(
+            TemplateSection introSection = TemplateSection.of(
                 "preset-sec-intro", 
-                "TEXT", 
+                TemplateSectionType.PARAGRAPH, 
                 1, 
                 introElements.first().outerHtml(),
-                Map.of("preset", true, "title", "서론")
+                Map.of("preset", true, "title", "서론"),
+                new ArrayList<>()
             );
             sections.add(introSection);
         }
@@ -139,12 +136,13 @@ public class PresetInitializationService {
                 }
             }
             
-            Map<String, Object> clauseSection = createSection(
+            TemplateSection clauseSection = TemplateSection.of(
                 "preset-sec-clause-" + (i + 1), 
-                "CLAUSE", 
+                TemplateSectionType.PARAGRAPH, 
                 order++, 
                 sectionHtml,
-                Map.of("preset", true, "title", sectionTitle, "clauseNumber", i + 1)
+                Map.of("preset", true, "title", sectionTitle, "clauseNumber", i + 1),
+                new ArrayList<>()
             );
             sections.add(clauseSection);
         }
@@ -152,12 +150,13 @@ public class PresetInitializationService {
         // Extract date section
         Elements dateElements = doc.select("div.date-section");
         if (!dateElements.isEmpty()) {
-            Map<String, Object> dateSection = createSection(
+            TemplateSection dateSection = TemplateSection.of(
                 "preset-sec-date", 
-                "DATE", 
+                TemplateSectionType.PARAGRAPH, 
                 order++, 
                 dateElements.first().outerHtml(),
-                Map.of("preset", true, "title", "계약체결일")
+                Map.of("preset", true, "title", "계약체결일"),
+                new ArrayList<>()
             );
             sections.add(dateSection);
         }
@@ -165,36 +164,27 @@ public class PresetInitializationService {
         // Extract signature section
         Elements signatureElements = doc.select("div.signature-section");
         if (!signatureElements.isEmpty()) {
-            Map<String, Object> signatureSection = createSection(
+            TemplateSection signatureSection = TemplateSection.of(
                 "preset-sec-signature", 
-                "SIGNATURE", 
+                TemplateSectionType.CUSTOM, 
                 order, 
                 signatureElements.first().outerHtml(),
-                Map.of("preset", true, "title", "서명")
+                Map.of("preset", true, "title", "서명"),
+                new ArrayList<>()
             );
             sections.add(signatureSection);
         }
         
-        return sections;
-    }
-    
-    private Map<String, Object> createSection(String sectionId, String type, int order, String content, Map<String, Object> metadata) {
-        Map<String, Object> section = new HashMap<>();
-        section.put("sectionId", sectionId);
-        section.put("type", type);
-        section.put("order", order);
-        section.put("content", content);
-        section.put("metadata", metadata);
-        return section;
+        // Create TemplateMetadata for preset
+        TemplateMetadata metadata = TemplateMetadata.of(
+            "표준 근로계약서",
+            "프리셋 템플릿",
+            "system",
+            new HashMap<>()
+        );
+        
+        return TemplateContent.of(metadata, sections);
     }
 
-    private String escapeJson(String value) {
-        return "\"" + value
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t")
-                + "\"";
-    }
+
 }
