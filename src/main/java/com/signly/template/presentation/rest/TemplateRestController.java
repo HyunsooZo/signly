@@ -2,6 +2,8 @@ package com.signly.template.presentation.rest;
 
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.dto.TemplateResponse;
+import com.signly.template.application.preset.TemplatePreset;
+import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.domain.model.TemplateStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,6 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 템플릿 조회 전용 REST API
@@ -20,9 +25,11 @@ import org.springframework.web.bind.annotation.*;
 public class TemplateRestController {
 
     private final TemplateService templateService;
+    private final TemplatePresetService presetService;
 
-    public TemplateRestController(TemplateService templateService) {
+    public TemplateRestController(TemplateService templateService, TemplatePresetService presetService) {
         this.templateService = templateService;
+        this.presetService = presetService;
     }
 
     @Operation(summary = "템플릿 목록 조회", description = "사용자의 템플릿 목록을 조회합니다 (계약서 생성 시 템플릿 선택용)")
@@ -37,5 +44,20 @@ public class TemplateRestController {
                 templateService.getTemplatesByOwner(userId, pageable);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "프리셋 템플릿 상세 조회", description = "프리셋 템플릿의 상세 정보를 조회합니다")
+    @GetMapping("/preset/{presetId}")
+    public ResponseEntity<Map<String, Object>> getPresetTemplate(@PathVariable String presetId) {
+        return presetService.getPreset(presetId)
+                .map(preset -> {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("presetId", preset.id());
+                    response.put("title", preset.name());
+                    response.put("description", preset.description());
+                    response.put("renderedHtml", preset.renderHtml());
+                    return ResponseEntity.ok(response);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }

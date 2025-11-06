@@ -72,6 +72,8 @@ public class SecurityConfig {
                 // 개발 도구는 공개 허용
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
+                    // 에러 페이지는 공개 허용 (인증 실패 시 리다이렉트 방지)
+                    .requestMatchers("/error").permitAll()
                 // JSP Forward를 위한 뷰 경로는 permitAll (실제 접근은 컨트롤러에서 제어)
                 .requestMatchers("/WEB-INF/views/**").permitAll()
                 // 프로필 관리 페이지는 인증 필요

@@ -14,31 +14,51 @@
         <div class="text-center mb-5">
             <h2 class="mb-3">
                 <i class="bi bi-file-earmark-plus text-primary me-2"></i>
-                계약서 유형 선택
+                계약서 템플릿 선택
             </h2>
-            <p class="text-muted">작성하실 계약서 유형을 선택해주세요</p>
+            <p class="text-muted">사용할 템플릿을 선택하거나 새로 만들어주세요</p>
         </div>
 
-        <div class="row g-4 justify-content-center">
-            <!-- 템플릿 불러오기 -->
-            <div class="col-md-6 col-lg-4">
-                <div class="contract-type-card contract-type-card-clickable" onclick="showTemplateSelector()">
-                    <div class="contract-type-icon">
-                        <i class="bi bi-file-earmark-text"></i>
+        <!-- 통합 템플릿 그리드 -->
+        <div class="row g-4" id="allTemplates">
+            <!-- 프리셋 템플릿 -->
+            <c:forEach var="preset" items="${presets}">
+                <div class="col-md-6 col-lg-3">
+                    <div class="template-card template-card-clickable" 
+                         onclick="selectPreset('${preset.id}')"
+                         data-template-id="${preset.id}"
+                         data-template-type="preset">
+                        <div class="template-card-header">
+                            <div class="template-icon">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                            <div class="template-badge preset-badge">기본</div>
+                        </div>
+                        <div class="template-card-body">
+                            <h5 class="template-title">${preset.name}</h5>
+                            <div class="template-preview" data-preset-id="${preset.id}">
+                                <p class="text-muted small">미리보기 로딩 중...</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="contract-type-title">템플릿 불러오기</div>
-                    <p class="contract-type-desc">저장된 템플릿을 선택하여 계약서 작성</p>
                 </div>
-            </div>
-
-            <!-- 템플릿 만들기 -->
-            <div class="col-md-6 col-lg-4">
-                <a href="/templates/new" class="contract-type-card">
-                    <div class="contract-type-icon">
-                        <i class="bi bi-plus-circle"></i>
+            </c:forEach>
+            
+            <!-- 사용자 템플릿은 JavaScript로 동적 추가 -->
+            
+            <!-- 새 템플릿 만들기 카드 -->
+            <div class="col-md-6 col-lg-3">
+                <a href="/templates/new" class="template-card template-card-new">
+                    <div class="template-card-header">
+                        <div class="template-icon">
+                            <i class="bi bi-plus-circle"></i>
+                        </div>
+                        <div class="template-badge new-badge">새로 만들기</div>
                     </div>
-                    <div class="contract-type-title">새 템플릿 만들기</div>
-                    <p class="contract-type-desc">템플릿을 먼저 만들어 두고 계약서를 생성하세요</p>
+                    <div class="template-card-body">
+                        <h5 class="template-title">새 템플릿 만들기</h5>
+                        <p class="template-description">나만의 템플릿을 만들어 계약서를 생성하세요</p>
+                    </div>
                 </a>
             </div>
         </div>
@@ -50,49 +70,35 @@
         </div>
     </div>
 
-    <!-- 템플릿 선택 모달 -->
-    <div class="modal fade" id="templateSelectorModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">템플릿 선택</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="templateSelect" class="form-label">사용할 템플릿을 선택하세요</label>
-                        <select class="form-select" id="templateSelect">
-                            <option value="">-- 템플릿 선택 --</option>
-                            <optgroup label="프리셋 템플릿">
-                                <c:forEach var="preset" items="${presets}">
-                                    <option value="preset:${preset.id}">${preset.name}</option>
-                                </c:forEach>
-                            </optgroup>
-                            <optgroup label="내 템플릿" id="userTemplatesGroup">
-                                <!-- JavaScript로 동적 로드 -->
-                            </optgroup>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <button type="button" class="btn btn-primary" onclick="selectTemplate()">선택</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let templateModal;
-
         document.addEventListener('DOMContentLoaded', function() {
-            templateModal = new bootstrap.Modal(document.getElementById('templateSelectorModal'));
             loadUserTemplates();
+            loadPresetPreviews();
         });
 
-        function showTemplateSelector() {
-            templateModal.show();
+        async function loadPresetPreviews() {
+            const previewDivs = document.querySelectorAll('.template-preview[data-preset-id]');
+            
+            for (const div of previewDivs) {
+                const presetId = div.getAttribute('data-preset-id');
+                try {
+                    const response = await fetch(`/api/templates/preset/\${presetId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.renderedHtml) {
+                            div.innerHTML = data.renderedHtml;
+                        } else {
+                            div.innerHTML = '<p class="text-muted small">미리보기 없음</p>';
+                        }
+                    }
+                } catch (error) {
+                    console.error('프리셋 미리보기 로드 실패:', error);
+                    div.innerHTML = '<p class="text-muted small">미리보기 로드 실패</p>';
+                }
+            }
         }
 
         async function loadUserTemplates() {
@@ -106,43 +112,78 @@
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    const userTemplatesGroup = document.getElementById('userTemplatesGroup');
+                    const allTemplatesContainer = document.getElementById('allTemplates');
+                    const newTemplateCard = allTemplatesContainer.querySelector('.col-md-6.col-lg-3:last-child');
 
                     if (data.content && data.content.length > 0) {
                         data.content.forEach(template => {
-                            const option = document.createElement('option');
-                            option.value = 'template:' + template.templateId;
-                            option.textContent = template.title;
-                            userTemplatesGroup.appendChild(option);
+                            const templateCard = createUserTemplateCard(template);
+                            allTemplatesContainer.insertBefore(templateCard, newTemplateCard);
                         });
-                    } else {
-                        const option = document.createElement('option');
-                        option.disabled = true;
-                        option.textContent = '저장된 템플릿이 없습니다';
-                        userTemplatesGroup.appendChild(option);
                     }
                 }
             } catch (error) {
-                console.error('템플릿 로드 실패:', error);
+                console.error('사용자 템플릿 로드 실패:', error);
             }
         }
 
-        function selectTemplate() {
-            const select = document.getElementById('templateSelect');
-            const selectedValue = select.value;
-
-            if (!selectedValue) {
-                showAlertModal('템플릿을 선택해주세요.');
-                return;
+        function createUserTemplateCard(template) {
+            const col = document.createElement('div');
+            col.className = 'col-md-6 col-lg-3';
+            
+            col.innerHTML = `
+                <div class="template-card template-card-clickable" 
+                     onclick="selectUserTemplate('\${template.templateId}')"
+                     data-template-id="\${template.templateId}"
+                     data-template-type="user">
+                    <div class="template-card-header">
+                        <div class="template-icon">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div class="template-badge user-badge">내 템플릿</div>
+                    </div>
+                    <div class="template-card-body">
+                        <h5 class="template-title">\${template.title}</h5>
+                        <div class="template-preview"></div>
+                        <div class="template-meta">
+                            <small class="text-muted">
+                                <i class="bi bi-clock me-1"></i>
+                                <span class="template-date"></span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const dateSpan = col.querySelector('.template-date');
+            if (dateSpan && template.updatedAt) {
+                dateSpan.textContent = formatDate(template.updatedAt);
             }
-
-            const [type, id] = selectedValue.split(':');
-
-            if (type === 'preset') {
-                window.location.href = '/contracts/new?preset=' + id;
-            } else if (type === 'template') {
-                window.location.href = '/contracts/new?templateId=' + id;
+            
+            const previewDiv = col.querySelector('.template-preview');
+            if (previewDiv && template.renderedHtml) {
+                previewDiv.innerHTML = template.renderedHtml;
             }
+            
+            return col;
+        }
+
+        function selectPreset(presetId) {
+            window.location.href = '/contracts/new?preset=' + presetId;
+        }
+
+        function selectUserTemplate(templateId) {
+            window.location.href = '/contracts/new?templateId=' + templateId;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
         }
     </script>
     <jsp:include page="../common/footer.jsp" />
