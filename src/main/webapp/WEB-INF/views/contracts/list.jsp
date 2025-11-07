@@ -13,20 +13,21 @@
     </jsp:include>
 
     <div class="container mt-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h2 class="mb-2">
-                            <i class="bi bi-file-earmark-check text-primary me-2"></i>
-                            계약서 관리
-                        </h2>
-                        <p class="text-muted mb-0">계약서를 생성하고 서명을 관리하세요</p>
+        <div class="main-content-card">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="mb-2">
+                                <i class="bi bi-file-earmark-check text-primary me-2"></i>
+                                계약서 관리
+                            </h2>
+                            <p class="text-muted mb-0">계약서를 생성하고 서명을 관리하세요</p>
+                        </div>
+                        <a href="/contracts/new" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>새 계약서 생성
+                        </a>
                     </div>
-                    <a href="/contracts/new" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>새 계약서 생성
-                    </a>
-                </div>
 
                 <!-- 알림 메시지 -->
                 <c:if test="${not empty successMessage}">

@@ -12,7 +12,7 @@
         <jsp:param name="currentPage" value="templates" />
     </jsp:include>
 
-<div class="builder-container">
+<div class="container mt-4">
     <!-- 프리셋 템플릿 선택 영역 -->
     <div class="preset-section" id="presetSection">
         <div class="preset-header">

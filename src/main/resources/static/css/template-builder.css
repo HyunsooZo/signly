@@ -6,9 +6,10 @@
     --hover-bg: #f8f9fa;
 }
 
-body {
-    background: #f5f7fa;
-    font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+/* 카드 헤더 스타일 통일 */
+.card-header {
+    background-color: white !important;
+    border-bottom: 1px solid #dee2e6;
 }
 
 /* 네비게이션 */
@@ -18,7 +19,6 @@ body {
 
 /* 메인 컨테이너 */
 .builder-container {
-    max-width: 1400px;
     margin: 0 auto;
     padding: 30px 15px;
 }
@@ -38,8 +38,8 @@ body {
     align-items: center;
     padding: 20px;
     border-bottom: 1px solid var(--border-color);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: white;
+    color: #333;
 }
 
 .preset-title {
@@ -339,25 +339,24 @@ body {
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,.08);
-    max-width: 900px;
-    margin: 0 auto;
     min-height: 800px;
 }
 
 .document-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: white;
+    color: #333;
     padding: 20px 30px;
     border-radius: 12px 12px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .document-title-input {
-    background: rgba(255,255,255,.2);
-    border: 2px solid rgba(255,255,255,.3);
-    color: white;
+    background: white;
+    border: 2px solid var(--border-color);
+    color: #333;
     padding: 8px 16px;
     border-radius: 8px;
     font-size: 18px;
@@ -366,11 +365,14 @@ body {
 }
 
 .document-title-input::placeholder {
-    color: rgba(255,255,255,.7);
+    color: #999;
 }
 
 .document-title-input:focus {
-    background: rgba(255,255,255,.3);
+    background: white;
+    border-color: var(--primary-color);
+    outline: none;
+}
     border-color: rgba(255,255,255,.5);
     outline: none;
 }
