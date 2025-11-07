@@ -43,33 +43,11 @@
                     </div>
                 </c:if>
 
-                <!-- 필터 -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <form method="get" class="row g-3">
-                            <div class="col-md-4">
-                                <label for="status" class="form-label">상태 필터</label>
-                                <select class="form-select" id="status" name="status" onchange="this.form.submit()">
-                                    <option value="">전체</option>
-                                    <c:forEach var="status" items="${statuses}">
-                                        <option value="${status}"
-                                                <c:if test="${currentStatus == status}">selected</c:if>>
-                                            <c:choose>
-                                                <c:when test="${status == 'DRAFT'}">초안</c:when>
-                                                <c:when test="${status == 'PENDING'}">서명 대기</c:when>
-                                                <c:when test="${status == 'SIGNED'}">서명 완료</c:when>
-                                                <c:when test="${status == 'COMPLETED'}">완료</c:when>
-                                                <c:when test="${status == 'CANCELLED'}">취소</c:when>
-                                                <c:when test="${status == 'EXPIRED'}">만료</c:when>
-                                                <c:otherwise>${status}</c:otherwise>
-                                            </c:choose>
-                                        </option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <!-- 상태 필터 탭 -->
+                <jsp:include page="../common/status-filter-tabs.jsp">
+                    <jsp:param name="filterType" value="contract" />
+                    <jsp:param name="currentStatus" value="${currentStatus}" />
+                </jsp:include>
 
                 <!-- 계약서 목록 -->
                 <div class="card">

@@ -45,30 +45,11 @@
                     </div>
                 </c:if>
 
-                <!-- 필터 -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <form method="get" class="row g-3">
-                            <div class="col-md-4">
-                                <label for="status" class="form-label">상태 필터</label>
-                                <select class="form-select" id="status" name="status" onchange="this.form.submit()">
-                                    <option value="">전체</option>
-                                    <c:forEach var="status" items="${statuses}">
-                                        <option value="${status}"
-                                                <c:if test="${currentStatus == status}">selected</c:if>>
-                                            <c:choose>
-                                                <c:when test="${status == 'DRAFT'}">초안</c:when>
-                                                <c:when test="${status == 'ACTIVE'}">활성</c:when>
-                                                <c:when test="${status == 'ARCHIVED'}">보관</c:when>
-                                                <c:otherwise>${status}</c:otherwise>
-                                            </c:choose>
-                                        </option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <!-- 상태 필터 탭 -->
+                <jsp:include page="../common/status-filter-tabs.jsp">
+                    <jsp:param name="filterType" value="template" />
+                    <jsp:param name="currentStatus" value="${currentStatus}" />
+                </jsp:include>
 
                 <!-- 템플릿 목록 -->
                 <c:choose>
@@ -89,7 +70,7 @@
                     <c:otherwise>
                         <div class="row g-4">
                             <c:forEach var="template" items="${templates.content}">
-                                <div class="col-md-6 col-lg-4">
+                                <div class="col-md-6 col-lg-3">
                                     <div class="template-card">
                                         <div class="template-card-body">
                                             <div class="template-preview" data-template-id="${template.templateId}">
