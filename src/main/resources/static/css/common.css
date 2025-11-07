@@ -53,6 +53,21 @@
     box-sizing: border-box;
 }
 
+/* 로고 스타일 */
+.navbar-brand {
+    font-family: 'Leckerli One', cursive;
+    font-size: 1.75rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+}
+
+/* 기본 리셋 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', Ubuntu, Cantarell, sans-serif;
     font-size: var(--font-size-base);
