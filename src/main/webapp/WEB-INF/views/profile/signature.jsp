@@ -13,15 +13,16 @@
     </jsp:include>
 
     <div class="container mt-4">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h2 class="mb-2">
-                    <i class="bi bi-pencil-square text-primary me-2"></i>
-                    갑 서명 관리
-                </h2>
-                <p class="text-muted mb-0">계약서에 자동으로 삽입될 서명을 등록하고 관리하세요.</p>
+        <div class="main-content-card">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="mb-2">
+                        <i class="bi bi-pencil-square text-primary me-2"></i>
+                        갑 서명 관리
+                    </h2>
+                    <p class="text-muted mb-0">계약서에 자동으로 삽입될 서명을 등록하고 관리하세요.</p>
+                </div>
             </div>
-        </div>
 
         <c:if test="${showSignatureAlert}">
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -116,6 +117,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 

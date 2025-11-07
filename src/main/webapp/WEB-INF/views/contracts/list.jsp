@@ -13,20 +13,21 @@
     </jsp:include>
 
     <div class="container mt-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h2 class="mb-2">
-                            <i class="bi bi-file-earmark-check text-primary me-2"></i>
-                            계약서 관리
-                        </h2>
-                        <p class="text-muted mb-0">계약서를 생성하고 서명을 관리하세요</p>
+        <div class="main-content-card">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="mb-2">
+                                <i class="bi bi-file-earmark-check text-primary me-2"></i>
+                                계약서 관리
+                            </h2>
+                            <p class="text-muted mb-0">계약서를 생성하고 서명을 관리하세요</p>
+                        </div>
+                        <a href="/contracts/new" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>새 계약서 생성
+                        </a>
                     </div>
-                    <a href="/contracts/new" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>새 계약서 생성
-                    </a>
-                </div>
 
                 <!-- 알림 메시지 -->
                 <c:if test="${not empty successMessage}">
@@ -43,33 +44,11 @@
                     </div>
                 </c:if>
 
-                <!-- 필터 -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <form method="get" class="row g-3">
-                            <div class="col-md-4">
-                                <label for="status" class="form-label">상태 필터</label>
-                                <select class="form-select" id="status" name="status" onchange="this.form.submit()">
-                                    <option value="">전체</option>
-                                    <c:forEach var="status" items="${statuses}">
-                                        <option value="${status}"
-                                                <c:if test="${currentStatus == status}">selected</c:if>>
-                                            <c:choose>
-                                                <c:when test="${status == 'DRAFT'}">초안</c:when>
-                                                <c:when test="${status == 'PENDING'}">서명 대기</c:when>
-                                                <c:when test="${status == 'SIGNED'}">서명 완료</c:when>
-                                                <c:when test="${status == 'COMPLETED'}">완료</c:when>
-                                                <c:when test="${status == 'CANCELLED'}">취소</c:when>
-                                                <c:when test="${status == 'EXPIRED'}">만료</c:when>
-                                                <c:otherwise>${status}</c:otherwise>
-                                            </c:choose>
-                                        </option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <!-- 상태 필터 탭 -->
+                <jsp:include page="../common/status-filter-tabs.jsp">
+                    <jsp:param name="filterType" value="contract" />
+                    <jsp:param name="currentStatus" value="${currentStatus}" />
+                </jsp:include>
 
                 <!-- 계약서 목록 -->
                 <div class="card">

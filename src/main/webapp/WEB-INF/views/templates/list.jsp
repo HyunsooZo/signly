@@ -5,8 +5,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
-    <jsp:param name="additionalCss" value="/css/templates.css" />
-    <jsp:param name="additionalCss2" value="/css/modal.css" />
+    <jsp:param name="additionalCss" value="/css/contracts.css" />
+    <jsp:param name="additionalCss2" value="/css/templates.css" />
+    <jsp:param name="additionalCss3" value="/css/modal.css" />
 </jsp:include>
 <body>
     <jsp:include page="../common/navbar.jsp">
@@ -14,20 +15,21 @@
     </jsp:include>
 
     <div class="container mt-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h2 class="mb-2">
-                            <i class="bi bi-file-earmark-text text-primary me-2"></i>
-                            템플릿 관리
-                        </h2>
-                        <p class="text-muted mb-0">계약서 템플릿을 생성하고 관리하세요</p>
+        <div class="main-content-card">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="mb-2">
+                                <i class="bi bi-file-earmark-text text-primary me-2"></i>
+                                템플릿 관리
+                            </h2>
+                            <p class="text-muted mb-0">계약서 템플릿을 생성하고 관리하세요</p>
+                        </div>
+                        <a href="/templates/new" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>새 템플릿 생성
+                        </a>
                     </div>
-                    <a href="/templates/new" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>새 템플릿 생성
-                    </a>
-                </div>
 
                 <!-- 알림 메시지 -->
                 <c:if test="${not empty successMessage}">
@@ -44,36 +46,17 @@
                     </div>
                 </c:if>
 
-                <!-- 필터 -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <form method="get" class="row g-3">
-                            <div class="col-md-4">
-                                <label for="status" class="form-label">상태 필터</label>
-                                <select class="form-select" id="status" name="status" onchange="this.form.submit()">
-                                    <option value="">전체</option>
-                                    <c:forEach var="status" items="${statuses}">
-                                        <option value="${status}"
-                                                <c:if test="${currentStatus == status}">selected</c:if>>
-                                            <c:choose>
-                                                <c:when test="${status == 'DRAFT'}">초안</c:when>
-                                                <c:when test="${status == 'ACTIVE'}">활성</c:when>
-                                                <c:when test="${status == 'ARCHIVED'}">보관</c:when>
-                                                <c:otherwise>${status}</c:otherwise>
-                                            </c:choose>
-                                        </option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <!-- 상태 필터 탭 -->
+                <jsp:include page="../common/status-filter-tabs.jsp">
+                    <jsp:param name="filterType" value="template" />
+                    <jsp:param name="currentStatus" value="${currentStatus}" />
+                </jsp:include>
 
                 <!-- 템플릿 목록 -->
-                <div class="card">
-                    <div class="card-body">
-                        <c:choose>
-                            <c:when test="${empty templates.content}">
+                <c:choose>
+                    <c:when test="${empty templates.content}">
+                        <div class="card">
+                            <div class="card-body">
                                 <div class="text-center py-5">
                                     <i class="bi bi-file-earmark-text display-1 text-muted"></i>
                                     <h4 class="mt-3 text-muted">등록된 템플릿이 없습니다</h4>
@@ -82,148 +65,134 @@
                                         <i class="bi bi-plus-circle me-2"></i>첫 번째 템플릿 생성
                                     </a>
                                 </div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>제목</th>
-                                                <th>상태</th>
-                                                <th>생성일</th>
-                                                <th>수정일</th>
-                                                <th class="text-center">작업</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <c:forEach var="template" items="${templates.content}">
-                                                <tr>
-                                                    <td>
-                                                        <a href="/templates/${template.templateId}" class="text-decoration-none">
-                                                            <strong>${template.title}</strong>
-                                                        </a>
-                                                        <c:if test="${not empty template.previewText}">
-                                                            <br>
-                                                            <small class="text-muted preview-text" data-html="${fn:escapeXml(template.previewText)}">
-                                                            </small>
-                                                        </c:if>
-                                                    </td>
-                                                    <td>
-                                                        <c:choose>
-                                                            <c:when test="${template.status == 'DRAFT'}">
-                                                                <span class="badge bg-secondary">초안</span>
-                                                            </c:when>
-                                                            <c:when test="${template.status == 'ACTIVE'}">
-                                                                <span class="badge bg-success">활성</span>
-                                                            </c:when>
-                                                            <c:when test="${template.status == 'ARCHIVED'}">
-                                                                <span class="badge bg-warning">보관</span>
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <span class="badge bg-light text-dark">${template.status}</span>
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </td>
-                                                    <td>
-                                                        <fmt:formatDate value="${template.createdAtDate}" pattern="yyyy-MM-dd HH:mm"/>
-                                                    </td>
-                                                    <td>
-                                                        <fmt:formatDate value="${template.updatedAtDate}" pattern="yyyy-MM-dd HH:mm"/>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <div class="btn-group btn-group-sm" role="group">
-                                                            <button type="button"
-                                                                    class="btn btn-outline-info"
-                                                                    data-template-id="${template.templateId}"
-                                                                    data-template-title="${fn:escapeXml(template.title)}"
-                                                                    data-template-html="${fn:escapeXml(template.renderedHtml)}"
-                                                                    onclick="previewTemplateButton(this)"
-                                                                    title="미리보기">
-                                                                <i class="bi bi-eye"></i>
-                                                            </button>
-                                                            <a href="/templates/${template.templateId}"
-                                                               class="btn btn-outline-primary"
-                                                               title="상세보기">
-                                                                <i class="bi bi-box-arrow-up-right"></i>
-                                                            </a>
-                                                            <a href="/templates/${template.templateId}/edit"
-                                                               class="btn btn-outline-secondary"
-                                                               title="수정">
-                                                                <i class="bi bi-pencil"></i>
-                                                            </a>
-                                                            <c:if test="${template.status == 'DRAFT'}">
-                                                                <form method="post" action="/templates/${template.templateId}/activate" class="d-inline">
-                                                                    <c:if test="${not empty _csrf}">
-                                                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                                                    </c:if>
-                                                                    <button type="button"
-                                                                            class="btn btn-outline-success"
-                                                                            onclick="activateTemplate('${template.templateId}')"
-                                                                            title="활성화">
-                                                                        <i class="bi bi-check-circle"></i>
-                                                                    </button>
-                                                                </form>
-                                                            </c:if>
-                                                            <c:if test="${template.status == 'ACTIVE'}">
-                                                                <form method="post" action="/templates/${template.templateId}/archive" class="d-inline">
-                                                                    <c:if test="${not empty _csrf}">
-                                                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-                                                                    </c:if>
-                                                                    <button type="button"
-                                                                            class="btn btn-outline-warning"
-                                                                            onclick="archiveTemplate('${template.templateId}')"
-                                                                            title="보관">
-                                                                        <i class="bi bi-archive"></i>
-                                                                    </button>
-                                                                </form>
-                                                            </c:if>
-                                                            <c:if test="${template.status == 'DRAFT'}">
-                                                                <button type="button"
-                                                                        class="btn btn-outline-danger"
-                                                                        onclick="deleteTemplate('${template.templateId}', '${template.title}')"
-                                                                        title="삭제">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
-                                                            </c:if>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            </c:forEach>
-                                        </tbody>
-                                    </table>
+                            </div>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="row g-4">
+                            <c:forEach var="template" items="${templates.content}">
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="template-card">
+                                        <div class="template-card-body">
+                                            <div class="template-preview" data-template-id="${template.templateId}">
+                                                <c:choose>
+                                                    <c:when test="${not empty template.renderedHtml}">
+                                                        ${template.renderedHtml}
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <p class="text-muted small">미리보기 없음</p>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <div class="template-status-badge">
+                                                    <c:choose>
+                                                        <c:when test="${template.status == 'DRAFT'}">
+                                                            <span class="badge bg-secondary">초안</span>
+                                                        </c:when>
+                                                        <c:when test="${template.status == 'ACTIVE'}">
+                                                            <span class="badge bg-success">활성</span>
+                                                        </c:when>
+                                                        <c:when test="${template.status == 'ARCHIVED'}">
+                                                            <span class="badge bg-warning">보관</span>
+                                                        </c:when>
+                                                    </c:choose>
+                                                </div>
+                                            </div>
+                                            <h5 class="template-title">${template.title}</h5>
+                                            
+                                            <div class="template-footer mt-auto">
+                                                <div class="template-meta-info mb-2">
+                                                    <small class="text-muted d-block mb-1">
+                                                        <i class="bi bi-calendar-plus me-1"></i>
+                                                        등록일: <fmt:formatDate value="${template.createdAtDate}" pattern="yyyy-MM-dd"/>
+                                                    </small>
+                                                    <small class="text-muted d-block">
+                                                        <i class="bi bi-pencil-square me-1"></i>
+                                                        수정일: <fmt:formatDate value="${template.updatedAtDate}" pattern="yyyy-MM-dd"/>
+                                                    </small>
+                                                </div>
+                                                
+                                                <div class="template-actions d-flex gap-1 justify-content-center">
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-info"
+                                                            data-template-id="${template.templateId}"
+                                                            data-template-title="${fn:escapeXml(template.title)}"
+                                                            data-template-html="${fn:escapeXml(template.renderedHtml)}"
+                                                            onclick="previewTemplateButton(this)"
+                                                            title="미리보기">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <a href="/templates/${template.templateId}"
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       title="상세보기">
+                                                        <i class="bi bi-box-arrow-up-right"></i>
+                                                    </a>
+                                                    <a href="/templates/${template.templateId}/edit"
+                                                       class="btn btn-sm btn-outline-secondary"
+                                                       title="수정">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <c:if test="${template.status == 'DRAFT'}">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-outline-success"
+                                                                onclick="activateTemplate('${template.templateId}')"
+                                                                title="활성화">
+                                                            <i class="bi bi-check-circle"></i>
+                                                        </button>
+                                                    </c:if>
+                                                    <c:if test="${template.status == 'ACTIVE'}">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-outline-warning"
+                                                                onclick="archiveTemplate('${template.templateId}')"
+                                                                title="보관">
+                                                            <i class="bi bi-archive"></i>
+                                                        </button>
+                                                    </c:if>
+                                                    <c:if test="${template.status == 'DRAFT'}">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-outline-danger"
+                                                                onclick="deleteTemplate('${template.templateId}', '${template.title}')"
+                                                                title="삭제">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </c:if>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+                            </c:forEach>
+                        </div>
 
-                                <!-- 페이지네이션 -->
-                                <c:if test="${templates.totalPages > 1}">
-                                    <nav aria-label="템플릿 목록 페이지네이션" class="mt-4">
-                                        <ul class="pagination justify-content-center">
-                                            <c:if test="${templates.hasPrevious()}">
-                                                <li class="page-item">
-                                                    <a class="page-link" href="?page=${templates.number - 1}&status=${param.status}">
-                                                        <i class="bi bi-chevron-left"></i>
-                                                    </a>
-                                                </li>
-                                            </c:if>
+                        <!-- 페이지네이션 -->
+                        <c:if test="${templates.totalPages > 1}">
+                            <nav aria-label="템플릿 목록 페이지네이션" class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    <c:if test="${templates.hasPrevious()}">
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=${templates.number - 1}&status=${param.status}">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    </c:if>
 
-                                            <c:forEach begin="0" end="${templates.totalPages - 1}" var="i">
-                                                <li class="page-item ${i == templates.number ? 'active' : ''}">
-                                                    <a class="page-link" href="?page=${i}&status=${param.status}">${i + 1}</a>
-                                                </li>
-                                            </c:forEach>
+                                    <c:forEach begin="0" end="${templates.totalPages - 1}" var="i">
+                                        <li class="page-item ${i == templates.number ? 'active' : ''}">
+                                            <a class="page-link" href="?page=${i}&status=${param.status}">${i + 1}</a>
+                                        </li>
+                                    </c:forEach>
 
-                                            <c:if test="${templates.hasNext()}">
-                                                <li class="page-item">
-                                                    <a class="page-link" href="?page=${templates.number + 1}&status=${param.status}">
-                                                        <i class="bi bi-chevron-right"></i>
-                                                    </a>
-                                                </li>
-                                            </c:if>
-                                        </ul>
-                                    </nav>
-                                </c:if>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
+                                    <c:if test="${templates.hasNext()}">
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=${templates.number + 1}&status=${param.status}">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    </c:if>
+                                </ul>
+                            </nav>
+                        </c:if>
+                    </c:otherwise>
+                </c:choose>
                 </div>
             </div>
         </div>

@@ -44,7 +44,7 @@
 
 /* Alert Modal 스타일 */
 #commonAlertModal .modal-header {
-    background-color: #f8f9fa;
+    background-color: white;
 }
 
 #commonAlertModal .modal-title {
@@ -57,12 +57,12 @@
 
 /* Confirm Modal 스타일 */
 #commonConfirmModal .modal-header {
-    background-color: #fff3cd;
-    border-bottom-color: #ffeaa7;
+    background-color: white;
+    border-bottom-color: #dee2e6;
 }
 
 #commonConfirmModal .modal-title {
-    color: #856404;
+    color: #495057;
 }
 
 #commonConfirmModal .modal-body {

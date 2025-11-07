@@ -1,7 +1,7 @@
 package com.signly.template.application.preset;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.signly.template.domain.model.TemplateContent;
+import com.signly.template.domain.model.TemplateSection;
 import com.signly.template.infrastructure.entity.TemplateEntity;
 import com.signly.template.infrastructure.repository.TemplateJpaRepository;
 import org.springframework.stereotype.Service;
@@ -15,11 +15,9 @@ import java.util.Optional;
 public class TemplatePresetService {
 
     private final TemplateJpaRepository templateRepository;
-    private final ObjectMapper objectMapper;
 
-    public TemplatePresetService(TemplateJpaRepository templateRepository, ObjectMapper objectMapper) {
+    public TemplatePresetService(TemplateJpaRepository templateRepository) {
         this.templateRepository = templateRepository;
-        this.objectMapper = objectMapper;
     }
 
     public List<TemplatePresetSummary> getSummaries() {
@@ -47,108 +45,25 @@ public class TemplatePresetService {
 
     private List<PresetSection> parsePresetSections(TemplateEntity entity) {
         try {
-            // rawHtml 체크
-            if (isRawHtmlFormat(entity)) {
-                // rawHtml 포맷인 경우 원본 HTML을 그대로 반환
-                return parseHtmlToSections(entity.getContent());
-            } else {
-                // 일반 JSON 섹션 포맷
-                return parseJsonSections(entity.getContent());
-            }
+            // TemplateContent 도메인 모델을 사용하여 파싱
+            TemplateContent templateContent = TemplateContent.fromJson(entity.getContent());
+            
+            // TemplateSection을 PresetSection으로 변환
+            return templateContent.getSections().stream()
+                    .map(this::convertToPresetSection)
+                    .toList();
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse preset template: " + entity.getPresetId(), e);
         }
     }
 
-    private boolean isRawHtmlFormat(TemplateEntity entity) {
-        try {
-            List<Map<String, Object>> sectionsData = objectMapper.readValue(
-                    entity.getContent(),
-                    new TypeReference<List<Map<String, Object>>>() {}
-            );
-            
-            // 단일 섹션에 rawHtml 플래그가 있는지 확인
-            if (sectionsData.size() == 1) {
-                Map<String, Object> sectionData = sectionsData.get(0);
-                Map<String, Object> metadata = (Map<String, Object>) sectionData.get("metadata");
-                return metadata != null && Boolean.TRUE.equals(metadata.get("rawHtml"));
-            }
-            return false;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private List<PresetSection> parseJsonSections(String content) throws Exception {
-        List<Map<String, Object>> sectionsData = objectMapper.readValue(
-                content,
-                new TypeReference<List<Map<String, Object>>>() {}
-        );
-
-        return sectionsData.stream()
-                .map(data -> {
-                    Map<String, Object> metadata = (Map<String, Object>) data.get("metadata");
-                    return new PresetSection(
-                            (String) data.get("sectionId"),
-                            (String) data.get("type"),
-                            ((Number) data.get("order")).intValue(),
-                            (String) data.get("content"),
-                            metadata != null ? metadata : Map.of()
-                    );
-                })
-                .toList();
-    }
-
-    private List<PresetSection> parseHtmlToSections(String jsonContent) {
-        List<PresetSection> sections = new ArrayList<>();
-
-        try {
-            // JSON에서 content 필드를 추출 (원본 HTML)
-            List<Map<String, Object>> sectionsData = objectMapper.readValue(
-                    jsonContent,
-                    new TypeReference<List<Map<String, Object>>>() {}
-            );
-
-            if (!sectionsData.isEmpty()) {
-                Map<String, Object> firstSection = sectionsData.get(0);
-                String htmlContent = (String) firstSection.get("content");
-
-                if (htmlContent != null && !htmlContent.isBlank()) {
-                    // 원본 HTML을 그대로 단일 섹션으로 반환
-                    Map<String, Object> metadata = (Map<String, Object>) firstSection.get("metadata");
-                    if (metadata == null) {
-                        metadata = Map.of("rawHtml", true);
-                    }
-
-                    sections.add(new PresetSection(
-                            "preset-section-0",
-                            "CUSTOM",
-                            0,
-                            htmlContent,
-                            metadata
-                    ));
-                    return sections;
-                }
-            }
-
-            // 기본 fallback
-            sections.add(createSection("text", jsonContent, 0, Map.of("kind", "text")));
-
-        } catch (Exception e) {
-            // 실패 시 단일 섹션으로 fallback
-            sections.add(createSection("text", jsonContent, 0, Map.of("kind", "text")));
-        }
-
-        return sections;
-    }
-    
-    private PresetSection createSection(String type, String content, int order, Map<String, Object> metadata) {
+    private PresetSection convertToPresetSection(TemplateSection templateSection) {
         return new PresetSection(
-                "preset-section-" + order,
-                type,
-                order,
-                content,
-                metadata
+                templateSection.getSectionId(),
+                templateSection.getType().name(),
+                templateSection.getOrder(),
+                templateSection.getContent(),
+                templateSection.getMetadata()
         );
     }
 }

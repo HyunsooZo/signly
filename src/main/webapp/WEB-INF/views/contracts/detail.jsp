@@ -15,6 +15,7 @@
     </jsp:include>
 
     <div class="container mt-4">
+        <div class="main-content-card">
         <div class="row">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-start mb-4">
@@ -310,6 +311,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 
