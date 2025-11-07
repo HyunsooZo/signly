@@ -11,6 +11,7 @@
     </jsp:include>
 
     <div class="container mt-5">
+        <div class="main-content-card">
         <div class="text-center mb-5">
             <h2 class="mb-3">
                 <i class="bi bi-file-earmark-plus text-primary me-2"></i>
@@ -63,6 +64,7 @@
             <a href="/contracts" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-2"></i>목록으로 돌아가기
             </a>
+        </div>
         </div>
     </div>
 
