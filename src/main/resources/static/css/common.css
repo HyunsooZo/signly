@@ -134,9 +134,9 @@ body {
 
 /* 로고 스타일 */
 .navbar-brand {
-    font-family: 'Carattere', cursive;
+    font-family: 'Lobster', cursive;
     font-size: 2.5rem;
-    font-weight: 700;
+    font-weight: 400;
     letter-spacing: 0.5px;
 }
 
