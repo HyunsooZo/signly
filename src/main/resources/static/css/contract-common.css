@@ -1,7 +1,10 @@
 /* 계약서 공통 스타일 - 웹/PDF/프리셋 모두 사용 */
 
-/* 기본 레이아웃 */
-body {
+/* 기본 레이아웃 - 문서 컨테이너에만 적용 */
+.preset-document,
+.contract-content,
+.template-document,
+body:not(:has(.navbar)) {
     font-family: 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', sans-serif;
     line-height: 1.6;
     font-size: 13px;
@@ -13,16 +16,6 @@ body:not(:has(.navbar)) {
     max-width: 210mm;
     margin: 0 auto;
     padding: 20mm;
-}
-
-/* 문서 컨테이너 */
-.preset-document,
-.contract-content,
-.template-document {
-    font-family: inherit;
-    line-height: inherit;
-    font-size: inherit;
-    color: inherit;
 }
 
 /* 제목 */

@@ -19,4 +19,9 @@
     <c:if test="${not empty param.additionalCss3}">
         <link href="${param.additionalCss3}" rel="stylesheet">
     </c:if>
+    
+    <!-- NProgress 로딩 바 -->
+    <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+    <link href="/css/page-loader.css" rel="stylesheet">
+    <script src="/js/page-loader.js"></script>
 </head>
