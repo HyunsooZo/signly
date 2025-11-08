@@ -92,7 +92,7 @@
                                                             <span class="badge bg-success">활성</span>
                                                         </c:when>
                                                         <c:when test="${template.status == 'ARCHIVED'}">
-                                                            <span class="badge bg-warning">보관</span>
+                                                            <span class="badge bg-warning">보류</span>
                                                         </c:when>
                                                     </c:choose>
                                                 </div>
@@ -143,11 +143,11 @@
                                                         <button type="button"
                                                                 class="btn btn-sm btn-outline-warning"
                                                                 onclick="archiveTemplate('${template.templateId}')"
-                                                                title="보관">
+                                                                title="보류">
                                                             <i class="bi bi-archive"></i>
                                                         </button>
                                                     </c:if>
-                                                    <c:if test="${template.status == 'DRAFT'}">
+                                                    <c:if test="${template.status == 'ARCHIVED'}">
                                                         <button type="button"
                                                                 class="btn btn-sm btn-outline-danger"
                                                                 onclick="deleteTemplate('${template.templateId}', '${template.title}')"
@@ -334,11 +334,11 @@
 
         function archiveTemplate(templateId) {
             showConfirmModal(
-                '템플릿을 보관하시겠습니까?',
+                '템플릿을 보류하시겠습니까?',
                 function() {
                     submitPost('/templates/' + templateId + '/archive');
                 },
-                '보관',
+                '보류',
                 '취소',
                 'btn-warning'
             );

@@ -49,7 +49,7 @@ public class ContractTemplate extends AggregateRoot {
 
         TemplateId templateId = TemplateId.generate();
         int initialVersion = 1;
-        TemplateStatus initialStatus = TemplateStatus.DRAFT;
+        TemplateStatus initialStatus = TemplateStatus.ACTIVE;
 
         return new ContractTemplate(
                 templateId,
@@ -119,7 +119,7 @@ public class ContractTemplate extends AggregateRoot {
     }
 
     public boolean canDelete() {
-        return this.status == TemplateStatus.DRAFT;
+        return this.status == TemplateStatus.ARCHIVED;
     }
 
     public void updateTitle(String newTitle) {
