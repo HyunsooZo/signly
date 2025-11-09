@@ -58,6 +58,7 @@ public class ContractWebController extends BaseWebController {
     private final CurrentUserProvider currentUserProvider;
     private final FirstPartySignatureService firstPartySignatureService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final com.signly.common.storage.FileStorageService fileStorageService;
 
     public ContractWebController(
             ContractService contractService,
@@ -65,7 +66,8 @@ public class ContractWebController extends BaseWebController {
             TemplateService templateService,
             TemplatePresetService templatePresetService,
             CurrentUserProvider currentUserProvider,
-            FirstPartySignatureService firstPartySignatureService
+            FirstPartySignatureService firstPartySignatureService,
+            com.signly.common.storage.FileStorageService fileStorageService
     ) {
         this.contractService = contractService;
         this.contractPdfService = contractPdfService;
@@ -73,6 +75,7 @@ public class ContractWebController extends BaseWebController {
         this.templatePresetService = templatePresetService;
         this.currentUserProvider = currentUserProvider;
         this.firstPartySignatureService = firstPartySignatureService;
+        this.fileStorageService = fileStorageService;
     }
 
     @GetMapping
@@ -570,8 +573,24 @@ public class ContractWebController extends BaseWebController {
                 return;
             }
 
-            // PDF 생성
-            GeneratedPdf pdf = contractPdfService.generateContractPdf(contractId);
+            GeneratedPdf pdf;
+            
+            // 저장된 PDF가 있으면 파일에서 읽기, 없으면 생성
+            if (contract.getPdfPath() != null && !contract.getPdfPath().isEmpty()) {
+                logger.info("저장된 PDF 파일 제공: contractId={}, path={}", contractId, contract.getPdfPath());
+                try {
+                    byte[] pdfContent = fileStorageService.load(contract.getPdfPath());
+                    String fileName = contract.getTitle() + "_" + 
+                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".pdf";
+                    pdf = GeneratedPdf.of(pdfContent, fileName);
+                } catch (Exception e) {
+                    logger.warn("저장된 PDF 로드 실패, 새로 생성: contractId={}", contractId, e);
+                    pdf = contractPdfService.generateContractPdf(contractId);
+                }
+            } else {
+                logger.info("저장된 PDF 없음, 새로 생성: contractId={}", contractId);
+                pdf = contractPdfService.generateContractPdf(contractId);
+            }
 
             // 파일명 인코딩 (한글 파일명 지원)
             String encodedFileName = URLEncoder.encode(pdf.getFileName(), StandardCharsets.UTF_8)
@@ -618,8 +637,24 @@ public class ContractWebController extends BaseWebController {
                 return;
             }
 
-            // PDF 생성
-            GeneratedPdf pdf = contractPdfService.generateContractPdf(contractId);
+            GeneratedPdf pdf;
+            
+            // 저장된 PDF가 있으면 파일에서 읽기, 없으면 생성
+            if (contract.getPdfPath() != null && !contract.getPdfPath().isEmpty()) {
+                logger.info("저장된 PDF 파일 제공: contractId={}, path={}", contractId, contract.getPdfPath());
+                try {
+                    byte[] pdfContent = fileStorageService.load(contract.getPdfPath());
+                    String fileName = contract.getTitle() + "_" + 
+                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".pdf";
+                    pdf = GeneratedPdf.of(pdfContent, fileName);
+                } catch (Exception e) {
+                    logger.warn("저장된 PDF 로드 실패, 새로 생성: contractId={}", contractId, e);
+                    pdf = contractPdfService.generateContractPdf(contractId);
+                }
+            } else {
+                logger.info("저장된 PDF 없음, 새로 생성: contractId={}", contractId);
+                pdf = contractPdfService.generateContractPdf(contractId);
+            }
 
             // 파일명 인코딩
             String encodedFileName = URLEncoder.encode(pdf.getFileName(), StandardCharsets.UTF_8)

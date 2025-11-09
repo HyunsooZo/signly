@@ -38,6 +38,8 @@ public class ContractSigningCoordinator {
     private final SignatureRepository signatureRepository;
     private final EmailNotificationService emailNotificationService;
     private final ContractAuthorizationService authorizationService;
+    private final ContractPdfService contractPdfService;
+    private final com.signly.common.storage.FileStorageService fileStorageService;
 
     public ContractSigningCoordinator(
             ContractRepository contractRepository,
@@ -46,7 +48,9 @@ public class ContractSigningCoordinator {
             SignatureService signatureService,
             SignatureRepository signatureRepository,
             EmailNotificationService emailNotificationService,
-            ContractAuthorizationService authorizationService
+            ContractAuthorizationService authorizationService,
+            ContractPdfService contractPdfService,
+            com.signly.common.storage.FileStorageService fileStorageService
     ) {
         this.contractRepository = contractRepository;
         this.contractSigningService = contractSigningService;
@@ -55,6 +59,8 @@ public class ContractSigningCoordinator {
         this.signatureRepository = signatureRepository;
         this.emailNotificationService = emailNotificationService;
         this.authorizationService = authorizationService;
+        this.contractPdfService = contractPdfService;
+        this.fileStorageService = fileStorageService;
     }
 
     public Contract sendForSigning(String userId, String contractId) {
@@ -103,6 +109,15 @@ public class ContractSigningCoordinator {
         Contract savedContract = contractRepository.save(contract);
 
         if (result.isFullySigned()) {
+            // PDF 생성 및 저장
+            try {
+                savePdfForCompletedContract(savedContract);
+            } catch (Exception pdfEx) {
+                logger.error("PDF 저장 중 오류 발생 (서명 처리는 완료됨): contractId={}",
+                        contract.getId().getValue(), pdfEx);
+            }
+            
+            // 완료 알림 이메일 발송
             emailNotificationService.sendContractCompleted(savedContract);
         }
 
@@ -140,7 +155,17 @@ public class ContractSigningCoordinator {
         Contract savedContract = contractRepository.save(contract);
 
         if (result.isFullySigned()) {
-            logger.info("모든 서명 완료, 완료 알림 이메일 발송: contractId={}", contract.getId().getValue());
+            logger.info("모든 서명 완료, PDF 저장 및 완료 알림 이메일 발송: contractId={}", contract.getId().getValue());
+            
+            // PDF 생성 및 저장
+            try {
+                savePdfForCompletedContract(savedContract);
+            } catch (Exception pdfEx) {
+                logger.error("PDF 저장 중 오류 발생 (서명 처리는 완료됨): contractId={}",
+                        contract.getId().getValue(), pdfEx);
+            }
+            
+            // 완료 알림 이메일 발송
             try {
                 emailNotificationService.sendContractCompleted(savedContract);
             } catch (Exception emailEx) {
@@ -150,6 +175,36 @@ public class ContractSigningCoordinator {
         }
 
         return savedContract;
+    }
+
+    /**
+     * 완료된 계약서의 PDF를 생성하고 저장
+     */
+    private void savePdfForCompletedContract(Contract contract) {
+        try {
+            String contractId = contract.getId().getValue();
+            logger.info("완료된 계약서 PDF 생성 시작: contractId={}", contractId);
+            
+            // PDF 생성
+            com.signly.contract.domain.model.GeneratedPdf pdf = contractPdfService.generateContractPdf(contractId);
+            
+            // 파일 저장
+            String storagePath = "contracts/completed/" + contractId + ".pdf";
+            com.signly.common.storage.StoredFile storedFile = fileStorageService.store(
+                    pdf.getContent(),
+                    storagePath,
+                    pdf.getFileName()
+            );
+            
+            // 계약서에 PDF 경로 저장
+            contract.setPdfPath(storedFile.getPath());
+            contractRepository.save(contract);
+            
+            logger.info("완료된 계약서 PDF 저장 완료: contractId={}, path={}", contractId, storedFile.getPath());
+        } catch (Exception e) {
+            logger.error("PDF 저장 실패: contractId={}", contract.getId().getValue(), e);
+            throw new RuntimeException("PDF 저장 중 오류가 발생했습니다", e);
+        }
     }
 
     public Contract completeContract(String userId, String contractId) {

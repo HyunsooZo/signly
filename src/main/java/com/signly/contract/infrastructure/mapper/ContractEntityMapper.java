@@ -33,6 +33,7 @@ public class ContractEntityMapper {
             contract.getPresetType()
         );
 
+        entity.setPdfPath(contract.getPdfPath());
 
         List<SignatureJpaEntity> signatureEntities = contract.getSignatures().stream()
             .map(this::toSignatureEntity)
@@ -80,6 +81,7 @@ public class ContractEntityMapper {
             signToken,
             entity.getExpiresAt(),
             entity.getPresetType(),
+            entity.getPdfPath(),
             entity.getCreatedAt(),
             entity.getUpdatedAt()
         );

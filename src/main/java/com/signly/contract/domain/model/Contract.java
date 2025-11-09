@@ -22,6 +22,7 @@ public class Contract extends AggregateRoot {
     private SignToken signToken;
     private LocalDateTime expiresAt;
     private PresetType presetType;
+    private String pdfPath;  // 완료된 계약서 PDF 파일 경로
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -39,6 +40,7 @@ public class Contract extends AggregateRoot {
         this.signToken = null;
         this.expiresAt = null;
         this.presetType = null;
+        this.pdfPath = null;
         this.createdAt = null;
         this.updatedAt = null;
     }
@@ -84,12 +86,14 @@ public class Contract extends AggregateRoot {
                                  PartyInfo secondParty, ContractStatus status,
                                  List<Signature> signatures, SignToken signToken,
                                  LocalDateTime expiresAt, PresetType presetType,
+                                 String pdfPath,
                                  LocalDateTime createdAt, LocalDateTime updatedAt) {
         Contract contract = new Contract(id, creatorId, templateId, title, content,
                                        firstParty, secondParty, expiresAt, presetType);
         contract.status = status;
         contract.signatures.addAll(signatures);
         contract.signToken = signToken;
+        contract.pdfPath = pdfPath;
         contract.createdAt = createdAt;
         contract.updatedAt = updatedAt;
         return contract;
@@ -300,5 +304,18 @@ public class Contract extends AggregateRoot {
 
     public PresetType getPresetType() {
         return presetType;
+    }
+
+    public String getPdfPath() {
+        return pdfPath;
+    }
+
+    public void setPdfPath(String pdfPath) {
+        this.pdfPath = pdfPath;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean hasPdfPath() {
+        return pdfPath != null && !pdfPath.isEmpty();
     }
 }

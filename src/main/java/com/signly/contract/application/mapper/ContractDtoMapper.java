@@ -28,6 +28,7 @@ public class ContractDtoMapper {
             contract.getPendingSigners(),
             contract.getExpiresAt(),
             contract.getPresetType(),
+            contract.getPdfPath(),
             contract.getCreatedAt(),
             contract.getUpdatedAt()
         );

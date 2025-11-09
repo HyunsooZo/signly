@@ -79,6 +79,9 @@ public class ContractJpaEntity extends BaseEntity {
     @Column(name = "preset_type", length = 50, nullable = false)
     private PresetType presetType = PresetType.NONE;
 
+    @Column(name = "pdf_path", length = 1000)
+    private String pdfPath;
+
     protected ContractJpaEntity() {}
 
     public ContractJpaEntity(
@@ -217,4 +220,13 @@ public class ContractJpaEntity extends BaseEntity {
     public void setPresetType(PresetType presetType) {
         this.presetType = presetType != null ? presetType : PresetType.NONE;
     }
+
+    public String getPdfPath() {
+        return pdfPath;
+    }
+
+    public void setPdfPath(String pdfPath) {
+        this.pdfPath = pdfPath;
+    }
+}
 }
