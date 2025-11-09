@@ -579,7 +579,7 @@ public class ContractWebController extends BaseWebController {
             if (contract.getPdfPath() != null && !contract.getPdfPath().isEmpty()) {
                 logger.info("저장된 PDF 파일 제공: contractId={}, path={}", contractId, contract.getPdfPath());
                 try {
-                    byte[] pdfContent = fileStorageService.load(contract.getPdfPath());
+                    byte[] pdfContent = fileStorageService.loadFile(contract.getPdfPath());
                     String fileName = contract.getTitle() + "_" + 
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".pdf";
                     pdf = GeneratedPdf.of(pdfContent, fileName);
@@ -643,7 +643,7 @@ public class ContractWebController extends BaseWebController {
             if (contract.getPdfPath() != null && !contract.getPdfPath().isEmpty()) {
                 logger.info("저장된 PDF 파일 제공: contractId={}, path={}", contractId, contract.getPdfPath());
                 try {
-                    byte[] pdfContent = fileStorageService.load(contract.getPdfPath());
+                    byte[] pdfContent = fileStorageService.loadFile(contract.getPdfPath());
                     String fileName = contract.getTitle() + "_" + 
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".pdf";
                     pdf = GeneratedPdf.of(pdfContent, fileName);

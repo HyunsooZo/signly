@@ -189,18 +189,18 @@ public class ContractSigningCoordinator {
             com.signly.contract.domain.model.GeneratedPdf pdf = contractPdfService.generateContractPdf(contractId);
             
             // 파일 저장
-            String storagePath = "contracts/completed/" + contractId + ".pdf";
-            com.signly.common.storage.StoredFile storedFile = fileStorageService.store(
+            com.signly.common.storage.StoredFile storedFile = fileStorageService.storeFile(
                     pdf.getContent(),
-                    storagePath,
-                    pdf.getFileName()
+                    pdf.getFileName(),
+                    "application/pdf",
+                    "contracts/completed"
             );
             
             // 계약서에 PDF 경로 저장
-            contract.setPdfPath(storedFile.getPath());
+            contract.setPdfPath(storedFile.filePath());
             contractRepository.save(contract);
             
-            logger.info("완료된 계약서 PDF 저장 완료: contractId={}, path={}", contractId, storedFile.getPath());
+            logger.info("완료된 계약서 PDF 저장 완료: contractId={}, path={}", contractId, storedFile.filePath());
         } catch (Exception e) {
             logger.error("PDF 저장 실패: contractId={}", contract.getId().getValue(), e);
             throw new RuntimeException("PDF 저장 중 오류가 발생했습니다", e);

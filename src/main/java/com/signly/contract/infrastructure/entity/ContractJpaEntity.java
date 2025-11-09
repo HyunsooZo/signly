@@ -229,4 +229,3 @@ public class ContractJpaEntity extends BaseEntity {
         this.pdfPath = pdfPath;
     }
 }
-}
