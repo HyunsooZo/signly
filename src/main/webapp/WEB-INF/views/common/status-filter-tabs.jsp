@@ -21,12 +21,6 @@
     <c:choose>
         <c:when test="${filterType == 'template'}">
             <li class="nav-item" role="presentation">
-                <a class="nav-link ${currentStatus == 'DRAFT' ? 'active' : ''}" 
-                   href="?status=DRAFT">
-                    초안
-                </a>
-            </li>
-            <li class="nav-item" role="presentation">
                 <a class="nav-link ${currentStatus == 'ACTIVE' ? 'active' : ''}" 
                    href="?status=ACTIVE">
                     활성
@@ -35,7 +29,7 @@
             <li class="nav-item" role="presentation">
                 <a class="nav-link ${currentStatus == 'ARCHIVED' ? 'active' : ''}" 
                    href="?status=ARCHIVED">
-                    보관
+                    보류
                 </a>
             </li>
         </c:when>

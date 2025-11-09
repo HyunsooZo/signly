@@ -105,7 +105,7 @@ public class TemplateService {
         validateOwnership(userId, template);
 
         if (!template.canDelete()) {
-            throw new ValidationException("DRAFT 상태의 템플릿만 삭제할 수 있습니다");
+            throw new ValidationException("보류된 템플릿만 삭제할 수 있습니다");
         }
 
         templateRepository.delete(template);
