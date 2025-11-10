@@ -11,13 +11,13 @@ public class SignatureEntityMapper {
         return new SignatureEntity(
                 null, // signatureId will be generated
                 null, // contract will be set later
-                signature.getSignerEmail(),
-                signature.getSignerName(),
-                signature.getSignatureData(),
-                signature.getSignedAt(),
-                signature.getIpAddress(),
-                signature.getDeviceInfo(),
-                signature.getSignaturePath()
+                signature.signerEmail(),
+                signature.signerName(),
+                signature.signatureData(),
+                signature.signedAt(),
+                signature.ipAddress(),
+                signature.deviceInfo(),
+                signature.signaturePath()
         );
     }
 

@@ -9,10 +9,10 @@ public class SignatureDtoMapper {
 
     public SignatureResponse toResponse(Signature signature) {
         return new SignatureResponse(
-                signature.getSignerEmail(),
-                signature.getSignerName(),
-                signature.getSignedAt(),
-                signature.getIpAddress()
+                signature.signerEmail(),
+                signature.signerName(),
+                signature.signedAt(),
+                signature.ipAddress()
         );
     }
 }

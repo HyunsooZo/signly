@@ -2,15 +2,12 @@ package com.signly.contract.domain.model;
 
 import com.signly.common.exception.ValidationException;
 import com.signly.common.util.UlidGenerator;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
-public class ContractId {
-    private final String value;
-
-    private ContractId(String value) {
-        this.value = value;
-    }
+public record ContractId(String value) {
 
     public static ContractId of(String value) {
         if (value == null || value.trim().isEmpty()) {
@@ -18,30 +15,7 @@ public class ContractId {
         }
         return new ContractId(value);
     }
-
     public static ContractId generate() {
         return new ContractId(UlidGenerator.generate());
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ContractId that = (ContractId) o;
-        return Objects.equals(value, that.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
-
-    @Override
-    public String toString() {
-        return value;
     }
 }

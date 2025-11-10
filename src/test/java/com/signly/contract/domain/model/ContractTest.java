@@ -156,7 +156,7 @@ class ContractTest {
         signingService.processSigning(contract, request);
 
         assertThat(contract.getSignatures()).hasSize(1);
-        assertThat(contract.getSignatures().get(0).getSignerEmail()).isEqualTo("first@example.com");
+        assertThat(contract.getSignatures().get(0).signerEmail()).isEqualTo("first@example.com");
     }
 
     @Test

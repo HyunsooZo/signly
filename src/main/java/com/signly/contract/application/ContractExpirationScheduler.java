@@ -1,6 +1,5 @@
 package com.signly.contract.application;
 
-import com.signly.contract.application.ContractService;
 import com.signly.common.email.EmailService;
 import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.repository.ContractRepository;
@@ -116,7 +115,7 @@ public class ContractExpirationScheduler {
             logger.info("계약서 '{}' 만료 예정 알림 발송 완료", contract.getTitle());
 
         } catch (Exception e) {
-            logger.error("만료 예정 알림 발송 중 오류 발생: 계약서 ID {}", contract.getId().getValue(), e);
+            logger.error("만료 예정 알림 발송 중 오류 발생: 계약서 ID {}", contract.getId().value(), e);
         }
     }
 }

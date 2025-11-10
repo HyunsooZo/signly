@@ -65,7 +65,7 @@ public class HtmlToPdfGenerator implements PdfGenerator {
             outputStream.close();
 
             GeneratedPdf pdf = GeneratedPdf.of(pdfBytes, fileName);
-            logger.info("PDF 생성 완료: fileName={}, size={}bytes", fileName, pdf.getSizeInBytes());
+            logger.info("PDF 생성 완료: fileName={}, size={}bytes", fileName, pdf.sizeInBytes());
 
             return pdf;
 

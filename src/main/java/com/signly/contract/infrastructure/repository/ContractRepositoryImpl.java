@@ -42,13 +42,13 @@ public class ContractRepositoryImpl implements ContractRepository {
 
     @Override
     public Optional<Contract> findById(ContractId contractId) {
-        return jpaRepository.findById(contractId.getValue())
+        return jpaRepository.findById(contractId.value())
                 .map(entityMapper::toDomain);
     }
 
     @Override
     public void delete(Contract contract) {
-        jpaRepository.deleteById(contract.getId().getValue());
+        jpaRepository.deleteById(contract.getId().value());
     }
 
     @Override

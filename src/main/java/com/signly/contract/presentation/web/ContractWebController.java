@@ -11,10 +11,8 @@ import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.ContractResponse;
 import com.signly.contract.application.dto.CreateContractCommand;
 import com.signly.contract.application.dto.UpdateContractCommand;
-import com.signly.contract.domain.model.ContractContent;
 import com.signly.contract.domain.model.ContractStatus;
 import com.signly.contract.domain.model.GeneratedPdf;
-import com.signly.contract.domain.model.PartyInfo;
 import com.signly.contract.domain.model.PresetType;
 import com.signly.signature.application.FirstPartySignatureService;
 import com.signly.template.application.TemplateService;
@@ -595,22 +593,22 @@ public class ContractWebController extends BaseWebController {
             }
 
             // 파일명 인코딩 (한글 파일명 지원)
-            String encodedFileName = URLEncoder.encode(pdf.getFileName(), StandardCharsets.UTF_8)
+            String encodedFileName = URLEncoder.encode(pdf.fileName(), StandardCharsets.UTF_8)
                     .replace("+", "%20");
 
             // HTTP 응답 헤더 설정
             response.setContentType(MediaType.APPLICATION_PDF_VALUE);
-            response.setContentLengthLong(pdf.getSizeInBytes());
+            response.setContentLengthLong(pdf.sizeInBytes());
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
 
             // PDF 바이트 스트림으로 전송
             try (OutputStream out = response.getOutputStream()) {
-                out.write(pdf.getContent());
+                out.write(pdf.content());
                 out.flush();
             }
 
-            logger.info("PDF 다운로드 성공: contractId={}, fileName={}", contractId, pdf.getFileName());
+            logger.info("PDF 다운로드 성공: contractId={}, fileName={}", contractId, pdf.fileName());
 
         } catch (Exception e) {
             logger.error("PDF 다운로드 중 오류 발생: contractId={}", contractId, e);
@@ -659,22 +657,22 @@ public class ContractWebController extends BaseWebController {
             }
 
             // 파일명 인코딩
-            String encodedFileName = URLEncoder.encode(pdf.getFileName(), StandardCharsets.UTF_8)
+            String encodedFileName = URLEncoder.encode(pdf.fileName(), StandardCharsets.UTF_8)
                     .replace("+", "%20");
 
             // HTTP 응답 헤더 설정 (inline으로 표시)
             response.setContentType(MediaType.APPLICATION_PDF_VALUE);
-            response.setContentLengthLong(pdf.getSizeInBytes());
+            response.setContentLengthLong(pdf.sizeInBytes());
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "inline; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
 
             // PDF 바이트 스트림으로 전송
             try (OutputStream out = response.getOutputStream()) {
-                out.write(pdf.getContent());
+                out.write(pdf.content());
                 out.flush();
             }
 
-            logger.info("PDF 인라인 뷰 성공: contractId={}, fileName={}", contractId, pdf.getFileName());
+            logger.info("PDF 인라인 뷰 성공: contractId={}, fileName={}", contractId, pdf.fileName());
 
         } catch (Exception e) {
             logger.error("PDF 인라인 뷰 중 오류 발생: contractId={}", contractId, e);

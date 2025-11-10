@@ -1,6 +1,5 @@
 package com.signly.signature.application;
 
-import com.signly.common.exception.BusinessException;
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
 import com.signly.common.storage.FileStorageService;
@@ -58,8 +57,8 @@ public class SignatureService {
 
         ImagePayload payload = parseDataUrl(command.signatureData());
 
-        String category = buildCategory(contractId.getValue(), normalizedEmail);
-        String originalFileName = buildFileName(contractId.getValue(), normalizedEmail, payload.extension());
+        String category = buildCategory(contractId.value(), normalizedEmail);
+        String originalFileName = buildFileName(contractId.value(), normalizedEmail, payload.extension());
         StoredFile storedFile = fileStorageService.storeFile(
                 payload.data(),
                 originalFileName,

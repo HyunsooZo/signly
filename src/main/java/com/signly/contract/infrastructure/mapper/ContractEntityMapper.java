@@ -16,7 +16,7 @@ public class ContractEntityMapper {
 
     public ContractJpaEntity toEntity(Contract contract) {
         ContractJpaEntity entity = new ContractJpaEntity(
-            contract.getId().getValue(),
+            contract.getId().value(),
             contract.getCreatorId().getValue(),
             contract.getTemplateId() != null ? contract.getTemplateId().getValue() : null,
             contract.getTitle(),
@@ -92,13 +92,13 @@ public class ContractEntityMapper {
         return new SignatureEntity(
             UlidGenerator.generate(),
             null, // contract will be set later
-            signature.getSignerEmail(),
-            signature.getSignerName(),
-            signature.getSignatureData(),
-            signature.getSignedAt(),
-            signature.getIpAddress(),
-            signature.getDeviceInfo(),
-            signature.getSignaturePath()
+            signature.signerEmail(),
+            signature.signerName(),
+            signature.signatureData(),
+            signature.signedAt(),
+            signature.ipAddress(),
+            signature.deviceInfo(),
+            signature.signaturePath()
         );
     }
 

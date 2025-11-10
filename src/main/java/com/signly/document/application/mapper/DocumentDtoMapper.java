@@ -10,7 +10,7 @@ public class DocumentDtoMapper {
     public DocumentResponse toResponse(Document document) {
         return new DocumentResponse(
             document.getId().getValue(),
-            document.getContractId().getValue(),
+            document.getContractId().value(),
             document.getUploadedBy().getValue(),
             document.getType(),
             document.getMetadata().getFileName(),

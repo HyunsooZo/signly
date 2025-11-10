@@ -3,7 +3,8 @@ package com.signly.contract.domain.model;
 import com.signly.common.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ContractIdTest {
 
@@ -13,15 +14,15 @@ class ContractIdTest {
 
         ContractId contractId = ContractId.of(validId);
 
-        assertThat(contractId.getValue()).isEqualTo(validId);
+        assertThat(contractId.value()).isEqualTo(validId);
     }
 
     @Test
     void 자동_생성할_수_있다() {
         ContractId contractId = ContractId.generate();
 
-        assertThat(contractId.getValue()).isNotNull();
-        assertThat(contractId.getValue()).isNotEmpty();
+        assertThat(contractId.value()).isNotNull();
+        assertThat(contractId.value()).isNotEmpty();
     }
 
     @Test
@@ -61,13 +62,5 @@ class ContractIdTest {
         ContractId contractId2 = ContractId.of("550e8400-e29b-41d4-a716-446655440001");
 
         assertThat(contractId1).isNotEqualTo(contractId2);
-    }
-
-    @Test
-    void toString은_값을_반환한다() {
-        String id = "550e8400-e29b-41d4-a716-446655440000";
-        ContractId contractId = ContractId.of(id);
-
-        assertThat(contractId.toString()).isEqualTo(id);
     }
 }

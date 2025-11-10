@@ -114,7 +114,7 @@ public class ContractSigningCoordinator {
                 savePdfForCompletedContract(savedContract);
             } catch (Exception pdfEx) {
                 logger.error("PDF 저장 중 오류 발생 (서명 처리는 완료됨): contractId={}",
-                        contract.getId().getValue(), pdfEx);
+                        contract.getId().value(), pdfEx);
             }
             
             // 완료 알림 이메일 발송
@@ -138,7 +138,7 @@ public class ContractSigningCoordinator {
 
         // 서명 데이터 저장
         CreateSignatureCommand command = new CreateSignatureCommand(
-                contractId.getValue(),
+                contractId.value(),
                 signatureData,
                 signerEmail,
                 signerName,
@@ -155,14 +155,14 @@ public class ContractSigningCoordinator {
         Contract savedContract = contractRepository.save(contract);
 
         if (result.isFullySigned()) {
-            logger.info("모든 서명 완료, PDF 저장 및 완료 알림 이메일 발송: contractId={}", contract.getId().getValue());
+            logger.info("모든 서명 완료, PDF 저장 및 완료 알림 이메일 발송: contractId={}", contract.getId().value());
             
             // PDF 생성 및 저장
             try {
                 savePdfForCompletedContract(savedContract);
             } catch (Exception pdfEx) {
                 logger.error("PDF 저장 중 오류 발생 (서명 처리는 완료됨): contractId={}",
-                        contract.getId().getValue(), pdfEx);
+                        contract.getId().value(), pdfEx);
             }
             
             // 완료 알림 이메일 발송
@@ -170,7 +170,7 @@ public class ContractSigningCoordinator {
                 emailNotificationService.sendContractCompleted(savedContract);
             } catch (Exception emailEx) {
                 logger.error("완료 알림 이메일 발송 중 오류 발생 (서명 처리는 완료됨): contractId={}",
-                        contract.getId().getValue(), emailEx);
+                        contract.getId().value(), emailEx);
             }
         }
 
@@ -182,7 +182,7 @@ public class ContractSigningCoordinator {
      */
     private void savePdfForCompletedContract(Contract contract) {
         try {
-            String contractId = contract.getId().getValue();
+            String contractId = contract.getId().value();
             logger.info("완료된 계약서 PDF 생성 시작: contractId={}", contractId);
             
             // PDF 생성
@@ -190,8 +190,8 @@ public class ContractSigningCoordinator {
             
             // 파일 저장
             com.signly.common.storage.StoredFile storedFile = fileStorageService.storeFile(
-                    pdf.getContent(),
-                    pdf.getFileName(),
+                    pdf.content(),
+                    pdf.fileName(),
                     "application/pdf",
                     "contracts/completed"
             );
@@ -202,7 +202,7 @@ public class ContractSigningCoordinator {
             
             logger.info("완료된 계약서 PDF 저장 완료: contractId={}, path={}", contractId, storedFile.filePath());
         } catch (Exception e) {
-            logger.error("PDF 저장 실패: contractId={}", contract.getId().getValue(), e);
+            logger.error("PDF 저장 실패: contractId={}", contract.getId().value(), e);
             throw new RuntimeException("PDF 저장 중 오류가 발생했습니다", e);
         }
     }
@@ -253,7 +253,7 @@ public class ContractSigningCoordinator {
                 contract.getCreatorId().getValue());
         
         CreateSignatureCommand firstPartyCommand = new CreateSignatureCommand(
-                contract.getId().getValue(),
+                contract.getId().value(),
                 firstPartySignatureData,
                 contract.getFirstParty().email(),
                 contract.getFirstParty().name(),
@@ -263,7 +263,7 @@ public class ContractSigningCoordinator {
         signatureService.createSignature(firstPartyCommand);
         
         logger.info("제1 당사자 서명 저장 완료: contractId={}, email={}",
-                contract.getId().getValue(), contract.getFirstParty().email());
+                contract.getId().value(), contract.getFirstParty().email());
     }
 
     private void ensureFirstPartySignatureExists(Contract contract) {
@@ -273,7 +273,7 @@ public class ContractSigningCoordinator {
         if (!signatureRepository.existsByContractIdAndSignerEmail(cId, contract.getFirstParty().email())) {
             saveFirstPartySignature(contract);
             logger.info("재전송 시 제1 당사자 서명 저장: contractId={}, email={}",
-                    contract.getId().getValue(), contract.getFirstParty().email());
+                    contract.getId().value(), contract.getFirstParty().email());
         }
     }
 }

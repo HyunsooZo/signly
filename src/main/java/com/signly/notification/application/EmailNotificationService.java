@@ -75,10 +75,10 @@ public class EmailNotificationService {
 
             outboxRepository.save(outbox);
             logger.info("계약서 서명 요청 이메일을 Outbox에 저장: contractId={}, outboxId={}",
-                    contract.getId().getValue(), outbox.getId().getValue());
+                    contract.getId().value(), outbox.getId().getValue());
 
         } catch (Exception e) {
-            logger.error("계약서 서명 요청 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
+            logger.error("계약서 서명 요청 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
         }
     }
 
@@ -99,18 +99,18 @@ public class EmailNotificationService {
             List<EmailAttachment> attachments = new ArrayList<>();
             GeneratedPdf generatedPdf = null;
             try {
-                generatedPdf = contractPdfService.generateContractPdf(contract.getId().getValue());
+                generatedPdf = contractPdfService.generateContractPdf(contract.getId().value());
                 EmailAttachment pdfAttachment = EmailAttachment.of(
-                        generatedPdf.getFileName(),
-                        generatedPdf.getContent(),
+                        generatedPdf.fileName(),
+                        generatedPdf.content(),
                         generatedPdf.getContentType()
                 );
                 attachments.add(pdfAttachment);
                 logger.info("계약서 PDF 생성 및 첨부 준비 완료: contractId={}, fileName={}",
-                        contract.getId().getValue(), generatedPdf.getFileName());
+                        contract.getId().value(), generatedPdf.fileName());
             } catch (Exception ex) {
                 logger.error("계약서 PDF 생성 실패, PDF 없이 이메일 발송: contractId={}",
-                        contract.getId().getValue(), ex);
+                        contract.getId().value(), ex);
             }
 
             // 양 당사자에게 Outbox 저장 (PDF 첨부)
@@ -137,15 +137,15 @@ public class EmailNotificationService {
                 try {
                     documentService.storeContractPdf(contract, generatedPdf);
                 } catch (Exception storeEx) {
-                    logger.error("계약서 PDF 저장 실패: contractId={}", contract.getId().getValue(), storeEx);
+                    logger.error("계약서 PDF 저장 실패: contractId={}", contract.getId().value(), storeEx);
                 }
             }
 
             logger.info("계약서 완료 알림 이메일을 Outbox에 저장: contractId={}, PDF첨부={}",
-                    contract.getId().getValue(), !attachments.isEmpty());
+                    contract.getId().value(), !attachments.isEmpty());
 
         } catch (Exception e) {
-            logger.error("계약서 완료 알림 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
+            logger.error("계약서 완료 알림 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
         }
     }
 
@@ -167,10 +167,10 @@ public class EmailNotificationService {
             );
 
             outboxRepository.save(outbox);
-            logger.info("계약서 취소 알림 이메일을 Outbox에 저장: contractId={}", contract.getId().getValue());
+            logger.info("계약서 취소 알림 이메일을 Outbox에 저장: contractId={}", contract.getId().value());
 
         } catch (Exception e) {
-            logger.error("계약서 취소 알림 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
+            logger.error("계약서 취소 알림 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
         }
     }
 
@@ -202,10 +202,10 @@ public class EmailNotificationService {
             outboxRepository.save(firstPartyOutbox);
             outboxRepository.save(secondPartyOutbox);
 
-            logger.info("계약서 만료 알림 이메일을 Outbox에 저장: contractId={}", contract.getId().getValue());
+            logger.info("계약서 만료 알림 이메일을 Outbox에 저장: contractId={}", contract.getId().value());
 
         } catch (Exception e) {
-            logger.error("계약서 만료 알림 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
+            logger.error("계약서 만료 알림 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
         }
     }
 
@@ -234,10 +234,10 @@ public class EmailNotificationService {
 
             outboxRepository.save(outbox);
             logger.info("계약서 만료 임박 알림 이메일을 Outbox에 저장: contractId={}, daysLeft={}",
-                    contract.getId().getValue(), daysLeft);
+                    contract.getId().value(), daysLeft);
 
         } catch (Exception e) {
-            logger.error("계약서 만료 임박 알림 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
+            logger.error("계약서 만료 임박 알림 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
         }
     }
 
@@ -262,10 +262,10 @@ public class EmailNotificationService {
             );
 
             outboxRepository.save(outbox);
-            logger.info("계약서 서명 독촉 이메일을 Outbox에 저장: contractId={}", contract.getId().getValue());
+            logger.info("계약서 서명 독촉 이메일을 Outbox에 저장: contractId={}", contract.getId().value());
 
         } catch (Exception e) {
-            logger.error("계약서 서명 독촉 이메일 Outbox 저장 실패: {}", contract.getId().getValue(), e);
+            logger.error("계약서 서명 독촉 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
         }
     }
 }

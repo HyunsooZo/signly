@@ -14,7 +14,7 @@ public class DocumentJpaMapper {
     public DocumentJpaEntity toEntity(Document document) {
         return new DocumentJpaEntity(
             document.getId().getValue(),
-            document.getContractId().getValue(),
+            document.getContractId().value(),
             document.getUploadedBy().getValue(),
             document.getType(),
             document.getMetadata().getFileName(),

@@ -3,10 +3,8 @@ package com.signly.contract.domain.service;
 import com.signly.common.exception.ValidationException;
 import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.model.ContractContent;
-import com.signly.contract.domain.model.ContractId;
 import com.signly.contract.domain.model.ContractStatus;
 import com.signly.contract.domain.model.PartyInfo;
-import com.signly.contract.domain.model.PresetType;
 import com.signly.contract.domain.model.Signature;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
@@ -17,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -264,9 +261,9 @@ class ContractSigningServiceTest {
 
         // Then
         Signature signature = result.signature();
-        assertThat(signature.getSignatureData()).isEqualTo(expectedSignatureData);
-        assertThat(signature.getIpAddress()).isEqualTo(expectedIpAddress);
-        assertThat(signature.getSignerName()).isEqualTo("First Party");
-        assertThat(signature.getSignerEmail()).isEqualTo(firstPartyEmail);
+        assertThat(signature.signatureData()).isEqualTo(expectedSignatureData);
+        assertThat(signature.ipAddress()).isEqualTo(expectedIpAddress);
+        assertThat(signature.signerName()).isEqualTo("First Party");
+        assertThat(signature.signerEmail()).isEqualTo(firstPartyEmail);
     }
 }

@@ -88,7 +88,7 @@ class ContractPdfServiceTest {
         when(pdfGenerator.generateFromHtml(htmlCaptor.capture(), anyString()))
                 .thenReturn(GeneratedPdf.of(new byte[]{1}, "dummy.pdf"));
 
-        contractPdfService.generateContractPdf(contractId.getValue());
+        contractPdfService.generateContractPdf(contractId.value());
 
         String finalHtml = htmlCaptor.getValue();
         assertThat(finalHtml).contains("<img src=\"data:image/png;base64,aGVsbG8=\"");
@@ -149,7 +149,7 @@ class ContractPdfServiceTest {
         when(pdfGenerator.generateFromHtml(htmlCaptor.capture(), anyString()))
                 .thenReturn(GeneratedPdf.of(new byte[]{1}, "dummy.pdf"));
 
-        contractPdfService.generateContractPdf(contractId.getValue());
+        contractPdfService.generateContractPdf(contractId.value());
 
         String finalHtml = htmlCaptor.getValue();
         assertThat(finalHtml).contains("data:image/png;base64,Zmlyc3Q=");

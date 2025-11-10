@@ -18,11 +18,11 @@ class SignatureTest {
 
         Signature signature = Signature.create(signerEmail, signerName, signatureData, ipAddress);
 
-        assertThat(signature.getSignerEmail()).isEqualTo(signerEmail.toLowerCase());
-        assertThat(signature.getSignerName()).isEqualTo(signerName);
-        assertThat(signature.getSignatureData()).isEqualTo(signatureData);
-        assertThat(signature.getIpAddress()).isEqualTo(ipAddress);
-        assertThat(signature.getSignedAt()).isBeforeOrEqualTo(LocalDateTime.now());
+        assertThat(signature.signerEmail()).isEqualTo(signerEmail.toLowerCase());
+        assertThat(signature.signerName()).isEqualTo(signerName);
+        assertThat(signature.signatureData()).isEqualTo(signatureData);
+        assertThat(signature.ipAddress()).isEqualTo(ipAddress);
+        assertThat(signature.signedAt()).isBeforeOrEqualTo(LocalDateTime.now());
     }
 
     @Test
@@ -31,7 +31,7 @@ class SignatureTest {
 
         Signature signature = Signature.create(signerEmail, "홍길동", "서명데이터", "192.168.1.1");
 
-        assertThat(signature.getSignerEmail()).isEqualTo("test@example.com");
+        assertThat(signature.signerEmail()).isEqualTo("test@example.com");
     }
 
     @Test
@@ -40,7 +40,7 @@ class SignatureTest {
 
         Signature signature = Signature.create("test@example.com", signerName, "서명데이터", "192.168.1.1");
 
-        assertThat(signature.getSignerName()).isEqualTo("홍길동");
+        assertThat(signature.signerName()).isEqualTo("홍길동");
     }
 
     @Test
@@ -130,9 +130,9 @@ class SignatureTest {
 
         Signature signature2 = Signature.create("test@example.com", "홍길동", "서명데이터", "192.168.1.1");
 
-        assertThat(signature1.getSignerEmail()).isEqualTo(signature2.getSignerEmail());
-        assertThat(signature1.getSignerName()).isEqualTo(signature2.getSignerName());
-        assertThat(signature1.getSignatureData()).isEqualTo(signature2.getSignatureData());
-        assertThat(signature1.getIpAddress()).isEqualTo(signature2.getIpAddress());
+        assertThat(signature1.signerEmail()).isEqualTo(signature2.signerEmail());
+        assertThat(signature1.signerName()).isEqualTo(signature2.signerName());
+        assertThat(signature1.signatureData()).isEqualTo(signature2.signatureData());
+        assertThat(signature1.ipAddress()).isEqualTo(signature2.ipAddress());
     }
 }

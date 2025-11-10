@@ -2,7 +2,6 @@ package com.signly.contract.domain.model;
 
 import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
-import com.signly.contract.domain.model.PartyInfo;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
 
@@ -120,8 +119,17 @@ public class Contract extends AggregateRoot {
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
-        Contract contract = new Contract(id, creatorId, templateId, title, content,
-                firstParty, secondParty, expiresAt, presetType);
+        Contract contract = new Contract(
+                id,
+                creatorId,
+                templateId,
+                title,
+                content,
+                firstParty,
+                secondParty,
+                expiresAt,
+                presetType
+        );
         contract.status = status;
         contract.signatures.addAll(signatures);
         contract.signToken = signToken;
@@ -277,7 +285,7 @@ public class Contract extends AggregateRoot {
     public List<String> getPendingSigners() {
         List<String> allSigners = Arrays.asList(firstParty.email(), secondParty.email());
         Set<String> signedEmails = signatures.stream()
-                .map(Signature::getSignerEmail)
+                .map(Signature::signerEmail)
                 .collect(Collectors.toSet());
 
         return allSigners.stream()

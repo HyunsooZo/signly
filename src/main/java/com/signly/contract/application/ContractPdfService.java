@@ -88,7 +88,7 @@ public class ContractPdfService {
         }
 
         logger.info("계약서 PDF 생성 완료: contractId={}, fileName={}, size={}bytes",
-                contractId, pdf.getFileName(), pdf.getSizeInBytes());
+                contractId, pdf.fileName(), pdf.sizeInBytes());
 
         return pdf;
     }
@@ -109,21 +109,21 @@ public class ContractPdfService {
      * SRP: 템플릿 치환 로직 분리
      */
     private String insertSignatureImages(ContractPdfData pdfData) {
-        String html = normalizeSignaturePlaceholders(pdfData.getHtmlContent());
+        String html = normalizeSignaturePlaceholders(pdfData.htmlContent());
         if (html == null) {
             return "";
         }
 
         html = injectSignatureImage(
                 html,
-                pdfData.getFirstPartySignatureImage(),
+                pdfData.firstPartySignatureImage(),
                 "[EMPLOYER_SIGNATURE_IMAGE]",
                 1
         );
 
         html = injectSignatureImage(
                 html,
-                pdfData.getSecondPartySignatureImage(),
+                pdfData.secondPartySignatureImage(),
                 "[EMPLOYEE_SIGNATURE_IMAGE]",
                 2
         );
@@ -240,8 +240,8 @@ public class ContractPdfService {
     }
 
     private Optional<String> buildSignatureDataUrl(Signature signature) {
-        String signaturePath = signature.getSignaturePath();
-        String originalDataUrl = signature.getSignatureData();
+        String signaturePath = signature.signaturePath();
+        String originalDataUrl = signature.signatureData();
 
         if (signaturePath != null && !signaturePath.isBlank()) {
             try {

@@ -66,7 +66,7 @@ class SignatureServiceTest {
 
         ArgumentCaptor<Signature> captor = ArgumentCaptor.forClass(Signature.class);
         verify(signatureRepository).save(captor.capture());
-        assertThat(captor.getValue().getSignerEmail()).isEqualTo(normalizedEmail);
+        assertThat(captor.getValue().signerEmail()).isEqualTo(normalizedEmail);
 
         verify(signatureRepository).existsByContractIdAndSignerEmail(ContractId.of(contractId), normalizedEmail);
     }

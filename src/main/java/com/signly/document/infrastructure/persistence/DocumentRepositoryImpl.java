@@ -40,7 +40,7 @@ public class DocumentRepositoryImpl implements DocumentRepository {
 
     @Override
     public List<Document> findByContractId(ContractId contractId) {
-        return jpaRepository.findByContractIdOrderByCreatedAtDesc(contractId.getValue())
+        return jpaRepository.findByContractIdOrderByCreatedAtDesc(contractId.value())
             .stream()
             .map(mapper::toDomain)
             .toList();
@@ -62,7 +62,7 @@ public class DocumentRepositoryImpl implements DocumentRepository {
     @Override
     public List<Document> findByContractIdAndType(ContractId contractId, DocumentType type) {
         return jpaRepository.findByContractIdAndTypeOrderByCreatedAtDesc(
-                    contractId.getValue(), 
+                    contractId.value(),
                     type.name()
                 )
                 .stream()
@@ -73,13 +73,13 @@ public class DocumentRepositoryImpl implements DocumentRepository {
     @Override
     public boolean existsByContractIdAndType(ContractId contractId, DocumentType type) {
         return jpaRepository.existsByContractIdAndType(
-                    contractId.getValue(), 
+                    contractId.value(),
                     type.name()
                 );
     }
 
     @Override
     public long countByContractId(ContractId contractId) {
-        return jpaRepository.countByContractId(contractId.getValue());
+        return jpaRepository.countByContractId(contractId.value());
     }
 }

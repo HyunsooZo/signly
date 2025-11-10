@@ -131,7 +131,7 @@ public class ContractEventHandler {
 
     private String generateContractUrl(Contract contract) {
         // 실제로는 application.properties에서 base URL을 가져와야 함
-        return "https://signly.com/contracts/" + contract.getId().getValue() + "/sign";
+        return "https://signly.com/contracts/" + contract.getId().value() + "/sign";
     }
 
     private String getSignerName(String signerEmail, Contract contract) {

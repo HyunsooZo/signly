@@ -83,15 +83,15 @@ public class DocumentService {
 
         removeExistingContractPdf(contractId);
 
-        String checksum = calculateChecksum(pdf.getContent());
+        String checksum = calculateChecksum(pdf.content());
         FileMetadata metadata = FileMetadata.create(
-                ensurePdfExtension(pdf.getFileName()),
+                ensurePdfExtension(pdf.fileName()),
                 pdf.getContentType(),
-                pdf.getSizeInBytes(),
+                pdf.sizeInBytes(),
                 checksum
         );
 
-        String storagePath = fileStorageService.storeFile(pdf.getContent(), metadata);
+        String storagePath = fileStorageService.storeFile(pdf.content(), metadata);
         Document document = Document.create(contractId, uploaderId, DocumentType.CONTRACT_PDF, metadata, storagePath);
         return documentRepository.save(document);
     }

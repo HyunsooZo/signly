@@ -97,7 +97,7 @@ public class ContractQueryService {
                     return new NotFoundException("유효하지 않은 서명 링크입니다");
                 });
 
-        logger.info("계약서 찾음: contractId={}, status={}", contract.getId().getValue(), contract.getStatus());
+        logger.info("계약서 찾음: contractId={}, status={}", contract.getId().value(), contract.getStatus());
 
         if (contract.isExpired()) {
             throw new ValidationException("만료된 계약서입니다");

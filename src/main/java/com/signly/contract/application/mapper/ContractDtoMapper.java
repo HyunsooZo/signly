@@ -16,7 +16,7 @@ public class ContractDtoMapper {
 
     public ContractResponse toResponse(Contract contract) {
         return new ContractResponse(
-            contract.getId().getValue(),
+            contract.getId().value(),
             contract.getCreatorId().getValue(),
             contract.getTemplateId() != null ? contract.getTemplateId().getValue() : null,
             contract.getTitle(),
@@ -50,10 +50,10 @@ public class ContractDtoMapper {
 
     private SignatureResponse toSignatureResponse(Signature signature) {
         return new SignatureResponse(
-            signature.getSignerEmail(),
-            signature.getSignerName(),
-            signature.getSignedAt(),
-            signature.getIpAddress()
+            signature.signerEmail(),
+            signature.signerName(),
+            signature.signedAt(),
+            signature.ipAddress()
         );
     }
 }

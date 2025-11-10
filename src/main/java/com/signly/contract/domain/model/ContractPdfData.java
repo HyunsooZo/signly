@@ -9,53 +9,32 @@ import java.util.Objects;
  * DDD 원칙: 불변 객체, 관련 데이터 응집
  * SRP: PDF 생성에 필요한 데이터만 포함
  */
-public class ContractPdfData {
-    private final ContractId contractId;
-    private final String title;
-    private final String htmlContent;
-    private final String firstPartySignatureImage;
-    private final String secondPartySignatureImage;
-    private final PresetType presetType;
-    private final Map<String, Object> additionalData;
+public record ContractPdfData(
+        ContractId contractId,
+        String title,
+        String htmlContent,
+        String firstPartySignatureImage,
+        String secondPartySignatureImage,
+        PresetType presetType,
+        Map<String, Object> additionalData
+) {
 
     private ContractPdfData(Builder builder) {
-        this.contractId = Objects.requireNonNull(builder.contractId, "계약서 ID는 필수입니다");
-        this.title = Objects.requireNonNull(builder.title, "제목은 필수입니다");
-        this.htmlContent = Objects.requireNonNull(builder.htmlContent, "HTML 내용은 필수입니다");
-        this.firstPartySignatureImage = builder.firstPartySignatureImage;
-        this.secondPartySignatureImage = builder.secondPartySignatureImage;
-        this.presetType = builder.presetType;
-        this.additionalData = builder.additionalData != null
-                ? new HashMap<>(builder.additionalData)
-                : new HashMap<>();
+        this(
+                Objects.requireNonNull(builder.contractId, "계약서 ID는 필수입니다"),
+                Objects.requireNonNull(builder.title, "제목은 필수입니다"),
+                Objects.requireNonNull(builder.htmlContent, "HTML 내용은 필수입니다"),
+                builder.firstPartySignatureImage,
+                builder.secondPartySignatureImage,
+                builder.presetType,
+                builder.additionalData != null
+                        ? new HashMap<>(builder.additionalData)
+                        : new HashMap<>()
+        );
     }
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    public ContractId getContractId() {
-        return contractId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getHtmlContent() {
-        return htmlContent;
-    }
-
-    public String getFirstPartySignatureImage() {
-        return firstPartySignatureImage;
-    }
-
-    public String getSecondPartySignatureImage() {
-        return secondPartySignatureImage;
-    }
-
-    public PresetType getPresetType() {
-        return presetType;
     }
 
     public Map<String, Object> getAdditionalData() {
@@ -68,7 +47,7 @@ public class ContractPdfData {
     public String generateFileName() {
         String sanitizedTitle = title.replaceAll("[^a-zA-Z0-9가-힣\\s-]", "")
                 .replaceAll("\\s+", "_");
-        return String.format("%s_%s.pdf", sanitizedTitle, contractId.getValue());
+        return String.format("%s_%s.pdf", sanitizedTitle, contractId.value());
     }
 
     /**
@@ -126,27 +105,5 @@ public class ContractPdfData {
         public ContractPdfData build() {
             return new ContractPdfData(this);
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ContractPdfData that = (ContractPdfData) o;
-        return Objects.equals(contractId, that.contractId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(contractId);
-    }
-
-    @Override
-    public String toString() {
-        return "ContractPdfData{" +
-                "contractId=" + contractId +
-                ", title='" + title + '\'' +
-                ", hasBothSignatures=" + hasBothSignatures() +
-                '}';
     }
 }

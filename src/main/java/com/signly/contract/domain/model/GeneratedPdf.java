@@ -1,23 +1,25 @@
 package com.signly.contract.domain.model;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * PDF 문서를 나타내는 Value Object
  * DDD 원칙: 불변 객체로 설계, 비즈니스 로직 캡슐화
  */
-public class GeneratedPdf {
-    private final byte[] content;
-    private final String fileName;
-    private final long sizeInBytes;
-    private final LocalDateTime generatedAt;
+public record GeneratedPdf(
+        byte[] content,
+        String fileName,
+        long sizeInBytes,
+        LocalDateTime generatedAt
+) {
 
-    private GeneratedPdf(
+    public GeneratedPdf(
             byte[] content,
             String fileName,
             LocalDateTime generatedAt
     ) {
+        this(content, fileName, content == null ? 0 : content.length, generatedAt);
+
         if (content == null || content.length == 0) {
             throw new IllegalArgumentException("PDF 내용이 비어있습니다");
         }
@@ -27,11 +29,6 @@ public class GeneratedPdf {
         if (generatedAt == null) {
             throw new IllegalArgumentException("생성 시각이 비어있습니다");
         }
-
-        this.content = content.clone(); // 방어적 복사
-        this.fileName = fileName;
-        this.sizeInBytes = content.length;
-        this.generatedAt = generatedAt;
     }
 
     public static GeneratedPdf of(
@@ -39,22 +36,6 @@ public class GeneratedPdf {
             String fileName
     ) {
         return new GeneratedPdf(content, fileName, LocalDateTime.now());
-    }
-
-    public byte[] getContent() {
-        return content.clone(); // 방어적 복사
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public long getSizeInBytes() {
-        return sizeInBytes;
-    }
-
-    public LocalDateTime getGeneratedAt() {
-        return generatedAt;
     }
 
     public String getContentType() {
@@ -70,29 +51,5 @@ public class GeneratedPdf {
     public boolean exceedsSize(int maxSizeInMb) {
         long maxBytes = maxSizeInMb * 1024L * 1024L;
         return this.sizeInBytes > maxBytes;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GeneratedPdf that = (GeneratedPdf) o;
-        return sizeInBytes == that.sizeInBytes &&
-                Objects.equals(fileName, that.fileName) &&
-                Objects.equals(generatedAt, that.generatedAt);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(fileName, sizeInBytes, generatedAt);
-    }
-
-    @Override
-    public String toString() {
-        return "GeneratedPdf{" +
-                "fileName='" + fileName + '\'' +
-                ", sizeInBytes=" + sizeInBytes +
-                ", generatedAt=" + generatedAt +
-                '}';
     }
 }
