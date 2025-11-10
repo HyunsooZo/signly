@@ -6,12 +6,11 @@ import com.signly.common.exception.ValidationException;
 import com.signly.common.storage.FileStorageService;
 import com.signly.common.storage.StoredFile;
 import com.signly.contract.domain.model.ContractId;
-import com.signly.signature.application.dto.CreateSignatureCommand;
-import com.signly.signature.application.dto.SignatureResponse;
-import com.signly.signature.application.mapper.SignatureDtoMapper;
-import com.signly.signature.domain.model.ContractSignature;
-import com.signly.signature.domain.model.SignatureId;
-import com.signly.signature.domain.repository.SignatureRepository;
+import com.signly.contract.application.dto.CreateSignatureCommand;
+import com.signly.contract.application.dto.SignatureResponse;
+import com.signly.contract.application.mapper.SignatureDtoMapper;
+import com.signly.contract.domain.model.Signature;
+import com.signly.contract.domain.repository.SignatureRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -51,7 +50,7 @@ public class SignatureService {
         if (signatureRepository.existsByContractIdAndSignerEmail(contractId, normalizedEmail)) {
             logger.warn("이미 서명이 존재함, 기존 서명 반환: contractId={}, signerEmail={}",
                 command.contractId(), normalizedEmail);
-            ContractSignature existingSignature = signatureRepository
+            Signature existingSignature = signatureRepository
                 .findByContractIdAndSignerEmail(contractId, normalizedEmail)
                 .orElseThrow(() -> new NotFoundException("서명을 찾을 수 없습니다"));
             return mapper.toResponse(existingSignature);
@@ -68,11 +67,10 @@ public class SignatureService {
                 category
         );
 
-        ContractSignature signature = ContractSignature.create(
-                contractId,
-                command.signatureData(),
+        Signature signature = Signature.create(
                 normalizedEmail,
                 command.signerName(),
+                command.signatureData(),
                 command.ipAddress(),
                 command.deviceInfo(),
                 storedFile.filePath()
@@ -84,7 +82,7 @@ public class SignatureService {
 
         signatureRepository.save(signature);
 
-        logger.info("서명 생성 완료: signatureId={}", signature.id().value());
+        logger.info("서명 생성 완료: signerEmail={}", normalizedEmail);
         return mapper.toResponse(signature);
     }
 
@@ -151,7 +149,7 @@ public class SignatureService {
 
     @Transactional(readOnly = true)
     public SignatureResponse getSignature(String signatureId) {
-        ContractSignature signature = signatureRepository.findById(SignatureId.of(signatureId))
+        Signature signature = signatureRepository.findById(signatureId)
                 .orElseThrow(() -> new NotFoundException("서명을 찾을 수 없습니다: " + signatureId));
 
         return mapper.toResponse(signature);
@@ -160,7 +158,7 @@ public class SignatureService {
     @Transactional(readOnly = true)
     public List<SignatureResponse> getSignaturesByContract(String contractId) {
         ContractId cId = ContractId.of(contractId);
-        List<ContractSignature> signatures = signatureRepository.findByContractId(cId);
+        List<Signature> signatures = signatureRepository.findByContractId(cId);
 
         return signatures.stream()
                 .map(mapper::toResponse)
@@ -180,7 +178,7 @@ public class SignatureService {
     public SignatureResponse getContractSignature(String contractId, String signerEmail) {
         ContractId cId = ContractId.of(contractId);
         String normalizedEmail = normalizeEmail(signerEmail);
-        ContractSignature signature = signatureRepository.findByContractIdAndSignerEmail(cId, normalizedEmail)
+        Signature signature = signatureRepository.findByContractIdAndSignerEmail(cId, normalizedEmail)
                 .orElseThrow(() -> new NotFoundException("서명을 찾을 수 없습니다"));
 
         return mapper.toResponse(signature);
@@ -191,13 +189,11 @@ public class SignatureService {
     }
 
     public void deleteSignature(String signatureId) {
-        SignatureId sId = SignatureId.of(signatureId);
-
-        if (!signatureRepository.findById(sId).isPresent()) {
+        if (!signatureRepository.findById(signatureId).isPresent()) {
             throw new NotFoundException("서명을 찾을 수 없습니다: " + signatureId);
         }
 
-        signatureRepository.delete(sId);
+        signatureRepository.delete(signatureId);
         logger.info("서명 삭제 완료: signatureId={}", signatureId);
     }
 }

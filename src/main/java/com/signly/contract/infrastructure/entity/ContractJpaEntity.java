@@ -3,6 +3,7 @@ package com.signly.contract.infrastructure.entity;
 import com.signly.common.domain.BaseEntity;
 import com.signly.contract.domain.model.ContractStatus;
 import com.signly.contract.domain.model.PresetType;
+import com.signly.contract.infrastructure.entity.SignatureEntity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -67,7 +68,7 @@ public class ContractJpaEntity extends BaseEntity {
     private ContractStatus status;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<SignatureJpaEntity> signatures = new ArrayList<>();
+    private List<SignatureEntity> signatures = new ArrayList<>();
 
     @Column(name = "sign_token", nullable = false, unique = true, length = 26)
     private String signToken;
@@ -188,11 +189,11 @@ public class ContractJpaEntity extends BaseEntity {
         this.status = status;
     }
 
-    public List<SignatureJpaEntity> getSignatures() {
+    public List<SignatureEntity> getSignatures() {
         return signatures;
     }
 
-    public void addSignature(SignatureJpaEntity signature) {
+    public void addSignature(SignatureEntity signature) {
         signatures.add(signature);
         signature.setContract(this);
     }

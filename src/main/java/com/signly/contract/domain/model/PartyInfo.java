@@ -7,26 +7,34 @@ import java.util.regex.Pattern;
 
 public class PartyInfo {
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
-        "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+            "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
     );
 
     private final String name;
     private final String email;
     private final String organizationName;
 
-    private PartyInfo(String name, String email, String organizationName) {
+    private PartyInfo(
+            String name,
+            String email,
+            String organizationName
+    ) {
         this.name = name;
         this.email = email;
         this.organizationName = organizationName;
     }
 
-    public static PartyInfo of(String name, String email, String organizationName) {
+    public static PartyInfo of(
+            String name,
+            String email,
+            String organizationName
+    ) {
         validateName(name);
         validateEmail(email);
         validateOrganizationName(organizationName);
 
         return new PartyInfo(name.trim(), email.trim().toLowerCase(),
-                           organizationName != null ? organizationName.trim() : null);
+                organizationName != null ? organizationName.trim() : null);
     }
 
     private static void validateName(String name) {
@@ -75,8 +83,8 @@ public class PartyInfo {
         if (o == null || getClass() != o.getClass()) return false;
         PartyInfo partyInfo = (PartyInfo) o;
         return Objects.equals(name, partyInfo.name) &&
-               Objects.equals(email, partyInfo.email) &&
-               Objects.equals(organizationName, partyInfo.organizationName);
+                Objects.equals(email, partyInfo.email) &&
+                Objects.equals(organizationName, partyInfo.organizationName);
     }
 
     @Override
@@ -87,9 +95,9 @@ public class PartyInfo {
     @Override
     public String toString() {
         return "PartyInfo{" +
-               "name='" + name + '\'' +
-               ", email='" + email + '\'' +
-               ", organizationName='" + organizationName + '\'' +
-               '}';
+                "name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", organizationName='" + organizationName + '\'' +
+                '}';
     }
 }

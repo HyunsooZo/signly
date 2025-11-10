@@ -11,25 +11,51 @@ public class Signature {
     private final LocalDateTime signedAt;
     private final String signatureData;
     private final String ipAddress;
+    private final String deviceInfo;
+    private final String signaturePath;
 
-    private Signature(String signerEmail, String signerName, LocalDateTime signedAt,
-                     String signatureData, String ipAddress) {
+    private Signature(
+            String signerEmail,
+            String signerName,
+            LocalDateTime signedAt,
+            String signatureData,
+            String ipAddress,
+            String deviceInfo,
+            String signaturePath
+    ) {
         this.signerEmail = signerEmail;
         this.signerName = signerName;
         this.signedAt = signedAt;
         this.signatureData = signatureData;
         this.ipAddress = ipAddress;
+        this.deviceInfo = deviceInfo;
+        this.signaturePath = signaturePath;
     }
 
-    public static Signature create(String signerEmail, String signerName,
-                                 String signatureData, String ipAddress) {
+    public static Signature create(
+            String signerEmail,
+            String signerName,
+            String signatureData,
+            String ipAddress
+    ) {
+        return create(signerEmail, signerName, signatureData, ipAddress, null, null);
+    }
+
+    public static Signature create(
+            String signerEmail,
+            String signerName,
+            String signatureData,
+            String ipAddress,
+            String deviceInfo,
+            String signaturePath
+    ) {
         validateSignerEmail(signerEmail);
         validateSignerName(signerName);
         validateSignatureData(signatureData);
         validateIpAddress(ipAddress);
 
         return new Signature(signerEmail.trim().toLowerCase(), signerName.trim(),
-                           LocalDateTime.now(), signatureData, ipAddress);
+                LocalDateTime.now(), signatureData, ipAddress, deviceInfo, signaturePath);
     }
 
     private static void validateSignerEmail(String signerEmail) {
@@ -76,8 +102,27 @@ public class Signature {
         return ipAddress;
     }
 
+    public String getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public String getSignaturePath() {
+        return signaturePath;
+    }
+
     public boolean isSignedBy(String email) {
         return signerEmail.equals(email.trim().toLowerCase());
+    }
+
+    public boolean validate() {
+        return !signatureData.isEmpty() &&
+                signerEmail != null &&
+                signerName != null &&
+                ipAddress != null;
+    }
+
+    public boolean verifyIntegrity() {
+        return validate() && signatureData != null && !signatureData.isEmpty();
     }
 
     @Override
@@ -86,24 +131,26 @@ public class Signature {
         if (o == null || getClass() != o.getClass()) return false;
         Signature signature = (Signature) o;
         return Objects.equals(signerEmail, signature.signerEmail) &&
-               Objects.equals(signerName, signature.signerName) &&
-               Objects.equals(signedAt, signature.signedAt) &&
-               Objects.equals(signatureData, signature.signatureData) &&
-               Objects.equals(ipAddress, signature.ipAddress);
+                Objects.equals(signerName, signature.signerName) &&
+                Objects.equals(signedAt, signature.signedAt) &&
+                Objects.equals(signatureData, signature.signatureData) &&
+                Objects.equals(ipAddress, signature.ipAddress) &&
+                Objects.equals(deviceInfo, signature.deviceInfo) &&
+                Objects.equals(signaturePath, signature.signaturePath);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(signerEmail, signerName, signedAt, signatureData, ipAddress);
+        return Objects.hash(signerEmail, signerName, signedAt, signatureData, ipAddress, deviceInfo, signaturePath);
     }
 
     @Override
     public String toString() {
         return "Signature{" +
-               "signerEmail='" + signerEmail + '\'' +
-               ", signerName='" + signerName + '\'' +
-               ", signedAt=" + signedAt +
-               ", ipAddress='" + ipAddress + '\'' +
-               '}';
+                "signerEmail='" + signerEmail + '\'' +
+                ", signerName='" + signerName + '\'' +
+                ", signedAt=" + signedAt +
+                ", ipAddress='" + ipAddress + '\'' +
+                '}';
     }
 }

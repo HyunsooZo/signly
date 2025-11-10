@@ -13,7 +13,11 @@ public class GeneratedPdf {
     private final long sizeInBytes;
     private final LocalDateTime generatedAt;
 
-    private GeneratedPdf(byte[] content, String fileName, LocalDateTime generatedAt) {
+    private GeneratedPdf(
+            byte[] content,
+            String fileName,
+            LocalDateTime generatedAt
+    ) {
         if (content == null || content.length == 0) {
             throw new IllegalArgumentException("PDF 내용이 비어있습니다");
         }
@@ -30,7 +34,10 @@ public class GeneratedPdf {
         this.generatedAt = generatedAt;
     }
 
-    public static GeneratedPdf of(byte[] content, String fileName) {
+    public static GeneratedPdf of(
+            byte[] content,
+            String fileName
+    ) {
         return new GeneratedPdf(content, fileName, LocalDateTime.now());
     }
 
@@ -56,6 +63,7 @@ public class GeneratedPdf {
 
     /**
      * 파일 크기가 제한을 초과하는지 확인 (비즈니스 규칙)
+     *
      * @param maxSizeInMb 최대 크기 (MB)
      * @return 초과 여부
      */

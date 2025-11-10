@@ -6,8 +6,8 @@ import com.signly.contract.application.support.ContractHtmlSanitizer;
 import com.signly.contract.domain.model.*;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.contract.domain.service.PdfGenerator;
-import com.signly.signature.domain.model.ContractSignature;
-import com.signly.signature.domain.repository.SignatureRepository;
+import com.signly.contract.domain.model.Signature;
+import com.signly.contract.domain.repository.SignatureRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -98,7 +98,7 @@ public class ContractPdfService {
      */
     private String getSignatureImage(ContractId contractId, String signerEmail) {
         String normalizedEmail = normalizeEmail(signerEmail);
-        Optional<ContractSignature> signature = signatureRepository
+        Optional<Signature> signature = signatureRepository
                 .findByContractIdAndSignerEmail(contractId, normalizedEmail);
 
         return signature.flatMap(this::buildSignatureDataUrl).orElse(null);
@@ -239,9 +239,9 @@ public class ContractPdfService {
         return String.format("<img src=\"%s\" class=\"signature-stamp-image-element\" alt=\"서명\"/>", dataUrl);
     }
 
-    private Optional<String> buildSignatureDataUrl(ContractSignature signature) {
-        String signaturePath = signature.signaturePath();
-        String originalDataUrl = signature.signatureData().value();
+    private Optional<String> buildSignatureDataUrl(Signature signature) {
+        String signaturePath = signature.getSignaturePath();
+        String originalDataUrl = signature.getSignatureData();
 
         if (signaturePath != null && !signaturePath.isBlank()) {
             try {

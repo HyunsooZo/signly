@@ -3,10 +3,10 @@ package com.signly.signature.application;
 import com.signly.common.storage.FileStorageService;
 import com.signly.common.storage.StoredFile;
 import com.signly.contract.domain.model.ContractId;
-import com.signly.signature.application.dto.CreateSignatureCommand;
-import com.signly.signature.application.mapper.SignatureDtoMapper;
-import com.signly.signature.domain.model.ContractSignature;
-import com.signly.signature.domain.repository.SignatureRepository;
+import com.signly.contract.application.dto.CreateSignatureCommand;
+import com.signly.contract.application.mapper.SignatureDtoMapper;
+import com.signly.contract.domain.model.Signature;
+import com.signly.contract.domain.repository.SignatureRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,9 +64,9 @@ class SignatureServiceTest {
 
         signatureService.createSignature(command);
 
-        ArgumentCaptor<ContractSignature> captor = ArgumentCaptor.forClass(ContractSignature.class);
+        ArgumentCaptor<Signature> captor = ArgumentCaptor.forClass(Signature.class);
         verify(signatureRepository).save(captor.capture());
-        assertThat(captor.getValue().signerInfo().signerEmail()).isEqualTo(normalizedEmail);
+        assertThat(captor.getValue().getSignerEmail()).isEqualTo(normalizedEmail);
 
         verify(signatureRepository).existsByContractIdAndSignerEmail(ContractId.of(contractId), normalizedEmail);
     }

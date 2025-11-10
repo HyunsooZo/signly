@@ -1,4 +1,4 @@
-package com.signly.signature.infrastructure.persistence.entity;
+package com.signly.contract.infrastructure.entity;
 
 import com.signly.common.domain.BaseEntity;
 import jakarta.persistence.*;
@@ -13,8 +13,9 @@ public class SignatureEntity extends BaseEntity {
     @Column(name = "signature_id", length = 26)
     private String signatureId;
 
-    @Column(name = "contract_id", length = 26, nullable = false)
-    private String contractId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_id", nullable = false)
+    private ContractJpaEntity contract;
 
     @Column(name = "signer_email", length = 255, nullable = false)
     private String signerEmail;
@@ -41,11 +42,11 @@ public class SignatureEntity extends BaseEntity {
 
     protected SignatureEntity() {}
 
-    public SignatureEntity(String signatureId, String contractId, String signerEmail, String signerName,
+    public SignatureEntity(String signatureId, ContractJpaEntity contract, String signerEmail, String signerName,
                           String signatureData, LocalDateTime signedAt, String ipAddress,
                           String deviceInfo, String signaturePath) {
         this.signatureId = signatureId;
-        this.contractId = contractId;
+        this.contract = contract;
         this.signerEmail = signerEmail;
         this.signerName = signerName;
         this.signatureData = signatureData;
@@ -59,8 +60,12 @@ public class SignatureEntity extends BaseEntity {
         return signatureId;
     }
 
-    public String getContractId() {
-        return contractId;
+    public ContractJpaEntity getContract() {
+        return contract;
+    }
+
+    public void setContract(ContractJpaEntity contract) {
+        this.contract = contract;
     }
 
     public String getSignerEmail() {

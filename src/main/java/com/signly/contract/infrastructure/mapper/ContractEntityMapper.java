@@ -3,8 +3,9 @@ package com.signly.contract.infrastructure.mapper;
 import com.signly.contract.domain.model.*;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
+import com.signly.common.util.UlidGenerator;
 import com.signly.contract.infrastructure.entity.ContractJpaEntity;
-import com.signly.contract.infrastructure.entity.SignatureJpaEntity;
+import com.signly.contract.infrastructure.entity.SignatureEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class ContractEntityMapper {
 
         entity.setPdfPath(contract.getPdfPath());
 
-        List<SignatureJpaEntity> signatureEntities = contract.getSignatures().stream()
+        List<SignatureEntity> signatureEntities = contract.getSignatures().stream()
             .map(this::toSignatureEntity)
             .collect(Collectors.toList());
 
@@ -87,22 +88,28 @@ public class ContractEntityMapper {
         );
     }
 
-    private SignatureJpaEntity toSignatureEntity(Signature signature) {
-        return new SignatureJpaEntity(
+    private SignatureEntity toSignatureEntity(Signature signature) {
+        return new SignatureEntity(
+            UlidGenerator.generate(),
+            null, // contract will be set later
             signature.getSignerEmail(),
             signature.getSignerName(),
-            signature.getSignedAt(),
             signature.getSignatureData(),
-            signature.getIpAddress()
+            signature.getSignedAt(),
+            signature.getIpAddress(),
+            signature.getDeviceInfo(),
+            signature.getSignaturePath()
         );
     }
 
-    private Signature toDomainSignature(SignatureJpaEntity entity) {
+    private Signature toDomainSignature(SignatureEntity entity) {
         return Signature.create(
             entity.getSignerEmail(),
             entity.getSignerName(),
             entity.getSignatureData(),
-            entity.getIpAddress()
+            entity.getIpAddress(),
+            entity.getDeviceInfo(),
+            entity.getSignaturePath()
         );
     }
 

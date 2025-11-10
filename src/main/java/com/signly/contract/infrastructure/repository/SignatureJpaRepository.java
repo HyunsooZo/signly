@@ -1,6 +1,6 @@
-package com.signly.signature.infrastructure.persistence.repository;
+package com.signly.contract.infrastructure.repository;
 
-import com.signly.signature.infrastructure.persistence.entity.SignatureEntity;
+import com.signly.contract.infrastructure.entity.SignatureEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

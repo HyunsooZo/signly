@@ -8,8 +8,8 @@ import com.signly.notification.domain.model.EmailOutbox;
 import com.signly.notification.domain.model.EmailTemplate;
 import com.signly.notification.domain.repository.EmailOutboxRepository;
 import com.signly.signature.application.FirstPartySignatureService;
-import com.signly.signature.domain.model.ContractSignature;
-import com.signly.signature.domain.repository.SignatureRepository;
+
+import com.signly.contract.domain.repository.SignatureRepository;
 import com.signly.document.application.DocumentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

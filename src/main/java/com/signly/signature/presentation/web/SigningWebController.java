@@ -3,8 +3,7 @@ package com.signly.signature.presentation.web;
 import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.ContractResponse;
 import com.signly.signature.application.SignatureService;
-import com.signly.signature.application.dto.CreateSignatureCommand;
-import com.signly.signature.application.dto.SignatureResponse;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

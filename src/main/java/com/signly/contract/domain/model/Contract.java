@@ -45,9 +45,17 @@ public class Contract extends AggregateRoot {
         this.updatedAt = null;
     }
 
-    private Contract(ContractId id, UserId creatorId, TemplateId templateId,
-                     String title, ContractContent content, PartyInfo firstParty,
-                     PartyInfo secondParty, LocalDateTime expiresAt, PresetType presetType) {
+    private Contract(
+            ContractId id,
+            UserId creatorId,
+            TemplateId templateId,
+            String title,
+            ContractContent content,
+            PartyInfo firstParty,
+            PartyInfo secondParty,
+            LocalDateTime expiresAt,
+            PresetType presetType
+    ) {
         this.id = id;
         this.creatorId = creatorId;
         this.templateId = templateId;
@@ -64,15 +72,28 @@ public class Contract extends AggregateRoot {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public static Contract create(UserId creatorId, TemplateId templateId, String title,
-                                  ContractContent content, PartyInfo firstParty,
-                                  PartyInfo secondParty, LocalDateTime expiresAt) {
+    public static Contract create(
+            UserId creatorId,
+            TemplateId templateId,
+            String title,
+            ContractContent content,
+            PartyInfo firstParty,
+            PartyInfo secondParty,
+            LocalDateTime expiresAt
+    ) {
         return create(creatorId, templateId, title, content, firstParty, secondParty, expiresAt, PresetType.NONE);
     }
 
-    public static Contract create(UserId creatorId, TemplateId templateId, String title,
-                                  ContractContent content, PartyInfo firstParty,
-                                  PartyInfo secondParty, LocalDateTime expiresAt, PresetType presetType) {
+    public static Contract create(
+            UserId creatorId,
+            TemplateId templateId,
+            String title,
+            ContractContent content,
+            PartyInfo firstParty,
+            PartyInfo secondParty,
+            LocalDateTime expiresAt,
+            PresetType presetType
+    ) {
         validateTitle(title);
         validateExpirationDate(expiresAt);
         validateParties(firstParty, secondParty);
@@ -81,15 +102,25 @@ public class Contract extends AggregateRoot {
                 title.trim(), content, firstParty, secondParty, expiresAt, presetType);
     }
 
-    public static Contract restore(ContractId id, UserId creatorId, TemplateId templateId,
-                                 String title, ContractContent content, PartyInfo firstParty,
-                                 PartyInfo secondParty, ContractStatus status,
-                                 List<Signature> signatures, SignToken signToken,
-                                 LocalDateTime expiresAt, PresetType presetType,
-                                 String pdfPath,
-                                 LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public static Contract restore(
+            ContractId id,
+            UserId creatorId,
+            TemplateId templateId,
+            String title,
+            ContractContent content,
+            PartyInfo firstParty,
+            PartyInfo secondParty,
+            ContractStatus status,
+            List<Signature> signatures,
+            SignToken signToken,
+            LocalDateTime expiresAt,
+            PresetType presetType,
+            String pdfPath,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         Contract contract = new Contract(id, creatorId, templateId, title, content,
-                                       firstParty, secondParty, expiresAt, presetType);
+                firstParty, secondParty, expiresAt, presetType);
         contract.status = status;
         contract.signatures.addAll(signatures);
         contract.signToken = signToken;
@@ -114,7 +145,10 @@ public class Contract extends AggregateRoot {
         }
     }
 
-    private static void validateParties(PartyInfo firstParty, PartyInfo secondParty) {
+    private static void validateParties(
+            PartyInfo firstParty,
+            PartyInfo secondParty
+    ) {
         if (firstParty.getEmail().equals(secondParty.getEmail())) {
             throw new ValidationException("당사자들의 이메일은 서로 달라야 합니다");
         }
@@ -213,7 +247,7 @@ public class Contract extends AggregateRoot {
      */
     private boolean isValidSigner(String email) {
         return firstParty.getEmail().equals(email.trim().toLowerCase()) ||
-               secondParty.getEmail().equals(email.trim().toLowerCase());
+                secondParty.getEmail().equals(email.trim().toLowerCase());
     }
 
     /**

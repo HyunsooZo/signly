@@ -1,11 +1,10 @@
-package com.signly.signature.infrastructure.persistence.repository;
+package com.signly.contract.infrastructure.repository;
 
 import com.signly.contract.domain.model.ContractId;
-import com.signly.signature.domain.model.ContractSignature;
-import com.signly.signature.domain.model.SignatureId;
-import com.signly.signature.domain.repository.SignatureRepository;
-import com.signly.signature.infrastructure.persistence.entity.SignatureEntity;
-import com.signly.signature.infrastructure.persistence.mapper.SignatureEntityMapper;
+import com.signly.contract.domain.model.Signature;
+import com.signly.contract.domain.repository.SignatureRepository;
+import com.signly.contract.infrastructure.entity.SignatureEntity;
+import com.signly.contract.infrastructure.mapper.SignatureEntityMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -24,19 +23,19 @@ public class SignatureRepositoryImpl implements SignatureRepository {
     }
 
     @Override
-    public void save(ContractSignature signature) {
+    public void save(Signature signature) {
         SignatureEntity entity = mapper.toEntity(signature);
         jpaRepository.save(entity);
     }
 
     @Override
-    public Optional<ContractSignature> findById(SignatureId signatureId) {
-        return jpaRepository.findById(signatureId.value())
+    public Optional<Signature> findById(String signatureId) {
+        return jpaRepository.findById(signatureId)
                 .map(mapper::toDomain);
     }
 
     @Override
-    public List<ContractSignature> findByContractId(ContractId contractId) {
+    public List<Signature> findByContractId(ContractId contractId) {
         return jpaRepository.findByContractId(contractId.getValue())
                 .stream()
                 .map(mapper::toDomain)
@@ -44,7 +43,7 @@ public class SignatureRepositoryImpl implements SignatureRepository {
     }
 
     @Override
-    public Optional<ContractSignature> findByContractIdAndSignerEmail(ContractId contractId, String signerEmail) {
+    public Optional<Signature> findByContractIdAndSignerEmail(ContractId contractId, String signerEmail) {
         return jpaRepository.findByContractIdAndSignerEmail(contractId.getValue(), signerEmail)
                 .map(mapper::toDomain);
     }
@@ -55,7 +54,7 @@ public class SignatureRepositoryImpl implements SignatureRepository {
     }
 
     @Override
-    public void delete(SignatureId signatureId) {
-        jpaRepository.deleteById(signatureId.value());
+    public void delete(String signatureId) {
+        jpaRepository.deleteById(signatureId);
     }
 }

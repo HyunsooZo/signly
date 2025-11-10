@@ -26,8 +26,8 @@ public class ContractPdfData {
         this.secondPartySignatureImage = builder.secondPartySignatureImage;
         this.presetType = builder.presetType;
         this.additionalData = builder.additionalData != null
-            ? new HashMap<>(builder.additionalData)
-            : new HashMap<>();
+                ? new HashMap<>(builder.additionalData)
+                : new HashMap<>();
     }
 
     public static Builder builder() {
@@ -67,7 +67,7 @@ public class ContractPdfData {
      */
     public String generateFileName() {
         String sanitizedTitle = title.replaceAll("[^a-zA-Z0-9가-힣\\s-]", "")
-                                     .replaceAll("\\s+", "_");
+                .replaceAll("\\s+", "_");
         return String.format("%s_%s.pdf", sanitizedTitle, contractId.getValue());
     }
 
@@ -76,7 +76,7 @@ public class ContractPdfData {
      */
     public boolean hasBothSignatures() {
         return firstPartySignatureImage != null && !firstPartySignatureImage.isBlank()
-            && secondPartySignatureImage != null && !secondPartySignatureImage.isBlank();
+                && secondPartySignatureImage != null && !secondPartySignatureImage.isBlank();
     }
 
     public static class Builder {
