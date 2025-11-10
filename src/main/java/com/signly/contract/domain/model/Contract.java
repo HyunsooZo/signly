@@ -4,11 +4,13 @@ import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Getter
 public class Contract extends AggregateRoot {
     private final ContractId id;
     private final UserId creatorId;
@@ -293,64 +295,8 @@ public class Contract extends AggregateRoot {
                 .collect(Collectors.toList());
     }
 
-    public ContractId getId() {
-        return id;
-    }
-
-    public UserId getCreatorId() {
-        return creatorId;
-    }
-
-    public TemplateId getTemplateId() {
-        return templateId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public ContractContent getContent() {
-        return content;
-    }
-
-    public PartyInfo getFirstParty() {
-        return firstParty;
-    }
-
-    public PartyInfo getSecondParty() {
-        return secondParty;
-    }
-
-    public ContractStatus getStatus() {
-        return status;
-    }
-
     public List<Signature> getSignatures() {
         return Collections.unmodifiableList(signatures);
-    }
-
-    public SignToken getSignToken() {
-        return signToken;
-    }
-
-    public LocalDateTime getExpiresAt() {
-        return expiresAt;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public PresetType getPresetType() {
-        return presetType;
-    }
-
-    public String getPdfPath() {
-        return pdfPath;
     }
 
     public void setPdfPath(String pdfPath) {
