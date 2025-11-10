@@ -20,8 +20,8 @@ public class ContractAuthorizationService {
 
     public void validateAccess(String userId, Contract contract) {
         if (!contract.getCreatorId().getValue().equals(userId) &&
-                !contract.getFirstParty().getEmail().equals(userId) &&
-                !contract.getSecondParty().getEmail().equals(userId)) {
+                !contract.getFirstParty().email().equals(userId) &&
+                !contract.getSecondParty().email().equals(userId)) {
             throw new ForbiddenException("해당 계약서에 접근할 권한이 없습니다");
         }
     }
@@ -33,8 +33,8 @@ public class ContractAuthorizationService {
     }
 
     public void validateSigningAccess(String signerEmail, Contract contract) {
-        if (!contract.getFirstParty().getEmail().equals(signerEmail) &&
-                !contract.getSecondParty().getEmail().equals(signerEmail)) {
+        if (!contract.getFirstParty().email().equals(signerEmail) &&
+                !contract.getSecondParty().email().equals(signerEmail)) {
             throw new ForbiddenException("해당 계약서에 접근할 권한이 없습니다");
         }
     }

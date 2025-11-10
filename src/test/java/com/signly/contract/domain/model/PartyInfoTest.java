@@ -15,9 +15,9 @@ class PartyInfoTest {
 
         PartyInfo partyInfo = PartyInfo.of(name, email, organization);
 
-        assertThat(partyInfo.getName()).isEqualTo(name);
-        assertThat(partyInfo.getEmail()).isEqualTo(email.toLowerCase());
-        assertThat(partyInfo.getOrganizationName()).isEqualTo(organization);
+        assertThat(partyInfo.name()).isEqualTo(name);
+        assertThat(partyInfo.email()).isEqualTo(email.toLowerCase());
+        assertThat(partyInfo.organizationName()).isEqualTo(organization);
     }
 
     @Test
@@ -27,9 +27,9 @@ class PartyInfoTest {
 
         PartyInfo partyInfo = PartyInfo.of(name, email, null);
 
-        assertThat(partyInfo.getName()).isEqualTo(name);
-        assertThat(partyInfo.getEmail()).isEqualTo(email.toLowerCase());
-        assertThat(partyInfo.getOrganizationName()).isNull();
+        assertThat(partyInfo.name()).isEqualTo(name);
+        assertThat(partyInfo.email()).isEqualTo(email.toLowerCase());
+        assertThat(partyInfo.organizationName()).isNull();
         assertThat(partyInfo.hasOrganization()).isFalse();
     }
 
@@ -39,7 +39,7 @@ class PartyInfoTest {
 
         PartyInfo partyInfo = PartyInfo.of("홍길동", email, "회사명");
 
-        assertThat(partyInfo.getEmail()).isEqualTo("test@example.com");
+        assertThat(partyInfo.email()).isEqualTo("test@example.com");
     }
 
     @Test
@@ -50,9 +50,9 @@ class PartyInfoTest {
 
         PartyInfo partyInfo = PartyInfo.of(name, email, organization);
 
-        assertThat(partyInfo.getName()).isEqualTo("홍길동");
-        assertThat(partyInfo.getEmail()).isEqualTo("test@example.com");
-        assertThat(partyInfo.getOrganizationName()).isEqualTo("회사명");
+        assertThat(partyInfo.name()).isEqualTo("홍길동");
+        assertThat(partyInfo.email()).isEqualTo("test@example.com");
+        assertThat(partyInfo.organizationName()).isEqualTo("회사명");
     }
 
     @Test

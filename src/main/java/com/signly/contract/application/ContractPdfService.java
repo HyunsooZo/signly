@@ -59,14 +59,14 @@ public class ContractPdfService {
                 .orElseThrow(() -> new NotFoundException("계약서를 찾을 수 없습니다: " + contractId));
 
         // 양측 서명 이미지 조회
-        String firstPartySignatureImage = getSignatureImage(cId, contract.getFirstParty().getEmail());
-        String secondPartySignatureImage = getSignatureImage(cId, contract.getSecondParty().getEmail());
+        String firstPartySignatureImage = getSignatureImage(cId, contract.getFirstParty().email());
+        String secondPartySignatureImage = getSignatureImage(cId, contract.getSecondParty().email());
 
         // PDF 데이터 구성
         ContractPdfData pdfData = ContractPdfData.builder()
                 .contractId(contract.getId())
                 .title(contract.getTitle())
-                .htmlContent(contract.getContent().getValue())
+                .htmlContent(contract.getContent().content())
                 .firstPartySignatureImage(firstPartySignatureImage)
                 .secondPartySignatureImage(secondPartySignatureImage)
                 .presetType(contract.getPresetType())

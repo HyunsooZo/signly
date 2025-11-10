@@ -20,7 +20,7 @@ public class ContractDtoMapper {
             contract.getCreatorId().getValue(),
             contract.getTemplateId() != null ? contract.getTemplateId().getValue() : null,
             contract.getTitle(),
-            contract.getContent().getValue(),
+            contract.getContent().content(),
             toPartyInfoResponse(contract.getFirstParty()),
             toPartyInfoResponse(contract.getSecondParty()),
             contract.getStatus(),
@@ -36,9 +36,9 @@ public class ContractDtoMapper {
 
     private PartyInfoResponse toPartyInfoResponse(PartyInfo partyInfo) {
         return new PartyInfoResponse(
-            partyInfo.getName(),
-            partyInfo.getEmail(),
-            partyInfo.getOrganizationName()
+            partyInfo.name(),
+            partyInfo.email(),
+            partyInfo.organizationName()
         );
     }
 

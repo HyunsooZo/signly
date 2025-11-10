@@ -84,12 +84,12 @@ public class ContractEventHandler {
 
             // 모든 당사자에게 완료 알림
             emailService.sendContractCompleted(
-                contract.getFirstParty().getEmail(),
+                contract.getFirstParty().email(),
                 contract.getTitle()
             );
 
             emailService.sendContractCompleted(
-                contract.getSecondParty().getEmail(),
+                contract.getSecondParty().email(),
                 contract.getTitle()
             );
 
@@ -111,13 +111,13 @@ public class ContractEventHandler {
 
             // 모든 당사자에게 취소 알림
             emailService.sendContractCancelled(
-                contract.getFirstParty().getEmail(),
+                contract.getFirstParty().email(),
                 contract.getTitle(),
                 reason
             );
 
             emailService.sendContractCancelled(
-                contract.getSecondParty().getEmail(),
+                contract.getSecondParty().email(),
                 contract.getTitle(),
                 reason
             );
@@ -135,10 +135,10 @@ public class ContractEventHandler {
     }
 
     private String getSignerName(String signerEmail, Contract contract) {
-        if (contract.getFirstParty().getEmail().equals(signerEmail)) {
-            return contract.getFirstParty().getName();
-        } else if (contract.getSecondParty().getEmail().equals(signerEmail)) {
-            return contract.getSecondParty().getName();
+        if (contract.getFirstParty().email().equals(signerEmail)) {
+            return contract.getFirstParty().name();
+        } else if (contract.getSecondParty().email().equals(signerEmail)) {
+            return contract.getSecondParty().name();
         }
         return "서명자";
     }

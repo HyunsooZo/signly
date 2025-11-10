@@ -87,8 +87,8 @@ public class ContractSigningService {
      * 서명자 권한 확인
      */
     private boolean isValidSigner(Contract contract, String email) {
-        return contract.getFirstParty().getEmail().equals(email.trim().toLowerCase()) ||
-               contract.getSecondParty().getEmail().equals(email.trim().toLowerCase());
+        return contract.getFirstParty().email().equals(email.trim().toLowerCase()) ||
+               contract.getSecondParty().email().equals(email.trim().toLowerCase());
     }
 
     /**

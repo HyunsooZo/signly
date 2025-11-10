@@ -58,18 +58,18 @@ public class EmailNotificationService {
 
             Map<String, Object> variables = new HashMap<>();
             variables.put("contractTitle", contract.getTitle());
-            variables.put("firstPartyName", contract.getFirstParty().getName());
-            variables.put("firstPartyEmail", contract.getFirstParty().getEmail());
-            variables.put("secondPartyName", contract.getSecondParty().getName());
-            variables.put("signerName", contract.getSecondParty().getName());
+            variables.put("firstPartyName", contract.getFirstParty().name());
+            variables.put("firstPartyEmail", contract.getFirstParty().email());
+            variables.put("secondPartyName", contract.getSecondParty().name());
+            variables.put("signerName", contract.getSecondParty().name());
             variables.put("contractUrl", signingUrl);
             variables.put("expiresAt", contract.getExpiresAt());
             variables.put("companyName", companyName);
 
             EmailOutbox outbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_SIGNING_REQUEST,
-                    contract.getSecondParty().getEmail(),
-                    contract.getSecondParty().getName(),
+                    contract.getSecondParty().email(),
+                    contract.getSecondParty().name(),
                     variables
             );
 
@@ -87,8 +87,8 @@ public class EmailNotificationService {
         try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("contractTitle", contract.getTitle());
-            variables.put("firstPartyName", contract.getFirstParty().getName());
-            variables.put("secondPartyName", contract.getSecondParty().getName());
+            variables.put("firstPartyName", contract.getFirstParty().name());
+            variables.put("secondPartyName", contract.getSecondParty().name());
             variables.put("completedAt", contract.getUpdatedAt());
             variables.put("companyName", companyName);
 
@@ -116,16 +116,16 @@ public class EmailNotificationService {
             // 양 당사자에게 Outbox 저장 (PDF 첨부)
             EmailOutbox firstPartyOutbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_COMPLETED,
-                    contract.getFirstParty().getEmail(),
-                    contract.getFirstParty().getName(),
+                    contract.getFirstParty().email(),
+                    contract.getFirstParty().name(),
                     variables,
                     attachments
             );
 
             EmailOutbox secondPartyOutbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_COMPLETED,
-                    contract.getSecondParty().getEmail(),
-                    contract.getSecondParty().getName(),
+                    contract.getSecondParty().email(),
+                    contract.getSecondParty().name(),
                     variables,
                     attachments
             );
@@ -154,15 +154,15 @@ public class EmailNotificationService {
         try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("contractTitle", contract.getTitle());
-            variables.put("firstPartyName", contract.getFirstParty().getName());
-            variables.put("secondPartyName", contract.getSecondParty().getName());
+            variables.put("firstPartyName", contract.getFirstParty().name());
+            variables.put("secondPartyName", contract.getSecondParty().name());
             variables.put("cancelledAt", contract.getUpdatedAt());
             variables.put("companyName", companyName);
 
             EmailOutbox outbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_CANCELLED,
-                    contract.getSecondParty().getEmail(),
-                    contract.getSecondParty().getName(),
+                    contract.getSecondParty().email(),
+                    contract.getSecondParty().name(),
                     variables
             );
 
@@ -179,23 +179,23 @@ public class EmailNotificationService {
         try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("contractTitle", contract.getTitle());
-            variables.put("firstPartyName", contract.getFirstParty().getName());
-            variables.put("secondPartyName", contract.getSecondParty().getName());
+            variables.put("firstPartyName", contract.getFirstParty().name());
+            variables.put("secondPartyName", contract.getSecondParty().name());
             variables.put("expiredAt", contract.getExpiresAt());
             variables.put("companyName", companyName);
 
             // 양 당사자에게 Outbox 저장
             EmailOutbox firstPartyOutbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_EXPIRED,
-                    contract.getFirstParty().getEmail(),
-                    contract.getFirstParty().getName(),
+                    contract.getFirstParty().email(),
+                    contract.getFirstParty().name(),
                     variables
             );
 
             EmailOutbox secondPartyOutbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_EXPIRED,
-                    contract.getSecondParty().getEmail(),
-                    contract.getSecondParty().getName(),
+                    contract.getSecondParty().email(),
+                    contract.getSecondParty().name(),
                     variables
             );
 
@@ -219,7 +219,7 @@ public class EmailNotificationService {
 
             Map<String, Object> variables = new HashMap<>();
             variables.put("contractTitle", contract.getTitle());
-            variables.put("signerName", contract.getSecondParty().getName());
+            variables.put("signerName", contract.getSecondParty().name());
             variables.put("daysLeft", daysLeft);
             variables.put("expiresAt", contract.getExpiresAt());
             variables.put("contractUrl", signingUrl);
@@ -227,8 +227,8 @@ public class EmailNotificationService {
 
             EmailOutbox outbox = EmailOutbox.create(
                     EmailTemplate.EXPIRATION_WARNING,
-                    contract.getSecondParty().getEmail(),
-                    contract.getSecondParty().getName(),
+                    contract.getSecondParty().email(),
+                    contract.getSecondParty().name(),
                     variables
             );
 
@@ -248,7 +248,7 @@ public class EmailNotificationService {
 
             Map<String, Object> variables = new HashMap<>();
             variables.put("contractTitle", contract.getTitle());
-            variables.put("signerName", contract.getSecondParty().getName());
+            variables.put("signerName", contract.getSecondParty().name());
             variables.put("sentAt", contract.getUpdatedAt());
             variables.put("expiresAt", contract.getExpiresAt());
             variables.put("contractUrl", signingUrl);
@@ -256,8 +256,8 @@ public class EmailNotificationService {
 
             EmailOutbox outbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_REMINDER,
-                    contract.getSecondParty().getEmail(),
-                    contract.getSecondParty().getName(),
+                    contract.getSecondParty().email(),
+                    contract.getSecondParty().name(),
                     variables
             );
 

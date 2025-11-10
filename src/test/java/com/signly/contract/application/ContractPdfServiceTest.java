@@ -72,16 +72,16 @@ class ContractPdfServiceTest {
         when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
 
         Signature signature = Signature.create(
-                secondParty.getEmail(),
+                secondParty.email(),
                 "을",
                 "data:image/png;base64,aGVsbG8=",
                 "127.0.0.1",
                 "Chrome",
                 null
         );
-        when(signatureRepository.findByContractIdAndSignerEmail(contractId, firstParty.getEmail()))
+        when(signatureRepository.findByContractIdAndSignerEmail(contractId, firstParty.email()))
                 .thenReturn(Optional.empty());
-        when(signatureRepository.findByContractIdAndSignerEmail(contractId, secondParty.getEmail()))
+        when(signatureRepository.findByContractIdAndSignerEmail(contractId, secondParty.email()))
                 .thenReturn(Optional.of(signature));
 
         ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.forClass(String.class);
@@ -123,7 +123,7 @@ class ContractPdfServiceTest {
         when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
 
         Signature firstSignature = Signature.create(
-                firstParty.getEmail(),
+                firstParty.email(),
                 "갑",
                 "data:image/png;base64,Zmlyc3Q=",
                 "127.0.0.1",
@@ -132,7 +132,7 @@ class ContractPdfServiceTest {
         );
 
         Signature secondSignature = Signature.create(
-                secondParty.getEmail(),
+                secondParty.email(),
                 "을",
                 "data:image/png;base64,c2Vjb25k",
                 "127.0.0.1",
@@ -140,9 +140,9 @@ class ContractPdfServiceTest {
                 null
         );
 
-        when(signatureRepository.findByContractIdAndSignerEmail(contractId, firstParty.getEmail()))
+        when(signatureRepository.findByContractIdAndSignerEmail(contractId, firstParty.email()))
                 .thenReturn(Optional.of(firstSignature));
-        when(signatureRepository.findByContractIdAndSignerEmail(contractId, secondParty.getEmail()))
+        when(signatureRepository.findByContractIdAndSignerEmail(contractId, secondParty.email()))
                 .thenReturn(Optional.of(secondSignature));
 
         ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.forClass(String.class);

@@ -2,6 +2,7 @@ package com.signly.contract.domain.model;
 
 import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
+import com.signly.contract.domain.model.PartyInfo;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
 
@@ -149,7 +150,7 @@ public class Contract extends AggregateRoot {
             PartyInfo firstParty,
             PartyInfo secondParty
     ) {
-        if (firstParty.getEmail().equals(secondParty.getEmail())) {
+        if (firstParty.email().equals(secondParty.email())) {
             throw new ValidationException("당사자들의 이메일은 서로 달라야 합니다");
         }
     }
@@ -246,8 +247,8 @@ public class Contract extends AggregateRoot {
      * 서명자 권한 확인
      */
     private boolean isValidSigner(String email) {
-        return firstParty.getEmail().equals(email.trim().toLowerCase()) ||
-                secondParty.getEmail().equals(email.trim().toLowerCase());
+        return firstParty.email().equals(email.trim().toLowerCase()) ||
+                secondParty.email().equals(email.trim().toLowerCase());
     }
 
     /**
@@ -262,7 +263,7 @@ public class Contract extends AggregateRoot {
      * 모든 당사자가 서명했는지 확인
      */
     public boolean isFullySigned() {
-        return hasSignedBy(firstParty.getEmail()) && hasSignedBy(secondParty.getEmail());
+        return hasSignedBy(firstParty.email()) && hasSignedBy(secondParty.email());
     }
 
     public boolean isExpired() {
@@ -274,7 +275,7 @@ public class Contract extends AggregateRoot {
     }
 
     public List<String> getPendingSigners() {
-        List<String> allSigners = Arrays.asList(firstParty.getEmail(), secondParty.getEmail());
+        List<String> allSigners = Arrays.asList(firstParty.email(), secondParty.email());
         Set<String> signedEmails = signatures.stream()
                 .map(Signature::getSignerEmail)
                 .collect(Collectors.toSet());

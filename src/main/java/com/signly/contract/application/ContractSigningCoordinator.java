@@ -255,25 +255,25 @@ public class ContractSigningCoordinator {
         CreateSignatureCommand firstPartyCommand = new CreateSignatureCommand(
                 contract.getId().getValue(),
                 firstPartySignatureData,
-                contract.getFirstParty().getEmail(),
-                contract.getFirstParty().getName(),
+                contract.getFirstParty().email(),
+                contract.getFirstParty().name(),
                 "SERVER",
                 "Server-initiated signature"
         );
         signatureService.createSignature(firstPartyCommand);
         
         logger.info("제1 당사자 서명 저장 완료: contractId={}, email={}",
-                contract.getId().getValue(), contract.getFirstParty().getEmail());
+                contract.getId().getValue(), contract.getFirstParty().email());
     }
 
     private void ensureFirstPartySignatureExists(Contract contract) {
         firstPartySignatureService.ensureSignatureExists(contract.getCreatorId().getValue());
         
         ContractId cId = contract.getId();
-        if (!signatureRepository.existsByContractIdAndSignerEmail(cId, contract.getFirstParty().getEmail())) {
+        if (!signatureRepository.existsByContractIdAndSignerEmail(cId, contract.getFirstParty().email())) {
             saveFirstPartySignature(contract);
             logger.info("재전송 시 제1 당사자 서명 저장: contractId={}, email={}",
-                    contract.getId().getValue(), contract.getFirstParty().getEmail());
+                    contract.getId().getValue(), contract.getFirstParty().email());
         }
     }
 }
