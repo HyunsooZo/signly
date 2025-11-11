@@ -32,10 +32,10 @@ public class TemplateVariableDto {
     ) {
         return new TemplateVariableDto(
             name,
-            variable.getLabel(),
-            variable.getType(),
-            variable.isRequired(),
-            variable.getDefaultValue()
+            variable.label(),
+            variable.type(),
+            variable.required(),
+            variable.defaultValue()
         );
     }
 }

@@ -2,7 +2,6 @@ package com.signly.template.application;
 
 import com.signly.template.domain.model.TemplateContent;
 import com.signly.template.domain.model.TemplateSection;
-import com.signly.template.domain.model.TemplateSectionType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 public class HtmlRenderer {
@@ -22,10 +20,13 @@ public class HtmlRenderer {
         return render(templateContent, Map.of());
     }
 
-    public String render(TemplateContent templateContent, Map<String, String> variableValues) {
-        List<TemplateSection> sections = templateContent.getSections().stream()
+    public String render(
+            TemplateContent templateContent,
+            Map<String, String> variableValues
+    ) {
+        List<TemplateSection> sections = templateContent.sections().stream()
                 .sorted(Comparator.comparingInt(TemplateSection::getOrder))
-                .collect(Collectors.toList());
+                .toList();
 
         StringBuilder html = new StringBuilder();
         html.append("<div class=\"template-document\">\n");
@@ -40,7 +41,10 @@ public class HtmlRenderer {
         return html.toString();
     }
 
-    private String renderSection(TemplateSection section, Map<String, String> variableValues) {
+    private String renderSection(
+            TemplateSection section,
+            Map<String, String> variableValues
+    ) {
         String content = substituteVariables(section.getContent(), variableValues);
         Map<String, Object> metadata = section.getMetadata();
 
@@ -53,7 +57,10 @@ public class HtmlRenderer {
         };
     }
 
-    private String renderHeader(String content, Map<String, Object> metadata) {
+    private String renderHeader(
+            String content,
+            Map<String, Object> metadata
+    ) {
         int level = metadata != null && metadata.containsKey("level") ?
                 ((Number) metadata.get("level")).intValue() : 1;
         level = Math.max(1, Math.min(6, level));
@@ -70,7 +77,10 @@ public class HtmlRenderer {
                 alignmentClass, level, escaped, level);
     }
 
-    private String renderParagraph(String content, Map<String, Object> metadata) {
+    private String renderParagraph(
+            String content,
+            Map<String, Object> metadata
+    ) {
         boolean indent = metadata != null && metadata.containsKey("indent") &&
                 (Boolean) metadata.get("indent");
 
@@ -87,7 +97,10 @@ public class HtmlRenderer {
                 indentClass, alignmentClass, escaped);
     }
 
-    private String renderDottedBox(String content, Map<String, Object> metadata) {
+    private String renderDottedBox(
+            String content,
+            Map<String, Object> metadata
+    ) {
         String alignment = metadata != null && metadata.containsKey("alignment") ?
                 (String) metadata.get("alignment") : "left";
 
@@ -100,7 +113,10 @@ public class HtmlRenderer {
                 alignmentClass, escaped);
     }
 
-    private String renderFooter(String content, Map<String, Object> metadata) {
+    private String renderFooter(
+            String content,
+            Map<String, Object> metadata
+    ) {
         String alignment = metadata != null && metadata.containsKey("alignment") ?
                 (String) metadata.get("alignment") : "center";
 
@@ -113,7 +129,10 @@ public class HtmlRenderer {
                 alignmentClass, escaped);
     }
 
-    private String renderCustom(String content, Map<String, Object> metadata) {
+    private String renderCustom(
+            String content,
+            Map<String, Object> metadata
+    ) {
         boolean sanitize = metadata == null || !metadata.containsKey("sanitize") ||
                 (Boolean) metadata.get("sanitize");
 
@@ -125,7 +144,10 @@ public class HtmlRenderer {
         }
     }
 
-    private String substituteVariables(String content, Map<String, String> variableValues) {
+    private String substituteVariables(
+            String content,
+            Map<String, String> variableValues
+    ) {
         if (content == null || content.isEmpty()) {
             return content;
         }

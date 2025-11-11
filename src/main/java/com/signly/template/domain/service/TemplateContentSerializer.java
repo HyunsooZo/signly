@@ -20,7 +20,11 @@ public class TemplateContentSerializer {
     /**
      * TemplateContentData를 JSON 문자열로 직렬화
      */
-    public String serializeToJson(String version, TemplateMetadata metadata, List<TemplateSection> sections) {
+    public String serializeToJson(
+            String version,
+            TemplateMetadata metadata,
+            List<TemplateSection> sections
+    ) {
         try {
             Map<String, Object> root = new HashMap<>();
             root.put("version", version);
@@ -38,17 +42,17 @@ public class TemplateContentSerializer {
      */
     private Map<String, Object> buildMetadataMap(TemplateMetadata metadata) {
         Map<String, Object> metadataMap = new HashMap<>();
-        metadataMap.put("title", metadata.getTitle());
-        metadataMap.put("description", metadata.getDescription());
-        metadataMap.put("createdBy", metadata.getCreatedBy());
+        metadataMap.put("title", metadata.title());
+        metadataMap.put("description", metadata.description());
+        metadataMap.put("createdBy", metadata.createdBy());
 
         Map<String, Map<String, Object>> variablesMap = new HashMap<>();
-        metadata.getVariables().forEach((key, var) -> {
+        metadata.variables().forEach((key, var) -> {
             Map<String, Object> varMap = new HashMap<>();
-            varMap.put("label", var.getLabel());
-            varMap.put("type", var.getType().name().toLowerCase());
-            varMap.put("required", var.isRequired());
-            varMap.put("defaultValue", var.getDefaultValue());
+            varMap.put("label", var.label());
+            varMap.put("type", var.type().name().toLowerCase());
+            varMap.put("required", var.required());
+            varMap.put("defaultValue", var.defaultValue());
             variablesMap.put(key, varMap);
         });
         metadataMap.put("variables", variablesMap);

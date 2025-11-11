@@ -1,24 +1,22 @@
 package com.signly.template.domain.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class TemplateMetadata {
+public record TemplateMetadata(
+        String title,
+        String description,
+        String createdBy,
+        Map<String, TemplateVariable> variables
+) {
 
-    @Getter
-    private final String title;
-    @Getter
-    private final String description;
-    @Getter
-    private final String createdBy;
-    private final Map<String, TemplateVariable> variables;
-
-    private TemplateMetadata(
+    public TemplateMetadata(
             String title,
-                             String description,
-                             String createdBy,
+            String description,
+            String createdBy,
             Map<String, TemplateVariable> variables
     ) {
         this.title = title;
@@ -47,4 +45,5 @@ public class TemplateMetadata {
     public TemplateVariable getVariable(String variableName) {
         return variables.get(variableName);
     }
+
 }

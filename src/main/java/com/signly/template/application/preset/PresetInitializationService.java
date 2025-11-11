@@ -71,7 +71,7 @@ public class PresetInitializationService {
                         null, // owner_id is null for presets
                         "표준 근로계약서",
                         jsonContent,
-                        templateContent.getSections().size(),
+                        templateContent.sections().size(),
                         TemplateStatus.ACTIVE,
                         true, // is_preset
                         "standard-employment-contract", // preset_id

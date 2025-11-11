@@ -10,10 +10,10 @@ public class TemplateEntityMapper {
 
     public TemplateEntity toEntity(ContractTemplate template) {
         return new TemplateEntity(
-                template.getTemplateId().getValue(),
-                template.getOwnerId().getValue(),
+                template.getTemplateId().value(),
+                template.getOwnerId().value(),
                 template.getTitle(),
-                template.getContent().getJsonContent(),
+                template.getContent().jsonContent(),
                 template.getVersion(),
                 template.getStatus(),
                 false, // isPreset - 사용자 템플릿은 프리셋이 아님
@@ -43,7 +43,7 @@ public class TemplateEntityMapper {
 
     public void updateEntity(TemplateEntity entity, ContractTemplate template) {
         entity.setTitle(template.getTitle());
-        entity.setContent(template.getContent().getJsonContent());
+        entity.setContent(template.getContent().jsonContent());
         entity.setVersion(template.getVersion());
         entity.setStatus(template.getStatus());
         entity.setUpdatedAt(template.getUpdatedAt());

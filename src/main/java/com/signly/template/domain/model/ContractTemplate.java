@@ -141,26 +141,26 @@ public class ContractTemplate extends AggregateRoot {
             throw new ValidationException("섹션은 필수입니다");
         }
 
-        var sections = new java.util.ArrayList<>(this.content.getSections());
+        var sections = new java.util.ArrayList<>(this.content.sections());
         sections.add(section);
 
         this.content = TemplateContent.of(
-            this.content.getMetadata(),
-            sections
+                this.content.metadata(),
+                sections
         );
         this.version++;
         updateTimestamp();
     }
 
     public void updateSection(
-        String sectionId,
-        String newContent
+            String sectionId,
+            String newContent
     ) {
         if (this.status == TemplateStatus.ACTIVE) {
             throw new ValidationException("활성화된 템플릿은 수정할 수 없습니다");
         }
 
-        var sections = new java.util.ArrayList<>(this.content.getSections());
+        var sections = new java.util.ArrayList<>(this.content.sections());
         boolean found = false;
 
         for (TemplateSection section : sections) {
@@ -176,8 +176,8 @@ public class ContractTemplate extends AggregateRoot {
         }
 
         this.content = TemplateContent.of(
-            this.content.getMetadata(),
-            sections
+                this.content.metadata(),
+                sections
         );
         this.version++;
         updateTimestamp();
@@ -188,7 +188,7 @@ public class ContractTemplate extends AggregateRoot {
             throw new ValidationException("활성화된 템플릿은 수정할 수 없습니다");
         }
 
-        var sections = new java.util.ArrayList<>(this.content.getSections());
+        var sections = new java.util.ArrayList<>(this.content.sections());
 
         if (sectionIds.size() != sections.size()) {
             throw new ValidationException("섹션 ID 개수가 일치하지 않습니다");
@@ -199,17 +199,17 @@ public class ContractTemplate extends AggregateRoot {
 
         for (String sectionId : sectionIds) {
             TemplateSection found = sections.stream()
-                .filter(s -> s.getSectionId().equals(sectionId))
-                .findFirst()
-                .orElseThrow(() -> new ValidationException("섹션을 찾을 수 없습니다: " + sectionId));
+                    .filter(s -> s.getSectionId().equals(sectionId))
+                    .findFirst()
+                    .orElseThrow(() -> new ValidationException("섹션을 찾을 수 없습니다: " + sectionId));
 
             found.setOrder(order++);
             reorderedSections.add(found);
         }
 
         this.content = TemplateContent.of(
-            this.content.getMetadata(),
-            reorderedSections
+                this.content.metadata(),
+                reorderedSections
         );
         this.version++;
         updateTimestamp();
@@ -220,7 +220,7 @@ public class ContractTemplate extends AggregateRoot {
             throw new ValidationException("활성화된 템플릿은 수정할 수 없습니다");
         }
 
-        var sections = new java.util.ArrayList<>(this.content.getSections());
+        var sections = new java.util.ArrayList<>(this.content.sections());
         boolean removed = sections.removeIf(s -> s.getSectionId().equals(sectionId));
 
         if (!removed) {
@@ -237,8 +237,8 @@ public class ContractTemplate extends AggregateRoot {
         }
 
         this.content = TemplateContent.of(
-            this.content.getMetadata(),
-            sections
+                this.content.metadata(),
+                sections
         );
         this.version++;
         updateTimestamp();

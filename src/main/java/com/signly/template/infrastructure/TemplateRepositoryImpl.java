@@ -29,7 +29,7 @@ public class TemplateRepositoryImpl implements TemplateRepository {
 
     @Override
     public ContractTemplate save(ContractTemplate template) {
-        Optional<TemplateEntity> existingEntity = templateJpaRepository.findById(template.getTemplateId().getValue());
+        Optional<TemplateEntity> existingEntity = templateJpaRepository.findById(template.getTemplateId().value());
 
         if (existingEntity.isPresent()) {
             TemplateEntity entity = existingEntity.get();
@@ -45,25 +45,25 @@ public class TemplateRepositoryImpl implements TemplateRepository {
 
     @Override
     public Optional<ContractTemplate> findById(TemplateId templateId) {
-        return templateJpaRepository.findById(templateId.getValue())
+        return templateJpaRepository.findById(templateId.value())
                 .map(templateEntityMapper::toDomain);
     }
 
     @Override
     public Page<ContractTemplate> findByOwnerId(UserId ownerId, Pageable pageable) {
-        Page<TemplateEntity> entities = templateJpaRepository.findByOwnerId(ownerId.getValue(), pageable);
+        Page<TemplateEntity> entities = templateJpaRepository.findByOwnerId(ownerId.value(), pageable);
         return entities.map(templateEntityMapper::toDomain);
     }
 
     @Override
     public Page<ContractTemplate> findByOwnerIdAndStatus(UserId ownerId, TemplateStatus status, Pageable pageable) {
-        Page<TemplateEntity> entities = templateJpaRepository.findByOwnerIdAndStatus(ownerId.getValue(), status, pageable);
+        Page<TemplateEntity> entities = templateJpaRepository.findByOwnerIdAndStatus(ownerId.value(), status, pageable);
         return entities.map(templateEntityMapper::toDomain);
     }
 
     @Override
     public List<ContractTemplate> findActiveTemplatesByOwnerId(UserId ownerId) {
-        List<TemplateEntity> entities = templateJpaRepository.findActiveTemplatesByOwnerId(ownerId.getValue());
+        List<TemplateEntity> entities = templateJpaRepository.findActiveTemplatesByOwnerId(ownerId.value());
         return entities.stream()
                 .map(templateEntityMapper::toDomain)
                 .collect(Collectors.toList());
@@ -71,16 +71,16 @@ public class TemplateRepositoryImpl implements TemplateRepository {
 
     @Override
     public boolean existsByOwnerIdAndTitle(UserId ownerId, String title) {
-        return templateJpaRepository.existsByOwnerIdAndTitle(ownerId.getValue(), title);
+        return templateJpaRepository.existsByOwnerIdAndTitle(ownerId.value(), title);
     }
 
     @Override
     public void delete(ContractTemplate template) {
-        templateJpaRepository.deleteById(template.getTemplateId().getValue());
+        templateJpaRepository.deleteById(template.getTemplateId().value());
     }
 
     @Override
     public long countByOwnerId(UserId ownerId) {
-        return templateJpaRepository.countByOwnerId(ownerId.getValue());
+        return templateJpaRepository.countByOwnerId(ownerId.value());
     }
 }

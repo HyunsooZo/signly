@@ -6,9 +6,7 @@ import com.signly.template.infrastructure.entity.TemplateEntity;
 import com.signly.template.infrastructure.repository.TemplateJpaRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -49,7 +47,7 @@ public class TemplatePresetService {
             TemplateContent templateContent = TemplateContent.fromJson(entity.getContent());
             
             // TemplateSection을 PresetSection으로 변환
-            return templateContent.getSections().stream()
+            return templateContent.sections().stream()
                     .map(this::convertToPresetSection)
                     .toList();
         } catch (Exception e) {

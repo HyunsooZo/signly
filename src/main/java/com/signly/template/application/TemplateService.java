@@ -15,6 +15,7 @@ import com.signly.template.domain.repository.TemplateRepository;
 import com.signly.user.domain.model.User;
 import com.signly.user.domain.model.UserId;
 import com.signly.user.domain.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,19 +26,17 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class TemplateService {
 
     private final TemplateRepository templateRepository;
     private final UserRepository userRepository;
     private final TemplateDtoMapper templateDtoMapper;
 
-    public TemplateService(TemplateRepository templateRepository, UserRepository userRepository, TemplateDtoMapper templateDtoMapper) {
-        this.templateRepository = templateRepository;
-        this.userRepository = userRepository;
-        this.templateDtoMapper = templateDtoMapper;
-    }
-
-    public TemplateResponse createTemplate(String userId, CreateTemplateCommand command) {
+    public TemplateResponse createTemplate(
+            String userId,
+            CreateTemplateCommand command
+    ) {
         UserId userIdObj = UserId.of(userId);
         User user = userRepository.findById(userIdObj)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
@@ -57,7 +56,11 @@ public class TemplateService {
         return templateDtoMapper.toResponse(savedTemplate);
     }
 
-    public TemplateResponse updateTemplate(String userId, String templateId, UpdateTemplateCommand command) {
+    public TemplateResponse updateTemplate(
+            String userId,
+            String templateId,
+            UpdateTemplateCommand command
+    ) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
                 .orElseThrow(() -> new NotFoundException("템플릿을 찾을 수 없습니다"));
@@ -65,7 +68,7 @@ public class TemplateService {
         validateOwnership(userId, template);
 
         if (!command.title().equals(template.getTitle()) &&
-            templateRepository.existsByOwnerIdAndTitle(template.getOwnerId(), command.title())) {
+                templateRepository.existsByOwnerIdAndTitle(template.getOwnerId(), command.title())) {
             throw new ValidationException("이미 같은 제목의 템플릿이 존재합니다");
         }
 
@@ -77,7 +80,10 @@ public class TemplateService {
         return templateDtoMapper.toResponse(updatedTemplate);
     }
 
-    public void activateTemplate(String userId, String templateId) {
+    public void activateTemplate(
+            String userId,
+            String templateId
+    ) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
                 .orElseThrow(() -> new NotFoundException("템플릿을 찾을 수 없습니다"));
@@ -87,7 +93,10 @@ public class TemplateService {
         templateRepository.save(template);
     }
 
-    public void archiveTemplate(String userId, String templateId) {
+    public void archiveTemplate(
+            String userId,
+            String templateId
+    ) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
                 .orElseThrow(() -> new NotFoundException("템플릿을 찾을 수 없습니다"));
@@ -97,7 +106,10 @@ public class TemplateService {
         templateRepository.save(template);
     }
 
-    public void deleteTemplate(String userId, String templateId) {
+    public void deleteTemplate(
+            String userId,
+            String templateId
+    ) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
                 .orElseThrow(() -> new NotFoundException("템플릿을 찾을 수 없습니다"));
@@ -112,7 +124,10 @@ public class TemplateService {
     }
 
     @Transactional(readOnly = true)
-    public TemplateResponse getTemplate(String userId, String templateId) {
+    public TemplateResponse getTemplate(
+            String userId,
+            String templateId
+    ) {
         TemplateId templateIdObj = TemplateId.of(templateId);
         ContractTemplate template = templateRepository.findById(templateIdObj)
                 .orElseThrow(() -> new NotFoundException("템플릿을 찾을 수 없습니다"));
@@ -122,14 +137,21 @@ public class TemplateService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TemplateResponse> getTemplatesByOwner(String userId, Pageable pageable) {
+    public Page<TemplateResponse> getTemplatesByOwner(
+            String userId,
+            Pageable pageable
+    ) {
         UserId userIdObj = UserId.of(userId);
         Page<ContractTemplate> templates = templateRepository.findByOwnerId(userIdObj, pageable);
         return templates.map(templateDtoMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
-    public Page<TemplateResponse> getTemplatesByOwnerAndStatus(String userId, TemplateStatus status, Pageable pageable) {
+    public Page<TemplateResponse> getTemplatesByOwnerAndStatus(
+            String userId,
+            TemplateStatus status,
+            Pageable pageable
+    ) {
         UserId userIdObj = UserId.of(userId);
         Page<ContractTemplate> templates = templateRepository.findByOwnerIdAndStatus(userIdObj, status, pageable);
         return templates.map(templateDtoMapper::toResponse);
@@ -144,8 +166,11 @@ public class TemplateService {
                 .collect(Collectors.toList());
     }
 
-    private void validateOwnership(String userId, ContractTemplate template) {
-        if (!template.getOwnerId().getValue().equals(userId)) {
+    private void validateOwnership(
+            String userId,
+            ContractTemplate template
+    ) {
+        if (!template.getOwnerId().value().equals(userId)) {
             throw new ForbiddenException("해당 템플릿에 대한 권한이 없습니다");
         }
     }

@@ -16,12 +16,12 @@ public class TemplateDtoMapper {
 
     public TemplateResponse toResponse(ContractTemplate template) {
         TemplateContent content = template.getContent();
-        List<TemplateSectionDto> sections = content.getSections().stream()
+        List<TemplateSectionDto> sections = content.sections().stream()
                 .map(TemplateSectionDto::from)
                 .collect(Collectors.toList());
 
-        Map<String, TemplateVariableDto> variables = content.getMetadata()
-                .getVariables()
+        Map<String, TemplateVariableDto> variables = content.metadata()
+                .variables()
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(
@@ -30,10 +30,10 @@ public class TemplateDtoMapper {
                 ));
 
         return new TemplateResponse(
-                template.getTemplateId().getValue(),
-                template.getOwnerId().getValue(),
+                template.getTemplateId().value(),
+                template.getOwnerId().value(),
                 template.getTitle(),
-                content.getJsonContent(),
+                content.jsonContent(),
                 template.getVersion(),
                 template.getStatus(),
                 template.getCreatedAt(),

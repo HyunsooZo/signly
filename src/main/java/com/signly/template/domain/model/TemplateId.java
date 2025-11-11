@@ -1,16 +1,10 @@
 package com.signly.template.domain.model;
 
 import com.signly.common.util.UlidGenerator;
-import lombok.Getter;
 
-import java.util.Objects;
+public record TemplateId(String value) {
 
-@Getter
-public class TemplateId {
-
-    private final String value;
-
-    private TemplateId(String value) {
+    public TemplateId(String value) {
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException("템플릿 ID는 null이거나 빈 값일 수 없습니다");
         }
@@ -28,21 +22,5 @@ public class TemplateId {
         return new TemplateId(UlidGenerator.generate());
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TemplateId that = (TemplateId) o;
-        return Objects.equals(value, that.value);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
-
-    @Override
-    public String toString() {
-        return value;
-    }
 }

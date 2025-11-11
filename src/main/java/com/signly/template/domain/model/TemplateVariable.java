@@ -1,27 +1,13 @@
 package com.signly.template.domain.model;
 
 import com.signly.common.exception.ValidationException;
-import lombok.Getter;
 
-@Getter
-public class TemplateVariable {
-
-    private final String label;
-    private final TemplateVariableType type;
-    private final boolean required;
-    private final String defaultValue;
-
-    private TemplateVariable(
-            String label,
-            TemplateVariableType type,
-            boolean required,
-            String defaultValue
-    ) {
-        this.label = label;
-        this.type = type;
-        this.required = required;
-        this.defaultValue = defaultValue;
-    }
+public record TemplateVariable(
+        String label,
+        TemplateVariableType type,
+        boolean required,
+        String defaultValue
+) {
 
     public static TemplateVariable of(
             String label,
