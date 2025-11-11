@@ -2,19 +2,20 @@ package com.signly.user.domain.model;
 
 import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
+import lombok.Getter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 
 public class User extends AggregateRoot {
 
-    private UserId userId;
-    private Email email;
+    @Getter private UserId userId;
+    @Getter private Email email;
     private EncodedPassword encodedPassword;
-    private String name;
-    private Company company;
-    private UserType userType;
-    private UserStatus status;
+    @Getter private String name;
+    @Getter private Company company;
+    @Getter private UserType userType;
+    @Getter private UserStatus status;
 
     protected User() {
         super();
@@ -171,32 +172,7 @@ public class User extends AggregateRoot {
     public boolean isActive() {
         return this.status == UserStatus.ACTIVE;
     }
-    
-    // 캡슐화를 위한 명시적 접근자 메서드
-    public UserId getUserId() {
-        return userId;
-    }
-    
-    public Email getEmail() {
-        return email;
-    }
-    
-    public String getName() {
-        return name;
-    }
-    
-    public Company getCompany() {
-        return company;
-    }
-    
-    public UserType getUserType() {
-        return userType;
-    }
-    
-    public UserStatus getStatus() {
-        return status;
-    }
-    
+
     /**
      * 인코딩된 비밀번호 값을 반환
      * 주로 영속성 계층에서 사용하며, 도메인 로직에서는 직접 사용을 최소화해야 함
@@ -204,6 +180,6 @@ public class User extends AggregateRoot {
      * @return 인코딩된 비밀번호 문자열
      */
     public String getEncodedPassword() {
-        return encodedPassword.getValue();
+        return encodedPassword.value();
     }
 }

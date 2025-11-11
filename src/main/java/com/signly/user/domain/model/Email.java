@@ -1,20 +1,12 @@
 package com.signly.user.domain.model;
 
-import lombok.Getter;
-
-import java.util.Objects;
 import java.util.regex.Pattern;
 
-@Getter
-public class Email {
+public record Email(String value) {
 
-    private static final Pattern EMAIL_PATTERN = Pattern.compile(
-            "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
-    );
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
-    private final String value;
-
-    private Email(String value) {
+    public Email(String value) {
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException("이메일은 null이거나 빈 값일 수 없습니다");
         }
@@ -31,21 +23,4 @@ public class Email {
         return new Email(value);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Email email = (Email) o;
-        return Objects.equals(value, email.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
-
-    @Override
-    public String toString() {
-        return value;
-    }
 }
