@@ -159,7 +159,7 @@ public class AuthWebController {
     ) {
         // Redis에서 토큰 삭제
         if (securityUser != null) {
-            String userId = securityUser.getUser().getUserId().getValue();
+            String userId = securityUser.getUser().getUserId().value();
             authService.logout(userId);
             logger.info("로그아웃 완료: userId={}", userId);
         }

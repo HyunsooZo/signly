@@ -51,29 +51,29 @@ public class AuthService {
             User user = securityUser.getUser();
 
             String accessToken = jwtTokenProvider.createAccessToken(
-                user.getUserId().getValue(),
-                user.getEmail().getValue(),
+                user.getUserId().value(),
+                user.getEmail().value(),
                 user.getUserType().name()
             );
 
             String refreshToken = jwtTokenProvider.createRefreshToken(
-                user.getUserId().getValue()
+                user.getUserId().value()
             );
 
             // Redis에 토큰 저장
-            tokenRedisService.saveAccessToken(user.getUserId().getValue(), accessToken);
-            tokenRedisService.saveRefreshToken(user.getUserId().getValue(), refreshToken);
+            tokenRedisService.saveAccessToken(user.getUserId().value(), accessToken);
+            tokenRedisService.saveRefreshToken(user.getUserId().value(), refreshToken);
 
             var company = user.getCompany();
             return new LoginResponse(
                 accessToken,
                 refreshToken,
-                user.getUserId().getValue(),
-                user.getEmail().getValue(),
+                user.getUserId().value(),
+                user.getEmail().value(),
                 user.getName(),
-                company != null ? company.getName() : null,
-                company != null ? company.getPhone() : null,
-                company != null ? company.getAddress() : null,
+                company != null ? company.name() : null,
+                company != null ? company.phone() : null,
+                company != null ? company.address() : null,
                 user.getUserType(),
                 jwtTokenProvider.getAccessTokenValidityInMs()
             );
@@ -105,29 +105,29 @@ public class AuthService {
         }
 
         String newAccessToken = jwtTokenProvider.createAccessToken(
-            user.getUserId().getValue(),
-            user.getEmail().getValue(),
+            user.getUserId().value(),
+            user.getEmail().value(),
             user.getUserType().name()
         );
 
         String newRefreshToken = jwtTokenProvider.createRefreshToken(
-            user.getUserId().getValue()
+            user.getUserId().value()
         );
 
         // Redis에 새로운 토큰 저장
-        tokenRedisService.saveAccessToken(user.getUserId().getValue(), newAccessToken);
-        tokenRedisService.saveRefreshToken(user.getUserId().getValue(), newRefreshToken);
+        tokenRedisService.saveAccessToken(user.getUserId().value(), newAccessToken);
+        tokenRedisService.saveRefreshToken(user.getUserId().value(), newRefreshToken);
 
         var company = user.getCompany();
         return new LoginResponse(
             newAccessToken,
             newRefreshToken,
-            user.getUserId().getValue(),
-            user.getEmail().getValue(),
+            user.getUserId().value(),
+            user.getEmail().value(),
             user.getName(),
-            company != null ? company.getName() : null,
-            company != null ? company.getPhone() : null,
-            company != null ? company.getAddress() : null,
+            company != null ? company.name() : null,
+            company != null ? company.phone() : null,
+            company != null ? company.address() : null,
             user.getUserType(),
             jwtTokenProvider.getAccessTokenValidityInMs()
         );
