@@ -13,15 +13,15 @@ public class DocumentJpaMapper {
 
     public DocumentJpaEntity toEntity(Document document) {
         return new DocumentJpaEntity(
-            document.getId().getValue(),
+            document.getId().value(),
             document.getContractId().value(),
-            document.getUploadedBy().getValue(),
+            document.getUploadedBy().value(),
             document.getType(),
-            document.getMetadata().getFileName(),
-            document.getMetadata().getFileName(),
-            document.getMetadata().getMimeType(),
-            document.getMetadata().getFileSize(),
-            document.getMetadata().getChecksum(),
+            document.getMetadata().fileName(),
+            document.getMetadata().fileName(),
+            document.getMetadata().mimeType(),
+            document.getMetadata().fileSize(),
+            document.getMetadata().checksum(),
             document.getStoragePath()
         );
     }

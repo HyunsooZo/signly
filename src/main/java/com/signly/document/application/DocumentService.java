@@ -223,8 +223,8 @@ public class DocumentService {
 
     private void validateAccessPermission(UserId userId, Contract contract) {
         if (!contract.getCreatorId().equals(userId) &&
-            !contract.getFirstParty().email().equals(userId.getValue()) &&
-            !contract.getSecondParty().email().equals(userId.getValue())) {
+            !contract.getFirstParty().email().equals(userId.value()) &&
+            !contract.getSecondParty().email().equals(userId.value())) {
             throw new ForbiddenException("해당 문서에 접근할 권한이 없습니다");
         }
     }

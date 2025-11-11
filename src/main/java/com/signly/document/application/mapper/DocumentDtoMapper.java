@@ -9,13 +9,13 @@ public class DocumentDtoMapper {
 
     public DocumentResponse toResponse(Document document) {
         return new DocumentResponse(
-            document.getId().getValue(),
+            document.getId().value(),
             document.getContractId().value(),
-            document.getUploadedBy().getValue(),
+            document.getUploadedBy().value(),
             document.getType(),
-            document.getMetadata().getFileName(),
-            document.getMetadata().getMimeType(),
-            document.getMetadata().getFileSize(),
+            document.getMetadata().fileName(),
+            document.getMetadata().mimeType(),
+            document.getMetadata().fileSize(),
             document.getStoragePath(),
             document.getCreatedAt(),
             document.getUpdatedAt()

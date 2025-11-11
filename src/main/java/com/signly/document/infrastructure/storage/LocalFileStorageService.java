@@ -29,7 +29,7 @@ public class LocalFileStorageService implements FileStorageService {
     public String storeFile(byte[] fileData, FileMetadata metadata) {
         try {
             String datePath = LocalDate.now().toString();
-            String fileName = generateFileName(metadata.getFileName());
+            String fileName = generateFileName(metadata.fileName());
             Path filePath = Paths.get(uploadDir, datePath, fileName);
 
             Files.createDirectories(filePath.getParent());
@@ -40,7 +40,7 @@ public class LocalFileStorageService implements FileStorageService {
             return storagePath;
 
         } catch (IOException e) {
-            logger.error("파일 저장 실패: {}", metadata.getFileName(), e);
+            logger.error("파일 저장 실패: {}", metadata.fileName(), e);
             throw new InfrastructureException("파일 저장에 실패했습니다", e);
         }
     }

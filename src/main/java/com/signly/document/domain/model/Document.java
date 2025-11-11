@@ -4,9 +4,11 @@ import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
 import com.signly.contract.domain.model.ContractId;
 import com.signly.user.domain.model.UserId;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Getter
 public class Document extends AggregateRoot {
     private final DocumentId id;
     private final ContractId contractId;
@@ -18,7 +20,6 @@ public class Document extends AggregateRoot {
     private LocalDateTime updatedAt;
 
     protected Document() {
-        // for JPA and reflection
         this.id = null;
         this.contractId = null;
         this.uploadedBy = null;
@@ -29,8 +30,14 @@ public class Document extends AggregateRoot {
         this.updatedAt = null;
     }
 
-    private Document(DocumentId id, ContractId contractId, UserId uploadedBy,
-                    DocumentType type, FileMetadata metadata, String storagePath) {
+    private Document(
+            DocumentId id,
+            ContractId contractId,
+            UserId uploadedBy,
+            DocumentType type,
+            FileMetadata metadata,
+            String storagePath
+    ) {
         this.id = id;
         this.contractId = contractId;
         this.uploadedBy = uploadedBy;
@@ -41,17 +48,29 @@ public class Document extends AggregateRoot {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public static Document create(ContractId contractId, UserId uploadedBy,
-                                DocumentType type, FileMetadata metadata, String storagePath) {
+    public static Document create(
+            ContractId contractId,
+            UserId uploadedBy,
+            DocumentType type,
+            FileMetadata metadata,
+            String storagePath
+    ) {
         validateStoragePath(storagePath);
 
         return new Document(DocumentId.generate(), contractId, uploadedBy,
-                          type, metadata, storagePath);
+                type, metadata, storagePath);
     }
 
-    public static Document restore(DocumentId id, ContractId contractId, UserId uploadedBy,
-                                 DocumentType type, FileMetadata metadata, String storagePath,
-                                 LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public static Document restore(
+            DocumentId id,
+            ContractId contractId,
+            UserId uploadedBy,
+            DocumentType type,
+            FileMetadata metadata,
+            String storagePath,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         Document document = new Document(id, contractId, uploadedBy, type, metadata, storagePath);
         document.createdAt = createdAt;
         document.updatedAt = updatedAt;
@@ -74,37 +93,5 @@ public class Document extends AggregateRoot {
 
     public boolean isAttachment() {
         return type == DocumentType.ATTACHMENT;
-    }
-
-    public DocumentId getId() {
-        return id;
-    }
-
-    public ContractId getContractId() {
-        return contractId;
-    }
-
-    public UserId getUploadedBy() {
-        return uploadedBy;
-    }
-
-    public DocumentType getType() {
-        return type;
-    }
-
-    public FileMetadata getMetadata() {
-        return metadata;
-    }
-
-    public String getStoragePath() {
-        return storagePath;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 }

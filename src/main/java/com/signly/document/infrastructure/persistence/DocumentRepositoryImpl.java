@@ -34,7 +34,7 @@ public class DocumentRepositoryImpl implements DocumentRepository {
 
     @Override
     public Optional<Document> findById(DocumentId id) {
-        return jpaRepository.findById(id.getValue())
+        return jpaRepository.findById(id.value())
             .map(mapper::toDomain);
     }
 
@@ -48,7 +48,7 @@ public class DocumentRepositoryImpl implements DocumentRepository {
 
     @Override
     public List<Document> findByUploadedBy(UserId uploadedBy) {
-        return jpaRepository.findByUploadedByOrderByCreatedAtDesc(uploadedBy.getValue())
+        return jpaRepository.findByUploadedByOrderByCreatedAtDesc(uploadedBy.value())
             .stream()
             .map(mapper::toDomain)
             .toList();
@@ -56,7 +56,7 @@ public class DocumentRepositoryImpl implements DocumentRepository {
 
     @Override
     public void delete(Document document) {
-        jpaRepository.deleteById(document.getId().getValue());
+        jpaRepository.deleteById(document.getId().value());
     }
 
     @Override

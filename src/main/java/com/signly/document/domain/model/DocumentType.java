@@ -1,5 +1,8 @@
 package com.signly.document.domain.model;
 
+import lombok.Getter;
+
+@Getter
 public enum DocumentType {
     CONTRACT_PDF("계약서 PDF"),
     SIGNATURE_IMAGE("서명 이미지"),
@@ -11,7 +14,4 @@ public enum DocumentType {
         this.displayName = displayName;
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
 }
