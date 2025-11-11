@@ -16,7 +16,7 @@ class PasswordTest {
     void createPassword_WithValidFormat_ShouldSuccess(String validPassword) {
         Password password = Password.of(validPassword);
 
-        assertThat(password.getValue()).isEqualTo(validPassword);
+        assertThat(password.value()).isEqualTo(validPassword);
     }
 
     @ParameterizedTest
