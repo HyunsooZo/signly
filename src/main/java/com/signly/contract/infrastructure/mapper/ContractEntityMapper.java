@@ -17,8 +17,8 @@ public class ContractEntityMapper {
     public ContractJpaEntity toEntity(Contract contract) {
         ContractJpaEntity entity = new ContractJpaEntity(
             contract.getId().value(),
-            contract.getCreatorId().getValue(),
-            contract.getTemplateId() != null ? contract.getTemplateId().getValue() : null,
+            contract.getCreatorId().value(),
+            contract.getTemplateId() != null ? contract.getTemplateId().value() : null,
             contract.getTitle(),
             contract.getContent().content(),
             null,

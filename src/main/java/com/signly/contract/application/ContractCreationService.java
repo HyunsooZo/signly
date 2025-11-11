@@ -171,7 +171,7 @@ public class ContractCreationService {
             Map<String, String> variableValues
     ) {
         Map<String, com.signly.template.domain.model.TemplateVariable> templateVariables =
-                templateContent.getMetadata().getVariables();
+                templateContent.metadata().variables();
 
         for (Map.Entry<String, com.signly.template.domain.model.TemplateVariable> entry : templateVariables.entrySet()) {
             String varName = entry.getKey();
@@ -179,9 +179,9 @@ public class ContractCreationService {
 
             String value = variableValues.get(varName);
 
-            if (varDef.isRequired() && (value == null || value.trim().isEmpty())) {
+            if (varDef.required() && (value == null || value.trim().isEmpty())) {
                 throw new ValidationException(
-                        String.format("필수 변수 '%s'의 값이 제공되지 않았습니다.", varDef.getLabel())
+                        String.format("필수 변수 '%s'의 값이 제공되지 않았습니다.", varDef.label())
                 );
             }
 
@@ -190,7 +190,7 @@ public class ContractCreationService {
                     varDef.validateValue(value);
                 } catch (ValidationException e) {
                     throw new ValidationException(
-                            String.format("변수 '%s'의 값이 유효하지 않습니다: %s", varDef.getLabel(), e.getMessage())
+                            String.format("변수 '%s'의 값이 유효하지 않습니다: %s", varDef.label(), e.getMessage())
                     );
                 }
             }

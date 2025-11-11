@@ -53,14 +53,14 @@ public class ContractRepositoryImpl implements ContractRepository {
 
     @Override
     public Page<Contract> findByCreatorId(UserId creatorId, Pageable pageable) {
-        Page<ContractJpaEntity> entities = jpaRepository.findByCreatorId(creatorId.getValue(), pageable);
+        Page<ContractJpaEntity> entities = jpaRepository.findByCreatorId(creatorId.value(), pageable);
         return entities.map(entityMapper::toDomain);
     }
 
     @Override
     public Page<Contract> findByCreatorIdAndStatus(UserId creatorId, ContractStatus status, Pageable pageable) {
         Page<ContractJpaEntity> entities = jpaRepository.findByCreatorIdAndStatus(
-                creatorId.getValue(), status, pageable);
+                creatorId.value(), status, pageable);
         return entities.map(entityMapper::toDomain);
     }
 
@@ -78,7 +78,7 @@ public class ContractRepositoryImpl implements ContractRepository {
 
     @Override
     public List<Contract> findByTemplateId(TemplateId templateId) {
-        List<ContractJpaEntity> entities = jpaRepository.findByTemplateId(templateId.getValue());
+        List<ContractJpaEntity> entities = jpaRepository.findByTemplateId(templateId.value());
         return entities.stream()
                 .map(entityMapper::toDomain)
                 .collect(Collectors.toList());
@@ -104,17 +104,17 @@ public class ContractRepositoryImpl implements ContractRepository {
 
     @Override
     public boolean existsByCreatorIdAndTitle(UserId creatorId, String title) {
-        return jpaRepository.existsByCreatorIdAndTitle(creatorId.getValue(), title);
+        return jpaRepository.existsByCreatorIdAndTitle(creatorId.value(), title);
     }
 
     @Override
     public long countByCreatorIdAndStatus(UserId creatorId, ContractStatus status) {
-        return jpaRepository.countByCreatorIdAndStatus(creatorId.getValue(), status);
+        return jpaRepository.countByCreatorIdAndStatus(creatorId.value(), status);
     }
 
     @Override
     public long countByTemplateId(TemplateId templateId) {
-        return jpaRepository.countByTemplateId(templateId.getValue());
+        return jpaRepository.countByTemplateId(templateId.value());
     }
 
     @Override

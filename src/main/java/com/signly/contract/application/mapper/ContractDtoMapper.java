@@ -17,8 +17,8 @@ public class ContractDtoMapper {
     public ContractResponse toResponse(Contract contract) {
         return new ContractResponse(
             contract.getId().value(),
-            contract.getCreatorId().getValue(),
-            contract.getTemplateId() != null ? contract.getTemplateId().getValue() : null,
+            contract.getCreatorId().value(),
+            contract.getTemplateId() != null ? contract.getTemplateId().value() : null,
             contract.getTitle(),
             contract.getContent().content(),
             toPartyInfoResponse(contract.getFirstParty()),

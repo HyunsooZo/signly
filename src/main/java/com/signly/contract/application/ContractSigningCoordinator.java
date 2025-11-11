@@ -68,7 +68,7 @@ public class ContractSigningCoordinator {
         authorizationService.validateOwnership(userId, contract);
 
         // 1. 제1 당사자 서명 확인
-        firstPartySignatureService.ensureSignatureExists(contract.getCreatorId().getValue());
+        firstPartySignatureService.ensureSignatureExists(contract.getCreatorId().value());
 
         // 2. 제1 당사자 서명 저장
         saveFirstPartySignature(contract);
@@ -211,7 +211,7 @@ public class ContractSigningCoordinator {
         Contract contract = findContract(contractId);
         authorizationService.validateOwnership(userId, contract);
         
-        firstPartySignatureService.ensureSignatureExists(contract.getCreatorId().getValue());
+        firstPartySignatureService.ensureSignatureExists(contract.getCreatorId().value());
         contract.complete();
         Contract savedContract = contractRepository.save(contract);
         
@@ -250,7 +250,7 @@ public class ContractSigningCoordinator {
 
     private void saveFirstPartySignature(Contract contract) {
         String firstPartySignatureData = firstPartySignatureService.getSignatureDataUrl(
-                contract.getCreatorId().getValue());
+                contract.getCreatorId().value());
         
         CreateSignatureCommand firstPartyCommand = new CreateSignatureCommand(
                 contract.getId().value(),
@@ -267,7 +267,7 @@ public class ContractSigningCoordinator {
     }
 
     private void ensureFirstPartySignatureExists(Contract contract) {
-        firstPartySignatureService.ensureSignatureExists(contract.getCreatorId().getValue());
+        firstPartySignatureService.ensureSignatureExists(contract.getCreatorId().value());
         
         ContractId cId = contract.getId();
         if (!signatureRepository.existsByContractIdAndSignerEmail(cId, contract.getFirstParty().email())) {
