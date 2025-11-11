@@ -22,7 +22,7 @@ public class EmailOutboxEntityMapper {
 
     public EmailOutboxEntity toEntity(EmailOutbox outbox) {
         EmailOutboxEntity entity = new EmailOutboxEntity();
-        entity.setId(outbox.getId().getValue());
+        entity.setId(outbox.getId().value());
         entity.setEmailType(outbox.getEmailTemplate());
         entity.setRecipientEmail(outbox.getRecipientEmail());
         entity.setRecipientName(outbox.getRecipientName());
@@ -84,9 +84,9 @@ public class EmailOutboxEntityMapper {
             List<Map<String, String>> attachmentDTOs = new ArrayList<>();
             for (EmailAttachment attachment : attachments) {
                 Map<String, String> dto = new HashMap<>();
-                dto.put("fileName", attachment.getFileName());
-                dto.put("content", Base64.getEncoder().encodeToString(attachment.getContent()));
-                dto.put("contentType", attachment.getContentType());
+                dto.put("fileName", attachment.fileName());
+                dto.put("content", Base64.getEncoder().encodeToString(attachment.content()));
+                dto.put("contentType", attachment.contentType());
                 attachmentDTOs.add(dto);
             }
             return objectMapper.writeValueAsString(attachmentDTOs);

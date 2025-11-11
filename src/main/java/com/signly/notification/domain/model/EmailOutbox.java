@@ -1,11 +1,14 @@
 package com.signly.notification.domain.model;
 
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+@Getter
 public class EmailOutbox {
     private final EmailOutboxId id;
     private final EmailTemplate emailTemplate;
@@ -134,56 +137,8 @@ public class EmailOutbox {
                 && (nextRetryAt == null || LocalDateTime.now().isAfter(nextRetryAt));
     }
 
-    // Getters
-    public EmailOutboxId getId() {
-        return id;
-    }
-
-    public EmailTemplate getEmailTemplate() {
-        return emailTemplate;
-    }
-
-    public String getRecipientEmail() {
-        return recipientEmail;
-    }
-
-    public String getRecipientName() {
-        return recipientName;
-    }
-
-    public Map<String, Object> getTemplateVariables() {
-        return templateVariables;
-    }
-
     public List<EmailAttachment> getAttachments() {
         return Collections.unmodifiableList(attachments);
     }
 
-    public EmailOutboxStatus getStatus() {
-        return status;
-    }
-
-    public int getRetryCount() {
-        return retryCount;
-    }
-
-    public int getMaxRetries() {
-        return maxRetries;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getSentAt() {
-        return sentAt;
-    }
-
-    public LocalDateTime getNextRetryAt() {
-        return nextRetryAt;
-    }
 }

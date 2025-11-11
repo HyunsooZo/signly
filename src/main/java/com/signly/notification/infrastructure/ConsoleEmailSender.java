@@ -20,7 +20,7 @@ public class ConsoleEmailSender implements EmailSender {
         if (request.hasAttachments()) {
             logger.info("Attachments: {}", request.attachments().size());
             request.attachments().forEach(attachment ->
-                    logger.info("  - {} ({} bytes)", attachment.getFileName(), attachment.getSizeInBytes())
+                    logger.info("  - {} ({} bytes)", attachment.fileName(), attachment.sizeInBytes())
             );
         }
         logger.info("================================");

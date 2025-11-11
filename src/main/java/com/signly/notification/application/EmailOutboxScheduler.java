@@ -59,7 +59,7 @@ public class EmailOutboxScheduler {
     private boolean processEmail(EmailOutbox outbox) {
         try {
             if (!outbox.canRetry()) {
-                logger.warn("재시도 불가한 이메일: id={}", outbox.getId().getValue());
+                logger.warn("재시도 불가한 이메일: id={}", outbox.getId().value());
                 return false;
             }
 
@@ -78,7 +78,7 @@ public class EmailOutboxScheduler {
             outboxRepository.save(outbox);
 
             logger.info("이메일 발송 성공: id={}, recipient={}, attachments={}",
-                    outbox.getId().getValue(), outbox.getRecipientEmail(),
+                    outbox.getId().value(), outbox.getRecipientEmail(),
                     outbox.getAttachments().size());
 
             return true;
@@ -86,7 +86,7 @@ public class EmailOutboxScheduler {
         } catch (Exception e) {
             // 발송 실패
             logger.error("이메일 발송 실패: id={}, recipient={}",
-                    outbox.getId().getValue(), outbox.getRecipientEmail(), e);
+                    outbox.getId().value(), outbox.getRecipientEmail(), e);
 
             outbox.markAsFailed(e.getMessage());
             outboxRepository.save(outbox);

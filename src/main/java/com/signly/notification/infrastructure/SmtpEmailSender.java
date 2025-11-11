@@ -55,12 +55,12 @@ public class SmtpEmailSender implements EmailSender {
             if (request.hasAttachments()) {
                 for (var attachment : request.attachments()) {
                     helper.addAttachment(
-                            attachment.getFileName(),
-                            () -> new ByteArrayInputStream(attachment.getContent()),
-                            attachment.getContentType()
+                            attachment.fileName(),
+                            () -> new ByteArrayInputStream(attachment.content()),
+                            attachment.contentType()
                     );
                     logger.debug("첨부파일 추가: fileName={}, size={}bytes",
-                            attachment.getFileName(), attachment.getSizeInBytes());
+                            attachment.fileName(), attachment.sizeInBytes());
                 }
             }
 
