@@ -5,8 +5,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
-    <jsp:param name="additionalCss" value="/css/contracts.css" />
-    <jsp:param name="additionalCss2" value="/css/contract-common.css" />
+    <jsp:param name="additionalCss" value="/css/fonts.css" />
+    <jsp:param name="additionalCss2" value="/css/contracts.css" />
+    <jsp:param name="additionalCss3" value="/css/contract-common.css" />
+    <jsp:param name="additionalCss4" value="/css/modal.css" />
 </jsp:include>
 <body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
     <jsp:include page="../common/navbar.jsp">
@@ -644,6 +646,9 @@
             // body 안에 있는 style 태그 제거
             contentHtml = contentHtml.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
 
+            // 남아있을 수 있는 template-variable-remove 요소 추가 제거
+            contentHtml = contentHtml.replace(/<span class="template-variable-remove"[^>]*>[\s\S]*?<\/span>/g, '');
+
             console.log('[DEBUG] Content HTML length:', contentHtml.length);
             console.log('[DEBUG] Content HTML first 500 chars:', contentHtml.substring(0, 500));
 
@@ -1238,6 +1243,9 @@
                     console.log('[DEBUG] After decode - Has <br> tags:', rendered.includes('<br'));
                 }
 
+                // 프리셋 HTML 정규화 (template-variable-remove 제거 등)
+                rendered = normalizePresetHtml(rendered);
+
                 console.log('[DEBUG] Final HTML length:', rendered.length);
                 console.log('[DEBUG] HTML preview (first 500):', rendered.substring(0, 500));
                 console.log('[DEBUG] HTML contains "section-number":', rendered.includes('section-number'));
@@ -1268,6 +1276,9 @@
                 console.log('[DEBUG] Decoding HTML entities...');
                 rendered = decodeHtmlEntities(rendered);
             }
+
+            // 템플릿 HTML 정규화
+            rendered = normalizePresetHtml(rendered);
 
             // 프리셋 모드로 전환
             switchToPresetMode();
@@ -1679,6 +1690,37 @@
             const textarea = document.createElement('textarea');
             textarea.innerHTML = value;
             return textarea.value;
+        }
+
+        // 프리셋 HTML 정규화 함수
+        function normalizePresetHtml(html) {
+            if (!html) {
+                return '';
+            }
+
+            console.log('[DEBUG] normalizePresetHtml - Input length:', html.length);
+
+            // template-variable-remove 요소 제거
+            let normalized = html.replace(/<span class="template-variable-remove"[^>]*>[\s\S]*?<\/span>/g, '');
+            
+            // 빈 p 태그 제거
+            normalized = normalized.replace(/<p><\/p>/g, '');
+            normalized = normalized.replace(/<p>\s*<\/p>/g, '');
+            
+            // p 태그로 감싸진 내용 정리 (section 태그 주변의 불필요한 p 태그 제거)
+            normalized = normalized.replace(/<p>(\s*<section[^>]*>[\s\S]*?<\/section>\s*)<\/p>/g, '$1');
+            
+            // 연속된 공백과 개행 문자 정리
+            normalized = normalized.replace(/\s+/g, ' ');
+            normalized = normalized.replace(/>\s+</g, '><');
+            
+            // HTML 엔티티 디코딩
+            normalized = decodeHtmlEntities(normalized);
+
+            console.log('[DEBUG] normalizePresetHtml - Output length:', normalized.length);
+            console.log('[DEBUG] normalizePresetHtml - First 300 chars:', normalized.substring(0, 300));
+
+            return normalized;
         }
 
         function sanitizeHtml(html) {

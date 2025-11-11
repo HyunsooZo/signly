@@ -5,7 +5,7 @@
 .contract-content,
 .template-document,
 body:not(:has(.navbar)) {
-    font-family: 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', sans-serif;
+    font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Helvetica Neue', sans-serif;
     line-height: 1.6;
     font-size: 13px;
     color: #222;
@@ -26,6 +26,7 @@ body:not(:has(.navbar)) {
     font-weight: 700;
     margin-bottom: 30px;
     letter-spacing: 6px;
+    font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
 }
 
 .contract-body > .title:first-child {
@@ -35,7 +36,7 @@ body:not(:has(.navbar)) {
 /* 인트로 */
 .contract-intro {
     text-align: justify;
-    margin: 7px 0;
+    margin: 18px 0;
 }
 
 /* 섹션 공통 */
@@ -46,7 +47,7 @@ body:not(:has(.navbar)) {
 .section-title,
 .section-dotted,
 .section-clause {
-    margin: 7px 0;
+    margin: 16px 0;
 }
 
 .section-text {
@@ -58,6 +59,7 @@ body:not(:has(.navbar)) {
 .section-title,
 .section-clause::before {
     font-weight: 700;
+    font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
 }
 
 .section-title {
@@ -68,7 +70,7 @@ body:not(:has(.navbar)) {
 /* 조항 */
 .section-clause {
     padding-left: 18px;
-    margin: 6px 0;
+    margin: 18px 0;
 }
 
 /* 점선 박스 */
@@ -87,6 +89,7 @@ body:not(:has(.navbar)) {
     text-align: center;
     font-size: 12px;
     color: #666;
+    font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
 }
 
 /* 유틸리티 클래스 */
@@ -157,6 +160,52 @@ body:not(:has(.navbar)) {
     text-align: center;
 }
 
+/* 템플릿 변수 제거 버튼 숨김 */
+.template-variable-remove {
+    display: none !important;
+}
+
+/* 모달 내부 폰트 강제 적용 */
+.modal .preset-document,
+.modal .contract-content,
+.modal .template-document {
+    font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
+}
+
+/* 모달 내부 모든 텍스트 요소에 폰트 적용 */
+.modal .title,
+.modal .section-number,
+.modal .section-title,
+.modal .contract-intro,
+.modal .section,
+.modal .section-text,
+.modal .section-clause,
+.modal .date-section,
+.modal .signature-section,
+.modal .signature-line {
+    font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
+}
+
+/* 모달 내부 문단 간격 PDF와 동일하게 적용 */
+.modal .contract-intro {
+    margin: 18px 0 !important;
+}
+
+.modal .section,
+.modal .section-text,
+.modal .section-signature,
+.modal .section-footer,
+.modal .section-title,
+.modal .section-dotted,
+.modal .section-clause {
+    margin: 16px 0 !important;
+}
+
+.modal .template-clause,
+.modal .template-paragraph {
+    margin: 18px 0 !important;
+}
+
 /* 템플릿 조항 (CSS counter 자동 번호) */
 .contract-content,
 body,
@@ -167,7 +216,7 @@ body,
 
 .template-clause {
     counter-increment: clause-counter;
-    margin: 6px 0;
+    margin: 18px 0;
     padding-left: 18px;
 }
 
@@ -206,7 +255,7 @@ body,
 }
 
 .template-paragraph {
-    margin: 6px 0;
+    margin: 18px 0;
 }
 
 .template-paragraph-indent {
@@ -236,6 +285,7 @@ body,
 .section-signature {
     margin-top: 50px;
     line-height: 2;
+    font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
 }
 
 .signature-section {
