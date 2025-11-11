@@ -77,7 +77,7 @@ public class FirstPartySignatureService {
 
         byte[] fileBytes = fileStorageService.loadFile(signature.getStoragePath());
         String base64 = Base64.getEncoder().encodeToString(fileBytes);
-        return "data:" + signature.getFileMetadata().getMimeType() + ";base64," + base64;
+        return "data:" + signature.getFileMetadata().mimeType() + ";base64," + base64;
     }
 
     @Transactional(readOnly = true)

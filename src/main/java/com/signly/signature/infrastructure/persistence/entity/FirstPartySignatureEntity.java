@@ -37,15 +37,17 @@ public class FirstPartySignatureEntity extends BaseEntity {
     protected FirstPartySignatureEntity() {
     }
 
-    public FirstPartySignatureEntity(String signatureId,
-                                     String ownerId,
-                                     String storagePath,
-                                     String originalFilename,
-                                     String mimeType,
-                                     long fileSize,
-                                     String checksum,
-                                     LocalDateTime createdAt,
-                                     LocalDateTime updatedAt) {
+    public FirstPartySignatureEntity(
+            String signatureId,
+            String ownerId,
+            String storagePath,
+            String originalFilename,
+            String mimeType,
+            long fileSize,
+            String checksum,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         super(createdAt, updatedAt);
         this.signatureId = signatureId;
         this.ownerId = ownerId;

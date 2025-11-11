@@ -15,8 +15,10 @@ public class FirstPartySignatureRepositoryImpl implements FirstPartySignatureRep
     private final FirstPartySignatureJpaRepository jpaRepository;
     private final FirstPartySignatureEntityMapper mapper;
 
-    public FirstPartySignatureRepositoryImpl(FirstPartySignatureJpaRepository jpaRepository,
-                                             FirstPartySignatureEntityMapper mapper) {
+    public FirstPartySignatureRepositoryImpl(
+            FirstPartySignatureJpaRepository jpaRepository,
+            FirstPartySignatureEntityMapper mapper
+    ) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
     }
@@ -30,17 +32,17 @@ public class FirstPartySignatureRepositoryImpl implements FirstPartySignatureRep
 
     @Override
     public Optional<FirstPartySignature> findByOwnerId(UserId ownerId) {
-        return jpaRepository.findByOwnerId(ownerId.getValue())
+        return jpaRepository.findByOwnerId(ownerId.value())
                 .map(mapper::toDomain);
     }
 
     @Override
     public boolean existsByOwnerId(UserId ownerId) {
-        return jpaRepository.existsByOwnerId(ownerId.getValue());
+        return jpaRepository.existsByOwnerId(ownerId.value());
     }
 
     @Override
     public void deleteByOwnerId(UserId ownerId) {
-        jpaRepository.deleteByOwnerId(ownerId.getValue());
+        jpaRepository.deleteByOwnerId(ownerId.value());
     }
 }

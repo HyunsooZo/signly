@@ -4,9 +4,11 @@ import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
 import com.signly.document.domain.model.FileMetadata;
 import com.signly.user.domain.model.UserId;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Getter
 public class FirstPartySignature extends AggregateRoot {
 
     private final SignatureId signatureId;
@@ -14,12 +16,14 @@ public class FirstPartySignature extends AggregateRoot {
     private FileMetadata fileMetadata;
     private String storagePath;
 
-    private FirstPartySignature(SignatureId signatureId,
-                               UserId ownerId,
-                               FileMetadata fileMetadata,
-                               String storagePath,
-                               LocalDateTime createdAt,
-                               LocalDateTime updatedAt) {
+    private FirstPartySignature(
+            SignatureId signatureId,
+            UserId ownerId,
+            FileMetadata fileMetadata,
+            String storagePath,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         super(createdAt, updatedAt);
         this.signatureId = signatureId;
         this.ownerId = ownerId;
@@ -27,9 +31,11 @@ public class FirstPartySignature extends AggregateRoot {
         this.storagePath = storagePath;
     }
 
-    public static FirstPartySignature create(UserId ownerId,
-                                             FileMetadata fileMetadata,
-                                             String storagePath) {
+    public static FirstPartySignature create(
+            UserId ownerId,
+            FileMetadata fileMetadata,
+            String storagePath
+    ) {
         validateOwner(ownerId);
         validateStoragePath(storagePath);
 
@@ -43,12 +49,14 @@ public class FirstPartySignature extends AggregateRoot {
         );
     }
 
-    public static FirstPartySignature restore(SignatureId signatureId,
-                                              UserId ownerId,
-                                              FileMetadata fileMetadata,
-                                              String storagePath,
-                                              LocalDateTime createdAt,
-                                              LocalDateTime updatedAt) {
+    public static FirstPartySignature restore(
+            SignatureId signatureId,
+            UserId ownerId,
+            FileMetadata fileMetadata,
+            String storagePath,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         validateOwner(ownerId);
         validateStoragePath(storagePath);
 
@@ -62,27 +70,14 @@ public class FirstPartySignature extends AggregateRoot {
         );
     }
 
-    public void updateFile(FileMetadata fileMetadata, String storagePath) {
+    public void updateFile(
+            FileMetadata fileMetadata,
+            String storagePath
+    ) {
         validateStoragePath(storagePath);
         this.fileMetadata = fileMetadata;
         this.storagePath = storagePath;
         updateTimestamp();
-    }
-
-    public SignatureId getSignatureId() {
-        return signatureId;
-    }
-
-    public UserId getOwnerId() {
-        return ownerId;
-    }
-
-    public FileMetadata getFileMetadata() {
-        return fileMetadata;
-    }
-
-    public String getStoragePath() {
-        return storagePath;
     }
 
     private static void validateOwner(UserId ownerId) {

@@ -3,8 +3,8 @@ package com.signly.signature.presentation.web;
 import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.ContractResponse;
 import com.signly.signature.application.SignatureService;
-
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -14,16 +14,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/sign")
+@RequiredArgsConstructor
 public class SigningWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(SigningWebController.class);
     private final ContractService contractService;
     private final SignatureService signatureService;
-
-    public SigningWebController(ContractService contractService, SignatureService signatureService) {
-        this.contractService = contractService;
-        this.signatureService = signatureService;
-    }
 
     @GetMapping("/{token}")
     public String signingPage(@PathVariable String token, Model model) {

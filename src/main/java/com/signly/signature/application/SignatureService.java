@@ -31,9 +31,11 @@ public class SignatureService {
     private final SignatureDtoMapper mapper;
     private final FileStorageService fileStorageService;
 
-    public SignatureService(SignatureRepository signatureRepository,
-                            SignatureDtoMapper mapper,
-                            FileStorageService fileStorageService) {
+    public SignatureService(
+            SignatureRepository signatureRepository,
+            SignatureDtoMapper mapper,
+            FileStorageService fileStorageService
+    ) {
         this.signatureRepository = signatureRepository;
         this.mapper = mapper;
         this.fileStorageService = fileStorageService;
@@ -48,10 +50,10 @@ public class SignatureService {
         // 이미 서명이 존재하는 경우 기존 서명 반환 (중복 방지)
         if (signatureRepository.existsByContractIdAndSignerEmail(contractId, normalizedEmail)) {
             logger.warn("이미 서명이 존재함, 기존 서명 반환: contractId={}, signerEmail={}",
-                command.contractId(), normalizedEmail);
+                    command.contractId(), normalizedEmail);
             Signature existingSignature = signatureRepository
-                .findByContractIdAndSignerEmail(contractId, normalizedEmail)
-                .orElseThrow(() -> new NotFoundException("서명을 찾을 수 없습니다"));
+                    .findByContractIdAndSignerEmail(contractId, normalizedEmail)
+                    .orElseThrow(() -> new NotFoundException("서명을 찾을 수 없습니다"));
             return mapper.toResponse(existingSignature);
         }
 
@@ -132,11 +134,18 @@ public class SignatureService {
         return new ImagePayload(decoded, contentType, extension);
     }
 
-    private String buildCategory(String contractId, String signerEmail) {
+    private String buildCategory(
+            String contractId,
+            String signerEmail
+    ) {
         return STORAGE_CATEGORY_PREFIX + "/" + contractId + "/" + sanitizeEmail(signerEmail);
     }
 
-    private String buildFileName(String contractId, String signerEmail, String extension) {
+    private String buildFileName(
+            String contractId,
+            String signerEmail,
+            String extension
+    ) {
         return "signature-" + contractId + "-" + sanitizeEmail(signerEmail) + "." + extension;
     }
 
@@ -165,7 +174,10 @@ public class SignatureService {
     }
 
     @Transactional(readOnly = true)
-    public boolean isContractSigned(String contractId, String signerEmail) {
+    public boolean isContractSigned(
+            String contractId,
+            String signerEmail
+    ) {
         ContractId cId = ContractId.of(contractId);
         String normalizedEmail = normalizeEmail(signerEmail);
         boolean exists = signatureRepository.existsByContractIdAndSignerEmail(cId, normalizedEmail);
@@ -174,7 +186,10 @@ public class SignatureService {
     }
 
     @Transactional(readOnly = true)
-    public SignatureResponse getContractSignature(String contractId, String signerEmail) {
+    public SignatureResponse getContractSignature(
+            String contractId,
+            String signerEmail
+    ) {
         ContractId cId = ContractId.of(contractId);
         String normalizedEmail = normalizeEmail(signerEmail);
         Signature signature = signatureRepository.findByContractIdAndSignerEmail(cId, normalizedEmail)
