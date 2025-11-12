@@ -5,6 +5,6 @@
 <script src="/js/alerts.js"></script>
 <c:if test="${not empty additionalJs}">
     <c:forEach var="jsFile" items="${additionalJs}">
-        <script src="${jsFile}"></script>
+        <script src="<c:out value='${jsFile}'/>"></script>
     </c:forEach>
 </c:if>

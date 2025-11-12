@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} - Signly</title>
+    <title><c:out value="${pageTitle}"/> - Signly</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
@@ -26,19 +26,19 @@
                     <div class="card-body p-4">
                         <!-- 계약서 정보 -->
                         <div class="mb-4">
-                            <h5 class="card-title">${contract.title}</h5>
+                            <h5 class="card-title"><c:out value="${contract.title}"/></h5>
                             <p class="text-muted">서명 전 본인 확인을 위해 정보를 입력해주세요.</p>
                         </div>
 
                         <!-- 알림 메시지 -->
                         <c:if test="${not empty errorMessage}">
                             <div class="alert alert-danger" role="alert">
-                                <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
+                                <i class="bi bi-exclamation-triangle me-2"></i><c:out value="${errorMessage}"/>
                             </div>
                         </c:if>
 
                         <!-- 인증 폼 -->
-                        <form method="post" action="/sign/${token}/verify">
+                        <form method="post" action="/sign/<c:out value='${token}'/>/verify">
                             <c:if test="${not empty _csrf}">
                                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                             </c:if>
@@ -47,7 +47,7 @@
                                     <i class="bi bi-envelope me-2"></i>이메일 주소
                                 </label>
                                 <input type="email" class="form-control" id="signerEmail" name="signerEmail"
-                                       placeholder="${contract.secondParty.email}" required>
+                                       placeholder="<c:out value='${contract.secondParty.email}'/>" required>
                                 <div class="form-text">계약서에 등록된 이메일 주소를 입력하세요.</div>
                             </div>
 
@@ -56,7 +56,7 @@
                                     <i class="bi bi-person me-2"></i>성명
                                 </label>
                                 <input type="text" class="form-control" id="signerName" name="signerName"
-                                       placeholder="${contract.secondParty.name}" required>
+                                       placeholder="<c:out value='${contract.secondParty.name}'/>" required>
                                 <div class="form-text">계약서에 등록된 성명을 입력하세요.</div>
                             </div>
 

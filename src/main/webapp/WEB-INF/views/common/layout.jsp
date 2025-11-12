@@ -87,7 +87,7 @@
     <!-- 페이지별 추가 스크립트 -->
     <c:if test="${not empty pageScript}">
         <script>
-            ${pageScript}
+            <c:out value="${pageScript}"/>
         </script>
     </c:if>
 </body>

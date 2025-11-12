@@ -27,14 +27,14 @@
         <!-- 알림 메시지 -->
         <c:if test="${not empty successMessage}">
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle me-2"></i>${successMessage}
+                <i class="bi bi-check-circle me-2"></i><c:out value="${successMessage}"/>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
 
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
+                <i class="bi bi-exclamation-triangle me-2"></i><c:out value="${errorMessage}"/>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
@@ -48,7 +48,7 @@
                             <i class="bi bi-file-earmark-text"></i>
                         </div>
                         <div class="stats-info">
-                            <h3>${templateStats.total}</h3>
+                            <h3><c:out value="${templateStats.total}"/></h3>
                             <p>총 템플릿</p>
                         </div>
                     </div>
@@ -67,7 +67,7 @@
                             <i class="bi bi-check-circle"></i>
                         </div>
                         <div class="stats-info">
-                            <h3>${templateStats.active}</h3>
+                            <h3><c:out value="${templateStats.active}"/></h3>
                             <p>활성 템플릿</p>
                         </div>
                     </div>
@@ -86,7 +86,7 @@
                             <i class="bi bi-file-earmark-check"></i>
                         </div>
                         <div class="stats-info">
-                            <h3>${contractStats.total}</h3>
+                            <h3><c:out value="${contractStats.total}"/></h3>
                             <p>총 계약서</p>
                         </div>
                     </div>
@@ -105,7 +105,7 @@
                             <i class="bi bi-clock"></i>
                         </div>
                         <div class="stats-info">
-                            <h3>${contractStats.pending}</h3>
+                            <h3><c:out value="${contractStats.pending}"/></h3>
                             <p>서명 대기</p>
                         </div>
                     </div>
@@ -210,8 +210,8 @@
                                         </div>
                                         <div class="recent-item-content">
                                             <h6 class="mb-1">
-                                                <a href="/templates/${template.templateId}" class="text-decoration-none">
-                                                    ${template.title}
+                                                <a href="/templates/<c:out value='${template.templateId}'/>" class="text-decoration-none">
+                                                    <c:out value="${template.title}"/>
                                                 </a>
                                             </h6>
                                             <small class="text-muted">
@@ -230,7 +230,7 @@
                                                     <span class="badge bg-warning">보관</span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <span class="badge bg-light text-dark">${template.status}</span>
+                                                    <span class="badge bg-light text-dark"><c:out value="${template.status}"/></span>
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
@@ -268,8 +268,8 @@
                                         </div>
                                         <div class="recent-item-content">
                                             <h6 class="mb-1">
-                                                <a href="/contracts/${contract.id}" class="text-decoration-none">
-                                                    ${contract.title}
+                                                <a href="/contracts/<c:out value='${contract.id}'/>" class="text-decoration-none">
+                                                    <c:out value="${contract.title}"/>
                                                 </a>
                                             </h6>
                                             <small class="text-muted">
@@ -297,7 +297,7 @@
                                                     <span class="badge bg-dark">만료</span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <span class="badge bg-light text-dark">${contract.status}</span>
+                                                    <span class="badge bg-light text-dark"><c:out value="${contract.status}"/></span>
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>

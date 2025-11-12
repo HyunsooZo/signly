@@ -39,14 +39,14 @@
 
         <c:if test="${not empty successMessage}">
             <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                <i class="bi bi-check-circle me-2"></i>${successMessage}
+                <i class="bi bi-check-circle me-2"></i><c:out value="${successMessage}"/>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
 
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
+                <i class="bi bi-exclamation-triangle me-2"></i><c:out value="${errorMessage}"/>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
@@ -62,10 +62,10 @@
                     <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
                         <c:choose>
                             <c:when test="${hasSignature}">
-                                <img src="${signatureDataUrl}" alt="등록된 서명" class="img-fluid border rounded signature-image-display">
+                                    <img src="<c:out value='${signatureDataUrl}'/>" alt="등록된 서명" class="img-fluid border rounded signature-image-display">
                                 <div class="mt-3 text-muted small">
-                                    <div><strong>파일명:</strong> ${signature.originalFilename()}</div>
-                                    <div><strong>형식:</strong> ${signature.mimeType()}</div>
+                                    <div><strong>파일명:</strong> <c:out value="${signature.originalFilename()}"/></div>
+                                    <div><strong>형식:</strong> <c:out value="${signature.mimeType()}"/></div>
                                     <div><strong>파일 크기:</strong> <fmt:formatNumber value="${signature.fileSize() / 1024}" maxFractionDigits="0"/> KB</div>
                                     <div><strong>업로드일:</strong> <fmt:formatDate value="${signature.updatedAtDate}" pattern="yyyy-MM-dd HH:mm"/></div>
                                 </div>

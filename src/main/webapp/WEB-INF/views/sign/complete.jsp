@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} - Signly</title>
+    <title><c:out value="${pageTitle}"/> - Signly</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
@@ -34,7 +34,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-8">
-                                <h5 class="card-title">${contract.title}</h5>
+                                <h5 class="card-title"><c:out value="${contract.title}"/></h5>
                                 <p class="text-muted mb-3">계약서가 정상적으로 서명되어 모든 당사자에게 통보되었습니다.</p>
 
                                 <div class="row">
@@ -43,8 +43,8 @@
                                             <h6 class="fw-bold text-primary">
                                                 <i class="bi bi-building me-2"></i>갑 (계약당사자)
                                             </h6>
-                                            <p class="mb-1">${contract.firstParty.name}</p>
-                                            <small class="text-muted">${contract.firstParty.email}</small>
+                                            <p class="mb-1"><c:out value="${contract.firstParty.name}"/></p>
+                                            <small class="text-muted"><c:out value="${contract.firstParty.email}"/></small>
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
@@ -52,8 +52,8 @@
                                             <h6 class="fw-bold text-success">
                                                 <i class="bi bi-person-check me-2"></i>을 (서명 완료)
                                             </h6>
-                                            <p class="mb-1">${contract.secondParty.name}</p>
-                                            <small class="text-muted">${contract.secondParty.email}</small>
+                                            <p class="mb-1"><c:out value="${contract.secondParty.name}"/></p>
+                                            <small class="text-muted"><c:out value="${contract.secondParty.email}"/></small>
                                         </div>
                                     </div>
                                 </div>
@@ -90,12 +90,12 @@
                                         <div class="border rounded p-4 bg-light">
                                             <i class="bi bi-file-earmark-pdf display-4 text-danger mb-3"></i>
                                             <h6 class="fw-bold mb-3">계약서 PDF</h6>
-                                            <a href="/contracts/${contract.id}/pdf/download"
+                                            <a href="/contracts/<c:out value='${contract.id}'/>/pdf/download"
                                                class="btn btn-danger btn-lg w-100 mb-2"
                                                download>
                                                 <i class="bi bi-download me-2"></i>PDF 다운로드
                                             </a>
-                                            <a href="/contracts/${contract.id}/pdf/inline"
+                                            <a href="/contracts/<c:out value='${contract.id}'/>/pdf/inline"
                                                class="btn btn-outline-secondary btn-sm w-100"
                                                target="_blank">
                                                 <i class="bi bi-eye me-2"></i>미리보기

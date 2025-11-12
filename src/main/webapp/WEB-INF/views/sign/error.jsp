@@ -23,7 +23,7 @@
                     <p class="lead text-muted mb-4">
                         <c:choose>
                             <c:when test="${not empty errorMessage}">
-                                ${errorMessage}
+                                <c:out value="${errorMessage}"/>
                             </c:when>
                             <c:otherwise>
                                 요청하신 계약서에 접근할 수 없습니다.
