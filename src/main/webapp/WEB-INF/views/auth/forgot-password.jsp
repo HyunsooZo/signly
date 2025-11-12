@@ -23,14 +23,14 @@
 
             <c:if test="${not empty errorMessage}">
                 <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                    ${errorMessage}
+                    <c:out value="${errorMessage}"/>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </c:if>
 
             <c:if test="${not empty successMessage}">
                 <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                    ${successMessage}
+                    <c:out value="${successMessage}"/>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </c:if>
@@ -39,10 +39,10 @@
                 <div class="form-group">
                     <label for="email" class="form-label">이메일</label>
                     <input type="email" class="form-control" id="email" name="email"
-                           value="${param.email}" required placeholder="가입하신 이메일을 입력해주세요">
+                           value="<c:out value="${param.email}"/>" required placeholder="가입하신 이메일을 입력해주세요">
                 </div>
 
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                <input type="hidden" name="<c:out value="${_csrf.parameterName}"/>" value="<c:out value="${_csrf.token}"/>"/>
 
                 <button type="submit" class="btn btn-primary btn-auth">비밀번호 재설정 링크 발송</button>
             </form>

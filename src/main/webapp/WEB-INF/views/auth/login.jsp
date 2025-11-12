@@ -23,14 +23,14 @@
 
             <c:if test="${not empty errorMessage}">
                 <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                    ${errorMessage}
+                    <c:out value="${errorMessage}"/>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </c:if>
 
             <c:if test="${not empty successMessage}">
                 <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                    ${successMessage}
+                    <c:out value="${successMessage}"/>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </c:if>
@@ -39,7 +39,7 @@
                 <div class="form-group">
                     <label for="email" class="form-label">이메일</label>
                     <input type="email" class="form-control" id="email" name="email"
-                           value="${param.email}" required placeholder="your@email.com">
+                           value="<c:out value="${param.email}"/>" required placeholder="your@email.com">
                 </div>
 
                 <div class="form-group">
@@ -88,7 +88,7 @@
 
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <c:if test="${not empty returnUrl}">
-                    <input type="hidden" name="returnUrl" value="${returnUrl}"/>
+                    <input type="hidden" name="returnUrl" value="<c:out value="${returnUrl}"/>"/>
                 </c:if>
 
                 <button type="submit" class="btn btn-primary btn-auth">로그인</button>

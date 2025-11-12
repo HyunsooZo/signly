@@ -18,19 +18,19 @@
         <div class="auth-card">
             <div class="auth-header">
                 <h1 class="auth-title">새 비밀번호 설정</h1>
-                <p class="auth-subtitle">${email}의 새 비밀번호를 입력해주세요</p>
+                <p class="auth-subtitle"><c:out value="${email}"/>의 새 비밀번호를 입력해주세요</p>
             </div>
 
             <c:if test="${not empty errorMessage}">
                 <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                    ${errorMessage}
+                    <c:out value="${errorMessage}"/>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </c:if>
 
             <form action="/reset-password" method="post" class="auth-form" onsubmit="return validateForm()">
-                <input type="hidden" name="token" value="${token}">
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                <input type="hidden" name="token" value="<c:out value="${token}"/>">
+                <input type="hidden" name="<c:out value="${_csrf.parameterName}"/>" value="<c:out value="${_csrf.token}"/>"/>
 
                 <div class="form-group">
                     <label for="newPassword" class="form-label">

@@ -24,7 +24,7 @@
 
             <c:if test="${not empty errorMessage}">
                 <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                    ${errorMessage}
+                    <c:out value="${errorMessage}"/>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </c:if>
@@ -33,9 +33,9 @@
                 <div class="form-group">
                     <label for="email" class="form-label">이메일 *</label>
                     <input type="email" class="form-control" id="email" name="email"
-                           value="${param.email}" required placeholder="your@email.com">
+                           value="<c:out value="${param.email}"/>" required placeholder="your@email.com">
                     <c:if test="${not empty fieldErrors.email}">
-                        <div class="field-error">${fieldErrors.email}</div>
+                        <div class="field-error"><c:out value="${fieldErrors.email}"/></div>
                     </c:if>
                 </div>
 
@@ -75,7 +75,7 @@
                         </div>
                     </div>
                     <c:if test="${not empty fieldErrors.password}">
-                        <div class="field-error">${fieldErrors.password}</div>
+                        <div class="field-error"><c:out value="${fieldErrors.password}"/></div>
                     </c:if>
                 </div>
 
@@ -115,43 +115,43 @@
                         </div>
                     </div>
                     <c:if test="${not empty fieldErrors.confirmPassword}">
-                        <div class="field-error">${fieldErrors.confirmPassword}</div>
+                        <div class="field-error"><c:out value="${fieldErrors.confirmPassword}"/></div>
                     </c:if>
                 </div>
 
                 <div class="form-group">
                     <label for="name" class="form-label">이름 *</label>
                     <input type="text" class="form-control" id="name" name="name"
-                           value="${param.name}" required placeholder="홍길동">
+                           value="<c:out value="${param.name}"/>" required placeholder="홍길동">
                     <c:if test="${not empty fieldErrors.name}">
-                        <div class="field-error">${fieldErrors.name}</div>
+                        <div class="field-error"><c:out value="${fieldErrors.name}"/></div>
                     </c:if>
                 </div>
 
                 <div class="form-group">
                     <label for="companyName" class="form-label">회사명</label>
                     <input type="text" class="form-control" id="companyName" name="companyName"
-                           value="${param.companyName}" placeholder="(주)예시회사">
+                           value="<c:out value="${param.companyName}"/>" placeholder="(주)예시회사">
                     <c:if test="${not empty fieldErrors.companyName}">
-                        <div class="field-error">${fieldErrors.companyName}</div>
+                        <div class="field-error"><c:out value="${fieldErrors.companyName}"/></div>
                     </c:if>
                 </div>
 
                 <div class="form-group">
                     <label for="businessPhone" class="form-label">사업장 전화번호</label>
                     <input type="text" class="form-control" id="businessPhone" name="businessPhone"
-                           value="${param.businessPhone}" placeholder="02-1234-5678">
+                           value="<c:out value="${param.businessPhone}"/>" placeholder="02-1234-5678">
                     <c:if test="${not empty fieldErrors.businessPhone}">
-                        <div class="field-error">${fieldErrors.businessPhone}</div>
+                        <div class="field-error"><c:out value="${fieldErrors.businessPhone}"/></div>
                     </c:if>
                 </div>
 
                 <div class="form-group">
                     <label for="businessAddress" class="form-label">사업장 주소</label>
                     <input type="text" class="form-control" id="businessAddress" name="businessAddress"
-                           value="${param.businessAddress}" placeholder="서울시 강남구 테헤란로 123">
+                           value="<c:out value="${param.businessAddress}"/>" placeholder="서울시 강남구 테헤란로 123">
                     <c:if test="${not empty fieldErrors.businessAddress}">
-                        <div class="field-error">${fieldErrors.businessAddress}</div>
+                        <div class="field-error"><c:out value="${fieldErrors.businessAddress}"/></div>
                     </c:if>
                 </div>
 
@@ -159,12 +159,12 @@
                     <label for="userType" class="form-label">사용자 유형 *</label>
                     <select class="form-control" id="userType" name="userType" required>
                         <option value="">선택해주세요</option>
-                        <option value="OWNER" ${param.userType == 'OWNER' ? 'selected' : ''}>사업자 (계약서 생성/발송)</option>
-                        <option value="CONTRACTOR" ${param.userType == 'CONTRACTOR' ? 'selected' : ''}>계약자 (서명 전용)</option>
+                        <option value="OWNER" <c:if test="${param.userType == 'OWNER'}">selected</c:if>>사업자 (계약서 생성/발송)</option>
+                        <option value="CONTRACTOR" <c:if test="${param.userType == 'CONTRACTOR'}">selected</c:if>>계약자 (서명 전용)</option>
                     </select>
                     <div class="form-text">사업자는 계약서를 생성하고 발송할 수 있으며, 계약자는 서명만 가능합니다.</div>
                     <c:if test="${not empty fieldErrors.userType}">
-                        <div class="field-error">${fieldErrors.userType}</div>
+                        <div class="field-error"><c:out value="${fieldErrors.userType}"/></div>
                     </c:if>
                 </div>
 

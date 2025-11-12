@@ -22,7 +22,7 @@
                     <div>
                         <h2 class="mb-2">
                             <i class="bi bi-file-earmark-check text-primary me-2"></i>
-                            ${contract.title}
+                            <c:out value="${contract.title}"/>
                         </h2>
                         <div class="d-flex align-items-center gap-3">
                             <c:choose>
@@ -45,7 +45,7 @@
                                     <span class="badge bg-dark fs-6">만료</span>
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="badge bg-light text-dark fs-6">${contract.status}</span>
+                                    <span class="badge bg-light text-dark fs-6"><c:out value="${contract.status}"/></span>
                                 </c:otherwise>
                             </c:choose>
                             <small class="text-muted">
@@ -64,14 +64,14 @@
                 <!-- 알림 메시지 -->
                 <c:if test="${not empty successMessage}">
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle me-2"></i>${successMessage}
+                        <i class="bi bi-check-circle me-2"></i><c:out value="${successMessage}"/>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
 
                 <c:if test="${not empty errorMessage}">
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
+                        <i class="bi bi-exclamation-triangle me-2"></i><c:out value="${errorMessage}"/>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
@@ -106,8 +106,8 @@
                                 <div class="signature-info">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
-                                            <h6 class="mb-1">${signature.signerName}</h6>
-                                            <p class="text-muted mb-1">${signature.signerEmail}</p>
+                                            <h6 class="mb-1"><c:out value="${signature.signerName}"/></h6>
+                                            <p class="text-muted mb-1"><c:out value="${signature.signerEmail}"/></p>
                                             <small class="text-muted">
                                                 서명일시: <fmt:formatDate value="${signature.signedAt}" pattern="yyyy-MM-dd HH:mm:ss"/>
                                             </small>
@@ -138,10 +138,10 @@
                                 <c:choose>
                                     <c:when test="${contract.status == 'SIGNED' or contract.status == 'COMPLETED'}">
                                         <!-- 서명 완료된 계약서 -->
-                                        <a href="/contracts/${contract.id}/pdf-view" class="btn btn-success">
+                                        <a href="/contracts/<c:out value='${contract.id}'/>/pdf-view" class="btn btn-success">
                                             <i class="bi bi-file-pdf me-2"></i>계약서 PDF 보기
                                         </a>
-                                        <a href="/contracts/${contract.id}/pdf/download" class="btn btn-outline-primary" download>
+                                        <a href="/contracts/<c:out value='${contract.id}'/>/pdf/download" class="btn btn-outline-primary" download>
                                             <i class="bi bi-download me-2"></i>PDF 다운로드
                                         </a>
 
@@ -155,7 +155,7 @@
                                     <c:otherwise>
                                         <!-- 진행 중인 계약서 -->
                                         <c:if test="${contract.status == 'DRAFT'}">
-                                            <a href="/contracts/${contract.id}/edit" class="btn btn-primary">
+                                            <a href="/contracts/<c:out value='${contract.id}'/>/edit" class="btn btn-primary">
                                                 <i class="bi bi-pencil me-2"></i>수정
                                             </a>
                                             <button type="button" class="btn btn-success" onclick="sendForSigning()">
@@ -186,7 +186,7 @@
                                         </c:if>
 
                                         <c:if test="${contract.status == 'PENDING'}">
-                                            <a href="/sign/${contract.id}" class="btn btn-outline-success" target="_blank">
+                                            <a href="/sign/<c:out value='${contract.id}'/>" class="btn btn-outline-success" target="_blank">
                                                 <i class="bi bi-pen me-2"></i>서명 페이지 보기
                                             </a>
                                         </c:if>
@@ -207,11 +207,11 @@
                             <div class="contract-info">
                                 <div class="info-item">
                                     <span class="fw-medium">계약서 ID:</span>
-                                    <span class="text-muted">${contract.id}</span>
+                                    <span class="text-muted"><c:out value="${contract.id}"/></span>
                                 </div>
                                 <div class="info-item">
                                     <span class="fw-medium">템플릿 ID:</span>
-                                    <span class="text-muted">${contract.templateId}</span>
+                                    <span class="text-muted"><c:out value="${contract.templateId}"/></span>
                                 </div>
                                 <div class="info-item">
                                     <span class="fw-medium">상태:</span>
@@ -235,7 +235,7 @@
                                             <span class="badge bg-dark">만료</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="badge bg-light text-dark">${contract.status}</span>
+                                            <span class="badge bg-light text-dark"><c:out value="${contract.status}"/></span>
                                         </c:otherwise>
                                     </c:choose>
                                 </div>
@@ -276,16 +276,16 @@
                                     <h6 class="text-primary mb-2">갑 (첫 번째 당사자)</h6>
                                     <div class="info-item">
                                         <span class="fw-medium">이름:</span>
-                                        <span class="text-muted">${contract.firstParty.name}</span>
+                                        <span class="text-muted"><c:out value="${contract.firstParty.name}"/></span>
                                     </div>
                                     <div class="info-item">
                                         <span class="fw-medium">이메일:</span>
-                                        <span class="text-muted">${contract.firstParty.email}</span>
+                                        <span class="text-muted"><c:out value="${contract.firstParty.email}"/></span>
                                     </div>
                                     <c:if test="${not empty contract.firstParty.organizationName}">
                                         <div class="info-item">
                                             <span class="fw-medium">회사/조직:</span>
-                                            <span class="text-muted">${contract.firstParty.organizationName}</span>
+                                            <span class="text-muted"><c:out value="${contract.firstParty.organizationName}"/></span>
                                         </div>
                                     </c:if>
                                 </div>
@@ -293,16 +293,16 @@
                                     <h6 class="text-success mb-2">을 (두 번째 당사자)</h6>
                                     <div class="info-item">
                                         <span class="fw-medium">이름:</span>
-                                        <span class="text-muted">${contract.secondParty.name}</span>
+                                        <span class="text-muted"><c:out value="${contract.secondParty.name}"/></span>
                                     </div>
                                     <div class="info-item">
                                         <span class="fw-medium">이메일:</span>
-                                        <span class="text-muted">${contract.secondParty.email}</span>
+                                        <span class="text-muted"><c:out value="${contract.secondParty.email}"/></span>
                                     </div>
                                     <c:if test="${not empty contract.secondParty.organizationName}">
                                         <div class="info-item">
                                             <span class="fw-medium">회사/조직:</span>
-                                            <span class="text-muted">${contract.secondParty.organizationName}</span>
+                                            <span class="text-muted"><c:out value="${contract.secondParty.organizationName}"/></span>
                                         </div>
                                     </c:if>
                                 </div>
@@ -349,7 +349,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>정말로 '<strong>${contract.title}</strong>' 계약서를 삭제하시겠습니까?</p>
+                    <p>정말로 '<strong><c:out value="${contract.title}"/></strong>' 계약서를 삭제하시겠습니까?</p>
                     <p class="text-danger">
                         <i class="bi bi-exclamation-triangle me-2"></i>
                         이 작업은 되돌릴 수 없습니다.
@@ -357,9 +357,9 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <form id="deleteForm" method="post" action="/contracts/${contract.id}/delete" class="d-inline">
+                    <form id="deleteForm" method="post" action="/contracts/<c:out value='${contract.id}'/>/delete" class="d-inline">
                         <c:if test="${not empty _csrf}">
-                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                            <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>" value="<c:out value='${_csrf.token}'/>" />
                         </c:if>
                         <button type="submit" class="btn btn-danger">삭제</button>
                     </form>
@@ -414,8 +414,8 @@
             contractTitle: previewData.contractTitle || '-'
         };
 
-        const csrfParam = '${_csrf.parameterName}';
-        const csrfToken = '${_csrf.token}';
+        const csrfParam = '<c:out value="${_csrf.parameterName}"/>';
+        const csrfToken = '<c:out value="${_csrf.token}"/>';
 
         function renderPlainTextContract(content) {
             const container = document.getElementById('contractContentHtmlContainer');
@@ -736,7 +736,7 @@
                 function() {
                     const form = document.createElement('form');
                     form.method = 'post';
-                    form.action = '/contracts/${contract.id}/send';
+                    form.action = '/contracts/<c:out value="${contract.id}"/>/send';
                     appendCsrfField(form);
                     document.body.appendChild(form);
                     form.submit();
@@ -753,7 +753,7 @@
                 function() {
                     const form = document.createElement('form');
                     form.method = 'post';
-                    form.action = '/contracts/${contract.id}/resend';
+                    form.action = '/contracts/<c:out value="${contract.id}"/>/resend';
                     appendCsrfField(form);
                     document.body.appendChild(form);
                     form.submit();
@@ -770,7 +770,7 @@
                 function() {
                     const form = document.createElement('form');
                     form.method = 'post';
-                    form.action = '/contracts/${contract.id}/cancel';
+                    form.action = '/contracts/<c:out value="${contract.id}"/>/cancel';
                     appendCsrfField(form);
                     document.body.appendChild(form);
                     form.submit();
@@ -787,7 +787,7 @@
                 function() {
                     const form = document.createElement('form');
                     form.method = 'post';
-                    form.action = '/contracts/${contract.id}/complete';
+                    form.action = '/contracts/<c:out value="${contract.id}"/>/complete';
                     appendCsrfField(form);
                     document.body.appendChild(form);
                     form.submit();

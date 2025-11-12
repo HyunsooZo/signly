@@ -32,14 +32,14 @@
                 <!-- 알림 메시지 -->
                 <c:if test="${not empty successMessage}">
                     <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                        <i class="bi bi-check-circle me-2"></i>${successMessage}
+                        <i class="bi bi-check-circle me-2"></i><c:out value="${successMessage}"/>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
 
                 <c:if test="${not empty errorMessage}">
                     <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                        <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
+                        <i class="bi bi-exclamation-triangle me-2"></i><c:out value="${errorMessage}"/>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
@@ -81,8 +81,8 @@
                                             <c:forEach var="contract" items="${contracts.content}">
                                                 <tr>
                                                     <td>
-                                                        <a href="/contracts/${contract.id}" class="text-decoration-none">
-                                                            <strong>${contract.title}</strong>
+                                                        <a href="/contracts/<c:out value='${contract.id}'/>" class="text-decoration-none">
+                                                            <strong><c:out value="${contract.title}"/></strong>
                                                         </a>
                                                         <c:if test="${not empty contract.content and contract.content.length() > 100}">
                                                             <br>
@@ -91,8 +91,8 @@
                                                     </td>
                                                     <td>
                                                         <div class="small">
-                                                            <strong>갑:</strong> ${contract.firstParty.name}<br>
-                                                            <strong>을:</strong> ${contract.secondParty.name}
+                                                            <strong>갑:</strong> <c:out value="${contract.firstParty.name}"/><br>
+                                                            <strong>을:</strong> <c:out value="${contract.secondParty.name}"/>
                                                         </div>
                                                     </td>
                                                     <td>
@@ -116,7 +116,7 @@
                                                                 <span class="badge bg-dark">만료</span>
                                                             </c:when>
                                                             <c:otherwise>
-                                                                <span class="badge bg-light text-dark">${contract.status}</span>
+                                                                <span class="badge bg-light text-dark"><c:out value="${contract.status}"/></span>
                                                             </c:otherwise>
                                                         </c:choose>
                                                     </td>
@@ -138,7 +138,7 @@
                                                             <c:choose>
                                                                 <c:when test="${contract.status == 'SIGNED' or contract.status == 'COMPLETED'}">
                                                                     <!-- 서명 완료된 계약서: PDF 보기 버튼만 표시 -->
-                                                                    <a href="/contracts/${contract.id}/pdf-view"
+                                                                    <a href="/contracts/<c:out value='${contract.id}'/>/pdf-view"
                                                                        class="btn btn-outline-success"
                                                                        title="계약서 PDF 보기">
                                                                         <i class="bi bi-file-pdf"></i>
@@ -146,26 +146,26 @@
                                                                 </c:when>
                                                                 <c:otherwise>
                                                                     <!-- 진행 중인 계약서: 기존 버튼들 -->
-                                                                    <a href="/contracts/${contract.id}"
+                                                                    <a href="/contracts/<c:out value='${contract.id}'/>"
                                                                        class="btn btn-outline-primary"
                                                                        title="상세보기">
                                                                         <i class="bi bi-eye"></i>
                                                                     </a>
                                                                     <c:if test="${contract.status == 'DRAFT'}">
-                                                                        <a href="/contracts/${contract.id}/edit"
+                                                                        <a href="/contracts/<c:out value='${contract.id}'/>/edit"
                                                                            class="btn btn-outline-secondary"
                                                                            title="수정">
                                                                             <i class="bi bi-pencil"></i>
                                                                         </a>
                                                                         <button type="button"
                                                                                 class="btn btn-outline-success"
-                                                                                onclick="sendForSigning('${contract.id}')"
+                                                                                onclick="sendForSigning('<c:out value='${contract.id}'/>')"
                                                                                 title="서명 요청">
                                                                             <i class="bi bi-send"></i>
                                                                         </button>
                                                                         <button type="button"
                                                                                 class="btn btn-outline-danger"
-                                                                                onclick="deleteContract('${contract.id}', '${contract.title}')"
+                                                                                onclick="deleteContract('<c:out value='${contract.id}'/>', '<c:out value='${contract.title}'/>')"
                                                                                 title="삭제">
                                                                             <i class="bi bi-trash"></i>
                                                                         </button>
@@ -173,7 +173,7 @@
                                                                     <c:if test="${contract.status == 'PENDING' or contract.status == 'SIGNED'}">
                                                                         <button type="button"
                                                                                 class="btn btn-outline-warning"
-                                                                                onclick="cancelContract('${contract.id}')"
+                                                                                onclick="cancelContract('<c:out value='${contract.id}'/>')"
                                                                                 title="취소">
                                                                             <i class="bi bi-x-circle"></i>
                                                                         </button>
@@ -243,7 +243,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                     <form id="deleteForm" method="post" class="d-inline">
                         <c:if test="${not empty _csrf}">
-                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                            <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>" value="<c:out value='${_csrf.token}'/>" />
                         </c:if>
                         <button type="submit" class="btn btn-danger">삭제</button>
                     </form>
@@ -271,7 +271,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">돌아가기</button>
                     <form id="cancelForm" method="post" class="d-inline">
                         <c:if test="${not empty _csrf}">
-                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                            <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>" value="<c:out value='${_csrf.token}'/>" />
                         </c:if>
                         <button type="submit" class="btn btn-warning">취소</button>
                     </form>
@@ -281,8 +281,8 @@
     </div>
 
     <script>
-        const csrfParam = '${_csrf.parameterName}';
-        const csrfToken = '${_csrf.token}';
+        const csrfParam = '<c:out value="${_csrf.parameterName}"/>';
+        const csrfToken = '<c:out value="${_csrf.token}"/>';
 
         function appendCsrfField(form) {
             if (!csrfParam || !csrfToken) {

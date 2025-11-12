@@ -19,7 +19,7 @@
 
             <div class="alert alert-danger" role="alert">
                 <h5 class="alert-heading">오류가 발생했습니다</h5>
-                <p>${not empty errorMessage ? errorMessage : '유효하지 않거나 만료된 비밀번호 재설정 링크입니다'}</p>
+                <p><c:out value="${not empty errorMessage ? errorMessage : '유효하지 않거나 만료된 비밀번호 재설정 링크입니다'}"/></p>
                 <hr>
                 <p class="mb-0">비밀번호 재설정 링크는 24시간 동안만 유효합니다.</p>
             </div>
