@@ -2,6 +2,7 @@ package com.signly.user.presentation.web;
 
 import com.signly.common.exception.BusinessException;
 import com.signly.common.exception.ValidationException;
+import com.signly.common.util.PasswordValidator;
 import com.signly.user.application.UserService;
 import com.signly.user.application.dto.RegisterUserCommand;
 import com.signly.user.domain.model.UserType;
@@ -53,10 +54,10 @@ public class UserWebController {
                 fieldErrors.put("email", "올바른 이메일 형식이 아닙니다.");
             }
 
-            if (password == null || password.length() < 8) {
-                fieldErrors.put("password", "비밀번호는 8자 이상이어야 합니다.");
-            } else if (!isValidPassword(password)) {
-                fieldErrors.put("password", "비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다.");
+            if (!PasswordValidator.hasMinimumLength(password)) {
+                fieldErrors.put("password", "비밀번호는 최소 " + PasswordValidator.MIN_PASSWORD_LENGTH + "자 이상이어야 합니다.");
+            } else if (!PasswordValidator.isValid(password)) {
+                fieldErrors.put("password", PasswordValidator.PASSWORD_REQUIREMENT_MESSAGE);
             }
 
             if (!password.equals(confirmPassword)) {
@@ -121,10 +122,6 @@ public class UserWebController {
 
     private boolean isValidEmail(String email) {
         return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-    }
-
-    private boolean isValidPassword(String password) {
-        return password.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
     }
 
     public static class RegistrationForm {
