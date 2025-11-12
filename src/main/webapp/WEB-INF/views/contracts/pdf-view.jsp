@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${pageTitle} - Signly</title>
+    <title><c:out value="${pageTitle}"/> - Signly</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
@@ -15,16 +15,16 @@
 <body>
     <div class="pdf-viewer-header">
         <h1 class="pdf-viewer-title">
-            <i class="bi bi-file-pdf me-2"></i>${contract.title}
+            <i class="bi bi-file-pdf me-2"></i><c:out value="${contract.title}"/>
         </h1>
         <div class="pdf-viewer-actions">
-            <a href="/contracts/${contract.id}/pdf/download"
+            <a href="/contracts/<c:out value='${contract.id}'/>/pdf/download"
                class="pdf-viewer-btn pdf-viewer-btn-primary"
                download>
                 <i class="bi bi-download"></i>
                 <span class="pdf-viewer-btn-text">다운로드</span>
             </a>
-            <a href="/contracts/${contract.id}"
+            <a href="/contracts/<c:out value='${contract.id}'/>"
                class="pdf-viewer-btn">
                 <i class="bi bi-arrow-left"></i>
                 <span class="pdf-viewer-btn-text">돌아가기</span>
@@ -42,7 +42,7 @@
 
         <!-- PDF 뷰어 - iframe 사용 (모든 브라우저에서 가장 안정적) -->
         <iframe id="pdfFrame"
-                src="/contracts/${contract.id}/pdf/inline"
+                src="/contracts/<c:out value='${contract.id}'/>/pdf/inline"
                 class="pdf-viewer-iframe">
         </iframe>
     </div>
@@ -86,9 +86,9 @@
             errorDiv.className = 'pdf-error';
             errorDiv.innerHTML = `
                 <i class="bi bi-exclamation-triangle-fill text-warning"></i>
-                <h4>${message}</h4>
+                <h4>` + message + `</h4>
                 <p class="mb-3">PDF 파일을 직접 다운로드하여 확인해주세요.</p>
-                <a href="/contracts/${contract.id}/pdf/download"
+                <a href="/contracts/<c:out value='${contract.id}'/>/pdf/download"
                    class="btn btn-primary"
                    download>
                     <i class="bi bi-download me-2"></i>PDF 다운로드

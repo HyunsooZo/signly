@@ -26,18 +26,18 @@
             <c:forEach var="preset" items="${presets}">
                 <div class="col-md-6 col-lg-3">
                     <div class="template-card template-card-clickable" 
-                         onclick="selectPreset('${preset.id}')"
-                         data-template-id="${preset.id}"
+                         onclick="selectPreset('<c:out value='${preset.id}'/>')"
+                         data-template-id="<c:out value='${preset.id}'/>"
                          data-template-type="preset">
                         <div class="template-card-body">
-                            <div class="template-preview" data-preset-id="${preset.id}">
+                            <div class="template-preview" data-preset-id="<c:out value='${preset.id}'/>">
                                 <div class="template-preview-badge preset-badge">
                                     <i class="bi bi-file-earmark-text"></i>
                                     기본
                                 </div>
                                 <p class="text-muted small">미리보기 로딩 중...</p>
                             </div>
-                            <h5 class="template-title">${preset.name}</h5>
+                            <h5 class="template-title"><c:out value="${preset.name}"/></h5>
                         </div>
                     </div>
                 </div>
@@ -83,7 +83,7 @@
             for (const div of previewDivs) {
                 const presetId = div.getAttribute('data-preset-id');
                 try {
-                    const response = await fetch(`/api/templates/preset/\${presetId}`);
+                     const response = await fetch('/api/templates/preset/' + presetId);
                     if (response.ok) {
                         const data = await response.json();
                         if (data.renderedHtml) {
@@ -129,10 +129,10 @@
             const col = document.createElement('div');
             col.className = 'col-md-6 col-lg-3';
             
-            col.innerHTML = `
+             col.innerHTML = `
                 <div class="template-card template-card-clickable" 
-                     onclick="selectUserTemplate('\${template.templateId}')"
-                     data-template-id="\${template.templateId}"
+                     onclick="selectUserTemplate('` + template.templateId + `')"
+                     data-template-id="` + template.templateId + `"
                      data-template-type="user">
                     <div class="template-card-body">
                         <div class="template-preview">
@@ -141,7 +141,7 @@
                                 내 템플릿
                             </div>
                         </div>
-                        <h5 class="template-title">\${template.title}</h5>
+                        <h5 class="template-title">` + template.title + `</h5>
                     </div>
                 </div>
             `;
