@@ -19,7 +19,7 @@
                     <div>
                         <h2 class="mb-2">
                             <i class="bi bi-file-earmark-text text-primary me-2"></i>
-                            ${template.title}
+                            <c:out value="${template.title}"/>
                         </h2>
                         <div class="d-flex align-items-center gap-3">
                             <c:choose>
@@ -33,7 +33,7 @@
                                     <span class="badge bg-warning fs-6">보류</span>
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="badge bg-light text-dark fs-6">${template.status}</span>
+                                    <span class="badge bg-light text-dark fs-6"><c:out value="${template.status}"/></span>
                                 </c:otherwise>
                             </c:choose>
                             <small class="text-muted">
@@ -52,14 +52,14 @@
                 <!-- 알림 메시지 -->
                 <c:if test="${not empty successMessage}">
                     <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                        <i class="bi bi-check-circle me-2"></i>${successMessage}
+                        <i class="bi bi-check-circle me-2"></i><c:out value="${successMessage}"/>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
 
                 <c:if test="${not empty errorMessage}">
                     <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                        <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
+                        <i class="bi bi-exclamation-triangle me-2"></i><c:out value="${errorMessage}"/>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
@@ -94,7 +94,7 @@
                         </div>
                         <div class="card-body">
                             <div class="d-grid gap-2">
-                                <a href="/templates/${template.templateId}/edit" class="btn btn-primary">
+                                <a href="/templates/<c:out value='${template.templateId}'/>/edit" class="btn btn-primary">
                                     <i class="bi bi-pencil me-2"></i>수정
                                 </a>
 
@@ -103,7 +103,7 @@
                                 </button>
 
                                 <c:if test="${template.status == 'ACTIVE'}">
-                                    <a href="/contracts/new?templateId=${template.templateId}" class="btn btn-success">
+                                    <a href="/contracts/new?templateId=<c:out value='${template.templateId}'/>" class="btn btn-success">
                                         <i class="bi bi-file-plus me-2"></i>계약서 생성
                                     </a>
                                 </c:if>
@@ -145,7 +145,7 @@
                             <div class="template-info">
                                 <div class="info-item">
                                     <span class="fw-medium">템플릿 ID:</span>
-                                    <span class="text-muted">${template.templateId}</span>
+                                    <span class="text-muted"><c:out value="${template.templateId}"/></span>
                                 </div>
                                 <div class="info-item">
                                     <span class="fw-medium">상태:</span>
@@ -160,7 +160,7 @@
                                             <span class="badge bg-warning">보류</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="badge bg-light text-dark">${template.status}</span>
+                                            <span class="badge bg-light text-dark"><c:out value="${template.status}"/></span>
                                         </c:otherwise>
                                     </c:choose>
                                 </div>
@@ -178,7 +178,7 @@
                                 </div>
                                 <div class="info-item">
                                     <span class="fw-medium">섹션 수:</span>
-                                    <span class="text-muted">${template.sections.size()}</span>
+                                    <span class="text-muted"><c:out value="${template.sections.size()}"/></span>
                                 </div>
                             </div>
                         </div>
@@ -222,7 +222,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>정말로 '<strong>${template.title}</strong>' 템플릿을 삭제하시겠습니까?</p>
+                    <p>정말로 '<strong><c:out value="${template.title}"/></strong>' 템플릿을 삭제하시겠습니까?</p>
                     <p class="text-danger">
                         <i class="bi bi-exclamation-triangle me-2"></i>
                         이 작업은 되돌릴 수 없습니다.
@@ -230,9 +230,9 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <form id="deleteForm" method="post" action="/templates/${template.templateId}/delete" class="d-inline">
+                    <form id="deleteForm" method="post" action="/templates/<c:out value='${template.templateId}'/>/delete" class="d-inline">
                         <c:if test="${not empty _csrf}">
-                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                            <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>" value="<c:out value='${_csrf.token}'/>" />
                         </c:if>
                         <button type="submit" class="btn btn-danger">삭제</button>
                     </form>
@@ -242,8 +242,8 @@
     </div>
 
     <script>
-        const csrfParam = '${_csrf.parameterName}';
-        const csrfToken = '${_csrf.token}';
+        const csrfParam = '<c:out value="${_csrf.parameterName}"/>';
+        const csrfToken = '<c:out value="${_csrf.token}"/>';
 
         // 페이지 로드 시 템플릿 내용 디코딩 및 표시
         document.addEventListener('DOMContentLoaded', function() {
@@ -281,7 +281,7 @@
         }
 
         function previewTemplate() {
-            let html = decodeHtml(`${template.renderedHtml}`);
+            let html = decodeHtml('<c:out value="${template.renderedHtml}" escapeXml="true" />');
 
             // 변수를 밑줄로 변환
             html = html.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, '<span class="template-variable-underline"></span>');
@@ -304,7 +304,7 @@
                 function() {
                     const form = document.createElement('form');
                     form.method = 'post';
-                    form.action = '/templates/${template.templateId}/activate';
+                    form.action = '/templates/<c:out value="${template.templateId}"/>/activate';
                     appendCsrfField(form);
                     document.body.appendChild(form);
                     form.submit();
@@ -321,7 +321,7 @@
                 function() {
                     const form = document.createElement('form');
                     form.method = 'post';
-                    form.action = '/templates/${template.templateId}/archive';
+                    form.action = '/templates/<c:out value="${template.templateId}"/>/archive';
                     appendCsrfField(form);
                     document.body.appendChild(form);
                     form.submit();

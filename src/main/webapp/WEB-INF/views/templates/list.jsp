@@ -34,14 +34,14 @@
                 <!-- 알림 메시지 -->
                 <c:if test="${not empty successMessage}">
                     <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                        <i class="bi bi-check-circle me-2"></i>${successMessage}
+                        <i class="bi bi-check-circle me-2"></i><c:out value="${successMessage}"/>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
 
                 <c:if test="${not empty errorMessage}">
                     <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                        <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
+                        <i class="bi bi-exclamation-triangle me-2"></i><c:out value="${errorMessage}"/>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
@@ -74,10 +74,10 @@
                                 <div class="col-md-6 col-lg-3">
                                     <div class="template-card">
                                         <div class="template-card-body">
-                                            <div class="template-preview" data-template-id="${template.templateId}">
+                                            <div class="template-preview" data-template-id="<c:out value='${template.templateId}'/>">
                                                 <c:choose>
                                                     <c:when test="${not empty template.renderedHtml}">
-                                                        ${template.renderedHtml}
+                                                        <c:out value="${template.renderedHtml}" escapeXml="false"/>
                                                     </c:when>
                                                     <c:otherwise>
                                                         <p class="text-muted small">미리보기 없음</p>
@@ -97,7 +97,7 @@
                                                     </c:choose>
                                                 </div>
                                             </div>
-                                            <h5 class="template-title">${template.title}</h5>
+                                            <h5 class="template-title"><c:out value="${template.title}"/></h5>
                                             
                                             <div class="template-footer mt-auto">
                                                 <div class="template-meta-info mb-2">
@@ -114,19 +114,19 @@
                                                 <div class="template-actions d-flex gap-1 justify-content-center">
                                                     <button type="button"
                                                             class="btn btn-sm btn-outline-info"
-                                                            data-template-id="${template.templateId}"
-                                                            data-template-title="${fn:escapeXml(template.title)}"
-                                                            data-template-html="${fn:escapeXml(template.renderedHtml)}"
+                                                            data-template-id="<c:out value='${template.templateId}'/>"
+                                                            data-template-title="<c:out value='${fn:escapeXml(template.title)}'/>"
+                                                            data-template-html="<c:out value='${fn:escapeXml(template.renderedHtml)}'/>"
                                                             onclick="previewTemplateButton(this)"
                                                             title="미리보기">
                                                         <i class="bi bi-eye"></i>
                                                     </button>
-                                                    <a href="/templates/${template.templateId}"
+                                                    <a href="/templates/<c:out value='${template.templateId}'/>"
                                                        class="btn btn-sm btn-outline-primary"
                                                        title="상세보기">
                                                         <i class="bi bi-box-arrow-up-right"></i>
                                                     </a>
-                                                    <a href="/templates/${template.templateId}/edit"
+                                                    <a href="/templates/<c:out value='${template.templateId}'/>/edit"
                                                        class="btn btn-sm btn-outline-secondary"
                                                        title="수정">
                                                         <i class="bi bi-pencil"></i>
@@ -134,7 +134,7 @@
                                                     <c:if test="${template.status == 'DRAFT'}">
                                                         <button type="button"
                                                                 class="btn btn-sm btn-outline-success"
-                                                                onclick="activateTemplate('${template.templateId}')"
+                                                                onclick="activateTemplate('<c:out value='${template.templateId}'/>')"
                                                                 title="활성화">
                                                             <i class="bi bi-check-circle"></i>
                                                         </button>
@@ -142,7 +142,7 @@
                                                     <c:if test="${template.status == 'ACTIVE'}">
                                                         <button type="button"
                                                                 class="btn btn-sm btn-outline-warning"
-                                                                onclick="archiveTemplate('${template.templateId}')"
+                                                                onclick="archiveTemplate('<c:out value='${template.templateId}'/>')"
                                                                 title="보류">
                                                             <i class="bi bi-archive"></i>
                                                         </button>
@@ -150,7 +150,7 @@
                                                     <c:if test="${template.status == 'ARCHIVED'}">
                                                         <button type="button"
                                                                 class="btn btn-sm btn-outline-danger"
-                                                                onclick="deleteTemplate('${template.templateId}', '${template.title}')"
+                                                                onclick="deleteTemplate('<c:out value='${template.templateId}'/>', '<c:out value='${template.title}'/>')"
                                                                 title="삭제">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
@@ -217,7 +217,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                     <form id="deleteForm" method="post" class="d-inline">
                         <c:if test="${not empty _csrf}">
-                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                            <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>" value="<c:out value='${_csrf.token}'/>" />
                         </c:if>
                         <button type="submit" class="btn btn-danger">삭제</button>
                     </form>
@@ -300,8 +300,8 @@
             return textarea.value;
         }
 
-        const csrfParam = '${_csrf.parameterName}';
-        const csrfToken = '${_csrf.token}';
+        const csrfParam = '<c:out value="${_csrf.parameterName}"/>';
+        const csrfToken = '<c:out value="${_csrf.token}"/>';
 
         function submitPost(action) {
             const form = document.createElement('form');
