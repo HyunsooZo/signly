@@ -10,7 +10,7 @@
     <jsp:param name="additionalCss3" value="/css/contract-common.css" />
     <jsp:param name="additionalCss4" value="/css/modal.css" />
 </jsp:include>
-<body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
+<body <c:if test="${not empty currentUserId}">data-current-user-id="<c:out value="${currentUserId}"/>"</c:if>>
     <jsp:include page="../common/navbar.jsp">
         <jsp:param name="currentPage" value="contracts" />
     </jsp:include>
@@ -23,7 +23,7 @@
                     <div>
                         <h2 class="mb-2">
                             <i class="bi bi-file-earmark-plus text-primary me-2"></i>
-                            ${pageTitle}
+                            <c:out value="${pageTitle}"/>
                         </h2>
                         <p class="text-muted mb-0">계약서 정보와 당사자 정보를 입력하세요</p>
                     </div>
@@ -35,33 +35,33 @@
                 <!-- 알림 메시지 -->
                 <c:if test="${not empty successMessage}">
                     <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                        <i class="bi bi-check-circle me-2"></i>${successMessage}
+                        <i class="bi bi-check-circle me-2"></i><c:out value="${successMessage}"/>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
 
                 <c:if test="${not empty errorMessage}">
                     <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                        <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
+                        <i class="bi bi-exclamation-triangle me-2"></i><c:out value="${errorMessage}"/>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </c:if>
             </div>
         </div>
 
-        <form method="post" action="${not empty contractId ? '/contracts/'.concat(contractId) : '/contracts'}" class="contract-form">
+        <form method="post" action="<c:out value='${not empty contractId ? "/contracts/".concat(contractId) : "/contracts"}'/>" class="contract-form">
             <c:if test="${not empty _csrf}">
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>" value="<c:out value='${_csrf.token}'/>" />
             </c:if>
             <c:if test="${not empty selectedPreset}">
-                <input type="hidden" name="selectedPreset" value="${selectedPreset}" />
+                <input type="hidden" name="selectedPreset" value="<c:out value='${selectedPreset}'/>" />
             </c:if>
-            <input type="hidden" id="templateId" name="templateId" value="${contract.templateId}">
+            <input type="hidden" id="templateId" name="templateId" value="<c:out value='${contract.templateId}'/>">
             <c:if test="${not empty selectedTemplate}">
-                <script type="application/json" id="selectedTemplateData">${selectedTemplateContent}</script>
+                <script type="application/json" id="selectedTemplateData"><c:out value="${selectedTemplateContent}"/></script>
             </c:if>
             <c:if test="${not empty existingContractJson}">
-                <script type="application/json" id="existingContractData">${existingContractJson}</script>
+                <script type="application/json" id="existingContractData"><c:out value="${existingContractJson}"/></script>
             </c:if>
 
             <!-- 프리셋 레이아웃 -->
@@ -106,7 +106,7 @@
                                 <div class="mb-0">
                                     <label for="presetExpiresAt" class="form-label">만료일</label>
                                     <input type="datetime-local" class="form-control" id="presetExpiresAt" name="expiresAt"
-                                           value="${contract.expiresAtInputValue}">
+                                           value="<c:out value='${contract.expiresAtInputValue}'/>">
                                     <div class="form-text">필요 시 서명 마감 일시를 지정하세요.</div>
                                 </div>
                             </div>
@@ -168,7 +168,7 @@
                                                         <c:set var="previewText" value="${empty template.previewText ? '' : template.previewText}" />
                                                         <c:set var="isSelectedTemplate" value="${contract.templateId == template.templateId}" />
                                                         <div class="col-md-6 col-lg-4">
-                                                            <div class="card h-100 template-option-card border" data-template-card data-template-id="${template.templateId}" data-template-selected="${isSelectedTemplate}">
+                                                            <div class="card h-100 template-option-card border" data-template-card data-template-id="<c:out value='${template.templateId}'/>" data-template-selected="<c:out value='${isSelectedTemplate}'/>">
                                                                 <div class="card-body d-flex flex-column">
                                                                     <h6 class="card-title mb-2"><c:out value="${template.title}" /></h6>
                                                                     <p class="text-muted small flex-grow-1 mb-3">
@@ -186,10 +186,10 @@
                                                                     </p>
                                                                     <button type="button"
                                                                             class="btn btn-outline-primary w-100 mt-auto"
-                                                                            data-template-button="${template.templateId}"
-                                                                            data-template-id="${template.templateId}"
-                                                                            data-template-title="${fn:escapeXml(template.title)}"
-                                                                            data-template-content="${fn:escapeXml(renderedHtml)}"
+                                                                            data-template-button="<c:out value='${template.templateId}'/>"
+                                                                            data-template-id="<c:out value='${template.templateId}'/>"
+                                                                            data-template-title="<c:out value='${fn:escapeXml(template.title)}'/>"
+                                                                            data-template-content="<c:out value='${fn:escapeXml(renderedHtml)}'/>"
                                                                             onclick="handleTemplateSelection(this)">
                                                                         템플릿 불러오기
                                                                     </button>
@@ -205,8 +205,8 @@
                                         <select id="presetSelect" class="d-none">
                                             <option value="">표준 양식을 선택하세요</option>
                                             <c:forEach var="preset" items="${presets}">
-                                                <option value="${preset.id}" data-name="${preset.name}">
-                                                    ${preset.name} - ${preset.description}
+                                                <option value="<c:out value='${preset.id}'/>" data-name="<c:out value='${preset.name}'/>">
+                                                    <c:out value="${preset.name}"/> - <c:out value="${preset.description}"/>
                                                 </option>
                                             </c:forEach>
                                         </select>
@@ -223,14 +223,14 @@
                                                 <div class="mb-3">
                                                     <label for="title" class="form-label">계약서 제목 <span class="text-danger">*</span></label>
                                                     <input type="text" class="form-control form-control-lg" id="title" name="title"
-                                                           value="${contract.title}" required maxlength="200"
+                                                           value="<c:out value='${contract.title}'/>" required maxlength="200"
                                                            placeholder="계약서 제목을 입력하세요">
                                                 </div>
 
                                                 <div class="mb-3" id="contentSection">
                                                     <label for="content" class="form-label">계약서 내용 <span class="text-danger">*</span></label>
                                                     <textarea class="form-control content-editor" id="content" name="content"
-                                                              rows="15" required placeholder="계약서 내용을 입력하세요...">${contract.content}</textarea>
+                                                              rows="15" required placeholder="계약서 내용을 입력하세요..."><c:out value='${contract.content}'/></textarea>
                                                     <div class="form-text">계약서의 전체 내용을 입력하세요. 변수를 사용하여 동적 값을 설정할 수 있습니다.</div>
 
                                             <div class="mt-3" id="customVariablesContainer">
@@ -277,19 +277,19 @@
                             <div class="mb-3">
                                 <label for="firstPartyName" class="form-label">이름 <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="firstPartyName" name="firstPartyName"
-                                       value="${contract.firstPartyName}" required maxlength="100"
+                                       value="<c:out value='${contract.firstPartyName}'/>" required maxlength="100"
                                        placeholder="성명을 입력하세요">
                             </div>
                             <div class="mb-3">
                                 <label for="firstPartyEmail" class="form-label">이메일 <span class="text-danger">*</span></label>
                                 <input type="email" class="form-control" id="firstPartyEmail" name="firstPartyEmail"
-                                       value="${contract.firstPartyEmail}" required maxlength="200"
+                                       value="<c:out value='${contract.firstPartyEmail}'/>" required maxlength="200"
                                        placeholder="example@domain.com">
                             </div>
                             <div class="mb-4">
                                 <label for="firstPartyAddress" class="form-label">회사/조직명</label>
                                 <textarea class="form-control" id="firstPartyAddress" name="firstPartyAddress"
-                                          rows="3" maxlength="500" placeholder="회사 또는 조직명을 입력하세요">${contract.firstPartyAddress}</textarea>
+                                          rows="3" maxlength="500" placeholder="회사 또는 조직명을 입력하세요"><c:out value='${contract.firstPartyAddress}'/></textarea>
                             </div>
 
                             <!-- 을 (두 번째 당사자) -->
@@ -297,19 +297,19 @@
                             <div class="mb-3">
                                 <label for="secondPartyName" class="form-label">이름 <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="secondPartyName" name="secondPartyName"
-                                       value="${contract.secondPartyName}" required maxlength="100"
+                                       value="<c:out value='${contract.secondPartyName}'/>" required maxlength="100"
                                        placeholder="성명을 입력하세요">
                             </div>
                             <div class="mb-3">
                                 <label for="secondPartyEmail" class="form-label">이메일 <span class="text-danger">*</span></label>
                                 <input type="email" class="form-control" id="secondPartyEmail" name="secondPartyEmail"
-                                       value="${contract.secondPartyEmail}" required maxlength="200"
+                                       value="<c:out value='${contract.secondPartyEmail}'/>" required maxlength="200"
                                        placeholder="example@domain.com">
                             </div>
                             <div class="mb-4">
                                 <label for="secondPartyAddress" class="form-label">회사/조직명</label>
                                 <textarea class="form-control" id="secondPartyAddress" name="secondPartyAddress"
-                                          rows="3" maxlength="500" placeholder="회사 또는 조직명을 입력하세요">${contract.secondPartyAddress}</textarea>
+                                          rows="3" maxlength="500" placeholder="회사 또는 조직명을 입력하세요"><c:out value='${contract.secondPartyAddress}'/></textarea>
                             </div>
                         </div>
                     </div>
@@ -325,7 +325,7 @@
                             <div class="mb-0">
                                 <label for="expiresAt" class="form-label">만료일</label>
                                 <input type="datetime-local" class="form-control" id="expiresAt" name="expiresAt"
-                                       value="${contract.expiresAtInputValue}">
+                                       value="<c:out value='${contract.expiresAtInputValue}'/>">
                                 <div class="form-text">필요 시 서명 마감 일시를 지정하세요.</div>
                             </div>
                         </div>
@@ -349,7 +349,7 @@
                             </button>
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-check-circle me-2"></i>
-                                ${empty contractId ? '계약서 생성' : '수정 완료'}
+                                <c:out value="${empty contractId ? '계약서 생성' : '수정 완료'}"/>
                             </button>
                         </div>
                     </div>
@@ -405,7 +405,7 @@
                 console.error('[ERROR] 선택된 템플릿 데이터 파싱 실패:', error);
             }
         }
-        const hasSelectedPreset = ${not empty selectedPreset ? 'true' : 'false'};
+        const hasSelectedPreset = <c:out value="${not empty selectedPreset ? 'true' : 'false'}"/>;
 
         function readOwnerInfo() {
             try {
@@ -1885,7 +1885,7 @@
 
             const label = document.createElement('span');
             label.className = 'custom-variable-inline-label';
-            label.textContent = `{${variableName}}`;
+            label.textContent = `{` + variableName + `}`;
 
             const input = document.createElement('input');
             input.type = 'text';
@@ -1912,7 +1912,7 @@
             if (!variableName) {
                 return;
             }
-            const selector = `.custom-variable-inline-input[data-variable-name="${variableName}"]`;
+            const selector = `.custom-variable-inline-input[data-variable-name="` + variableName + `"]`;
             const inputs = customContentPreview?.querySelectorAll(selector) || [];
             inputs.forEach(input => {
                 if (input === sourceElement) {
@@ -1928,7 +1928,7 @@
             if (!customVariableFieldsWrapper) {
                 return;
             }
-            const selector = `[data-variable-field="${variableName}"]`;
+            const selector = `[data-variable-field="` + variableName + `"]`;
             const field = customVariableFieldsWrapper.querySelector(selector);
             if (field && field !== sourceElement && field.value !== value) {
                 field.value = value || '';
@@ -2128,17 +2128,17 @@
 
                 // 페이지 로드 시 selectedPreset 또는 selectedTemplate이 있으면 자동으로 로드
         <c:if test="${not empty selectedPreset}">
-        console.log('[DEBUG] selectedPreset found:', '${selectedPreset}');
-        console.log('[DEBUG] contractId found:', '${contractId}');
+        console.log('[DEBUG] selectedPreset found:', '<c:out value="${selectedPreset}"/>');
+        console.log('[DEBUG] contractId found:', '<c:out value="${contractId}"/>');
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('[DEBUG] DOMContentLoaded - Loading preset:', '${selectedPreset}');
-            loadPresetById('${selectedPreset}');
+            console.log('[DEBUG] DOMContentLoaded - Loading preset:', '<c:out value="${selectedPreset}"/>');
+            loadPresetById('<c:out value="${selectedPreset}"/>');
         });
         </c:if>
         <c:if test="${empty selectedPreset}">
         console.log('[DEBUG] No selectedPreset found');
-        console.log('[DEBUG] contractId:', '${contractId}');
-        console.log('[DEBUG] contract.presetType:', '${contract.selectedPreset}');
+        console.log('[DEBUG] contractId:', '<c:out value="${contractId}"/>');
+        console.log('[DEBUG] contract.presetType:', '<c:out value="${contract.selectedPreset}"/>');
         </c:if>
 
 // 폼 제출 직전 상태 확인
