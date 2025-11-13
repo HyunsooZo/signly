@@ -24,6 +24,10 @@
 
     <!-- 파비콘 -->
     <link rel="icon" type="image/png" href="<c:url value='/images/favicon.png' />">
+    
+    <!-- CSRF Protection -->
+    <meta name="_csrf" content="${_csrf.token}" />
+    <meta name="_csrf_header" content="${_csrf.headerName}" />
 </head>
 <body>
     <!-- 헤더 -->
@@ -76,6 +80,7 @@
 
     <!-- JavaScript -->
     <script src="<c:url value='/js/common.js' />"></script>
+    <script src="<c:url value='/js/common/csrf.js' />"></script>
     <script src="<c:url value='/js/auth.js' />"></script>
     <script src="<c:url value='/js/alerts.js' />"></script>
     <c:if test="${not empty additionalJs}">
