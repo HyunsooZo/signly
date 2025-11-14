@@ -29,8 +29,6 @@ public class EmailNotificationService {
     private final EmailOutboxRepository outboxRepository;
     private final String baseUrl;
     private final String companyName;
-    private final FirstPartySignatureService firstPartySignatureService;
-    private final SignatureRepository signatureRepository;
     private final ContractPdfService contractPdfService;
     private final DocumentService documentService;
 
@@ -38,15 +36,12 @@ public class EmailNotificationService {
             EmailOutboxRepository outboxRepository,
             @Value("${app.base-url:http://localhost:8080}") String baseUrl,
             @Value("${app.name:Signly}") String companyName,
-            FirstPartySignatureService firstPartySignatureService,
-            SignatureRepository signatureRepository,
             ContractPdfService contractPdfService,
-            DocumentService documentService) {
+            DocumentService documentService
+    ) {
         this.outboxRepository = outboxRepository;
         this.baseUrl = baseUrl;
         this.companyName = companyName;
-        this.firstPartySignatureService = firstPartySignatureService;
-        this.signatureRepository = signatureRepository;
         this.contractPdfService = contractPdfService;
         this.documentService = documentService;
     }
@@ -56,7 +51,7 @@ public class EmailNotificationService {
         try {
             String signingUrl = baseUrl + "/sign/" + contract.getSignToken().value();
 
-            Map<String, Object> variables = new HashMap<>();
+            var variables = new HashMap<String, Object>();
             variables.put("contractTitle", contract.getTitle());
             variables.put("firstPartyName", contract.getFirstParty().name());
             variables.put("firstPartyEmail", contract.getFirstParty().email());
@@ -66,7 +61,7 @@ public class EmailNotificationService {
             variables.put("expiresAt", contract.getExpiresAt());
             variables.put("companyName", companyName);
 
-            EmailOutbox outbox = EmailOutbox.create(
+            var outbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_SIGNING_REQUEST,
                     contract.getSecondParty().email(),
                     contract.getSecondParty().name(),
@@ -96,11 +91,11 @@ public class EmailNotificationService {
             // (template_variables 컬럼 크기 제한 고려)
 
             // PDF 생성 및 첨부파일 준비
-            List<EmailAttachment> attachments = new ArrayList<>();
+            var attachments = new ArrayList<EmailAttachment>();
             GeneratedPdf generatedPdf = null;
             try {
                 generatedPdf = contractPdfService.generateContractPdf(contract.getId().value());
-                EmailAttachment pdfAttachment = EmailAttachment.of(
+                var pdfAttachment = EmailAttachment.of(
                         generatedPdf.fileName(),
                         generatedPdf.content(),
                         generatedPdf.getContentType()
@@ -114,7 +109,7 @@ public class EmailNotificationService {
             }
 
             // 양 당사자에게 Outbox 저장 (PDF 첨부)
-            EmailOutbox firstPartyOutbox = EmailOutbox.create(
+            var firstPartyOutbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_COMPLETED,
                     contract.getFirstParty().email(),
                     contract.getFirstParty().name(),
@@ -122,7 +117,7 @@ public class EmailNotificationService {
                     attachments
             );
 
-            EmailOutbox secondPartyOutbox = EmailOutbox.create(
+            var secondPartyOutbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_COMPLETED,
                     contract.getSecondParty().email(),
                     contract.getSecondParty().name(),
@@ -152,14 +147,14 @@ public class EmailNotificationService {
     @Transactional
     public void sendContractCancelled(Contract contract) {
         try {
-            Map<String, Object> variables = new HashMap<>();
+            var variables = new HashMap<String, Object>();
             variables.put("contractTitle", contract.getTitle());
             variables.put("firstPartyName", contract.getFirstParty().name());
             variables.put("secondPartyName", contract.getSecondParty().name());
             variables.put("cancelledAt", contract.getUpdatedAt());
             variables.put("companyName", companyName);
 
-            EmailOutbox outbox = EmailOutbox.create(
+            var outbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_CANCELLED,
                     contract.getSecondParty().email(),
                     contract.getSecondParty().name(),
@@ -177,7 +172,7 @@ public class EmailNotificationService {
     @Transactional
     public void sendContractExpired(Contract contract) {
         try {
-            Map<String, Object> variables = new HashMap<>();
+            var variables = new HashMap<String, Object>();
             variables.put("contractTitle", contract.getTitle());
             variables.put("firstPartyName", contract.getFirstParty().name());
             variables.put("secondPartyName", contract.getSecondParty().name());
@@ -185,14 +180,14 @@ public class EmailNotificationService {
             variables.put("companyName", companyName);
 
             // 양 당사자에게 Outbox 저장
-            EmailOutbox firstPartyOutbox = EmailOutbox.create(
+            var firstPartyOutbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_EXPIRED,
                     contract.getFirstParty().email(),
                     contract.getFirstParty().name(),
                     variables
             );
 
-            EmailOutbox secondPartyOutbox = EmailOutbox.create(
+            var secondPartyOutbox = EmailOutbox.create(
                     EmailTemplate.CONTRACT_EXPIRED,
                     contract.getSecondParty().email(),
                     contract.getSecondParty().name(),
@@ -217,7 +212,7 @@ public class EmailNotificationService {
         try {
             String signingUrl = baseUrl + "/sign/" + contract.getSignToken().value();
 
-            Map<String, Object> variables = new HashMap<>();
+            var variables = new HashMap<String, Object>();
             variables.put("contractTitle", contract.getTitle());
             variables.put("signerName", contract.getSecondParty().name());
             variables.put("daysLeft", daysLeft);
@@ -225,7 +220,7 @@ public class EmailNotificationService {
             variables.put("contractUrl", signingUrl);
             variables.put("companyName", companyName);
 
-            EmailOutbox outbox = EmailOutbox.create(
+            var outbox = EmailOutbox.create(
                     EmailTemplate.EXPIRATION_WARNING,
                     contract.getSecondParty().email(),
                     contract.getSecondParty().name(),
@@ -233,39 +228,11 @@ public class EmailNotificationService {
             );
 
             outboxRepository.save(outbox);
-            logger.info("계약서 만료 임박 알림 이메일을 Outbox에 저장: contractId={}, daysLeft={}",
-                    contract.getId().value(), daysLeft);
+            logger.info("계약서 만료 임박 알림 이메일을 Outbox에 저장: contractId={}, daysLeft={}", contract.getId().value(), daysLeft);
 
         } catch (Exception e) {
             logger.error("계약서 만료 임박 알림 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
         }
     }
 
-    @Transactional
-    public void sendContractReminder(Contract contract) {
-        try {
-            String signingUrl = baseUrl + "/sign/" + contract.getSignToken().value();
-
-            Map<String, Object> variables = new HashMap<>();
-            variables.put("contractTitle", contract.getTitle());
-            variables.put("signerName", contract.getSecondParty().name());
-            variables.put("sentAt", contract.getUpdatedAt());
-            variables.put("expiresAt", contract.getExpiresAt());
-            variables.put("contractUrl", signingUrl);
-            variables.put("companyName", companyName);
-
-            EmailOutbox outbox = EmailOutbox.create(
-                    EmailTemplate.CONTRACT_REMINDER,
-                    contract.getSecondParty().email(),
-                    contract.getSecondParty().name(),
-                    variables
-            );
-
-            outboxRepository.save(outbox);
-            logger.info("계약서 서명 독촉 이메일을 Outbox에 저장: contractId={}", contract.getId().value());
-
-        } catch (Exception e) {
-            logger.error("계약서 서명 독촉 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
-        }
-    }
 }

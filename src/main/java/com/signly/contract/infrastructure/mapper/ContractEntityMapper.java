@@ -36,9 +36,9 @@ public class ContractEntityMapper {
 
         entity.setPdfPath(contract.getPdfPath());
 
-        List<SignatureEntity> signatureEntities = contract.getSignatures().stream()
+        var signatureEntities = contract.getSignatures().stream()
             .map(this::toSignatureEntity)
-            .collect(Collectors.toList());
+            .toList();
 
         signatureEntities.forEach(entity::addSignature);
 
@@ -46,24 +46,24 @@ public class ContractEntityMapper {
     }
 
     public Contract toDomain(ContractJpaEntity entity) {
-        UserId creatorId = UserId.of(entity.getCreatorId());
-        TemplateId templateId = entity.getTemplateId() != null ? TemplateId.of(entity.getTemplateId()) : null;
-        ContractId contractId = ContractId.of(entity.getId());
-        ContractContent content = ContractContent.of(entity.getContent());
+        var creatorId = UserId.of(entity.getCreatorId());
+        var templateId = entity.getTemplateId() != null ? TemplateId.of(entity.getTemplateId()) : null;
+        var contractId = ContractId.of(entity.getId());
+        var content = ContractContent.of(entity.getContent());
 
-        PartyInfo firstParty = PartyInfo.of(
+        var firstParty = PartyInfo.of(
             entity.getFirstPartyName(),
             entity.getFirstPartyEmail(),
             entity.getFirstPartyOrganization()
         );
 
-        PartyInfo secondParty = PartyInfo.of(
+        var secondParty = PartyInfo.of(
             entity.getSecondPartyName(),
             entity.getSecondPartyEmail(),
             entity.getSecondPartyOrganization()
         );
 
-        List<Signature> signatures = entity.getSignatures().stream()
+        var signatures = entity.getSignatures().stream()
             .map(this::toDomainSignature)
             .collect(Collectors.toList());
 

@@ -10,6 +10,7 @@ import com.signly.contract.application.dto.SignatureResponse;
 import com.signly.contract.application.mapper.SignatureDtoMapper;
 import com.signly.contract.domain.model.Signature;
 import com.signly.contract.domain.repository.SignatureRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class SignatureService {
 
     private static final Logger logger = LoggerFactory.getLogger(SignatureService.class);
@@ -31,44 +33,34 @@ public class SignatureService {
     private final SignatureDtoMapper mapper;
     private final FileStorageService fileStorageService;
 
-    public SignatureService(
-            SignatureRepository signatureRepository,
-            SignatureDtoMapper mapper,
-            FileStorageService fileStorageService
-    ) {
-        this.signatureRepository = signatureRepository;
-        this.mapper = mapper;
-        this.fileStorageService = fileStorageService;
-    }
-
-    public SignatureResponse createSignature(CreateSignatureCommand command) {
+    public void createSignature(CreateSignatureCommand command) {
         String normalizedEmail = normalizeEmail(command.signerEmail());
         logger.info("서명 생성 시작: contractId={}, signerEmail={}", command.contractId(), normalizedEmail);
 
-        ContractId contractId = ContractId.of(command.contractId());
+        var contractId = ContractId.of(command.contractId());
 
         // 이미 서명이 존재하는 경우 기존 서명 반환 (중복 방지)
         if (signatureRepository.existsByContractIdAndSignerEmail(contractId, normalizedEmail)) {
-            logger.warn("이미 서명이 존재함, 기존 서명 반환: contractId={}, signerEmail={}",
-                    command.contractId(), normalizedEmail);
-            Signature existingSignature = signatureRepository
+            logger.warn("이미 서명이 존재함, 기존 서명 반환: contractId={}, signerEmail={}", command.contractId(), normalizedEmail);
+            var existingSignature = signatureRepository
                     .findByContractIdAndSignerEmail(contractId, normalizedEmail)
                     .orElseThrow(() -> new NotFoundException("서명을 찾을 수 없습니다"));
-            return mapper.toResponse(existingSignature);
+            mapper.toResponse(existingSignature);
+            return;
         }
 
-        ImagePayload payload = parseDataUrl(command.signatureData());
+        var payload = parseDataUrl(command.signatureData());
 
         String category = buildCategory(contractId.value(), normalizedEmail);
         String originalFileName = buildFileName(contractId.value(), normalizedEmail, payload.extension());
-        StoredFile storedFile = fileStorageService.storeFile(
+        var storedFile = fileStorageService.storeFile(
                 payload.data(),
                 originalFileName,
                 payload.contentType(),
                 category
         );
 
-        Signature signature = Signature.create(
+        var signature = Signature.create(
                 normalizedEmail,
                 command.signerName(),
                 command.signatureData(),
@@ -84,7 +76,7 @@ public class SignatureService {
         signatureRepository.save(signature);
 
         logger.info("서명 생성 완료: signerEmail={}", normalizedEmail);
-        return mapper.toResponse(signature);
+        mapper.toResponse(signature);
     }
 
     private ImagePayload parseDataUrl(String dataUrl) {

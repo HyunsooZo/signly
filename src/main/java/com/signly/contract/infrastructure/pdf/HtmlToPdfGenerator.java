@@ -30,13 +30,8 @@ import java.util.Optional;
 public class HtmlToPdfGenerator implements PdfGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(HtmlToPdfGenerator.class);
-    private static final List<String> PDF_CSS_RESOURCES = List.of(
-            "static/css/contract-common.css"
-    );
-    private static final List<String> FONT_RESOURCES = List.of(
-            "fonts/NanumGothic-Regular.ttf",
-            "fonts/NanumGothic-Bold.ttf"
-    );
+    private static final List<String> PDF_CSS_RESOURCES = List.of("static/css/contract-common.css");
+    private static final List<String> FONT_RESOURCES = List.of("fonts/NanumGothic-Regular.ttf", "fonts/NanumGothic-Bold.ttf");
 
     @Override
     public GeneratedPdf generateFromHtml(String htmlContent, String fileName) {
@@ -46,8 +41,8 @@ public class HtmlToPdfGenerator implements PdfGenerator {
             // HTML을 XHTML로 정리 (Flying Saucer는 엄격한 XHTML 요구)
             String xhtmlContent = sanitizeHtmlToXhtml(htmlContent);
 
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ITextRenderer renderer = new ITextRenderer();
+            var outputStream = new ByteArrayOutputStream();
+            var renderer = new ITextRenderer();
 
             registerFonts(renderer);
 

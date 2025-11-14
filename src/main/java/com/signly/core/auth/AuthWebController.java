@@ -7,6 +7,7 @@ import com.signly.core.auth.dto.LoginRequest;
 import com.signly.core.auth.dto.LoginResponse;
 import com.signly.user.application.UserService;
 import com.signly.user.application.dto.UserResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
+@RequiredArgsConstructor
 public class AuthWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthWebController.class);
@@ -36,20 +38,6 @@ public class AuthWebController {
 
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
-
-    public AuthWebController(
-            AuthService authService,
-            UserService userService,
-            EmailService emailService,
-            TokenRedisService tokenRedisService,
-            Environment environment
-    ) {
-        this.authService = authService;
-        this.userService = userService;
-        this.emailService = emailService;
-        this.tokenRedisService = tokenRedisService;
-        this.environment = environment;
-    }
 
     @GetMapping("/login")
     public String loginForm(
@@ -99,9 +87,7 @@ public class AuthWebController {
             authCookie.setPath("/");
             // SameSite는 Servlet 4.0+에서 지원, 하위 버전에서는 Response Header로 처리
             if (isProduction) {
-                response.setHeader("Set-Cookie", 
-                    String.format("%s; Path=/; HttpOnly; Secure; SameSite=Strict", 
-                        authCookie.getName() + "=" + authCookie.getValue()));
+                response.setHeader("Set-Cookie", String.format("%s; Path=/; HttpOnly; Secure; SameSite=Strict", authCookie.getName() + "=" + authCookie.getValue()));
             }
             authCookie.setMaxAge(60 * 60); // 1시간
             response.addCookie(authCookie);
@@ -200,14 +186,13 @@ public class AuthWebController {
             String token = userService.generatePasswordResetToken(email);
 
             // 사용자 정보 가져오기
-            UserResponse user = userService.getUserByEmail(email);
+            var user = userService.getUserByEmail(email);
 
             // 이메일 발송
             emailService.sendPasswordResetEmail(email, user.name(), token, baseUrl);
 
             logger.info("비밀번호 재설정 이메일 발송 완료: {}", email);
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "비밀번호 재설정 링크를 이메일로 발송했습니다. 이메일을 확인해주세요.");
+            redirectAttributes.addFlashAttribute("successMessage", "비밀번호 재설정 링크를 이메일로 발송했습니다. 이메일을 확인해주세요.");
             return "redirect:/forgot-password";
 
         } catch (Exception e) {

@@ -2,18 +2,20 @@ package com.signly.document.infrastructure.persistence.entity;
 
 import com.signly.document.domain.model.DocumentType;
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 @Table(name = "documents", indexes = {
-    @Index(name = "idx_contract_id", columnList = "contract_id"),
-    @Index(name = "idx_uploaded_by", columnList = "uploaded_by"),
-    @Index(name = "idx_type", columnList = "type"),
-    @Index(name = "idx_contract_type", columnList = "contract_id, type"),
-    @Index(name = "idx_created_at", columnList = "created_at")
+        @Index(name = "idx_contract_id", columnList = "contract_id"),
+        @Index(name = "idx_uploaded_by", columnList = "uploaded_by"),
+        @Index(name = "idx_type", columnList = "type"),
+        @Index(name = "idx_contract_type", columnList = "contract_id, type"),
+        @Index(name = "idx_created_at", columnList = "created_at")
 })
 public class DocumentJpaEntity {
     @Id
@@ -58,9 +60,18 @@ public class DocumentJpaEntity {
 
     protected DocumentJpaEntity() {}
 
-    public DocumentJpaEntity(String id, String contractId, String uploadedBy,
-                           DocumentType type, String filename, String originalFilename,
-                           String contentType, Long fileSize, String checksum, String storagePath) {
+    public DocumentJpaEntity(
+            String id,
+            String contractId,
+            String uploadedBy,
+            DocumentType type,
+            String filename,
+            String originalFilename,
+            String contentType,
+            Long fileSize,
+            String checksum,
+            String storagePath
+    ) {
         this.id = id;
         this.contractId = contractId;
         this.uploadedBy = uploadedBy;
@@ -73,51 +84,4 @@ public class DocumentJpaEntity {
         this.storagePath = storagePath;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public String getContractId() {
-        return contractId;
-    }
-
-    public String getUploadedBy() {
-        return uploadedBy;
-    }
-
-    public DocumentType getType() {
-        return type;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public String getOriginalFilename() {
-        return originalFilename;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public Long getFileSize() {
-        return fileSize;
-    }
-
-    public String getChecksum() {
-        return checksum;
-    }
-
-    public String getStoragePath() {
-        return storagePath;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
 }

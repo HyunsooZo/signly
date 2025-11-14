@@ -3,9 +3,13 @@ package com.signly.notification.infrastructure.persistence.entity;
 import com.signly.notification.domain.model.EmailOutboxStatus;
 import com.signly.notification.domain.model.EmailTemplate;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "email_outbox",
         indexes = {
@@ -13,6 +17,7 @@ import java.time.LocalDateTime;
                 @Index(name = "idx_created_at", columnList = "created_at")
         })
 public class EmailOutboxEntity {
+    // Getters and Setters
     @Id
     @Column(name = "id", length = 26)
     private String id;
@@ -74,116 +79,4 @@ public class EmailOutboxEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public EmailTemplate getEmailType() {
-        return emailType;
-    }
-
-    public void setEmailType(EmailTemplate emailType) {
-        this.emailType = emailType;
-    }
-
-    public String getRecipientEmail() {
-        return recipientEmail;
-    }
-
-    public void setRecipientEmail(String recipientEmail) {
-        this.recipientEmail = recipientEmail;
-    }
-
-    public String getRecipientName() {
-        return recipientName;
-    }
-
-    public void setRecipientName(String recipientName) {
-        this.recipientName = recipientName;
-    }
-
-    public String getTemplateVariables() {
-        return templateVariables;
-    }
-
-    public void setTemplateVariables(String templateVariables) {
-        this.templateVariables = templateVariables;
-    }
-
-    public String getAttachments() {
-        return attachments;
-    }
-
-    public void setAttachments(String attachments) {
-        this.attachments = attachments;
-    }
-
-    public EmailOutboxStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(EmailOutboxStatus status) {
-        this.status = status;
-    }
-
-    public Integer getRetryCount() {
-        return retryCount;
-    }
-
-    public void setRetryCount(Integer retryCount) {
-        this.retryCount = retryCount;
-    }
-
-    public Integer getMaxRetries() {
-        return maxRetries;
-    }
-
-    public void setMaxRetries(Integer maxRetries) {
-        this.maxRetries = maxRetries;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public LocalDateTime getSentAt() {
-        return sentAt;
-    }
-
-    public void setSentAt(LocalDateTime sentAt) {
-        this.sentAt = sentAt;
-    }
-
-    public LocalDateTime getNextRetryAt() {
-        return nextRetryAt;
-    }
-
-    public void setNextRetryAt(LocalDateTime nextRetryAt) {
-        this.nextRetryAt = nextRetryAt;
-    }
 }

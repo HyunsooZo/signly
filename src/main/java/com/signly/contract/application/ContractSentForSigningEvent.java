@@ -7,7 +7,10 @@ public class ContractSentForSigningEvent extends ApplicationEvent {
 
     private final Contract contract;
 
-    public ContractSentForSigningEvent(Object source, Contract contract) {
+    public ContractSentForSigningEvent(
+            Object source,
+            Contract contract
+    ) {
         super(source);
         this.contract = contract;
     }

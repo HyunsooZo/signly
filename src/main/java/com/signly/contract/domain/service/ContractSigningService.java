@@ -14,35 +14,42 @@ public class ContractSigningService {
 
     /**
      * 계약서 서명 처리
-     * 
+     *
      * @param contract 서명할 계약서
-     * @param request 서명 요청 정보
+     * @param request  서명 요청 정보
      * @return 생성된 서명 정보
      */
-    public SigningResult processSigning(Contract contract, SigningRequest request) {
+    public SigningResult processSigning(
+            Contract contract,
+            SigningRequest request
+    ) {
         validateSigningRequest(contract, request);
-        
-        Signature signature = createSignature(request);
+
+        var signature = createSignature(request);
         contract.addSignature(signature);
-        
+
         boolean isFullySigned = contract.isFullySigned();
         if (isFullySigned) {
             contract.markAsFullySigned();
         }
-        
+
         return new SigningResult(signature, isFullySigned);
     }
 
     /**
      * 외부에서 서명 데이터를 저장한 후 상태만 업데이트할 때 사용
-     * 
-     * @param contract 계약서
-     * @param signerEmail 서명자 이메일
+     *
+     * @param contract              계약서
+     * @param signerEmail           서명자 이메일
      * @param allSignaturesComplete 모든 서명이 완료되었는지 여부
      */
-    public void markSignedBy(Contract contract, String signerEmail, boolean allSignaturesComplete) {
+    public void markSignedBy(
+            Contract contract,
+            String signerEmail,
+            boolean allSignaturesComplete
+    ) {
         validateSigningEligibility(contract, signerEmail);
-        
+
         if (allSignaturesComplete) {
             contract.markAsFullySigned();
         }
@@ -51,7 +58,10 @@ public class ContractSigningService {
     /**
      * 서명 요청 유효성 검증
      */
-    private void validateSigningRequest(Contract contract, SigningRequest request) {
+    private void validateSigningRequest(
+            Contract contract,
+            SigningRequest request
+    ) {
         validateSigningEligibility(contract, request.signerEmail());
         validateDuplicateSigning(contract, request.signerEmail());
     }
@@ -59,7 +69,10 @@ public class ContractSigningService {
     /**
      * 서명 자격 검증
      */
-    private void validateSigningEligibility(Contract contract, String signerEmail) {
+    private void validateSigningEligibility(
+            Contract contract,
+            String signerEmail
+    ) {
         if (!contract.getStatus().canSign()) {
             throw new ValidationException("서명 대기 상태에서만 서명할 수 있습니다");
         }
@@ -77,7 +90,10 @@ public class ContractSigningService {
     /**
      * 중복 서명 검증
      */
-    private void validateDuplicateSigning(Contract contract, String signerEmail) {
+    private void validateDuplicateSigning(
+            Contract contract,
+            String signerEmail
+    ) {
         if (hasSignedBy(contract, signerEmail)) {
             throw new ValidationException("이미 서명한 계약서입니다");
         }
@@ -86,15 +102,21 @@ public class ContractSigningService {
     /**
      * 서명자 권한 확인
      */
-    private boolean isValidSigner(Contract contract, String email) {
+    private boolean isValidSigner(
+            Contract contract,
+            String email
+    ) {
         return contract.getFirstParty().email().equals(email.trim().toLowerCase()) ||
-               contract.getSecondParty().email().equals(email.trim().toLowerCase());
+                contract.getSecondParty().email().equals(email.trim().toLowerCase());
     }
 
     /**
      * 서명 완료 여부 확인
      */
-    private boolean hasSignedBy(Contract contract, String email) {
+    private boolean hasSignedBy(
+            Contract contract,
+            String email
+    ) {
         return contract.getSignatures().stream()
                 .anyMatch(signature -> signature.isSignedBy(email));
     }
@@ -104,10 +126,10 @@ public class ContractSigningService {
      */
     private Signature createSignature(SigningRequest request) {
         return Signature.create(
-            request.signerEmail(),
-            request.signerName(),
-            request.signatureData(),
-            request.ipAddress()
+                request.signerEmail(),
+                request.signerName(),
+                request.signatureData(),
+                request.ipAddress()
         );
     }
 
@@ -115,17 +137,17 @@ public class ContractSigningService {
      * 서명 요청 정보
      */
     public record SigningRequest(
-        String signerEmail,
-        String signerName,
-        String signatureData,
-        String ipAddress
+            String signerEmail,
+            String signerName,
+            String signatureData,
+            String ipAddress
     ) {}
 
     /**
      * 서명 처리 결과
      */
     public record SigningResult(
-        Signature signature,
-        boolean isFullySigned
+            Signature signature,
+            boolean isFullySigned
     ) {}
 }

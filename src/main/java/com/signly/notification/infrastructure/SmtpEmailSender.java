@@ -40,8 +40,8 @@ public class SmtpEmailSender implements EmailSender {
     @Override
     public void sendEmail(EmailRequest request) {
         try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(
+            var mimeMessage = mailSender.createMimeMessage();
+            var helper = new MimeMessageHelper(
                     mimeMessage,
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name());
@@ -74,7 +74,7 @@ public class SmtpEmailSender implements EmailSender {
     }
 
     private SpringTemplateEngine createTemplateEngine() {
-        ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+        var resolver = new ClassLoaderTemplateResolver();
         resolver.setPrefix("templates/email/");
         resolver.setSuffix("");
         resolver.setTemplateMode(TemplateMode.HTML);
@@ -87,8 +87,8 @@ public class SmtpEmailSender implements EmailSender {
     }
 
     private String renderTemplate(EmailRequest request) {
-        Context context = new Context(Locale.KOREAN);
-        Map<String, Object> variables = request.templateVariables();
+        var context = new Context(Locale.KOREAN);
+        var variables = request.templateVariables();
         if (variables != null) {
             context.setVariables(variables);
         }

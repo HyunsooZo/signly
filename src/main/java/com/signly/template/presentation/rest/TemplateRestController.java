@@ -2,7 +2,6 @@ package com.signly.template.presentation.rest;
 
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.dto.TemplateResponse;
-import com.signly.template.application.preset.TemplatePreset;
 import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.domain.model.TemplateStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,9 +52,9 @@ public class TemplateRestController {
         List<Map<String, Object>> presets = presetService.getSummaries().stream()
                 .map(summary -> {
                     Map<String, Object> response = new HashMap<>();
-                    response.put("presetId", summary.getId());
-                    response.put("title", summary.getName());
-                    response.put("description", summary.getDescription());
+                    response.put("presetId", summary.id());
+                    response.put("title", summary.name());
+                    response.put("description", summary.description());
                     return response;
                 })
                 .toList();

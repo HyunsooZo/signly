@@ -4,19 +4,17 @@ import com.signly.template.domain.model.TemplateContent;
 import com.signly.template.domain.model.TemplateSection;
 import com.signly.template.infrastructure.entity.TemplateEntity;
 import com.signly.template.infrastructure.repository.TemplateJpaRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class TemplatePresetService {
 
     private final TemplateJpaRepository templateRepository;
-
-    public TemplatePresetService(TemplateJpaRepository templateRepository) {
-        this.templateRepository = templateRepository;
-    }
 
     public List<TemplatePresetSummary> getSummaries() {
         return templateRepository.findAllActivePresets().stream()
@@ -44,12 +42,10 @@ public class TemplatePresetService {
     private List<PresetSection> parsePresetSections(TemplateEntity entity) {
         try {
             // TemplateContent 도메인 모델을 사용하여 파싱
-            TemplateContent templateContent = TemplateContent.fromJson(entity.getContent());
-            
+            var templateContent = TemplateContent.fromJson(entity.getContent());
+
             // TemplateSection을 PresetSection으로 변환
-            return templateContent.sections().stream()
-                    .map(this::convertToPresetSection)
-                    .toList();
+            return templateContent.sections().stream().map(this::convertToPresetSection).toList();
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse preset template: " + entity.getPresetId(), e);
         }

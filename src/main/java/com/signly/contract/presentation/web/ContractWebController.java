@@ -22,6 +22,7 @@ import com.signly.template.domain.model.TemplateStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -48,6 +49,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/contracts")
+@RequiredArgsConstructor
 public class ContractWebController extends BaseWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractWebController.class);
@@ -59,24 +61,6 @@ public class ContractWebController extends BaseWebController {
     private final FirstPartySignatureService firstPartySignatureService;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final com.signly.common.storage.FileStorageService fileStorageService;
-
-    public ContractWebController(
-            ContractService contractService,
-            ContractPdfService contractPdfService,
-            TemplateService templateService,
-            TemplatePresetService templatePresetService,
-            CurrentUserProvider currentUserProvider,
-            FirstPartySignatureService firstPartySignatureService,
-            com.signly.common.storage.FileStorageService fileStorageService
-    ) {
-        this.contractService = contractService;
-        this.contractPdfService = contractPdfService;
-        this.templateService = templateService;
-        this.templatePresetService = templatePresetService;
-        this.currentUserProvider = currentUserProvider;
-        this.firstPartySignatureService = firstPartySignatureService;
-        this.fileStorageService = fileStorageService;
-    }
 
     @GetMapping
     public String contractList(
@@ -112,7 +96,6 @@ public class ContractWebController extends BaseWebController {
     @GetMapping("/new")
     public String newContractForm(
             @RequestParam(value = "templateId", required = false) String templateId,
-            @RequestParam(value = "preset", required = false) String preset,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
             @AuthenticationPrincipal SecurityUser securityUser,
             HttpServletRequest request,
@@ -127,13 +110,13 @@ public class ContractWebController extends BaseWebController {
             if (!firstPartySignatureService.hasSignature(resolvedUserId)) {
                 logger.warn("서명 없이 계약서 생성 시도: userId={}", resolvedUserId);
                 redirectAttributes.addFlashAttribute("errorMessage",
-                    "계약서를 생성하려면 먼저 서명을 등록해야 합니다.");
+                        "계약서를 생성하려면 먼저 서명을 등록해야 합니다.");
                 redirectAttributes.addFlashAttribute("showSignatureAlert", true);
                 return "redirect:/profile/signature";
             }
 
-            // preset이나 templateId가 없으면 유형 선택 화면으로 이동
-            if (preset == null && templateId == null) {
+            // templateId가 없으면 유형 선택 화면으로 이동
+            if (templateId == null) {
                 model.addAttribute("pageTitle", "계약서 유형 선택");
                 model.addAttribute("presets", templatePresetService.getSummaries());
                 return "contracts/select-type";
@@ -143,24 +126,48 @@ public class ContractWebController extends BaseWebController {
             ContractForm form = new ContractForm();
             form.setExpiresAt(LocalDateTime.now().plusHours(24));
 
-            // 템플릿이 지정된 경우 템플릿 정보 로드 (프리셋 레이아웃으로 표시)
-            if (templateId != null && !templateId.isEmpty()) {
+            // 템플릿 정보 로드 (preset 또는 user template)
+            String templateTitle;
+            String templateContent;
+            String renderedHtml;
+            Object variables = new LinkedHashMap<>();
+
+            // 먼저 preset인지 확인
+            var presetOpt = templatePresetService.getPreset(templateId);
+            if (presetOpt.isPresent()) {
+                var preset = presetOpt.get();
+                templateTitle = preset.name();
+                templateContent = ""; // preset은 content가 없음
+                renderedHtml = preset.renderHtml();
+                logger.info("[DEBUG] Loaded preset template: {}, renderedHtmlLength={}",
+                        templateId, renderedHtml != null ? renderedHtml.length() : 0);
+            } else {
+                // preset이 아니면 user template 로드
                 TemplateResponse template = templateService.getTemplate(resolvedUserId, templateId);
-                form.setTemplateId(templateId);
-                form.setTitle(template.getTitle());
-                form.setContent(template.getContent());
-                // 템플릿을 프리셋처럼 사용
-                model.addAttribute("selectedTemplate", templateId);
-                try {
-                    Map<String, Object> templatePayload = new LinkedHashMap<>();
-                    templatePayload.put("templateId", template.getTemplateId());
-                    templatePayload.put("title", template.getTitle());
-                    templatePayload.put("renderedHtml", template.getRenderedHtml());
-                    templatePayload.put("variables", template.getVariables());
-                    model.addAttribute("selectedTemplateContent", objectMapper.writeValueAsString(templatePayload));
-                } catch (Exception e) {
-                    logger.warn("[DEBUG] New form - Failed to build template JSON: {}", e.getMessage());
-                }
+                templateTitle = template.getTitle();
+                templateContent = template.getContent();
+                renderedHtml = template.getRenderedHtml();
+                variables = template.getVariables() != null ? template.getVariables() : new LinkedHashMap<>();
+                logger.info("[DEBUG] Loaded user template: {}, renderedHtmlLength={}",
+                        templateId, renderedHtml != null ? renderedHtml.length() : 0);
+            }
+
+            form.setTemplateId(templateId);
+            form.setTitle(templateTitle);
+            form.setContent(templateContent);
+
+            model.addAttribute("selectedTemplate", templateId);
+            try {
+                Map<String, Object> templatePayload = new LinkedHashMap<>();
+                templatePayload.put("templateId", templateId);
+                templatePayload.put("title", templateTitle);
+                templatePayload.put("renderedHtml", renderedHtml);
+                templatePayload.put("variables", variables);
+                String jsonPayload = objectMapper.writeValueAsString(templatePayload);
+                logger.info("[DEBUG] Template JSON payload length: {}", jsonPayload.length());
+                model.addAttribute("selectedTemplateContent", jsonPayload);
+            } catch (Exception e) {
+                logger.error("[ERROR] Failed to build template JSON", e);
             }
 
             // 활성 템플릿 목록 로드
@@ -172,7 +179,6 @@ public class ContractWebController extends BaseWebController {
             model.addAttribute("contract", form);
             model.addAttribute("templates", activeTemplates.getContent());
             model.addAttribute("presets", templatePresetService.getSummaries());
-            model.addAttribute("selectedPreset", preset);
             return "contracts/form";
 
         } catch (Exception e) {
@@ -574,13 +580,13 @@ public class ContractWebController extends BaseWebController {
             }
 
             GeneratedPdf pdf;
-            
+
             // 저장된 PDF가 있으면 파일에서 읽기, 없으면 생성
             if (contract.getPdfPath() != null && !contract.getPdfPath().isEmpty()) {
                 logger.info("저장된 PDF 파일 제공: contractId={}, path={}", contractId, contract.getPdfPath());
                 try {
                     byte[] pdfContent = fileStorageService.loadFile(contract.getPdfPath());
-                    String fileName = contract.getTitle() + "_" + 
+                    String fileName = contract.getTitle() + "_" +
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".pdf";
                     pdf = GeneratedPdf.of(pdfContent, fileName);
                 } catch (Exception e) {
@@ -638,13 +644,13 @@ public class ContractWebController extends BaseWebController {
             }
 
             GeneratedPdf pdf;
-            
+
             // 저장된 PDF가 있으면 파일에서 읽기, 없으면 생성
             if (contract.getPdfPath() != null && !contract.getPdfPath().isEmpty()) {
                 logger.info("저장된 PDF 파일 제공: contractId={}, path={}", contractId, contract.getPdfPath());
                 try {
                     byte[] pdfContent = fileStorageService.loadFile(contract.getPdfPath());
-                    String fileName = contract.getTitle() + "_" + 
+                    String fileName = contract.getTitle() + "_" +
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".pdf";
                     pdf = GeneratedPdf.of(pdfContent, fileName);
                 } catch (Exception e) {

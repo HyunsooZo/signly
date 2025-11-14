@@ -2,6 +2,7 @@ package com.signly.contract.application;
 
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
+import com.signly.common.storage.FileStorageService;
 import com.signly.contract.application.dto.SignContractCommand;
 import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.model.ContractId;
@@ -13,6 +14,7 @@ import com.signly.signature.application.FirstPartySignatureService;
 import com.signly.signature.application.SignatureService;
 import com.signly.contract.application.dto.CreateSignatureCommand;
 import com.signly.contract.domain.repository.SignatureRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ import java.util.List;
  */
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ContractSigningCoordinator {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractSigningCoordinator.class);
@@ -39,31 +42,12 @@ public class ContractSigningCoordinator {
     private final EmailNotificationService emailNotificationService;
     private final ContractAuthorizationService authorizationService;
     private final ContractPdfService contractPdfService;
-    private final com.signly.common.storage.FileStorageService fileStorageService;
+    private final FileStorageService fileStorageService;
 
-    public ContractSigningCoordinator(
-            ContractRepository contractRepository,
-            ContractSigningService contractSigningService,
-            FirstPartySignatureService firstPartySignatureService,
-            SignatureService signatureService,
-            SignatureRepository signatureRepository,
-            EmailNotificationService emailNotificationService,
-            ContractAuthorizationService authorizationService,
-            ContractPdfService contractPdfService,
-            com.signly.common.storage.FileStorageService fileStorageService
+    public void sendForSigning(
+            String userId,
+            String contractId
     ) {
-        this.contractRepository = contractRepository;
-        this.contractSigningService = contractSigningService;
-        this.firstPartySignatureService = firstPartySignatureService;
-        this.signatureService = signatureService;
-        this.signatureRepository = signatureRepository;
-        this.emailNotificationService = emailNotificationService;
-        this.authorizationService = authorizationService;
-        this.contractPdfService = contractPdfService;
-        this.fileStorageService = fileStorageService;
-    }
-
-    public Contract sendForSigning(String userId, String contractId) {
         Contract contract = findContract(contractId);
         authorizationService.validateOwnership(userId, contract);
 
@@ -80,10 +64,12 @@ public class ContractSigningCoordinator {
         // 4. 제2 당사자에게 이메일 발송
         emailNotificationService.sendContractSigningRequest(savedContract);
 
-        return savedContract;
     }
 
-    public Contract resendSigningEmail(String userId, String contractId) {
+    public void resendSigningEmail(
+            String userId,
+            String contractId
+    ) {
         Contract contract = findContract(contractId);
         authorizationService.validateOwnership(userId, contract);
 
@@ -95,18 +81,20 @@ public class ContractSigningCoordinator {
         ensureFirstPartySignatureExists(contract);
 
         emailNotificationService.sendContractSigningRequest(contract);
-        
-        return contract;
+
     }
 
-    public Contract signContract(String signerEmail, String contractId, SignContractCommand command) {
-        Contract contract = findContract(contractId);
+    public Contract signContract(
+            String signerEmail,
+            String contractId,
+            SignContractCommand command
+    ) {
+        var contract = findContract(contractId);
 
-        ContractSigningService.SigningRequest request = new ContractSigningService.SigningRequest(
-                signerEmail, command.signerName(), command.signatureData(), command.ipAddress());
+        var request = new ContractSigningService.SigningRequest(signerEmail, command.signerName(), command.signatureData(), command.ipAddress());
 
-        ContractSigningService.SigningResult result = contractSigningService.processSigning(contract, request);
-        Contract savedContract = contractRepository.save(contract);
+        var result = contractSigningService.processSigning(contract, request);
+        var savedContract = contractRepository.save(contract);
 
         if (result.isFullySigned()) {
             // PDF 생성 및 저장
@@ -116,7 +104,7 @@ public class ContractSigningCoordinator {
                 logger.error("PDF 저장 중 오류 발생 (서명 처리는 완료됨): contractId={}",
                         contract.getId().value(), pdfEx);
             }
-            
+
             // 완료 알림 이메일 발송
             emailNotificationService.sendContractCompleted(savedContract);
         }
@@ -131,13 +119,13 @@ public class ContractSigningCoordinator {
             String signatureData,
             String ipAddress
     ) {
-        Contract contract = contractRepository.findBySignToken(com.signly.contract.domain.model.SignToken.of(token))
+        var contract = contractRepository.findBySignToken(com.signly.contract.domain.model.SignToken.of(token))
                 .orElseThrow(() -> new NotFoundException("유효하지 않은 서명 링크입니다"));
 
-        ContractId contractId = contract.getId();
+        var contractId = contract.getId();
 
         // 서명 데이터 저장
-        CreateSignatureCommand command = new CreateSignatureCommand(
+        var command = new CreateSignatureCommand(
                 contractId.value(),
                 signatureData,
                 signerEmail,
@@ -148,15 +136,14 @@ public class ContractSigningCoordinator {
         signatureService.createSignature(command);
 
         // 서명 처리 및 상태 업데이트
-        ContractSigningService.SigningRequest request = new ContractSigningService.SigningRequest(
-                signerEmail, signerName, signatureData, ipAddress);
+        var request = new ContractSigningService.SigningRequest(signerEmail, signerName, signatureData, ipAddress);
 
-        ContractSigningService.SigningResult result = contractSigningService.processSigning(contract, request);
-        Contract savedContract = contractRepository.save(contract);
+        var result = contractSigningService.processSigning(contract, request);
+        var savedContract = contractRepository.save(contract);
 
         if (result.isFullySigned()) {
             logger.info("모든 서명 완료, PDF 저장 및 완료 알림 이메일 발송: contractId={}", contract.getId().value());
-            
+
             // PDF 생성 및 저장
             try {
                 savePdfForCompletedContract(savedContract);
@@ -164,7 +151,7 @@ public class ContractSigningCoordinator {
                 logger.error("PDF 저장 중 오류 발생 (서명 처리는 완료됨): contractId={}",
                         contract.getId().value(), pdfEx);
             }
-            
+
             // 완료 알림 이메일 발송
             try {
                 emailNotificationService.sendContractCompleted(savedContract);
@@ -184,22 +171,22 @@ public class ContractSigningCoordinator {
         try {
             String contractId = contract.getId().value();
             logger.info("완료된 계약서 PDF 생성 시작: contractId={}", contractId);
-            
+
             // PDF 생성
-            com.signly.contract.domain.model.GeneratedPdf pdf = contractPdfService.generateContractPdf(contractId);
-            
+            var pdf = contractPdfService.generateContractPdf(contractId);
+
             // 파일 저장
-            com.signly.common.storage.StoredFile storedFile = fileStorageService.storeFile(
+            var storedFile = fileStorageService.storeFile(
                     pdf.content(),
                     pdf.fileName(),
                     "application/pdf",
                     "contracts/completed"
             );
-            
+
             // 계약서에 PDF 경로 저장
             contract.setPdfPath(storedFile.filePath());
             contractRepository.save(contract);
-            
+
             logger.info("완료된 계약서 PDF 저장 완료: contractId={}, path={}", contractId, storedFile.filePath());
         } catch (Exception e) {
             logger.error("PDF 저장 실패: contractId={}", contract.getId().value(), e);
@@ -207,34 +194,39 @@ public class ContractSigningCoordinator {
         }
     }
 
-    public Contract completeContract(String userId, String contractId) {
-        Contract contract = findContract(contractId);
+    public Contract completeContract(
+            String userId,
+            String contractId
+    ) {
+        var contract = findContract(contractId);
         authorizationService.validateOwnership(userId, contract);
-        
+
         firstPartySignatureService.ensureSignatureExists(contract.getCreatorId().value());
         contract.complete();
-        Contract savedContract = contractRepository.save(contract);
-        
+        var savedContract = contractRepository.save(contract);
+
         emailNotificationService.sendContractCompleted(savedContract);
-        
+
         return savedContract;
     }
 
-    public Contract cancelContract(String userId, String contractId) {
-        Contract contract = findContract(contractId);
+    public void cancelContract(
+            String userId,
+            String contractId
+    ) {
+        var contract = findContract(contractId);
         authorizationService.validateOwnership(userId, contract);
-        
+
         contract.cancel();
-        Contract savedContract = contractRepository.save(contract);
-        
+        var savedContract = contractRepository.save(contract);
+
         emailNotificationService.sendContractCancelled(savedContract);
-        
-        return savedContract;
+
     }
 
     public void expireContracts() {
-        LocalDateTime now = LocalDateTime.now();
-        List<Contract> expiredContracts = contractRepository.findExpiredContracts(now);
+        var now = LocalDateTime.now();
+        var expiredContracts = contractRepository.findExpiredContracts(now);
 
         expiredContracts.forEach(contract -> {
             contract.expire();
@@ -251,8 +243,8 @@ public class ContractSigningCoordinator {
     private void saveFirstPartySignature(Contract contract) {
         String firstPartySignatureData = firstPartySignatureService.getSignatureDataUrl(
                 contract.getCreatorId().value());
-        
-        CreateSignatureCommand firstPartyCommand = new CreateSignatureCommand(
+
+        var firstPartyCommand = new CreateSignatureCommand(
                 contract.getId().value(),
                 firstPartySignatureData,
                 contract.getFirstParty().email(),
@@ -261,14 +253,14 @@ public class ContractSigningCoordinator {
                 "Server-initiated signature"
         );
         signatureService.createSignature(firstPartyCommand);
-        
+
         logger.info("제1 당사자 서명 저장 완료: contractId={}, email={}",
                 contract.getId().value(), contract.getFirstParty().email());
     }
 
     private void ensureFirstPartySignatureExists(Contract contract) {
         firstPartySignatureService.ensureSignatureExists(contract.getCreatorId().value());
-        
+
         ContractId cId = contract.getId();
         if (!signatureRepository.existsByContractIdAndSignerEmail(cId, contract.getFirstParty().email())) {
             saveFirstPartySignature(contract);

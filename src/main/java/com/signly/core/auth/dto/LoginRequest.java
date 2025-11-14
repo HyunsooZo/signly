@@ -11,7 +11,6 @@ public record LoginRequest(
     String email,
 
     @NotBlank(message = "비밀번호는 필수입니다")
-    @Pattern(regexp = PasswordValidator.PASSWORD_REGEX, 
-             message = PasswordValidator.PASSWORD_REQUIREMENT_MESSAGE)
+    @Pattern(regexp = PasswordValidator.PASSWORD_REGEX, message = PasswordValidator.PASSWORD_REQUIREMENT_MESSAGE)
     String password
 ) {}

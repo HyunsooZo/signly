@@ -5,6 +5,7 @@ import com.signly.common.security.SecurityUser;
 import com.signly.common.web.BaseWebController;
 import com.signly.home.application.DashboardService;
 import com.signly.home.application.dto.DashboardResponse;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -20,19 +21,12 @@ import jakarta.servlet.http.HttpServletRequest;
  * SRP: 뷰 렌더링과 요청/응답 처리만 담당
  */
 @Controller
+@RequiredArgsConstructor
 public class HomeWebController extends BaseWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(HomeWebController.class);
     private final DashboardService dashboardService;
     private final CurrentUserProvider currentUserProvider;
-
-    public HomeWebController(
-            DashboardService dashboardService,
-            CurrentUserProvider currentUserProvider
-    ) {
-        this.dashboardService = dashboardService;
-        this.currentUserProvider = currentUserProvider;
-    }
 
     @GetMapping("/")
     public String root() {

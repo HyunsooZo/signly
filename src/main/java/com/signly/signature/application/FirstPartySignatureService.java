@@ -8,6 +8,7 @@ import com.signly.signature.application.dto.FirstPartySignatureResponse;
 import com.signly.signature.domain.model.FirstPartySignature;
 import com.signly.signature.domain.repository.FirstPartySignatureRepository;
 import com.signly.user.domain.model.UserId;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.util.Base64;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class FirstPartySignatureService {
 
     private static final String STORAGE_CATEGORY_PREFIX = "signatures/first-party";
@@ -25,24 +27,21 @@ public class FirstPartySignatureService {
     private final FirstPartySignatureRepository signatureRepository;
     private final FileStorageService fileStorageService;
 
-    public FirstPartySignatureService(FirstPartySignatureRepository signatureRepository,
-                                      FileStorageService fileStorageService) {
-        this.signatureRepository = signatureRepository;
-        this.fileStorageService = fileStorageService;
-    }
-
-    public FirstPartySignatureResponse uploadSignature(String ownerId, String dataUrl) {
-        ImagePayload payload = parseDataUrl(dataUrl);
+    public void uploadSignature(
+            String ownerId,
+            String dataUrl
+    ) {
+        var payload = parseDataUrl(dataUrl);
 
         String fileName = "signature-" + ownerId + "." + payload.extension();
-        StoredFile storedFile = fileStorageService.storeFile(
+        var storedFile = fileStorageService.storeFile(
                 payload.data(),
                 fileName,
                 payload.contentType(),
                 buildCategory(ownerId)
         );
 
-        FileMetadata metadata = FileMetadata.create(
+        var metadata = FileMetadata.create(
                 storedFile.originalFilename(),
                 storedFile.contentType(),
                 storedFile.size(),
@@ -51,16 +50,16 @@ public class FirstPartySignatureService {
 
         UserId userId = UserId.of(ownerId);
 
-        FirstPartySignature signature = signatureRepository.findByOwnerId(userId)
+        var signature = signatureRepository.findByOwnerId(userId)
                 .map(existing -> updateExistingSignature(existing, metadata, storedFile.filePath()))
                 .orElseGet(() -> createNewSignature(userId, metadata, storedFile.filePath()));
 
-        return FirstPartySignatureResponse.from(signature);
+        FirstPartySignatureResponse.from(signature);
     }
 
     @Transactional(readOnly = true)
     public FirstPartySignatureResponse getSignature(String ownerId) {
-        FirstPartySignature signature = signatureRepository.findByOwnerId(UserId.of(ownerId))
+        var signature = signatureRepository.findByOwnerId(UserId.of(ownerId))
                 .orElseThrow(() -> new ValidationException("등록된 갑 서명을 찾을 수 없습니다."));
         return FirstPartySignatureResponse.from(signature);
     }
@@ -72,7 +71,7 @@ public class FirstPartySignatureService {
 
     @Transactional(readOnly = true)
     public String getSignatureDataUrl(String ownerId) {
-        FirstPartySignature signature = signatureRepository.findByOwnerId(UserId.of(ownerId))
+        var signature = signatureRepository.findByOwnerId(UserId.of(ownerId))
                 .orElseThrow(() -> new ValidationException("등록된 갑 서명을 찾을 수 없습니다."));
 
         byte[] fileBytes = fileStorageService.loadFile(signature.getStoragePath());
@@ -87,21 +86,25 @@ public class FirstPartySignatureService {
         }
     }
 
-    private FirstPartySignature updateExistingSignature(FirstPartySignature existing,
-                                                        FileMetadata metadata,
-                                                        String storagePath) {
+    private FirstPartySignature updateExistingSignature(
+            FirstPartySignature existing,
+            FileMetadata metadata,
+            String storagePath
+    ) {
         String previousPath = existing.getStoragePath();
         existing.updateFile(metadata, storagePath);
-        FirstPartySignature saved = signatureRepository.save(existing);
+        var saved = signatureRepository.save(existing);
         if (!previousPath.equals(storagePath)) {
             fileStorageService.deleteFile(previousPath);
         }
         return saved;
     }
 
-    private FirstPartySignature createNewSignature(UserId ownerId,
-                                                   FileMetadata metadata,
-                                                   String storagePath) {
+    private FirstPartySignature createNewSignature(
+            UserId ownerId,
+            FileMetadata metadata,
+            String storagePath
+    ) {
         FirstPartySignature newSignature = FirstPartySignature.create(ownerId, metadata, storagePath);
         return signatureRepository.save(newSignature);
     }

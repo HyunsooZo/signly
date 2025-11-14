@@ -8,6 +8,7 @@ import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.contract.domain.service.PdfGenerator;
 import com.signly.contract.domain.model.Signature;
 import com.signly.contract.domain.repository.SignatureRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.util.Optional;
  */
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ContractPdfService {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractPdfService.class);
@@ -32,18 +34,6 @@ public class ContractPdfService {
     private final SignatureRepository signatureRepository;
     private final PdfGenerator pdfGenerator;
     private final FileStorageService fileStorageService;
-
-    public ContractPdfService(
-            ContractRepository contractRepository,
-            SignatureRepository signatureRepository,
-            PdfGenerator pdfGenerator,
-            FileStorageService fileStorageService
-    ) {
-        this.contractRepository = contractRepository;
-        this.signatureRepository = signatureRepository;
-        this.pdfGenerator = pdfGenerator;
-        this.fileStorageService = fileStorageService;
-    }
 
     /**
      * 계약서 ID로 PDF 생성
@@ -54,8 +44,8 @@ public class ContractPdfService {
     public GeneratedPdf generateContractPdf(String contractId) {
         logger.info("계약서 PDF 생성 시작: contractId={}", contractId);
 
-        ContractId cId = ContractId.of(contractId);
-        Contract contract = contractRepository.findById(cId)
+        var cId = ContractId.of(contractId);
+        var contract = contractRepository.findById(cId)
                 .orElseThrow(() -> new NotFoundException("계약서를 찾을 수 없습니다: " + contractId));
 
         // 양측 서명 이미지 조회
@@ -63,7 +53,7 @@ public class ContractPdfService {
         String secondPartySignatureImage = getSignatureImage(cId, contract.getSecondParty().email());
 
         // PDF 데이터 구성
-        ContractPdfData pdfData = ContractPdfData.builder()
+        var pdfData = ContractPdfData.builder()
                 .contractId(contract.getId())
                 .title(contract.getTitle())
                 .htmlContent(contract.getContent().content())
@@ -96,10 +86,12 @@ public class ContractPdfService {
     /**
      * 서명 이미지 조회 (없으면 null 반환)
      */
-    private String getSignatureImage(ContractId contractId, String signerEmail) {
+    private String getSignatureImage(
+            ContractId contractId,
+            String signerEmail
+    ) {
         String normalizedEmail = normalizeEmail(signerEmail);
-        Optional<Signature> signature = signatureRepository
-                .findByContractIdAndSignerEmail(contractId, normalizedEmail);
+        var signature = signatureRepository.findByContractIdAndSignerEmail(contractId, normalizedEmail);
 
         return signature.flatMap(this::buildSignatureDataUrl).orElse(null);
     }
@@ -134,7 +126,7 @@ public class ContractPdfService {
     private String normalizeSignaturePlaceholders(String html) {
         String sanitized = ContractHtmlSanitizer.sanitize(html);
 
-        if (sanitized == null || sanitized.isBlank()) {
+        if (sanitized.isBlank()) {
             return sanitized;
         }
 
@@ -147,10 +139,12 @@ public class ContractPdfService {
                 .replace("&lbrack;EMPLOYEE_SIGNATURE_IMAGE&rbrack;", "[EMPLOYEE_SIGNATURE_IMAGE]");
     }
 
-    private String injectSignatureImage(String html,
-                                       String dataUrl,
-                                       String placeholder,
-                                       int wrapperIndex) {
+    private String injectSignatureImage(
+            String html,
+            String dataUrl,
+            String placeholder,
+            int wrapperIndex
+    ) {
         if (dataUrl == null || dataUrl.isBlank()) {
             return html.replace(placeholder, "");
         }
@@ -164,7 +158,11 @@ public class ContractPdfService {
         return insertIntoWrapper(html, imageTag, wrapperIndex);
     }
 
-    private String insertIntoWrapper(String html, String imageTag, int occurrence) {
+    private String insertIntoWrapper(
+            String html,
+            String imageTag,
+            int occurrence
+    ) {
         int searchIndex = 0;
 
         for (int i = 0; i < occurrence; i++) {
@@ -205,7 +203,10 @@ public class ContractPdfService {
         return html;
     }
 
-    private int findMatchingSpanEnd(String html, int searchFrom) {
+    private int findMatchingSpanEnd(
+            String html,
+            int searchFrom
+    ) {
         int depth = 1;
         int index = searchFrom;
 
@@ -272,7 +273,10 @@ public class ContractPdfService {
         return email == null ? null : email.trim().toLowerCase();
     }
 
-    private void dumpPdfHtmlDebug(String contractId, String html) {
+    private void dumpPdfHtmlDebug(
+            String contractId,
+            String html
+    ) {
         try {
             Path debugDir = Path.of("logs", "pdf-debug");
             Files.createDirectories(debugDir);

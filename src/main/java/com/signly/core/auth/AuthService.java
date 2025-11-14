@@ -11,6 +11,7 @@ import com.signly.user.domain.model.Email;
 import com.signly.user.domain.model.Password;
 import com.signly.user.domain.model.User;
 import com.signly.user.domain.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
@@ -29,36 +31,21 @@ public class AuthService {
     private final UserRepository userRepository;
     private final TokenRedisService tokenRedisService;
 
-    public AuthService(AuthenticationManager authenticationManager,
-                      JwtTokenProvider jwtTokenProvider,
-                      PasswordEncoder passwordEncoder,
-                      UserRepository userRepository,
-                      TokenRedisService tokenRedisService) {
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.passwordEncoder = passwordEncoder;
-        this.userRepository = userRepository;
-        this.tokenRedisService = tokenRedisService;
-    }
-
     public LoginResponse login(LoginRequest request) {
         try {
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password())
-            );
+            var token = new UsernamePasswordAuthenticationToken(request.email(), request.password());
+            var authentication = authenticationManager.authenticate(token);
 
-            SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
-            User user = securityUser.getUser();
+            var securityUser = (SecurityUser) authentication.getPrincipal();
+            var user = securityUser.getUser();
 
             String accessToken = jwtTokenProvider.createAccessToken(
-                user.getUserId().value(),
-                user.getEmail().value(),
-                user.getUserType().name()
+                    user.getUserId().value(),
+                    user.getEmail().value(),
+                    user.getUserType().name()
             );
 
-            String refreshToken = jwtTokenProvider.createRefreshToken(
-                user.getUserId().value()
-            );
+            String refreshToken = jwtTokenProvider.createRefreshToken(user.getUserId().value());
 
             // Redis에 토큰 저장
             tokenRedisService.saveAccessToken(user.getUserId().value(), accessToken);
@@ -66,16 +53,16 @@ public class AuthService {
 
             var company = user.getCompany();
             return new LoginResponse(
-                accessToken,
-                refreshToken,
-                user.getUserId().value(),
-                user.getEmail().value(),
-                user.getName(),
-                company != null ? company.name() : null,
-                company != null ? company.phone() : null,
-                company != null ? company.address() : null,
-                user.getUserType(),
-                jwtTokenProvider.getAccessTokenValidityInMs()
+                    accessToken,
+                    refreshToken,
+                    user.getUserId().value(),
+                    user.getEmail().value(),
+                    user.getName(),
+                    company != null ? company.name() : null,
+                    company != null ? company.phone() : null,
+                    company != null ? company.address() : null,
+                    user.getUserType(),
+                    jwtTokenProvider.getAccessTokenValidityInMs()
             );
 
         } catch (AuthenticationException e) {
@@ -105,13 +92,13 @@ public class AuthService {
         }
 
         String newAccessToken = jwtTokenProvider.createAccessToken(
-            user.getUserId().value(),
-            user.getEmail().value(),
-            user.getUserType().name()
+                user.getUserId().value(),
+                user.getEmail().value(),
+                user.getUserType().name()
         );
 
         String newRefreshToken = jwtTokenProvider.createRefreshToken(
-            user.getUserId().value()
+                user.getUserId().value()
         );
 
         // Redis에 새로운 토큰 저장
@@ -120,16 +107,16 @@ public class AuthService {
 
         var company = user.getCompany();
         return new LoginResponse(
-            newAccessToken,
-            newRefreshToken,
-            user.getUserId().value(),
-            user.getEmail().value(),
-            user.getName(),
-            company != null ? company.name() : null,
-            company != null ? company.phone() : null,
-            company != null ? company.address() : null,
-            user.getUserType(),
-            jwtTokenProvider.getAccessTokenValidityInMs()
+                newAccessToken,
+                newRefreshToken,
+                user.getUserId().value(),
+                user.getEmail().value(),
+                user.getName(),
+                company != null ? company.name() : null,
+                company != null ? company.phone() : null,
+                company != null ? company.address() : null,
+                user.getUserType(),
+                jwtTokenProvider.getAccessTokenValidityInMs()
         );
     }
 
@@ -141,7 +128,10 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public void validateCredentials(String email, String password) {
+    public void validateCredentials(
+            String email,
+            String password
+    ) {
         User user = userRepository.findByEmail(Email.of(email))
                 .orElseThrow(() -> new UnauthorizedException("사용자를 찾을 수 없습니다"));
 

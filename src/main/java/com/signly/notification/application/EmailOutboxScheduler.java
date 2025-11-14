@@ -4,6 +4,7 @@ import com.signly.notification.application.dto.EmailRequest;
 import com.signly.notification.domain.model.EmailOutbox;
 import com.signly.notification.domain.repository.EmailOutboxRepository;
 import com.signly.notification.infrastructure.EmailSender;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class EmailOutboxScheduler {
     private static final Logger logger = LoggerFactory.getLogger(EmailOutboxScheduler.class);
     private static final int BATCH_SIZE = 10; // 한 번에 처리할 이메일 수
@@ -20,16 +22,11 @@ public class EmailOutboxScheduler {
     private final EmailOutboxRepository outboxRepository;
     private final EmailSender emailSender;
 
-    public EmailOutboxScheduler(EmailOutboxRepository outboxRepository, EmailSender emailSender) {
-        this.outboxRepository = outboxRepository;
-        this.emailSender = emailSender;
-    }
-
     @Scheduled(fixedDelay = 10000) // 10초마다 실행
     @Transactional
     public void processPendingEmails() {
         try {
-            List<EmailOutbox> pendingEmails = outboxRepository.findPendingEmails(BATCH_SIZE);
+            var pendingEmails = outboxRepository.findPendingEmails(BATCH_SIZE);
 
             if (pendingEmails.isEmpty()) {
                 return;

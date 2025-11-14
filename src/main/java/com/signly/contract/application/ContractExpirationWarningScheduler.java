@@ -4,6 +4,7 @@ import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.model.ContractStatus;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.notification.application.EmailNotificationService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,6 +20,7 @@ import java.util.List;
  * SRP: 만료 임박 알림 발송만 담당
  */
 @Component
+@RequiredArgsConstructor
 public class ContractExpirationWarningScheduler {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractExpirationWarningScheduler.class);
@@ -26,14 +28,6 @@ public class ContractExpirationWarningScheduler {
 
     private final ContractRepository contractRepository;
     private final EmailNotificationService emailNotificationService;
-
-    public ContractExpirationWarningScheduler(
-            ContractRepository contractRepository,
-            EmailNotificationService emailNotificationService
-    ) {
-        this.contractRepository = contractRepository;
-        this.emailNotificationService = emailNotificationService;
-    }
 
     @Scheduled(cron = "0 0 9 * * *")
     @Transactional
@@ -44,11 +38,10 @@ public class ContractExpirationWarningScheduler {
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime warningThreshold = now.plusDays(WARNING_DAYS);
 
-            List<Contract> expiringContracts = contractRepository
-                    .findByStatusAndExpiresAtBefore(ContractStatus.PENDING, warningThreshold);
+            var expiringContracts = contractRepository.findByStatusAndExpiresAtBefore(ContractStatus.PENDING, warningThreshold);
 
             int sentCount = 0;
-            for (Contract contract : expiringContracts) {
+            for (var contract : expiringContracts) {
                 if (contract.getExpiresAt() != null) {
                     long daysLeft = ChronoUnit.DAYS.between(now, contract.getExpiresAt());
                     
