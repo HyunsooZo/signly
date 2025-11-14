@@ -199,7 +199,7 @@ public class HtmlToPdfGenerator implements PdfGenerator {
         css = css.replaceAll("(?s)/\\* 템플릿 미리보기.*?\\*/", "");
         css = css.replaceAll("(?s)\\.template-preview[^}]*\\}", "");
         css = css.replaceAll("(?s)\\.preset-preview-body[^}]*\\}", "");
-        css = css.replaceAll("(?s)#presetHtmlContainer[^}]*\\}", "");
+        // #presetHtmlContainer 스타일 제거 - 더 이상 존재하지 않음
         
         // !important 속성 제거 (PDF에서는 불필요)
         css = css.replaceAll("\\s*!important\\s*", "");

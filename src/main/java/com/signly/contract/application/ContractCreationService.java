@@ -6,14 +6,16 @@ import com.signly.common.exception.ValidationException;
 import com.signly.contract.application.dto.CreateContractCommand;
 import com.signly.contract.application.dto.UpdateContractCommand;
 import com.signly.contract.application.support.ContractHtmlSanitizer;
-import com.signly.contract.domain.model.*;
+import com.signly.contract.domain.model.Contract;
+import com.signly.contract.domain.model.ContractContent;
+import com.signly.contract.domain.model.ContractId;
+import com.signly.contract.domain.model.PartyInfo;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.signature.application.FirstPartySignatureService;
-import com.signly.template.application.HtmlRenderer;
-import com.signly.template.domain.model.ContractTemplate;
 import com.signly.template.domain.model.TemplateContent;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.template.domain.repository.TemplateRepository;
+import com.signly.template.domain.service.UnifiedTemplateRenderer;
 import com.signly.user.domain.model.User;
 import com.signly.user.domain.model.UserId;
 import com.signly.user.domain.model.UserType;
@@ -40,7 +42,7 @@ public class ContractCreationService {
     private final UserRepository userRepository;
     private final TemplateRepository templateRepository;
     private final FirstPartySignatureService firstPartySignatureService;
-    private final HtmlRenderer htmlRenderer;
+    private final UnifiedTemplateRenderer unifiedTemplateRenderer;
     private final ContractAuthorizationService authorizationService;
 
     public Contract createContract(
@@ -155,7 +157,7 @@ public class ContractCreationService {
 
         validateTemplateVariables(template.getContent(), variableValues);
 
-        String renderedHtml = htmlRenderer.render(template.getContent(), variableValues);
+        String renderedHtml = unifiedTemplateRenderer.renderWithVariables(template.getContent(), variableValues);
         String sanitizedContent = ContractHtmlSanitizer.sanitize(renderedHtml);
 
         return ContractContent.of(sanitizedContent);
