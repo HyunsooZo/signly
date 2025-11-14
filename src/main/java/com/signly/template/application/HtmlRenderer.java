@@ -2,19 +2,19 @@ package com.signly.template.application;
 
 import com.signly.template.domain.model.TemplateContent;
 import com.signly.template.domain.model.TemplateSection;
+import com.signly.template.domain.service.TemplateVariableUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+/**
+ * HTML 렌더러
+ * Refactored to use unified utilities and standardized variable format [VARIABLE_NAME].
+ */
 @Service
 public class HtmlRenderer {
-
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([a-zA-Z0-9_]+)}}");
 
     public String render(TemplateContent templateContent) {
         return render(templateContent, Map.of());
@@ -45,7 +45,7 @@ public class HtmlRenderer {
             TemplateSection section,
             Map<String, String> variableValues
     ) {
-        var content = substituteVariables(section.getContent(), variableValues);
+        var content = TemplateVariableUtils.substituteVariables(section.getContent(), variableValues);
         var metadata = section.getMetadata();
 
         return switch (section.getType()) {
@@ -65,9 +65,7 @@ public class HtmlRenderer {
         level = Math.max(1, Math.min(6, level));
 
         String alignment = metadata != null && metadata.containsKey("alignment") ? (String) metadata.get("alignment") : "center";
-
         String escaped = HtmlUtils.htmlEscape(content);
-
         String alignmentClass = getAlignmentClass(alignment);
 
         return String.format("<section class=\"template-heading%s\"><h%d>%s</h%d></section>", alignmentClass, level, escaped, level);
@@ -78,9 +76,7 @@ public class HtmlRenderer {
             Map<String, Object> metadata
     ) {
         boolean indent = metadata != null && metadata.containsKey("indent") && (Boolean) metadata.get("indent");
-
         String alignment = metadata != null && metadata.containsKey("alignment") ? (String) metadata.get("alignment") : "left";
-
         String escaped = HtmlUtils.htmlEscape(content).replace("\n", "<br>");
 
         String indentClass = indent ? " template-paragraph-indent" : "";
@@ -94,9 +90,7 @@ public class HtmlRenderer {
             Map<String, Object> metadata
     ) {
         String alignment = metadata != null && metadata.containsKey("alignment") ? (String) metadata.get("alignment") : "left";
-
         String escaped = HtmlUtils.htmlEscape(content).replace("\n", "<br>");
-
         String alignmentClass = getAlignmentClass(alignment);
 
         return String.format("<section class=\"template-dotted-box%s\"><p>%s</p></section>", alignmentClass, escaped);
@@ -107,9 +101,7 @@ public class HtmlRenderer {
             Map<String, Object> metadata
     ) {
         String alignment = metadata != null && metadata.containsKey("alignment") ? (String) metadata.get("alignment") : "center";
-
         String escaped = HtmlUtils.htmlEscape(content).replace("\n", "<br>");
-
         String alignmentClass = getAlignmentClass(alignment);
 
         return String.format("<section class=\"template-footer%s\"><p>%s</p></section>", alignmentClass, escaped);
@@ -126,27 +118,6 @@ public class HtmlRenderer {
         } else {
             return "<section class=\"template-custom\">" + content + "</section>";
         }
-    }
-
-    private String substituteVariables(
-            String content,
-            Map<String, String> variableValues
-    ) {
-        if (content == null || content.isEmpty()) {
-            return content;
-        }
-
-        Matcher matcher = VARIABLE_PATTERN.matcher(content);
-        var result = new StringBuilder();
-
-        while (matcher.find()) {
-            String variableName = matcher.group(1);
-            String value = variableValues.getOrDefault(variableName, "{{" + variableName + "}}");
-            matcher.appendReplacement(result, Matcher.quoteReplacement(value));
-        }
-        matcher.appendTail(result);
-
-        return result.toString();
     }
 
     private String getAlignmentClass(String alignment) {

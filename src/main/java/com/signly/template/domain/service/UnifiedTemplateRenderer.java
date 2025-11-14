@@ -1,7 +1,7 @@
 package com.signly.template.domain.service;
 
-import com.signly.template.domain.model.TemplateSection;
 import com.signly.template.domain.model.TemplateContent;
+import com.signly.template.domain.model.TemplateSection;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
@@ -47,7 +47,10 @@ public class UnifiedTemplateRenderer {
     /**
      * 템플릿 콘텐츠를 변수 값 대입하여 렌더링
      */
-    public String renderWithVariables(TemplateContent templateContent, Map<String, String> variableValues) {
+    public String renderWithVariables(
+            TemplateContent templateContent,
+            Map<String, String> variableValues
+    ) {
         List<TemplateSection> sections = templateContent.sections().stream()
                 .sorted(Comparator.comparingInt(TemplateSection::getOrder))
                 .toList();
@@ -78,7 +81,10 @@ public class UnifiedTemplateRenderer {
     /**
      * 섹션 목록을 지정된 모드로 렌더링
      */
-    private String renderSections(List<TemplateSection> sections, RenderMode mode) {
+    private String renderSections(
+            List<TemplateSection> sections,
+            RenderMode mode
+    ) {
         return sections.stream()
                 .sorted(Comparator.comparingInt(TemplateSection::getOrder))
                 .map(section -> sectionRenderer.renderSection(section, mode))
@@ -88,7 +94,10 @@ public class UnifiedTemplateRenderer {
     /**
      * 개별 섹션을 변수 값 대입하여 렌더링
      */
-    private String renderSectionWithVariables(TemplateSection section, Map<String, String> variableValues) {
+    private String renderSectionWithVariables(
+            TemplateSection section,
+            Map<String, String> variableValues
+    ) {
         String content = TemplateVariableUtils.substituteVariables(section.getContent(), variableValues);
         return renderAdvancedSection(section.getType(), content, section.getMetadata());
     }
@@ -96,9 +105,11 @@ public class UnifiedTemplateRenderer {
     /**
      * 고급 섹션 렌더링 (메타데이터 기반)
      */
-    private String renderAdvancedSection(com.signly.template.domain.model.TemplateSectionType type, 
-                                       String content, 
-                                       Map<String, Object> metadata) {
+    private String renderAdvancedSection(
+            com.signly.template.domain.model.TemplateSectionType type,
+            String content,
+            Map<String, Object> metadata
+    ) {
         return switch (type) {
             case HEADER -> renderHeader(content, metadata);
             case PARAGRAPH -> renderParagraph(content, metadata);
@@ -108,7 +119,10 @@ public class UnifiedTemplateRenderer {
         };
     }
 
-    private String renderHeader(String content, Map<String, Object> metadata) {
+    private String renderHeader(
+            String content,
+            Map<String, Object> metadata
+    ) {
         int level = metadata != null && metadata.containsKey("level") ? ((Number) metadata.get("level")).intValue() : 1;
         level = Math.max(1, Math.min(6, level));
 
@@ -116,11 +130,14 @@ public class UnifiedTemplateRenderer {
         String escaped = HtmlUtils.htmlEscape(content);
         String alignmentClass = getAlignmentClass(alignment);
 
-        return String.format("<section class=\"template-heading%s\"><h%d>%s</h%d></section>", 
-                           alignmentClass, level, escaped, level);
+        return String.format("<section class=\"template-heading%s\"><h%d>%s</h%d></section>",
+                alignmentClass, level, escaped, level);
     }
 
-    private String renderParagraph(String content, Map<String, Object> metadata) {
+    private String renderParagraph(
+            String content,
+            Map<String, Object> metadata
+    ) {
         boolean indent = metadata != null && metadata.containsKey("indent") && (Boolean) metadata.get("indent");
         String alignment = metadata != null && metadata.containsKey("alignment") ? (String) metadata.get("alignment") : "left";
         String escaped = HtmlUtils.htmlEscape(content).replace("\n", "<br>");
@@ -128,29 +145,38 @@ public class UnifiedTemplateRenderer {
         String indentClass = indent ? " template-paragraph-indent" : "";
         String alignmentClass = getAlignmentClass(alignment);
 
-        return String.format("<section class=\"template-paragraph%s%s\"><p>%s</p></section>", 
-                           indentClass, alignmentClass, escaped);
+        return String.format("<section class=\"template-paragraph%s%s\"><p>%s</p></section>",
+                indentClass, alignmentClass, escaped);
     }
 
-    private String renderDottedBox(String content, Map<String, Object> metadata) {
+    private String renderDottedBox(
+            String content,
+            Map<String, Object> metadata
+    ) {
         String alignment = metadata != null && metadata.containsKey("alignment") ? (String) metadata.get("alignment") : "left";
         String escaped = HtmlUtils.htmlEscape(content).replace("\n", "<br>");
         String alignmentClass = getAlignmentClass(alignment);
 
-        return String.format("<section class=\"template-dotted-box%s\"><p>%s</p></section>", 
-                           alignmentClass, escaped);
+        return String.format("<section class=\"template-dotted-box%s\"><p>%s</p></section>",
+                alignmentClass, escaped);
     }
 
-    private String renderFooter(String content, Map<String, Object> metadata) {
+    private String renderFooter(
+            String content,
+            Map<String, Object> metadata
+    ) {
         String alignment = metadata != null && metadata.containsKey("alignment") ? (String) metadata.get("alignment") : "center";
         String escaped = HtmlUtils.htmlEscape(content).replace("\n", "<br>");
         String alignmentClass = getAlignmentClass(alignment);
 
-        return String.format("<section class=\"template-footer%s\"><p>%s</p></section>", 
-                           alignmentClass, escaped);
+        return String.format("<section class=\"template-footer%s\"><p>%s</p></section>",
+                alignmentClass, escaped);
     }
 
-    private String renderCustom(String content, Map<String, Object> metadata) {
+    private String renderCustom(
+            String content,
+            Map<String, Object> metadata
+    ) {
         boolean sanitize = metadata == null || !metadata.containsKey("sanitize") || (Boolean) metadata.get("sanitize");
 
         if (sanitize) {

@@ -5,6 +5,8 @@ import com.signly.template.application.dto.TemplateSectionDto;
 import com.signly.template.application.dto.TemplateVariableDto;
 import com.signly.template.domain.model.ContractTemplate;
 import com.signly.template.domain.model.TemplateContent;
+import com.signly.template.domain.service.UnifiedTemplateRenderer;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,7 +14,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class TemplateDtoMapper {
+
+    private final UnifiedTemplateRenderer unifiedTemplateRenderer;
 
     public TemplateResponse toResponse(ContractTemplate template) {
         TemplateContent content = template.getContent();
@@ -39,8 +44,8 @@ public class TemplateDtoMapper {
                 template.getCreatedAt(),
                 template.getUpdatedAt(),
                 sections,
-                content.renderHtml(),
-                content.toPlainText(),
+                unifiedTemplateRenderer.renderPreview(content),
+                unifiedTemplateRenderer.renderPlainText(content),
                 variables
         );
     }

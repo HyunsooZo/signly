@@ -2,7 +2,6 @@ package com.signly.template.domain.model;
 
 import com.signly.common.exception.ValidationException;
 import com.signly.template.domain.service.TemplateContentParser;
-import com.signly.template.domain.service.TemplateContentRenderer;
 import com.signly.template.domain.service.TemplateContentSerializer;
 
 import java.util.ArrayList;
@@ -24,7 +23,6 @@ public record TemplateContent(
     private static final String VERSION = "1.0";
     private static final TemplateContentParser parser = new TemplateContentParser();
     private static final TemplateContentSerializer serializer = new TemplateContentSerializer();
-    private static final TemplateContentRenderer renderer = new TemplateContentRenderer();
 
     /**
      * JSON 문자열로부터 TemplateContent 생성
@@ -63,17 +61,31 @@ public record TemplateContent(
     }
 
     /**
-     * HTML로 렌더링
+     * HTML로 렌더링 (미리보기용)
+     * Note: This method is deprecated. Use UnifiedTemplateRenderer instead.
      */
+    @Deprecated
     public String renderHtml() {
-        return renderer.renderToHtml(sections);
+        // Simple fallback implementation for backward compatibility
+        return sections.stream()
+                .sorted(Comparator.comparingInt(TemplateSection::getOrder))
+                .map(section -> "<section class=\"template-section\" data-type=\"" + section.getType() + "\">" +
+                        "<p>" + com.signly.template.domain.service.TemplateVariableUtils.convertVariablesToUnderlines(section.getContent()) + "</p></section>")
+                .collect(Collectors.joining("\n"));
     }
 
     /**
      * 일반 텍스트로 렌더링
+     * Note: This method is deprecated. Use UnifiedTemplateRenderer instead.
      */
+    @Deprecated
     public String toPlainText() {
-        return renderer.renderToPlainText(sections);
+        // Simple fallback implementation for backward compatibility
+        return sections.stream()
+                .sorted(Comparator.comparingInt(TemplateSection::getOrder))
+                .map(TemplateSection::getContent)
+                .filter(text -> text != null && !text.isBlank())
+                .collect(Collectors.joining(" • "));
     }
 
     public List<TemplateSection> sections() {
