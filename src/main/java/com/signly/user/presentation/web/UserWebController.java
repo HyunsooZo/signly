@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -30,20 +29,21 @@ public class UserWebController {
     }
 
 
-
     @PostMapping("/register")
-    public String processRegistration(@RequestParam String email,
-                                    @RequestParam String password,
-                                    @RequestParam String confirmPassword,
-                                    @RequestParam String name,
-                                    @RequestParam(required = false) String companyName,
-                                    @RequestParam(required = false) String businessPhone,
-                                    @RequestParam(required = false) String businessAddress,
-                                    @RequestParam String userType,
-                                    @RequestParam(required = false) boolean agreeTerms,
-                                    Model model,
-                                    RedirectAttributes redirectAttributes,
-                                    HttpServletRequest request) {
+    public String processRegistration(
+            @RequestParam String email,
+            @RequestParam String password,
+            @RequestParam String confirmPassword,
+            @RequestParam String name,
+            @RequestParam(required = false) String companyName,
+            @RequestParam(required = false) String businessPhone,
+            @RequestParam(required = false) String businessAddress,
+            @RequestParam String userType,
+            @RequestParam(required = false) boolean agreeTerms,
+            Model model,
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request
+    ) {
         try {
             // 기본 유효성 검사
             Map<String, String> fieldErrors = new HashMap<>();
@@ -85,20 +85,20 @@ public class UserWebController {
 
             // 회원가입 처리
             RegisterUserCommand command = new RegisterUserCommand(
-                email.trim(),
-                password,
-                name.trim(),
-                companyName != null ? companyName.trim() : null,
-                businessPhone != null ? businessPhone.trim() : null,
-                businessAddress != null ? businessAddress.trim() : null,
-                UserType.valueOf(userType)
+                    email.trim(),
+                    password,
+                    name.trim(),
+                    companyName != null ? companyName.trim() : null,
+                    businessPhone != null ? businessPhone.trim() : null,
+                    businessAddress != null ? businessAddress.trim() : null,
+                    UserType.valueOf(userType)
             );
 
             userService.registerUser(command);
 
             logger.info("사용자 회원가입 성공: {}", email);
             redirectAttributes.addFlashAttribute("successMessage",
-                "회원가입이 완료되었습니다. 로그인해주세요.");
+                    "회원가입이 완료되었습니다. 로그인해주세요.");
             return "redirect:/login";
 
         } catch (ValidationException e) {
@@ -119,7 +119,6 @@ public class UserWebController {
     }
 
 
-
     private boolean isValidEmail(String email) {
         return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
@@ -133,19 +132,32 @@ public class UserWebController {
         private String userType;
         private boolean agreeTerms;
 
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
-        public String getConfirmPassword() { return confirmPassword; }
-        public void setConfirmPassword(String confirmPassword) { this.confirmPassword = confirmPassword; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getCompanyName() { return companyName; }
-        public void setCompanyName(String companyName) { this.companyName = companyName; }
-        public String getUserType() { return userType; }
-        public void setUserType(String userType) { this.userType = userType; }
-        public boolean isAgreeTerms() { return agreeTerms; }
-        public void setAgreeTerms(boolean agreeTerms) { this.agreeTerms = agreeTerms; }
+        public String getEmail() {return email;}
+
+        public void setEmail(String email) {this.email = email;}
+
+        public String getPassword() {return password;}
+
+        public void setPassword(String password) {this.password = password;}
+
+        public String getConfirmPassword() {return confirmPassword;}
+
+        public void setConfirmPassword(String confirmPassword) {this.confirmPassword = confirmPassword;}
+
+        public String getName() {return name;}
+
+        public void setName(String name) {this.name = name;}
+
+        public String getCompanyName() {return companyName;}
+
+        public void setCompanyName(String companyName) {this.companyName = companyName;}
+
+        public String getUserType() {return userType;}
+
+        public void setUserType(String userType) {this.userType = userType;}
+
+        public boolean isAgreeTerms() {return agreeTerms;}
+
+        public void setAgreeTerms(boolean agreeTerms) {this.agreeTerms = agreeTerms;}
     }
 }

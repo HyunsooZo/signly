@@ -13,6 +13,8 @@ import com.signly.template.application.preset.PresetSection;
 import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.application.preset.TemplatePresetSummary;
 import com.signly.template.domain.model.TemplateStatus;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -20,8 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -258,8 +258,7 @@ public class TemplateWebController extends BaseWebController {
     }
 
 
-
-    private record TemplatePresetSectionsResponse(String id, String name, 
+    private record TemplatePresetSectionsResponse(String id, String name,
                                                   java.util.List<com.signly.template.application.preset.PresetSection> sections) {}
 
     @PostMapping("/{templateId}/activate")
@@ -325,7 +324,10 @@ public class TemplateWebController extends BaseWebController {
         return "redirect:/templates";
     }
 
-    private void logCsrfDebug(String action, HttpServletRequest request) {
+    private void logCsrfDebug(
+            String action,
+            HttpServletRequest request
+    ) {
         try {
             String paramValue = request.getParameter("_csrf");
             String headerValue = request.getHeader("X-CSRF-TOKEN");

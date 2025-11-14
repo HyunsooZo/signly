@@ -22,7 +22,10 @@ public class SigningWebController {
     private final SignatureService signatureService;
 
     @GetMapping("/{token}")
-    public String signingPage(@PathVariable String token, Model model) {
+    public String signingPage(
+            @PathVariable String token,
+            Model model
+    ) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -46,7 +49,10 @@ public class SigningWebController {
     }
 
     @GetMapping("/{token}/verify")
-    public String verifyPage(@PathVariable String token, Model model) {
+    public String verifyPage(
+            @PathVariable String token,
+            Model model
+    ) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -64,11 +70,13 @@ public class SigningWebController {
     }
 
     @PostMapping("/{token}/verify")
-    public String verifyAccess(@PathVariable String token,
-                              @RequestParam String signerEmail,
-                              @RequestParam String signerName,
-                              Model model,
-                              RedirectAttributes redirectAttributes) {
+    public String verifyAccess(
+            @PathVariable String token,
+            @RequestParam String signerEmail,
+            @RequestParam String signerName,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -91,11 +99,13 @@ public class SigningWebController {
 
     @PostMapping("/{token}/sign")
     @ResponseBody
-    public String processSignature(@PathVariable String token,
-                                 @RequestParam String signatureData,
-                                 @RequestParam String signerEmail,
-                                 @RequestParam String signerName,
-                                 HttpServletRequest request) {
+    public String processSignature(
+            @PathVariable String token,
+            @RequestParam String signatureData,
+            @RequestParam String signerEmail,
+            @RequestParam String signerName,
+            HttpServletRequest request
+    ) {
         try {
             logger.info("서명 처리 요청: token={}, signerEmail={}", token, signerEmail);
 
@@ -116,7 +126,10 @@ public class SigningWebController {
     }
 
     @GetMapping("/{token}/complete")
-    public String completePage(@PathVariable String token, Model model) {
+    public String completePage(
+            @PathVariable String token,
+            Model model
+    ) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 

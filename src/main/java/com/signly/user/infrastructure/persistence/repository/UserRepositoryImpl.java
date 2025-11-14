@@ -16,7 +16,10 @@ public class UserRepositoryImpl implements UserRepository {
     private final UserJpaRepository userJpaRepository;
     private final UserEntityMapper userEntityMapper;
 
-    public UserRepositoryImpl(UserJpaRepository userJpaRepository, UserEntityMapper userEntityMapper) {
+    public UserRepositoryImpl(
+            UserJpaRepository userJpaRepository,
+            UserEntityMapper userEntityMapper
+    ) {
         this.userJpaRepository = userJpaRepository;
         this.userEntityMapper = userEntityMapper;
     }

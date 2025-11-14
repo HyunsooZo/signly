@@ -1,18 +1,22 @@
 package com.signly.user.application;
 
-import com.signly.user.application.dto.*;
-import com.signly.user.application.mapper.UserDtoMapper;
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import com.signly.user.domain.model.*;
+import com.signly.user.application.dto.RegisterUserCommand;
+import com.signly.user.application.dto.UserResponse;
+import com.signly.user.application.mapper.UserDtoMapper;
+import com.signly.user.domain.model.Company;
+import com.signly.user.domain.model.Email;
+import com.signly.user.domain.model.Password;
+import com.signly.user.domain.model.User;
 import com.signly.user.domain.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -26,7 +30,11 @@ public class UserService {
     // 비밀번호 재설정 토큰 저장소 (실제 운영환경에서는 Redis나 DB 사용 권장)
     private final Map<String, PasswordResetToken> resetTokens = new ConcurrentHashMap<>();
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserDtoMapper userDtoMapper) {
+    public UserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            UserDtoMapper userDtoMapper
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userDtoMapper = userDtoMapper;
@@ -36,7 +44,10 @@ public class UserService {
         private final String email;
         private final LocalDateTime expiryTime;
 
-        public PasswordResetToken(String email, LocalDateTime expiryTime) {
+        public PasswordResetToken(
+                String email,
+                LocalDateTime expiryTime
+        ) {
             this.email = email;
             this.expiryTime = expiryTime;
         }
@@ -107,7 +118,10 @@ public class UserService {
         return token;
     }
 
-    public void resetPassword(String token, String newPassword) {
+    public void resetPassword(
+            String token,
+            String newPassword
+    ) {
         PasswordResetToken resetToken = resetTokens.get(token);
 
         if (resetToken == null) {

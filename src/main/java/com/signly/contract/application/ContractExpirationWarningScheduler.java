@@ -1,6 +1,5 @@
 package com.signly.contract.application;
 
-import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.model.ContractStatus;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.notification.application.EmailNotificationService;
@@ -13,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 /**
  * 계약서 만료 임박 알림 스케줄러
@@ -44,7 +42,7 @@ public class ContractExpirationWarningScheduler {
             for (var contract : expiringContracts) {
                 if (contract.getExpiresAt() != null) {
                     long daysLeft = ChronoUnit.DAYS.between(now, contract.getExpiresAt());
-                    
+
                     if (daysLeft == WARNING_DAYS && daysLeft > 0) {
                         emailNotificationService.sendExpirationWarning(contract, (int) daysLeft);
                         sentCount++;

@@ -1,6 +1,9 @@
 package com.signly.user.infrastructure.persistence.mapper;
 
-import com.signly.user.domain.model.*;
+import com.signly.user.domain.model.Company;
+import com.signly.user.domain.model.Email;
+import com.signly.user.domain.model.User;
+import com.signly.user.domain.model.UserId;
 import com.signly.user.infrastructure.persistence.entity.UserEntity;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +47,10 @@ public class UserEntityMapper {
         );
     }
 
-    public void updateEntity(UserEntity entity, User user) {
+    public void updateEntity(
+            UserEntity entity,
+            User user
+    ) {
         Company company = user.getCompany();
         entity.setPassword(user.getEncodedPassword());
         entity.setName(user.getName());

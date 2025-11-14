@@ -138,18 +138,18 @@
         margin: 0.5rem;
         max-width: calc(100% - 1rem);
     }
-    
+
     .modal-header,
     .modal-body,
     .modal-footer {
         padding: 1rem;
     }
-    
+
     .modal-footer {
         flex-direction: column;
         gap: 0.5rem;
     }
-    
+
     .modal-footer .btn {
         width: 100%;
     }

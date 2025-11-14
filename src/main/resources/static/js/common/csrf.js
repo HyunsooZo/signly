@@ -12,7 +12,7 @@ class CsrfManager {
     init() {
         // Get token from meta tag or cookie
         this.token = this.getTokenFromMeta() || this.getTokenFromCookie();
-        
+
         // Auto-refresh token from response headers
         this.setupTokenRefresh();
     }
@@ -36,7 +36,7 @@ class CsrfManager {
     setupTokenRefresh() {
         // Listen for response headers to update token
         const originalFetch = window.fetch;
-        window.fetch = function(...args) {
+        window.fetch = function (...args) {
             return originalFetch.apply(this, args).then(response => {
                 const newToken = response.headers.get('X-CSRF-TOKEN');
                 if (newToken) {

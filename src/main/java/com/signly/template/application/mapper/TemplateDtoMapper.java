@@ -30,8 +30,8 @@ public class TemplateDtoMapper {
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    entry -> TemplateVariableDto.from(entry.getKey(), entry.getValue())
+                        Map.Entry::getKey,
+                        entry -> TemplateVariableDto.from(entry.getKey(), entry.getValue())
                 ));
 
         return new TemplateResponse(

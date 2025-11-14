@@ -98,7 +98,7 @@ function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText
     confirmBtn.className = `btn ${confirmClass}`;
 
     // 확인 버튼 이벤트 리스너 설정
-    confirmBtn.onclick = function() {
+    confirmBtn.onclick = function () {
         const bsModal = bootstrap.Modal.getInstance(modal);
         bsModal.hide();
         if (typeof onConfirm === 'function') {

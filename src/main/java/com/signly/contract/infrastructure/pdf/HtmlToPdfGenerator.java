@@ -34,7 +34,10 @@ public class HtmlToPdfGenerator implements PdfGenerator {
     private static final List<String> FONT_RESOURCES = List.of("fonts/NanumGothic-Regular.ttf", "fonts/NanumGothic-Bold.ttf");
 
     @Override
-    public GeneratedPdf generateFromHtml(String htmlContent, String fileName) {
+    public GeneratedPdf generateFromHtml(
+            String htmlContent,
+            String fileName
+    ) {
         try {
             logger.info("PDF 생성 시작: fileName={}", fileName);
 
@@ -95,7 +98,7 @@ public class HtmlToPdfGenerator implements PdfGenerator {
 
         // HTML이 완전한 문서가 아니면 XHTML 문서로 감싸기
         if (!xhtml.trim().toLowerCase().startsWith("<!doctype") &&
-            !xhtml.trim().toLowerCase().startsWith("<html")) {
+                !xhtml.trim().toLowerCase().startsWith("<html")) {
             xhtml = wrapInXhtmlDocument(xhtml);
         }
 
@@ -109,23 +112,26 @@ public class HtmlToPdfGenerator implements PdfGenerator {
      */
     private String wrapInXhtmlDocument(String bodyContent) {
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-               "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" " +
-               "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" +
-               "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
-               "<head>\n" +
-               "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n" +
-               "  <title>Contract PDF</title>\n" +
-               "  <style type=\"text/css\">\n" +
-               getContractCssStyles() +
-               "  </style>\n" +
-               "</head>\n" +
-               "<body>\n" +
-               bodyContent +
-               "\n</body>\n" +
-               "</html>";
+                "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" " +
+                "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" +
+                "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+                "<head>\n" +
+                "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n" +
+                "  <title>Contract PDF</title>\n" +
+                "  <style type=\"text/css\">\n" +
+                getContractCssStyles() +
+                "  </style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                bodyContent +
+                "\n</body>\n" +
+                "</html>";
     }
 
-    private void dumpFailureHtml(String fileName, String xhtmlContent) {
+    private void dumpFailureHtml(
+            String fileName,
+            String xhtmlContent
+    ) {
         try {
             Path debugDir = Path.of("logs", "pdf-debug");
             Files.createDirectories(debugDir);
@@ -159,7 +165,11 @@ public class HtmlToPdfGenerator implements PdfGenerator {
     }
 
     @Override
-    public GeneratedPdf generateFromTemplate(String templateName, Map<String, Object> variables, String fileName) {
+    public GeneratedPdf generateFromTemplate(
+            String templateName,
+            Map<String, Object> variables,
+            String fileName
+    ) {
         // 현재는 미구현 (필요시 Thymeleaf 템플릿 엔진 연동)
         throw new UnsupportedOperationException("Template-based PDF generation is not yet implemented");
     }
@@ -182,7 +192,7 @@ public class HtmlToPdfGenerator implements PdfGenerator {
     private String adaptCssForPdf(String css) {
         // 웹 전용 스타일 필터링
         String adapted = filterWebOnlyStyles(css);
-        
+
         // 기존 폰트 변환 로직
         adapted = adapted.replace("body:not(:has(.navbar))", "body");
         adapted = adapted.replace("'Malgun Gothic'", "'NanumGothic', 'Nanum Gothic', 'Malgun Gothic'");
@@ -200,37 +210,40 @@ public class HtmlToPdfGenerator implements PdfGenerator {
         css = css.replaceAll("(?s)\\.template-preview[^}]*\\}", "");
         css = css.replaceAll("(?s)\\.preset-preview-body[^}]*\\}", "");
         // #presetHtmlContainer 스타일 제거 - 더 이상 존재하지 않음
-        
+
         // !important 속성 제거 (PDF에서는 불필요)
         css = css.replaceAll("\\s*!important\\s*", "");
-        
+
         // 웹 전용 미디어 쿼리 제거
         css = css.replaceAll("(?s)@media[^{]*\\{[^}]*\\}", "");
-        
+
         // 웹 전용 가상 클래스 제거
         css = css.replaceAll(":hover[^{]*\\{[^}]*\\}", "");
         css = css.replaceAll(":focus[^{]*\\{[^}]*\\}", "");
-        
+
         // cursor 관련 속성 제거
         css = css.replaceAll("cursor:[^;]*;", "");
-        
+
         // transition 관련 속성 제거
         css = css.replaceAll("transition:[^;]*;", "");
-        
+
         // transform 관련 속성 제거
         css = css.replaceAll("transform:[^;]*;", "");
-        
+
         // box-shadow 관련 속성 제거 (PDF에서는 지원 안됨)
         css = css.replaceAll("box-shadow:[^;]*;", "");
-        
+
         // background 관련 복잡한 속성 단순화
         css = css.replaceAll("background:[^;]*gradient[^;]*;", "background: #fff;");
         css = css.replaceAll("background:[^;]*rgba[^;]*;", "background: #fff;");
-        
+
         return css;
     }
 
-    private void appendCss(StringBuilder builder, String css) {
+    private void appendCss(
+            StringBuilder builder,
+            String css
+    ) {
         if (builder.length() > 0) {
             builder.append('\n');
         }

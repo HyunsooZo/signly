@@ -3,7 +3,7 @@
  * 전역적으로 사용되는 헬퍼 함수들
  */
 
-window.SignlyUtils = (function() {
+window.SignlyUtils = (function () {
     'use strict';
 
     /**

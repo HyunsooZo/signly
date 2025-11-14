@@ -8,11 +8,11 @@ class ContractForm {
         // ===== DOM REFERENCES =====
         this.contractContentTextarea = document.getElementById('content');
         this.currentUserId = document.body?.dataset?.currentUserId || '';
-        
+
         // Layout elements
         this.normalLayout = document.getElementById('normalLayout');
         this.templateLayout = document.getElementById('templateLayout');
-        
+
         // Template elements
         this.templateHtmlContainer = document.getElementById('templateHtmlContainer');
         this.templateTitleDisplay = document.getElementById('templateLayoutTitle');
@@ -25,13 +25,13 @@ class ContractForm {
         this.templateSecondPartyEmailInput = document.getElementById('templateSecondPartyEmail');
         this.templateExpiresAtInput = document.getElementById('templateExpiresAt');
         this.templateExpirationCard = document.getElementById('templateExpirationCard');
-        
+
         // Normal layout elements
         this.customVariableContainer = document.getElementById('customVariablesContainer');
         this.customVariableFieldsWrapper = document.getElementById('customVariableFields');
         this.customContentPreviewWrapper = document.getElementById('customContentPreviewWrapper');
         this.customContentPreview = document.getElementById('customContentPreview');
-        
+
         // Other elements
         this.presetSelect = document.getElementById('presetSelect');
         this.expiresAtInput = document.getElementById('expiresAt');
@@ -41,16 +41,16 @@ class ContractForm {
         this.secondPartyNameInput = document.getElementById('secondPartyName');
         this.secondPartyEmailInput = document.getElementById('secondPartyEmail');
         this.secondPartyAddressInput = document.getElementById('secondPartyAddress');
-        
+
         // ===== STATE =====
         this.customVariableValues = {};
         this.customVariables = [];
         this.legacyVariableCounter = 0;
-        
+
         // ===== CONSTANTS =====
         this.PLACEHOLDER_REGEX = /\{([^{}]+)\}|\[([^\[\]]+)\]/g;
         this.IGNORED_PLACEHOLDERS = new Set(['EMPLOYER_SIGNATURE_IMAGE']);
-        
+
         // ===== DATA =====
         this.ownerInfo = null;
         this.ownerSignatureInfo = null;
@@ -59,29 +59,29 @@ class ContractForm {
         this.existingContractData = null;
         this.selectedTemplateData = null;
         this.hasSelectedPreset = document.querySelector('input[name="selectedPreset"]')?.value || '';
-        
+
         // ===== INITIALIZATION =====
         this.init();
     }
-    
+
     // ========================================
     // SECTION 1: INITIALIZATION
     // ========================================
-    
+
     init() {
         // 먼저 JSON 데이터 파싱
         this.parseJsonData();
-        
+
         console.log('[DEBUG] init - selectedTemplateData:', this.selectedTemplateData);
         console.log('[DEBUG] init - existingContractData:', this.existingContractData);
-        
+
         // Check if script tag exists
         const templateEl = document.getElementById('selectedTemplateData');
         console.log('[DEBUG] selectedTemplateData element exists:', !!templateEl);
         if (templateEl) {
             console.log('[DEBUG] selectedTemplateData content:', templateEl.textContent);
         }
-        
+
         // 초기 레이아웃 설정
         if (this.selectedTemplateData) {
             console.log('[DEBUG] Loading template with data:', {
@@ -101,7 +101,7 @@ class ContractForm {
             window.location.href = '/contracts/select-type';
         }
     }
-    
+
     parseJsonData() {
         // Parse existingContractData
         const existingEl = document.getElementById('existingContractData');
@@ -112,7 +112,7 @@ class ContractForm {
                 console.error('[ERROR] 기존 계약 데이터 파싱 실패:', error);
             }
         }
-        
+
         // Parse selectedTemplateData
         const templateEl = document.getElementById('selectedTemplateData');
         if (templateEl) {
@@ -123,14 +123,14 @@ class ContractForm {
             }
         }
     }
-    
+
     loadOwnerData() {
         this.ownerInfo = this.readOwnerInfo();
         this.ownerSignatureInfo = this.readOwnerSignature();
         this.ownerSignatureDataUrl = this.ownerSignatureInfo.dataUrl || '';
         this.ownerSignatureUpdatedAt = this.ownerSignatureInfo.updatedAt || '';
     }
-    
+
     setupEventListeners() {
         // Content textarea input
         if (this.contractContentTextarea) {
@@ -139,7 +139,7 @@ class ContractForm {
                 this.updateDirectPreview();
             });
         }
-        
+
         // Preset select change
         if (this.presetSelect) {
             this.presetSelect.addEventListener('change', async (event) => {
@@ -149,11 +149,11 @@ class ContractForm {
                 this.presetSelect.value = '';
             });
         }
-        
+
         // Form submit validation
         this.setupFormValidation();
     }
-    
+
     setupFormValidation() {
         const forms = document.getElementsByClassName('contract-form');
         Array.from(forms).forEach(form => {
@@ -162,23 +162,23 @@ class ContractForm {
             });
         });
     }
-    
+
     checkAutoLoad() {
         // Check for selectedPreset
         if (this.hasSelectedPreset) {
             this.loadPresetById(this.hasSelectedPreset);
         }
-        
+
         // Check for existing contract data
         if (this.existingContractData && this.existingContractData.content) {
             this.loadExistingContractAsPreset();
         }
     }
-    
+
     // ========================================
     // SECTION 2: UTILITY METHODS
     // ========================================
-    
+
     readOwnerInfo() {
         try {
             const raw = localStorage.getItem('signly_user_info');
@@ -202,7 +202,7 @@ class ContractForm {
             return null;
         }
     }
-    
+
     readOwnerSignature() {
         try {
             const raw = localStorage.getItem('signly_owner_signature');
@@ -222,7 +222,7 @@ class ContractForm {
             return {};
         }
     }
-    
+
     forEachPlaceholder(text, callback) {
         if (!text) {
             return;
@@ -237,7 +237,7 @@ class ContractForm {
             callback(name, match[0], match.index);
         }
     }
-    
+
     toLocalDateTimeValue(date) {
         const pad = (value) => String(value).padStart(2, '0');
         return [
@@ -248,7 +248,7 @@ class ContractForm {
             ':', pad(date.getMinutes())
         ].join('');
     }
-    
+
     decodeHtmlEntities(value) {
         if (!value) {
             return '';
@@ -257,7 +257,7 @@ class ContractForm {
         textarea.innerHTML = value;
         return textarea.value;
     }
-    
+
     sanitizeHtml(html) {
         if (!html) {
             return '';
@@ -267,15 +267,15 @@ class ContractForm {
         template.content.querySelectorAll('script').forEach(node => node.remove());
         return template.innerHTML;
     }
-    
+
     escapeRegExp(text) {
         return text.replace(/[.*+?^$()|[\]{}\\]/g, '\\$&');
     }
-    
+
     // ========================================
     // SECTION 3: EXPIRATION DATE MANAGEMENT
     // ========================================
-    
+
     updateExpirationMinAttributes() {
         const minValue = this.toLocalDateTimeValue(new Date());
         const normal = this.expiresAtInput;
@@ -287,7 +287,7 @@ class ContractForm {
             preset.min = minValue;
         }
     }
-    
+
     syncExpirationField(sourceField) {
         const normal = this.expiresAtInput;
         const preset = this.templateExpiresAtInput;
@@ -300,7 +300,7 @@ class ContractForm {
             normal.value = preset.value;
         }
     }
-    
+
     initializeExpirationInputs() {
         if (!this.expiresAtInput && !this.templateExpiresAtInput) {
             return;
@@ -350,11 +350,11 @@ class ContractForm {
 
         this.syncExpirationField(this.expiresAtInput && this.expiresAtInput.value ? this.expiresAtInput : this.templateExpiresAtInput);
     }
-    
+
     // ========================================
     // SECTION 4: PRESET MODE METHODS
     // ========================================
-    
+
     switchToTemplateMode() {
         if (this.normalLayout) {
             this.normalLayout.style.display = 'none';
@@ -394,12 +394,12 @@ class ContractForm {
             });
         }
     }
-    
+
     switchToNormalMode() {
         // 에러 처리용으로 유지 (실제로는 사용되지 않음)
         console.warn('[WARN] switchToNormalMode() called but normalLayout has been removed');
     }
-    
+
     renderTemplateHtml(html, templateName) {
         if (!this.templateHtmlContainer) return;
 
@@ -439,17 +439,17 @@ class ContractForm {
             this.templateHiddenTitle.value = templateName || '계약서';
         }
     }
-    
+
     replaceVariablesWithInputs(container) {
         // 먼저 data-variable-name 속성을 가진 요소들을 찾아서 input으로 교체
         const variableElements = container.querySelectorAll('[data-variable-name]');
         variableElements.forEach(element => {
             const varName = element.getAttribute('data-variable-name');
             if (!varName) return;
-            
+
             // 이미 input이 있으면 스킵
             if (element.querySelector('input')) return;
-            
+
             // 서명 이미지 처리
             if (varName === 'EMPLOYER_SIGNATURE_IMAGE') {
                 const signatureImg = this.createSignatureImage();
@@ -457,7 +457,7 @@ class ContractForm {
                 element.appendChild(signatureImg);
                 return;
             }
-            
+
             // 변수를 input으로 교체
             const input = document.createElement('input');
             input.type = 'text';
@@ -498,7 +498,7 @@ class ContractForm {
             element.innerHTML = '';
             element.appendChild(input);
         });
-        
+
         // 텍스트 노드에서 [변수명] 또는 {변수명} 패턴도 처리
         const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
         const textNodes = [];
@@ -554,7 +554,7 @@ class ContractForm {
         // 사업주 정보 자동 입력
         this.applyOwnerInfoToTemplateForm();
     }
-    
+
     restoreSavedVariableInputs(container) {
         const savedSpans = container.querySelectorAll('.contract-variable-underline');
         savedSpans.forEach(span => {
@@ -578,7 +578,7 @@ class ContractForm {
             span.replaceWith(wrapper);
         });
     }
-    
+
     createVariableInput(varName) {
         const upper = varName.toUpperCase();
         const normalized = upper.replace(/[-_\s]/g, '');
@@ -596,7 +596,7 @@ class ContractForm {
         }
         // 날짜 관련 (yyyy-mm-dd = 10자)
         else if (normalized.includes('DATE') || upper.includes('날짜') || upper.includes('일자') ||
-                 upper.includes('계약일') || upper.includes('시작일') || upper.includes('종료일')) {
+            upper.includes('계약일') || upper.includes('시작일') || upper.includes('종료일')) {
             inputSize = 11;
             maxLength = 10;
         }
@@ -607,20 +607,20 @@ class ContractForm {
         }
         // 요일, 숫자 등 짧은 값
         else if (normalized.includes('DAY') || normalized.includes('DAYS') || normalized.includes('HOLIDAYS') ||
-                 upper.includes('요일') || upper.includes('휴일')) {
+            upper.includes('요일') || upper.includes('휴일')) {
             inputSize = 4;
             maxLength = 10;
         }
         // 주소, 장소, 업무 등 긴 값 (최대 20자)
         else if (normalized.includes('ADDRESS') || normalized.includes('WORKPLACE') || normalized.includes('DESCRIPTION') ||
-                 upper.includes('주소') || upper.includes('장소') || upper.includes('업무') || upper.includes('내용')) {
+            upper.includes('주소') || upper.includes('장소') || upper.includes('업무') || upper.includes('내용')) {
             inputSize = 20;
             maxLength = 50;
         }
         // 급여, 금액 관련
         else if (normalized.includes('SALARY') || normalized.includes('BONUS') || normalized.includes('ALLOWANCE') ||
-                 normalized.includes('PAYMENT') || normalized.includes('METHOD') ||
-                 upper.includes('급여') || upper.includes('임금') || upper.includes('금액') || upper.includes('지급') || upper.includes('방법')) {
+            normalized.includes('PAYMENT') || normalized.includes('METHOD') ||
+            upper.includes('급여') || upper.includes('임금') || upper.includes('금액') || upper.includes('지급') || upper.includes('방법')) {
             inputSize = 12;
             maxLength = 30;
         }
@@ -636,7 +636,7 @@ class ContractForm {
         }
         // 회사명/조직명
         else if (normalized.includes('COMPANY') || normalized.includes('ORGANIZATION') ||
-                 upper.includes('회사') || upper.includes('조직')) {
+            upper.includes('회사') || upper.includes('조직')) {
             inputSize = 15;
             maxLength = 30;
         }
@@ -668,7 +668,7 @@ class ContractForm {
         wrapper.appendChild(input);
         return wrapper;
     }
-    
+
     getPlaceholderExample(varName, upper, normalized) {
         // 이름 관련
         if (normalized.includes('NAME') || upper === 'EMPLOYER' || upper === 'EMPLOYEE' ||
@@ -744,7 +744,7 @@ class ContractForm {
         // 기본값
         return '';
     }
-    
+
     createSignatureImage() {
         // localStorage에서 서명 이미지 가져오기
         const signatureRaw = localStorage.getItem('signly_owner_signature');
@@ -784,7 +784,7 @@ class ContractForm {
             return span;
         }
     }
-    
+
     getDefaultValueForVariable(varName) {
         if (!varName) return '';
 
@@ -841,7 +841,7 @@ class ContractForm {
 
         return '';
     }
-    
+
     applyOwnerInfoToTemplateForm() {
         if (!this.ownerInfo) return;
 
@@ -855,7 +855,7 @@ class ContractForm {
             this.templateFirstPartyAddress.value = this.ownerInfo.companyName || '';
         }
     }
-    
+
     updateTemplateContent() {
         if (!this.templateHtmlContainer) return;
 
@@ -902,18 +902,18 @@ class ContractForm {
             this.templateHiddenContent.value = clone.innerHTML;
         }
     }
-    
+
     cleanupEmptyVariableContext(container) {
         const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
         const textNodes = [];
-        
+
         while (walker.nextNode()) {
             const node = walker.currentNode;
             if (node.nodeValue && node.nodeValue.trim() === '') {
                 textNodes.push(node);
             }
         }
-        
+
         textNodes.forEach(node => {
             // 부모가 p 태그이고 다른 자식이 없으면 p 태그 제거
             const parent = node.parentNode;
@@ -924,15 +924,15 @@ class ContractForm {
             }
         });
     }
-    
+
     // ========================================
     // SECTION 5: PRESET LOADING
     // ========================================
-    
+
     async loadPresetById(presetId) {
         try {
             const response = await fetch('/templates/presets/' + presetId, {
-                headers: { 'Accept': 'application/json' }
+                headers: {'Accept': 'application/json'}
             });
 
             if (!response.ok) {
@@ -981,7 +981,7 @@ class ContractForm {
             showAlertModal('표준 양식을 불러오지 못했습니다.');
         }
     }
-    
+
     loadTemplateAsPreset(templateTitle, templateHtml, templateVariables) {
         console.log('[DEBUG] Loading template as preset:', templateTitle);
         console.log('[DEBUG] Template HTML length:', templateHtml ? templateHtml.length : 0);
@@ -1012,7 +1012,7 @@ class ContractForm {
 
         this.applyExistingContractData();
     }
-    
+
     extractSavedVariableValues(savedHtml) {
         if (!savedHtml) {
             return [];
@@ -1026,7 +1026,7 @@ class ContractForm {
             value: (node.textContent || '').trim()
         }));
     }
-    
+
     fillPresetInputsFromSavedValues(savedValues, attempt = 0) {
         if (!this.templateHtmlContainer || attempt > 10) {
             return;
@@ -1061,7 +1061,7 @@ class ContractForm {
         this.updateTemplateContent();
         this.updateDirectPreview();
     }
-    
+
     applyExistingContractData() {
         if (!this.existingContractData) {
             return;
@@ -1110,7 +1110,7 @@ class ContractForm {
             }
         }
     }
-    
+
     loadExistingContractAsPreset() {
         if (!this.existingContractData || !this.existingContractData.content) {
             return;
@@ -1121,11 +1121,11 @@ class ContractForm {
         this.renderTemplateHtml(decoded, title);
         this.applyExistingContractData();
     }
-    
+
     // ========================================
     // SECTION 6: TEMPLATE VARIABLE FORMS
     // ========================================
-    
+
     renderTemplateVariableForms(variables) {
         if (!this.templateHtmlContainer) return;
 
@@ -1237,7 +1237,7 @@ class ContractForm {
             }
         });
     }
-    
+
     updateTemplateVariableInHtml(varName, value) {
         if (!this.templateHtmlContainer) return;
 
@@ -1258,7 +1258,7 @@ class ContractForm {
 
         this.updatePresetContent();
     }
-    
+
     validateVariableInput(input, varDef) {
         const value = input.value.trim();
 
@@ -1309,7 +1309,7 @@ class ContractForm {
         input.classList.add('is-valid');
         return true;
     }
-    
+
     showValidationError(input, message) {
         input.classList.add('is-invalid');
 
@@ -1319,7 +1319,7 @@ class ContractForm {
 
         input.parentElement.appendChild(feedback);
     }
-    
+
     validateAllTemplateVariables() {
         const variableInputs = document.querySelectorAll('[data-variable-name][data-variable-type]');
         let allValid = true;
@@ -1342,11 +1342,11 @@ class ContractForm {
 
         return allValid;
     }
-    
+
     // ========================================
     // SECTION 7: TEMPLATE SELECTION UI
     // ========================================
-    
+
     highlightTemplateCard(selectedCard) {
         const cards = document.querySelectorAll('[data-template-card]');
         cards.forEach(card => {
@@ -1369,7 +1369,7 @@ class ContractForm {
             activeButton.classList.add('btn-primary', 'text-white');
         }
     }
-    
+
     handleTemplateSelection(button) {
         if (!button) {
             return;
@@ -1392,11 +1392,11 @@ class ContractForm {
             window.location.href = `/contracts/new?templateId=${templateId}`;
         }
     }
-    
+
     // ========================================
     // SECTION 8: CUSTOM CONTRACT METHODS
     // ========================================
-    
+
     applyOwnerInfoToNormalForm() {
         if (!this.ownerInfo) {
             return;
@@ -1412,7 +1412,7 @@ class ContractForm {
             this.firstPartyAddressInput.value = this.ownerInfo.companyName;
         }
     }
-    
+
     detectCustomVariables() {
         if (!this.contractContentTextarea) {
             return;
@@ -1427,7 +1427,7 @@ class ContractForm {
         this.customVariables = Array.from(detected);
         this.renderCustomVariableInputs();
     }
-    
+
     renderCustomVariableInputs() {
         if (!this.customVariableContainer || !this.customVariableFieldsWrapper) {
             return;
@@ -1477,12 +1477,12 @@ class ContractForm {
 
         this.updateDirectPreview();
     }
-    
+
     suggestDefaultValue(variableName) {
         // getDefaultValueForVariable과 동일한 로직 사용
         return this.getDefaultValueForVariable(variableName);
     }
-    
+
     updateDirectPreview() {
         if (!this.customContentPreviewWrapper || !this.customContentPreview) {
             return;
@@ -1510,7 +1510,7 @@ class ContractForm {
         this.customContentPreview.innerHTML = '';
         this.customContentPreview.appendChild(template.content);
     }
-    
+
     transformPlaceholdersForInlineEditing(root) {
         if (!root) {
             return;
@@ -1527,7 +1527,7 @@ class ContractForm {
 
         textNodes.forEach(node => this.replaceTextNodeWithInputs(node));
     }
-    
+
     replaceTextNodeWithInputs(textNode) {
         const text = textNode.nodeValue;
         this.PLACEHOLDER_REGEX.lastIndex = 0;
@@ -1563,7 +1563,7 @@ class ContractForm {
 
         parent.replaceChild(fragment, textNode);
     }
-    
+
     createInlineVariableElement(variableName) {
         const wrapper = document.createElement('span');
         wrapper.className = 'custom-variable-inline';
@@ -1592,7 +1592,7 @@ class ContractForm {
         wrapper.appendChild(input);
         return wrapper;
     }
-    
+
     updateInlineVariableDisplays(variableName, value, sourceElement) {
         if (!variableName) {
             return;
@@ -1608,7 +1608,7 @@ class ContractForm {
             }
         });
     }
-    
+
     updateVariablePanelField(variableName, value, sourceElement) {
         if (!this.customVariableFieldsWrapper) {
             return;
@@ -1619,10 +1619,10 @@ class ContractForm {
             field.value = value || '';
         }
     }
-    
+
     insertVariable(variable) {
         if (!this.contractContentTextarea) return;
-        
+
         const start = this.contractContentTextarea.selectionStart;
         const end = this.contractContentTextarea.selectionEnd;
         const text = this.contractContentTextarea.value;
@@ -1631,11 +1631,11 @@ class ContractForm {
         this.contractContentTextarea.selectionStart = this.contractContentTextarea.selectionEnd = start + variable.length;
         this.contractContentTextarea.focus();
     }
-    
+
     // ========================================
     // SECTION 9: SIGNATURE MANAGEMENT
     // ========================================
-    
+
     async initializeOwnerSignature() {
         if (this.ownerSignatureDataUrl) {
             return;
@@ -1675,7 +1675,7 @@ class ContractForm {
             console.warn('[WARN] 사업주 서명 정보를 가져오는 중 오류 발생:', error);
         }
     }
-    
+
     persistOwnerSignature(dataUrl, updatedAt) {
         if (!dataUrl) {
             localStorage.removeItem('signly_owner_signature');
@@ -1692,7 +1692,7 @@ class ContractForm {
             console.warn('[WARN] 사업주 서명 정보를 localStorage에 저장할 수 없습니다:', error);
         }
     }
-    
+
     reapplyOwnerSignature() {
         if (this.contractContentTextarea && this.contractContentTextarea.value) {
             this.contractContentTextarea.value = this.applyOwnerSignature(this.contractContentTextarea.value);
@@ -1700,7 +1700,7 @@ class ContractForm {
             this.updateDirectPreview();
         }
     }
-    
+
     applyOwnerSignature(html) {
         if (!html || typeof html !== 'string') {
             return html;
@@ -1715,7 +1715,7 @@ class ContractForm {
 
         return html.replace(/\[EMPLOYER_SIGNATURE_IMAGE\]/g, signatureMarkup);
     }
-    
+
     applyCustomVariablesToContent(rawContent) {
         if (!rawContent || typeof rawContent !== 'string') {
             return rawContent;
@@ -1729,11 +1729,11 @@ class ContractForm {
             return this.customVariableValues[variableName] || '';
         });
     }
-    
+
     // ========================================
     // SECTION 10: FORM SUBMISSION & PREVIEW
     // ========================================
-    
+
     previewContract() {
         const previewContent = document.getElementById('previewContent');
         if (!previewContent) return;
@@ -1777,7 +1777,7 @@ class ContractForm {
         previewContent.innerHTML = htmlToPreview;
         new bootstrap.Modal(document.getElementById('previewModal')).show();
     }
-    
+
     handleFormSubmit(event, form) {
         // 템플릿 모드인 경우
         if (this.templateLayout && this.templateLayout.style.display !== 'none') {
@@ -1847,13 +1847,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========================================
 
 // JSP의 인라인 이벤트 핸들러에서 호출하는 함수들
-window.handleTemplateSelection = function(button) {
+window.handleTemplateSelection = function (button) {
     if (window.contractForm) {
         window.contractForm.handleTemplateSelection(button);
     }
 };
 
-window.previewContract = function() {
+window.previewContract = function () {
     if (window.contractForm) {
         window.contractForm.previewContract();
     }

@@ -7,12 +7,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contract_templates", indexes = {
-    @Index(name = "idx_template_owner_id", columnList = "owner_id"),
-    @Index(name = "idx_template_status", columnList = "status"),
-    @Index(name = "idx_template_is_preset", columnList = "is_preset"),
-    @Index(name = "idx_template_preset_id", columnList = "preset_id"),
-    @Index(name = "idx_template_owner_status", columnList = "owner_id, status"),
-    @Index(name = "idx_template_created_at", columnList = "created_at")
+        @Index(name = "idx_template_owner_id", columnList = "owner_id"),
+        @Index(name = "idx_template_status", columnList = "status"),
+        @Index(name = "idx_template_is_preset", columnList = "is_preset"),
+        @Index(name = "idx_template_preset_id", columnList = "preset_id"),
+        @Index(name = "idx_template_owner_status", columnList = "owner_id, status"),
+        @Index(name = "idx_template_created_at", columnList = "created_at")
 })
 public class TemplateEntity {
 
@@ -51,9 +51,18 @@ public class TemplateEntity {
     protected TemplateEntity() {
     }
 
-    public TemplateEntity(String templateId, String ownerId, String title, String content,
-                         int version, TemplateStatus status, boolean isPreset, String presetId,
-                         LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public TemplateEntity(
+            String templateId,
+            String ownerId,
+            String title,
+            String content,
+            int version,
+            TemplateStatus status,
+            boolean isPreset,
+            String presetId,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         this.templateId = templateId;
         this.ownerId = ownerId;
         this.title = title;

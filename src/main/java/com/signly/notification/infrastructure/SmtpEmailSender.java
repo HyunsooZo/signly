@@ -2,7 +2,6 @@ package com.signly.notification.infrastructure;
 
 import com.signly.notification.application.dto.EmailRequest;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +16,6 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import java.util.Map;
 
 @Component
 public class SmtpEmailSender implements EmailSender {

@@ -1,19 +1,19 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
-    <jsp:param name="additionalCss" value="/css/contract-template-base.css" />
-    <jsp:param name="additionalCss2" value="/css/contract-template-preview.css" />
-    <jsp:param name="additionalCss3" value="/css/contracts.css" />
-    <jsp:param name="additionalCss4" value="/css/templates.css" />
-    <jsp:param name="additionalCss5" value="/css/modal.css" />
+    <jsp:param name="additionalCss" value="/css/contract-template-base.css"/>
+    <jsp:param name="additionalCss2" value="/css/contract-template-preview.css"/>
+    <jsp:param name="additionalCss3" value="/css/contracts.css"/>
+    <jsp:param name="additionalCss4" value="/css/templates.css"/>
+    <jsp:param name="additionalCss5" value="/css/modal.css"/>
 </jsp:include>
 <body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
 <jsp:include page="../common/navbar.jsp">
-    <jsp:param name="currentPage" value="contracts" />
+    <jsp:param name="currentPage" value="contracts"/>
 </jsp:include>
 
 <div class="container mt-4">
@@ -50,19 +50,22 @@
             </div>
         </div>
 
-        <form method="post" action="${not empty contractId ? '/contracts/'.concat(contractId) : '/contracts'}" class="contract-form">
+        <form method="post" action="${not empty contractId ? '/contracts/'.concat(contractId) : '/contracts'}"
+              class="contract-form">
             <c:if test="${not empty _csrf}">
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             </c:if>
             <c:if test="${not empty selectedPreset}">
-                <input type="hidden" name="selectedPreset" value="<c:out value='${selectedPreset}'/>" />
+                <input type="hidden" name="selectedPreset" value="<c:out value='${selectedPreset}'/>"/>
             </c:if>
             <input type="hidden" id="templateId" name="templateId" value="<c:out value='${contract.templateId}'/>">
             <c:if test="${not empty selectedTemplateContent}">
-                <script type="application/json" id="selectedTemplateData"><c:out value="${selectedTemplateContent}" escapeXml="false"/></script>
+                <script type="application/json" id="selectedTemplateData"><c:out value="${selectedTemplateContent}"
+                                                                                 escapeXml="false"/></script>
             </c:if>
             <c:if test="${not empty existingContractJson}">
-                <script type="application/json" id="existingContractData"><c:out value="${existingContractJson}" escapeXml="false"/></script>
+                <script type="application/json" id="existingContractData"><c:out value="${existingContractJson}"
+                                                                                 escapeXml="false"/></script>
             </c:if>
 
             <!-- 템플릿 레이아웃 -->
@@ -72,7 +75,8 @@
                         <div class="card mb-4">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">
-                                    <i class="bi bi-file-earmark-text me-2"></i>                                    <span id="templateLayoutTitle">표준 근로계약서</span>
+                                    <i class="bi bi-file-earmark-text me-2"></i> <span
+                                        id="templateLayoutTitle">표준 근로계약서</span>
                                 </h5>
                             </div>
                             <div class="card-body preset-preview-body">
@@ -90,8 +94,11 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <label for="templateSecondPartyEmail" class="form-label">근로자 이메일 <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="templateSecondPartyEmail" name="secondPartyEmail" required maxlength="200" placeholder="example@domain.com">
+                                    <label for="templateSecondPartyEmail" class="form-label">근로자 이메일 <span
+                                            class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="templateSecondPartyEmail"
+                                           name="secondPartyEmail" required maxlength="200"
+                                           placeholder="example@domain.com">
                                 </div>
                             </div>
                         </div>
@@ -106,15 +113,13 @@
                                 <p class="text-muted small mb-3">만료일을 비우면 계약서는 생성 시점 기준 24시간 동안 유효합니다.</p>
                                 <div class="mb-0">
                                     <label for="presetExpiresAt" class="form-label">만료일</label>
-                                    <input type="datetime-local" class="form-control" id="templateExpiresAt" name="expiresAt"
+                                    <input type="datetime-local" class="form-control" id="templateExpiresAt"
+                                           name="expiresAt"
                                            value="<c:out value='${contract.expiresAtInputValue}'/>">
                                     <div class="form-text">필요 시 서명 마감 일시를 지정하세요.</div>
                                 </div>
                             </div>
                         </div>
-
-
-
 
 
                         <!-- Hidden fields -->
@@ -177,6 +182,6 @@
 </div>
 
 <script src="/js/contract-form.js"></script>
-<jsp:include page="../common/footer.jsp" />
+<jsp:include page="../common/footer.jsp"/>
 </body>
 </html>

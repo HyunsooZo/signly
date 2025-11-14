@@ -2,7 +2,6 @@ package com.signly.signature.application;
 
 import com.signly.common.exception.ValidationException;
 import com.signly.common.storage.FileStorageService;
-import com.signly.common.storage.StoredFile;
 import com.signly.document.domain.model.FileMetadata;
 import com.signly.signature.application.dto.FirstPartySignatureResponse;
 import com.signly.signature.domain.model.FirstPartySignature;

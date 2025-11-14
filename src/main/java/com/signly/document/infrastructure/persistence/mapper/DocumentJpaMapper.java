@@ -13,36 +13,36 @@ public class DocumentJpaMapper {
 
     public DocumentJpaEntity toEntity(Document document) {
         return new DocumentJpaEntity(
-            document.getId().value(),
-            document.getContractId().value(),
-            document.getUploadedBy().value(),
-            document.getType(),
-            document.getMetadata().fileName(),
-            document.getMetadata().fileName(),
-            document.getMetadata().mimeType(),
-            document.getMetadata().fileSize(),
-            document.getMetadata().checksum(),
-            document.getStoragePath()
+                document.getId().value(),
+                document.getContractId().value(),
+                document.getUploadedBy().value(),
+                document.getType(),
+                document.getMetadata().fileName(),
+                document.getMetadata().fileName(),
+                document.getMetadata().mimeType(),
+                document.getMetadata().fileSize(),
+                document.getMetadata().checksum(),
+                document.getStoragePath()
         );
     }
 
     public Document toDomain(DocumentJpaEntity entity) {
         FileMetadata metadata = FileMetadata.create(
-            entity.getOriginalFilename(),
-            entity.getContentType(),
-            entity.getFileSize(),
-            entity.getChecksum()
+                entity.getOriginalFilename(),
+                entity.getContentType(),
+                entity.getFileSize(),
+                entity.getChecksum()
         );
 
         return Document.restore(
-            DocumentId.of(entity.getId()),
-            ContractId.of(entity.getContractId()),
-            UserId.of(entity.getUploadedBy()),
-            entity.getType(),
-            metadata,
-            entity.getStoragePath(),
-            entity.getCreatedAt(),
-            entity.getUpdatedAt()
+                DocumentId.of(entity.getId()),
+                ContractId.of(entity.getContractId()),
+                UserId.of(entity.getUploadedBy()),
+                entity.getType(),
+                metadata,
+                entity.getStoragePath(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt()
         );
     }
 }

@@ -16,18 +16,25 @@ public interface PdfGenerator {
      * HTML 문자열을 PDF로 변환
      *
      * @param htmlContent HTML 문자열
-     * @param fileName PDF 파일명
+     * @param fileName    PDF 파일명
      * @return 생성된 PDF
      */
-    GeneratedPdf generateFromHtml(String htmlContent, String fileName);
+    GeneratedPdf generateFromHtml(
+            String htmlContent,
+            String fileName
+    );
 
     /**
      * HTML 템플릿과 변수를 사용하여 PDF 생성
      *
      * @param templateName 템플릿 파일명
-     * @param variables 템플릿 변수
-     * @param fileName PDF 파일명
+     * @param variables    템플릿 변수
+     * @param fileName     PDF 파일명
      * @return 생성된 PDF
      */
-    GeneratedPdf generateFromTemplate(String templateName, Map<String, Object> variables, String fileName);
+    GeneratedPdf generateFromTemplate(
+            String templateName,
+            Map<String, Object> variables,
+            String fileName
+    );
 }

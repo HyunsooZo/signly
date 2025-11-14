@@ -13,7 +13,10 @@ public abstract class AggregateRoot extends BaseEntity {
         super();
     }
 
-    protected AggregateRoot(LocalDateTime createdAt, LocalDateTime updatedAt) {
+    protected AggregateRoot(
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         super(createdAt, updatedAt);
     }
 

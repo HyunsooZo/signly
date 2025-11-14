@@ -144,7 +144,6 @@ body:not(:has(.navbar)) {
 }
 
 
-
 /* 계약서 변수 밑줄 (상세 페이지용) */
 .contract-variable-underline {
     display: inline-block;
@@ -332,10 +331,12 @@ body,
     .signature-block {
         float: none;
     }
+
     .signature-block--employee {
         float: none;
         flex: 1; /* 남은 공간 차지 */
     }
+
     .signature-block--employer {
         float: none;
         width: fit-content; /* 내부 요소들에 딱 맞는 너비 */
@@ -349,7 +350,6 @@ body,
     max-width: fit-content;
     width: fit-content;
 }
-
 
 
 .signature-line--seal {

@@ -40,7 +40,7 @@ const AuthManager = {
                 } catch (e) {
                     // JSON 파싱 실패 시 기본 메시지 사용
                 }
-                
+
                 console.log('인증 실패:', errorMessage);
                 this.redirectToLogin();
                 throw new Error(errorMessage);
@@ -83,7 +83,7 @@ window.AuthManager = AuthManager;
 /**
  * 페이지 로드 시 자동 인증 체크
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // 로그인 페이지가 아닌 경우에만 체크
     const isLoginPage = window.location.pathname === '/login';
     const isPublicPage = window.location.pathname.startsWith('/sign/');

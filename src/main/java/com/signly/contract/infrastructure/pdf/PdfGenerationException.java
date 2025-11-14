@@ -10,7 +10,10 @@ public class PdfGenerationException extends RuntimeException {
         super(message);
     }
 
-    public PdfGenerationException(String message, Throwable cause) {
+    public PdfGenerationException(
+            String message,
+            Throwable cause
+    ) {
         super(message, cause);
     }
 }

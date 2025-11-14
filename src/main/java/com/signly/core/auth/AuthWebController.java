@@ -6,24 +6,26 @@ import com.signly.common.security.TokenRedisService;
 import com.signly.core.auth.dto.LoginRequest;
 import com.signly.core.auth.dto.LoginResponse;
 import com.signly.user.application.UserService;
-import com.signly.user.application.dto.UserResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import java.util.Arrays;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Arrays;
 
 @Controller
 @RequiredArgsConstructor
@@ -79,7 +81,7 @@ public class AuthWebController {
 
             // 환경별 보안 설정
             boolean isProduction = Arrays.asList(environment.getActiveProfiles()).contains("prod");
-            
+
             // JWT 액세스 토큰을 쿠키에 저장 (보안 강화)
             Cookie authCookie = new Cookie("authToken", loginResponse.accessToken());
             authCookie.setHttpOnly(true); // XSS 방어를 위해 JavaScript 접근 차단
@@ -100,9 +102,9 @@ public class AuthWebController {
                 refreshCookie.setPath("/");
                 // SameSite는 Servlet 4.0+에서 지원, 하위 버전에서는 Response Header로 처리
                 if (isProduction) {
-                    response.setHeader("Set-Cookie", 
-                        String.format("%s; Path=/; HttpOnly; Secure; SameSite=Strict", 
-                            refreshCookie.getName() + "=" + refreshCookie.getValue()));
+                    response.setHeader("Set-Cookie",
+                            String.format("%s; Path=/; HttpOnly; Secure; SameSite=Strict",
+                                    refreshCookie.getName() + "=" + refreshCookie.getValue()));
                 }
                 refreshCookie.setMaxAge(30 * 24 * 60 * 60); // 30일
                 response.addCookie(refreshCookie);
@@ -113,7 +115,7 @@ public class AuthWebController {
 
             // Redis에 액세스 토큰 저장
             tokenRedisService.saveAccessToken(loginResponse.userId(), loginResponse.accessToken());
-            
+
             logger.info("로그인 성공: {}", loginRequest.email());
             redirectAttributes.addFlashAttribute("successMessage", "로그인되었습니다.");
 

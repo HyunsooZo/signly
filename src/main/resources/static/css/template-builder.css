@@ -14,7 +14,7 @@
 
 /* 네비게이션 */
 .navbar {
-    box-shadow: 0 2px 4px rgba(0,0,0,.08);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .08);
 }
 
 /* 메인 컨테이너 */
@@ -28,7 +28,7 @@
     background: white;
     border-radius: 12px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
     overflow: hidden;
 }
 
@@ -90,7 +90,7 @@
 
 .preset-card:hover {
     border-color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(0,102,204,0.15);
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
     transform: translateY(-2px);
 }
 
@@ -175,38 +175,38 @@
     .preset-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .preset-header {
         padding: 15px;
     }
-    
+
     .preset-content {
         padding: 15px;
         max-height: 300px;
     }
-    
+
     .preset-card {
         padding: 12px;
     }
-    
+
     .preset-card-header {
         gap: 8px;
     }
-    
+
     .preset-card-icon {
         width: 35px;
         height: 35px;
         font-size: 1rem;
     }
-    
+
     .preset-card-title {
         font-size: 0.95rem;
     }
-    
+
     .preset-card-description {
         font-size: 0.85rem;
     }
-    
+
     .preset-card-button {
         padding: 5px 10px;
         font-size: 0.8rem;
@@ -217,34 +217,34 @@
     .builder-container {
         padding: 15px 10px;
     }
-    
+
     .preset-section {
         margin-bottom: 15px;
     }
-    
+
     .preset-header {
         padding: 12px;
     }
-    
+
     .preset-title {
         font-size: 1rem;
     }
-    
+
     .preset-content {
         padding: 12px;
         max-height: 250px;
     }
-    
+
     .preset-card {
         padding: 10px;
     }
-    
+
     .preset-card-action {
         flex-direction: column;
         gap: 8px;
         align-items: stretch;
     }
-    
+
     .preset-card-button {
         width: 100%;
         padding: 8px;
@@ -257,7 +257,7 @@
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
     position: sticky;
     top: 20px;
     z-index: 100;
@@ -293,7 +293,7 @@
     background: var(--hover-bg);
     border-color: var(--primary-color);
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
 }
 
 .toolbar-btn.active {
@@ -338,7 +338,7 @@
 .document-container {
     background: white;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
     min-height: 800px;
 }
 
@@ -373,8 +373,23 @@
     border-color: var(--primary-color);
     outline: none;
 }
-    border-color: rgba(255,255,255,.5);
-    outline: none;
+
+border-color:
+
+rgba
+(
+255
+,
+255
+,
+255
+,
+.5
+)
+;
+outline: none
+
+;
 }
 
 .document-actions {
@@ -426,7 +441,7 @@
     background: white;
     padding: 4px;
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
 }
 
 .editable-section:hover .section-controls,
@@ -614,7 +629,7 @@
     background: white;
     border-radius: 12px;
     padding: 30px;
-    box-shadow: 0 10px 40px rgba(0,0,0,.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .2);
     z-index: 1000;
     max-width: 600px;
     max-height: 80vh;
@@ -633,7 +648,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,.5);
+    background: rgba(0, 0, 0, .5);
     z-index: 999;
     display: none;
 }
@@ -728,14 +743,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
     cursor: pointer;
     transition: all 0.3s;
 }
 
 .floating-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0,0,0,.2);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .2);
 }
 
 /* 추가 스타일 - 인라인 스타일 대체 */

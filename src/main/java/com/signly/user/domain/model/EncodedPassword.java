@@ -1,11 +1,7 @@
 package com.signly.user.domain.model;
 
 import com.signly.common.exception.ValidationException;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.Objects;
 
 /**
  * 인코딩된 비밀번호를 나타내는 값 객체
@@ -16,7 +12,10 @@ public record EncodedPassword(String value) {
     /**
      * 평문 비밀번호를 인코딩하여 EncodedPassword 객체 생성
      */
-    public static EncodedPassword from(Password password, PasswordEncoder passwordEncoder) {
+    public static EncodedPassword from(
+            Password password,
+            PasswordEncoder passwordEncoder
+    ) {
         if (password == null) {
             throw new ValidationException("비밀번호는 필수입니다");
         }
@@ -39,7 +38,10 @@ public record EncodedPassword(String value) {
     /**
      * 평문 비밀번호가 이 인코딩된 비밀번호와 일치하는지 검증
      */
-    public boolean matches(Password password, PasswordEncoder passwordEncoder) {
+    public boolean matches(
+            Password password,
+            PasswordEncoder passwordEncoder
+    ) {
         if (password == null || passwordEncoder == null) {
             return false;
         }

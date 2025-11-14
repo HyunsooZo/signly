@@ -18,7 +18,10 @@ public class EmailOutboxRepositoryImpl implements EmailOutboxRepository {
     private final EmailOutboxJpaRepository jpaRepository;
     private final EmailOutboxEntityMapper mapper;
 
-    public EmailOutboxRepositoryImpl(EmailOutboxJpaRepository jpaRepository, EmailOutboxEntityMapper mapper) {
+    public EmailOutboxRepositoryImpl(
+            EmailOutboxJpaRepository jpaRepository,
+            EmailOutboxEntityMapper mapper
+    ) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
     }

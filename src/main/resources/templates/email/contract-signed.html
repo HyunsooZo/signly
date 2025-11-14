@@ -7,32 +7,32 @@
     <th:block th:replace="~{fragments/email-style.html :: emailStyles}"></th:block>
 </head>
 <body class="email-body">
-    <div class="email-wrapper">
-        <div class="email-card">
-            <div class="email-header">
-                <div class="email-logo" th:text="${companyName}">Signly</div>
+<div class="email-wrapper">
+    <div class="email-card">
+        <div class="email-header">
+            <div class="email-logo" th:text="${companyName}">Signly</div>
+        </div>
+
+        <div class="email-content">
+            <div class="email-success-icon">✅</div>
+
+            <h2 class="email-title email-title--success email-center">계약서 서명 완료</h2>
+
+            <p>계약서에 새로운 서명이 완료되었습니다.</p>
+
+            <div class="email-highlight">
+                <p class="email-meta"><strong>계약서 제목:</strong> <span th:text="${contractTitle}">계약서 제목</span></p>
+                <p class="email-meta"><strong>서명자:</strong> <span th:text="${signerName}">서명자 이름</span></p>
             </div>
 
-            <div class="email-content">
-                <div class="email-success-icon">✅</div>
+            <p>계약서 진행 상황을 확인하시려면 시스템에 로그인해 주세요.</p>
+        </div>
 
-                <h2 class="email-title email-title--success email-center">계약서 서명 완료</h2>
-
-                <p>계약서에 새로운 서명이 완료되었습니다.</p>
-
-                <div class="email-highlight">
-                    <p class="email-meta"><strong>계약서 제목:</strong> <span th:text="${contractTitle}">계약서 제목</span></p>
-                    <p class="email-meta"><strong>서명자:</strong> <span th:text="${signerName}">서명자 이름</span></p>
-                </div>
-
-                <p>계약서 진행 상황을 확인하시려면 시스템에 로그인해 주세요.</p>
-            </div>
-
-            <div class="email-footer">
-                <p>이 이메일은 <span th:text="${companyName}">Signly</span> 전자계약 시스템에서 자동으로 발송되었습니다.</p>
-                <p>본 이메일에 회신하지 마세요.</p>
-            </div>
+        <div class="email-footer">
+            <p>이 이메일은 <span th:text="${companyName}">Signly</span> 전자계약 시스템에서 자동으로 발송되었습니다.</p>
+            <p>본 이메일에 회신하지 마세요.</p>
         </div>
     </div>
+</div>
 </body>
 </html>

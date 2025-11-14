@@ -9,13 +9,19 @@ import java.time.LocalDateTime;
 
 public class User extends AggregateRoot {
 
-    @Getter private UserId userId;
-    @Getter private Email email;
+    @Getter
+    private UserId userId;
+    @Getter
+    private Email email;
     private EncodedPassword encodedPassword;
-    @Getter private String name;
-    @Getter private Company company;
-    @Getter private UserType userType;
-    @Getter private UserStatus status;
+    @Getter
+    private String name;
+    @Getter
+    private Company company;
+    @Getter
+    private UserType userType;
+    @Getter
+    private UserStatus status;
 
     protected User() {
         super();
@@ -127,14 +133,21 @@ public class User extends AggregateRoot {
         updateTimestamp();
     }
 
-    public void updateProfile(String name, Company company) {
+    public void updateProfile(
+            String name,
+            Company company
+    ) {
         validateName(name);
         this.name = name;
         this.company = company != null ? company : Company.empty();
         updateTimestamp();
     }
 
-    public void changePassword(Password oldPassword, Password newPassword, PasswordEncoder passwordEncoder) {
+    public void changePassword(
+            Password oldPassword,
+            Password newPassword,
+            PasswordEncoder passwordEncoder
+    ) {
         if (!validatePassword(oldPassword, passwordEncoder)) {
             throw new ValidationException("기존 비밀번호가 일치하지 않습니다");
         }
@@ -142,12 +155,20 @@ public class User extends AggregateRoot {
         updateTimestamp();
     }
 
-    public void resetPassword(Password newPassword, PasswordEncoder passwordEncoder) {
+    public void resetPassword(
+            Password newPassword,
+            PasswordEncoder passwordEncoder
+    ) {
         this.encodedPassword = EncodedPassword.from(newPassword, passwordEncoder);
         updateTimestamp();
     }
 
-    private static void validateCreateParameters(Email email, Password password, String name, UserType userType) {
+    private static void validateCreateParameters(
+            Email email,
+            Password password,
+            String name,
+            UserType userType
+    ) {
         if (email == null) {
             throw new ValidationException("이메일은 필수입니다");
         }
@@ -176,7 +197,7 @@ public class User extends AggregateRoot {
     /**
      * 인코딩된 비밀번호 값을 반환
      * 주로 영속성 계층에서 사용하며, 도메인 로직에서는 직접 사용을 최소화해야 함
-     * 
+     *
      * @return 인코딩된 비밀번호 문자열
      */
     public String getEncodedPassword() {

@@ -511,9 +511,6 @@
 }
 
 
-
-
-
 .template-card-new .template-description {
     color: #495057;
 }
@@ -607,36 +604,36 @@
     .template-card {
         margin-bottom: 1rem;
     }
-    
+
     .template-card:hover {
         transform: translateY(-4px) scale(1.01);
     }
-    
+
     .template-card-header {
         padding: 1rem;
     }
-    
+
     .template-card-body {
         padding: 1rem;
     }
-    
+
     .template-title {
         font-size: 1rem;
     }
-    
+
     .template-description {
         font-size: 0.85rem;
     }
-    
+
     .template-icon {
         width: 40px;
         height: 40px;
     }
-    
+
     .template-icon i {
         font-size: 1.25rem;
     }
-    
+
     .template-card-new .template-icon i {
         font-size: 1.5rem;
     }

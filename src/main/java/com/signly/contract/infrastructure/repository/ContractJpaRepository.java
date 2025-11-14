@@ -13,26 +13,52 @@ import java.util.List;
 
 public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, String> {
 
-    Page<ContractJpaEntity> findByCreatorId(String creatorId, Pageable pageable);
+    Page<ContractJpaEntity> findByCreatorId(
+            String creatorId,
+            Pageable pageable
+    );
 
-    Page<ContractJpaEntity> findByCreatorIdAndStatus(String creatorId, ContractStatus status, Pageable pageable);
+    Page<ContractJpaEntity> findByCreatorIdAndStatus(
+            String creatorId,
+            ContractStatus status,
+            Pageable pageable
+    );
 
     @Query("SELECT c FROM ContractJpaEntity c WHERE c.firstPartyEmail = :email OR c.secondPartyEmail = :email")
-    Page<ContractJpaEntity> findByPartyEmail(@Param("email") String email, Pageable pageable);
+    Page<ContractJpaEntity> findByPartyEmail(
+            @Param("email") String email,
+            Pageable pageable
+    );
 
     @Query("SELECT c FROM ContractJpaEntity c WHERE (c.firstPartyEmail = :email OR c.secondPartyEmail = :email) AND c.status = :status")
-    Page<ContractJpaEntity> findByPartyEmailAndStatus(@Param("email") String email, @Param("status") ContractStatus status, Pageable pageable);
+    Page<ContractJpaEntity> findByPartyEmailAndStatus(
+            @Param("email") String email,
+            @Param("status") ContractStatus status,
+            Pageable pageable
+    );
 
     List<ContractJpaEntity> findByTemplateId(String templateId);
 
     @Query("SELECT c FROM ContractJpaEntity c WHERE c.status IN (:statuses) AND c.expiresAt < :currentTime")
-    List<ContractJpaEntity> findExpiredContracts(@Param("statuses") List<ContractStatus> statuses, @Param("currentTime") LocalDateTime currentTime);
+    List<ContractJpaEntity> findExpiredContracts(
+            @Param("statuses") List<ContractStatus> statuses,
+            @Param("currentTime") LocalDateTime currentTime
+    );
 
-    List<ContractJpaEntity> findByStatusAndExpiresAtBefore(ContractStatus status, LocalDateTime dateTime);
+    List<ContractJpaEntity> findByStatusAndExpiresAtBefore(
+            ContractStatus status,
+            LocalDateTime dateTime
+    );
 
-    boolean existsByCreatorIdAndTitle(String creatorId, String title);
+    boolean existsByCreatorIdAndTitle(
+            String creatorId,
+            String title
+    );
 
-    long countByCreatorIdAndStatus(String creatorId, ContractStatus status);
+    long countByCreatorIdAndStatus(
+            String creatorId,
+            ContractStatus status
+    );
 
     long countByTemplateId(String templateId);
 

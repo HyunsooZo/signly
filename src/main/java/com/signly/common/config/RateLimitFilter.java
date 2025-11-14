@@ -51,11 +51,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
         boolean allowed = rateLimitService.tryAcquire(limiterName, clientIp);
 
         if (allowed) {
-            log.debug("Rate limit check passed - IP: {}, Endpoint: {}, Limiter: {}", 
-                     clientIp, requestURI, limiterName);
+            log.debug("Rate limit check passed - IP: {}, Endpoint: {}, Limiter: {}",
+                    clientIp, requestURI, limiterName);
             filterChain.doFilter(request, response);
         } else {
-            log.warn("Rate limit exceeded - IP: {}, Endpoint: {}, Limiter: {}, Method: {}, UserAgent: {}", 
+            log.warn("Rate limit exceeded - IP: {}, Endpoint: {}, Limiter: {}, Method: {}, UserAgent: {}",
                     clientIp, requestURI, limiterName, method, request.getHeader("User-Agent"));
 
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());

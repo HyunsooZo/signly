@@ -2,7 +2,7 @@
  * 공통 자바스크립트 - Signly
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // 드롭다운 메뉴 기능
     initDropdowns();
 
@@ -26,7 +26,7 @@ function initDropdowns() {
     const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
 
     dropdownToggles.forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
+        toggle.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
 
@@ -65,7 +65,7 @@ function initMobileMenu() {
     const headerNav = document.querySelector('.header-nav');
 
     if (mobileToggle && headerNav) {
-        mobileToggle.addEventListener('click', function() {
+        mobileToggle.addEventListener('click', function () {
             headerNav.classList.toggle('mobile-open');
             this.classList.toggle('active');
         });
@@ -113,7 +113,7 @@ function initFormValidation() {
     const forms = document.querySelectorAll('form[data-validate="true"]');
 
     forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             if (!validateForm(this)) {
                 e.preventDefault();
             }
@@ -229,7 +229,7 @@ function initLoadingSpinner() {
     // 폼 제출시 로딩 스피너 표시
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
-        form.addEventListener('submit', function() {
+        form.addEventListener('submit', function () {
             const submitBtn = this.querySelector('button[type="submit"], input[type="submit"]');
             if (submitBtn) {
                 showLoadingSpinner(submitBtn);
@@ -270,7 +270,7 @@ async function sendRequest(url, options = {}) {
         credentials: 'same-origin'
     };
 
-    const mergedOptions = { ...defaultOptions, ...options };
+    const mergedOptions = {...defaultOptions, ...options};
 
     try {
         // AuthManager가 로드되어 있고 인증 필요한 요청이면 authenticatedFetch 사용
@@ -330,7 +330,7 @@ function showAlert(message, type = 'info') {
  */
 function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText = '취소', confirmClass = 'btn-primary') {
     const modalId = 'confirmModal-' + Date.now();
-    
+
     const modalHtml = `
         <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -350,28 +350,28 @@ function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText
             </div>
         </div>
     `;
-    
+
     // 기존 모달 제거
     const existingModals = document.querySelectorAll('[id^="confirmModal-"]');
     existingModals.forEach(modal => modal.remove());
-    
+
     // 새 모달 추가
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-    
+
     const modalElement = document.getElementById(modalId);
     const modal = new bootstrap.Modal(modalElement);
-    
+
     // 확인 버튼 이벤트
     modalElement.querySelector('#confirmBtn').addEventListener('click', () => {
         if (onConfirm) onConfirm();
         modal.hide();
     });
-    
+
     // 모달이 닫힐 때 DOM에서 제거
     modalElement.addEventListener('hidden.bs.modal', () => {
         modalElement.remove();
     });
-    
+
     modal.show();
 }
 
@@ -380,7 +380,7 @@ function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText
  */
 function showAlertModal(message, title = '알림', buttonText = '확인') {
     const modalId = 'alertModal-' + Date.now();
-    
+
     const modalHtml = `
         <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -399,22 +399,22 @@ function showAlertModal(message, title = '알림', buttonText = '확인') {
             </div>
         </div>
     `;
-    
+
     // 기존 모달 제거
     const existingModals = document.querySelectorAll('[id^="alertModal-"]');
     existingModals.forEach(modal => modal.remove());
-    
+
     // 새 모달 추가
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-    
+
     const modalElement = document.getElementById(modalId);
     const modal = new bootstrap.Modal(modalElement);
-    
+
     // 모달이 닫힐 때 DOM에서 제거
     modalElement.addEventListener('hidden.bs.modal', () => {
         modalElement.remove();
     });
-    
+
     modal.show();
 }
 
@@ -442,7 +442,7 @@ function createAlertContainer() {
  * 쿠키 관련 함수들
  */
 const Cookie = {
-    set: function(name, value, days) {
+    set: function (name, value, days) {
         let expires = '';
         if (days) {
             const date = new Date();
@@ -452,7 +452,7 @@ const Cookie = {
         document.cookie = name + '=' + (value || '') + expires + '; path=/';
     },
 
-    get: function(name) {
+    get: function (name) {
         const nameEQ = name + '=';
         const ca = document.cookie.split(';');
         for (let i = 0; i < ca.length; i++) {
@@ -463,7 +463,7 @@ const Cookie = {
         return null;
     },
 
-    delete: function(name) {
+    delete: function (name) {
         document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     }
 };
@@ -473,7 +473,7 @@ const Cookie = {
  */
 const Utils = {
     // 디바운스
-    debounce: function(func, wait) {
+    debounce: function (func, wait) {
         let timeout;
         return function executedFunction(...args) {
             const later = () => {
@@ -486,9 +486,9 @@ const Utils = {
     },
 
     // 쓰로틀
-    throttle: function(func, limit) {
+    throttle: function (func, limit) {
         let inThrottle;
-        return function() {
+        return function () {
             const args = arguments;
             const context = this;
             if (!inThrottle) {
@@ -500,7 +500,7 @@ const Utils = {
     },
 
     // 날짜 포맷팅
-    formatDate: function(date, format = 'YYYY-MM-DD') {
+    formatDate: function (date, format = 'YYYY-MM-DD') {
         const d = new Date(date);
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -513,7 +513,7 @@ const Utils = {
     },
 
     // 파일 크기 포맷팅
-    formatFileSize: function(bytes) {
+    formatFileSize: function (bytes) {
         if (bytes === 0) return '0 Bytes';
 
         const k = 1024;

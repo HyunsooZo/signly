@@ -8,19 +8,19 @@ class TemplateForm {
         this.clauseCounter = 0;
         this.activeElement = null;
         this.sections = [];
-        
+
         this.FRONTEND_TYPES = new Set(['text', 'clause', 'dotted', 'footer', 'signature', 'html', 'title']);
         this.htmlEntityDecoder = document.createElement('textarea');
-        
+
         this.init();
     }
-    
+
     init() {
         this.loadInitialSections();
         this.setupEventListeners();
         this.loadPresets();
     }
-    
+
     loadInitialSections() {
         const initialSectionsElement = document.getElementById('initialSections');
         if (initialSectionsElement) {
@@ -34,7 +34,7 @@ class TemplateForm {
             }
         }
     }
-    
+
     setupEventListeners() {
         document.addEventListener('input', (e) => {
             if (e.target.classList.contains('html-editor')) {
@@ -44,25 +44,25 @@ class TemplateForm {
                 }
             }
         });
-        
+
         document.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
                 this.saveTemplate();
             }
-            
+
             if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
                 e.preventDefault();
                 this.previewTemplate();
             }
-            
+
             if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
                 e.preventDefault();
                 this.showVariableModal();
             }
         });
     }
-    
+
     decodeHtmlEntities(value) {
         if (!value || typeof value !== 'string') {
             return value;
@@ -71,14 +71,14 @@ class TemplateForm {
         temp.innerHTML = value;
         return temp.textContent || temp.innerText || value;
     }
-    
+
     parseSectionsPayload(raw) {
         if (!raw) {
             return [];
         }
-        
+
         let parsed = raw;
-        
+
         if (typeof raw === 'string') {
             const trimmed = raw.trim();
             if (!trimmed) {
@@ -91,11 +91,11 @@ class TemplateForm {
                 return [];
             }
         }
-        
+
         if (Array.isArray(parsed)) {
             return parsed;
         }
-        
+
         if (parsed && typeof parsed === 'object') {
             if (Array.isArray(parsed.sections)) {
                 return parsed.sections;
@@ -111,10 +111,10 @@ class TemplateForm {
             }
             return [parsed];
         }
-        
+
         return [];
     }
-    
+
     normalizeFrontendType(type, metadata) {
         metadata = metadata || {};
         if (metadata && typeof metadata === 'object' && metadata.kind && this.FRONTEND_TYPES.has(String(metadata.kind).toLowerCase())) {
@@ -148,11 +148,11 @@ class TemplateForm {
                 return 'text';
         }
     }
-    
+
     ensureMetadataForType(type, metadata) {
         metadata = metadata || {};
         const base = metadata && typeof metadata === 'object' ? Object.assign({}, metadata) : {};
-        
+
         switch (type) {
             case 'title':
                 return Object.assign(base, {
@@ -193,12 +193,12 @@ class TemplateForm {
                 });
         }
     }
-    
+
     coerceMetadata(metadata) {
         if (!metadata) {
             return {};
         }
-        
+
         if (typeof metadata === 'string') {
             try {
                 metadata = JSON.parse(metadata);
@@ -206,123 +206,123 @@ class TemplateForm {
                 return {};
             }
         }
-        
+
         if (typeof metadata !== 'object' || Array.isArray(metadata)) {
             return {};
         }
-        
+
         return metadata;
     }
-    
+
     createSectionElement(type, content, metadata) {
         const section = document.createElement('div');
         section.className = 'section';
         section.dataset.type = type;
-        
+
         const normalizedType = this.normalizeFrontendType(type, metadata);
         const finalMetadata = this.ensureMetadataForType(normalizedType, metadata);
-        
+
         section.dataset.metadata = JSON.stringify(finalMetadata);
-        
+
         let innerHTML = '';
-        
+
         switch (normalizedType) {
             case 'title':
                 const level = finalMetadata.level || 1;
                 const centered = finalMetadata.centered !== false;
                 innerHTML = `<h${level} class="section-title ${centered ? 'text-center' : ''}" contenteditable="true" data-placeholder="제목을 입력하세요">${content || ''}</h${level}>`;
                 break;
-                
+
             case 'clause':
                 this.clauseCounter++;
                 const number = finalMetadata.number !== false;
                 const indent = finalMetadata.indent !== false;
                 innerHTML = `<div class="clause-section ${indent ? 'indented' : ''}" contenteditable="true" data-placeholder="조항 내용을 입력하세요">${number ? `${this.clauseCounter}. ` : ''}${content || ''}</div>`;
                 break;
-                
+
             case 'dotted':
                 const height = finalMetadata.height || 60;
                 innerHTML = `<div class="dotted-box" style="height: ${height}px;" contenteditable="true" data-placeholder="서명란 내용을 입력하세요">${content || ''}</div>`;
                 break;
-                
+
             case 'footer':
                 const position = finalMetadata.position || 'center';
                 innerHTML = `<div class="footer-section text-${position}" contenteditable="true" data-placeholder="푸터 내용을 입력하세요">${content || ''}</div>`;
                 break;
-                
+
             case 'signature':
                 innerHTML = `<div class="signature-section"><div class="signature-placeholder">[서명]</div></div>`;
                 break;
-                
+
             case 'html':
                 innerHTML = `<div class="html-section"><textarea class="html-editor" placeholder="HTML 코드를 입력하세요">${content || ''}</textarea><div class="html-preview">${content || ''}</div></div>`;
                 break;
-                
+
             case 'text':
             default:
                 innerHTML = `<div class="text-section" contenteditable="true" data-placeholder="내용을 입력하세요">${content || ''}</div>`;
                 break;
         }
-        
+
         section.innerHTML = innerHTML;
-        
+
         section.addEventListener('click', (e) => {
             this.activeElement = section;
             this.updateToolbar();
         });
-        
+
         section.addEventListener('input', () => {
             this.updateSectionsData();
         });
-        
+
         return section;
     }
-    
+
     createPlaceholder() {
         const placeholder = document.createElement('div');
         placeholder.className = 'section-placeholder';
         placeholder.innerHTML = '<div class="placeholder-text">+ 여기에 섹션을 추가하세요</div>';
-        
+
         placeholder.addEventListener('click', () => {
             this.showSectionModal();
         });
-        
+
         return placeholder;
     }
-    
+
     renderSections() {
         const documentBody = document.getElementById('documentBody');
         if (!documentBody) {
             return;
         }
-        
+
         documentBody.innerHTML = '';
-        
+
         this.sections.forEach((sectionData, index) => {
             const metadata = this.coerceMetadata(sectionData.metadata);
             const section = this.createSectionElement(sectionData.type, sectionData.content, metadata);
             section.dataset.id = sectionData.sectionId || ('section-' + Date.now() + '-' + Math.random());
             documentBody.appendChild(section);
         });
-        
+
         documentBody.appendChild(this.createPlaceholder());
         this.updateSectionsData();
     }
-    
+
     updateSectionsData() {
         const documentBody = document.getElementById('documentBody');
         if (!documentBody) {
             return;
         }
-        
+
         const sectionElements = documentBody.querySelectorAll('.section:not(.section-placeholder)');
         this.sections = [];
-        
+
         sectionElements.forEach(element => {
             const type = element.dataset.type;
             const metadata = this.coerceMetadata(element.dataset.metadata);
             let content = '';
-            
+
             const editableElement = element.querySelector('[contenteditable="true"], .html-editor');
             if (editableElement) {
                 if (editableElement.classList.contains('html-editor')) {
@@ -331,7 +331,7 @@ class TemplateForm {
                     content = editableElement.innerHTML;
                 }
             }
-            
+
             this.sections.push({
                 type: type,
                 content: content,
@@ -339,13 +339,13 @@ class TemplateForm {
                 sectionId: element.dataset.id || ('section-' + Date.now() + '-' + Math.random())
             });
         });
-        
+
         const sectionsJsonInput = document.getElementById('sectionsJson');
         if (sectionsJsonInput) {
             sectionsJsonInput.value = JSON.stringify(this.sections);
         }
     }
-    
+
     insertVariable(variable) {
         if (this.activeElement) {
             const editableElement = this.activeElement.querySelector('[contenteditable="true"]');
@@ -362,7 +362,7 @@ class TemplateForm {
             }
         }
     }
-    
+
     showSectionModal() {
         const modal = document.getElementById('sectionModal');
         if (modal) {
@@ -370,7 +370,7 @@ class TemplateForm {
             bsModal.show();
         }
     }
-    
+
     showVariableModal() {
         const modal = document.getElementById('variableModal');
         if (modal) {
@@ -378,29 +378,29 @@ class TemplateForm {
             bsModal.show();
         }
     }
-    
+
     addSection(type) {
         const section = this.createSectionElement(type, '', {});
         const placeholder = document.querySelector('.section-placeholder');
         if (placeholder) {
             placeholder.parentNode.insertBefore(section, placeholder);
         }
-        
+
         this.activeElement = section;
         this.updateSectionsData();
         this.updateToolbar();
-        
+
         const modal = document.getElementById('sectionModal');
         if (modal) {
             bootstrap.Modal.getInstance(modal).hide();
         }
-        
+
         const editableElement = section.querySelector('[contenteditable="true"]');
         if (editableElement) {
             editableElement.focus();
         }
     }
-    
+
     deleteSection() {
         if (this.activeElement && !this.activeElement.classList.contains('section-placeholder')) {
             this.activeElement.remove();
@@ -409,32 +409,32 @@ class TemplateForm {
             this.updateToolbar();
         }
     }
-    
+
     duplicateSection() {
         if (this.activeElement && !this.activeElement.classList.contains('section-placeholder')) {
             const clone = this.activeElement.cloneNode(true);
             clone.dataset.id = 'section-' + Date.now() + '-' + Math.random();
-            
+
             clone.addEventListener('click', (e) => {
                 this.activeElement = clone;
                 this.updateToolbar();
             });
-            
+
             clone.addEventListener('input', () => {
                 this.updateSectionsData();
             });
-            
+
             this.activeElement.parentNode.insertBefore(clone, this.activeElement.nextSibling);
             this.activeElement = clone;
             this.updateSectionsData();
             this.updateToolbar();
         }
     }
-    
+
     updateToolbar() {
         const deleteBtn = document.getElementById('deleteSectionBtn');
         const duplicateBtn = document.getElementById('duplicateSectionBtn');
-        
+
         if (this.activeElement && !this.activeElement.classList.contains('section-placeholder')) {
             if (deleteBtn) deleteBtn.disabled = false;
             if (duplicateBtn) duplicateBtn.disabled = false;
@@ -443,10 +443,10 @@ class TemplateForm {
             if (duplicateBtn) duplicateBtn.disabled = true;
         }
     }
-    
+
     saveTemplate() {
         this.updateSectionsData();
-        
+
         const form = document.getElementById('templateForm');
         if (form && form.checkValidity()) {
             form.submit();
@@ -454,35 +454,35 @@ class TemplateForm {
             form.reportValidity();
         }
     }
-    
+
     previewTemplate() {
         this.updateSectionsData();
-        
+
         const form = document.getElementById('templateForm');
         const formData = new FormData(form);
-        
+
         fetch('/templates/preview', {
             method: 'POST',
             body: formData
         })
-        .then(response => response.text())
-        .then(html => {
-            const previewWindow = window.open('', '_blank');
-            previewWindow.document.write(html);
-            previewWindow.document.close();
-        })
-        .catch(error => {
-            console.error('Preview failed:', error);
-            if (window.showAlertModal) {
-                showAlertModal('미리보기 생성 중 오류가 발생했습니다.');
-            }
-        });
+            .then(response => response.text())
+            .then(html => {
+                const previewWindow = window.open('', '_blank');
+                previewWindow.document.write(html);
+                previewWindow.document.close();
+            })
+            .catch(error => {
+                console.error('Preview failed:', error);
+                if (window.showAlertModal) {
+                    showAlertModal('미리보기 생성 중 오류가 발생했습니다.');
+                }
+            });
     }
-    
+
     loadPresets() {
         const presetLoading = document.getElementById('presetLoading');
         const presetGrid = document.getElementById('presetGrid');
-        
+
         fetch('/templates/presets')
             .then(response => response.json())
             .then(presets => {
@@ -490,7 +490,7 @@ class TemplateForm {
                 if (presetGrid) {
                     presetGrid.style.display = 'grid';
                     presetGrid.innerHTML = '';
-                    
+
                     presets.forEach(preset => {
                         const card = this.createPresetCard(preset);
                         presetGrid.appendChild(card);
@@ -504,7 +504,7 @@ class TemplateForm {
                 }
             });
     }
-    
+
     createPresetCard(preset) {
         const card = document.createElement('div');
         card.className = 'preset-card';
@@ -519,7 +519,7 @@ class TemplateForm {
         `;
         return card;
     }
-    
+
     loadPreset(presetId, presetName) {
         fetch(`/templates/presets/${presetId}`)
             .then(response => response.json())
@@ -533,54 +533,54 @@ class TemplateForm {
                 }
             });
     }
-    
+
     loadPresetSections(presetSections, presetName) {
         this.clauseCounter = 0;
-        
+
         const documentBody = document.getElementById('documentBody');
         if (documentBody) {
             documentBody.innerHTML = '';
         }
-        
+
         const templateTitle = document.getElementById('templateTitle');
         if (templateTitle) {
             templateTitle.value = presetName;
         }
-        
+
         presetSections.forEach((sectionData) => {
             const metadata = this.coerceMetadata(sectionData.metadata);
-            
+
             let content = sectionData.content;
             if (sectionData.type !== 'html' && sectionData.type !== 'signature') {
                 content = this.convertBracketsToVariables(content);
             }
-            
+
             const section = this.createSectionElement(sectionData.type, content, metadata);
             section.dataset.id = sectionData.sectionId || ('section-' + Date.now() + '-' + Math.random());
-            
+
             if (documentBody) {
                 documentBody.appendChild(section);
             }
         });
-        
+
         if (documentBody) {
             documentBody.appendChild(this.createPlaceholder());
         }
-        
+
         this.updateSectionsData();
-        
+
         if (window.showAlertModal) {
             showAlertModal('프리셋 템플릿이 성공적으로 로드되었습니다. 필요에 맞게 수정하여 사용하세요.');
         }
-        
+
         this.collapsePresetSection();
     }
-    
+
     convertBracketsToVariables(content) {
         if (!content) {
             return content;
         }
-        
+
         return content
             .replace(/\[EMPLOYER\]/g, '{EMPLOYER}')
             .replace(/\[COMPANY_NAME\]/g, '{COMPANY_NAME}')
@@ -593,11 +593,11 @@ class TemplateForm {
             .replace(/\[WORKPLACE\]/g, '{WORKPLACE}')
             .replace(/\[WORK_HOURS\]/g, '{WORK_HOURS}');
     }
-    
+
     togglePresetSection() {
         const content = document.getElementById('presetContent');
         const icon = document.getElementById('presetToggleIcon');
-        
+
         if (content && icon) {
             if (content.classList.contains('collapsed')) {
                 content.classList.remove('collapsed');
@@ -608,11 +608,11 @@ class TemplateForm {
             }
         }
     }
-    
+
     collapsePresetSection() {
         const content = document.getElementById('presetContent');
         const icon = document.getElementById('presetToggleIcon');
-        
+
         if (content && icon) {
             content.classList.add('collapsed');
             icon.className = 'bi bi-chevron-down';
@@ -621,55 +621,55 @@ class TemplateForm {
 }
 
 // Global functions for onclick handlers
-window.insertVariable = function(variable) {
+window.insertVariable = function (variable) {
     if (window.templateForm) {
         window.templateForm.insertVariable(variable);
     }
 };
 
-window.togglePresetSection = function() {
+window.togglePresetSection = function () {
     if (window.templateForm) {
         window.templateForm.togglePresetSection();
     }
 };
 
-window.addSection = function(type) {
+window.addSection = function (type) {
     if (window.templateForm) {
         window.templateForm.addSection(type);
     }
 };
 
-window.deleteSection = function() {
+window.deleteSection = function () {
     if (window.templateForm) {
         window.templateForm.deleteSection();
     }
 };
 
-window.duplicateSection = function() {
+window.duplicateSection = function () {
     if (window.templateForm) {
         window.templateForm.duplicateSection();
     }
 };
 
-window.saveTemplate = function() {
+window.saveTemplate = function () {
     if (window.templateForm) {
         window.templateForm.saveTemplate();
     }
 };
 
-window.previewTemplate = function() {
+window.previewTemplate = function () {
     if (window.templateForm) {
         window.templateForm.previewTemplate();
     }
 };
 
-window.showVariableModal = function() {
+window.showVariableModal = function () {
     if (window.templateForm) {
         window.templateForm.showVariableModal();
     }
 };
 
-window.showSectionModal = function() {
+window.showSectionModal = function () {
     if (window.templateForm) {
         window.templateForm.showSectionModal();
     }

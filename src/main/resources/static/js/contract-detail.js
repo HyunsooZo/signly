@@ -11,28 +11,28 @@ class ContractDetail {
         this.isHtmlPreset = false;
         this.csrfParam = '';
         this.csrfToken = '';
-        
+
         this.init();
     }
-    
+
     init() {
         this.loadData();
         this.determineContentType();
         this.renderContent();
     }
-    
+
     loadData() {
         const previewDataElement = document.getElementById('contractPreviewData');
         this.previewData = previewDataElement ? previewDataElement.dataset : {};
-        
+
         const contractContentTextarea = document.getElementById('contractContentHtml');
         this.contractRawContent = contractContentTextarea ? contractContentTextarea.value : '';
-        
+
         this.presetTypeValue = (this.previewData.presetType || '').toUpperCase();
         this.csrfParam = window.csrfParam || '';
         this.csrfToken = window.csrfToken || '';
     }
-    
+
     determineContentType() {
         // HTML 내용인지 자동 감지 (meta, div, style 태그 등이 있으면 HTML로 판단)
         const looksLikeHtml = this.contractRawContent && (
@@ -41,10 +41,10 @@ class ContractDetail {
             this.contractRawContent.includes('<style') ||
             this.contractRawContent.includes('<body')
         );
-        
+
         this.isHtmlPreset = (this.presetTypeValue && this.presetTypeValue !== 'NONE') || looksLikeHtml;
     }
-    
+
     renderContent() {
         if (this.isHtmlPreset) {
             this.renderHtmlContract(this.contractRawContent);
@@ -52,7 +52,7 @@ class ContractDetail {
             this.renderPlainTextContract(this.contractRawContent);
         }
     }
-    
+
     getPreviewDefaults() {
         return {
             firstPartyName: this.previewData.firstPartyName || '-',
@@ -64,7 +64,7 @@ class ContractDetail {
             contractTitle: this.previewData.contractTitle || '-'
         };
     }
-    
+
     renderPlainTextContract(content) {
         const container = document.getElementById('contractContentHtmlContainer');
         if (!container) {
@@ -77,29 +77,29 @@ class ContractDetail {
         container.style.color = 'black';
         container.style.padding = '2rem';
     }
-    
+
     scopeCssText(cssText, scopeSelector) {
         if (!cssText || !cssText.trim()) {
             return '';
         }
-        
+
         let tempStyle;
         try {
             tempStyle = document.createElement('style');
             tempStyle.textContent = cssText;
             document.head.appendChild(tempStyle);
-            
+
             const sheet = tempStyle.sheet;
             if (!sheet || !sheet.cssRules) {
                 return this.naiveScopeCss(cssText, scopeSelector);
             }
-            
+
             const processRules = (rules) => {
                 const output = [];
                 Array.from(rules).forEach(rule => {
                     const ruleType = rule.type;
                     const CSSRuleRef = window.CSSRule || {};
-                    
+
                     if (CSSRuleRef.STYLE_RULE !== undefined && ruleType === CSSRuleRef.STYLE_RULE) {
                         const scopedSelectors = rule.selectorText
                             .split(',')
@@ -122,7 +122,7 @@ class ContractDetail {
                 });
                 return output;
             };
-            
+
             const scopedRules = processRules(sheet.cssRules);
             return scopedRules.join('\n');
         } catch (error) {
@@ -134,12 +134,12 @@ class ContractDetail {
             }
         }
     }
-    
+
     naiveScopeCss(cssText, scopeSelector) {
         if (!cssText || !cssText.trim()) {
             return '';
         }
-        
+
         return cssText.replace(/([^{}]+)\s*\{/g, (match, selector) => {
             selector = selector.trim();
             if (selector.startsWith('@') || selector.includes(':root')) {
@@ -148,16 +148,16 @@ class ContractDetail {
             return scopeSelector + ' ' + selector + ' {';
         });
     }
-    
+
     renderHtmlContract(htmlContent) {
         const container = document.getElementById('contractContentHtmlContainer');
         if (!container) {
             return;
         }
-        
+
         const tempWrapper = document.createElement('div');
         tempWrapper.innerHTML = htmlContent;
-        
+
         const styles = [];
         const styleElements = tempWrapper.querySelectorAll('style');
         styleElements.forEach(styleEl => {
@@ -166,14 +166,14 @@ class ContractDetail {
             }
             styleEl.parentNode.removeChild(styleEl);
         });
-        
+
         const scopedStyle = document.createElement('style');
         scopedStyle.textContent = styles.join('\n');
         container.appendChild(scopedStyle);
-        
+
         const bodyContent = tempWrapper.querySelector('body') || tempWrapper;
         container.innerHTML += bodyContent.innerHTML;
-        
+
         const defaults = this.getPreviewDefaults();
         const placeholders = {
             'CONTRACT_TITLE': defaults.contractTitle,
@@ -184,16 +184,16 @@ class ContractDetail {
             'SECOND_PARTY_EMAIL': defaults.secondPartyEmail,
             'SECOND_PARTY_ORG': defaults.secondPartyOrg
         };
-        
+
         let finalHtml = container.innerHTML;
         Object.entries(placeholders).forEach(([key, value]) => {
             const regex = new RegExp(`\\{${key}\\}`, 'g');
             finalHtml = finalHtml.replace(regex, value);
         });
-        
+
         container.innerHTML = finalHtml;
     }
-    
+
     appendCsrfField(form) {
         if (this.csrfParam && this.csrfToken) {
             const csrfField = document.createElement('input');
@@ -203,7 +203,7 @@ class ContractDetail {
             form.appendChild(csrfField);
         }
     }
-    
+
     downloadPdf() {
         const form = document.createElement('form');
         form.method = 'post';
@@ -212,7 +212,7 @@ class ContractDetail {
         document.body.appendChild(form);
         form.submit();
     }
-    
+
     resendEmail() {
         if (window.showConfirmModal) {
             window.showConfirmModal(
@@ -231,7 +231,7 @@ class ContractDetail {
             );
         }
     }
-    
+
     cancelContract() {
         if (window.showConfirmModal) {
             window.showConfirmModal(
@@ -250,7 +250,7 @@ class ContractDetail {
             );
         }
     }
-    
+
     completeContract() {
         if (window.showConfirmModal) {
             window.showConfirmModal(
@@ -269,58 +269,58 @@ class ContractDetail {
             );
         }
     }
-    
+
     deleteContract() {
         const deleteModal = document.getElementById('deleteModal');
         if (deleteModal) {
             new bootstrap.Modal(deleteModal).show();
         }
     }
-    
+
     getContractId() {
         // Try to get contract ID from the page data or URL
         const metaTag = document.querySelector('meta[name="contract-id"]');
         if (metaTag) {
             return metaTag.content;
         }
-        
+
         // Fallback: try to extract from URL path
         const pathParts = window.location.pathname.split('/');
         const contractIndex = pathParts.indexOf('contracts');
         if (contractIndex !== -1 && pathParts[contractIndex + 1]) {
             return pathParts[contractIndex + 1];
         }
-        
+
         return '';
     }
 }
 
 // Global functions for onclick handlers
-window.downloadPdf = function() {
+window.downloadPdf = function () {
     if (window.contractDetail) {
         window.contractDetail.downloadPdf();
     }
 };
 
-window.resendEmail = function() {
+window.resendEmail = function () {
     if (window.contractDetail) {
         window.contractDetail.resendEmail();
     }
 };
 
-window.cancelContract = function() {
+window.cancelContract = function () {
     if (window.contractDetail) {
         window.contractDetail.cancelContract();
     }
 };
 
-window.completeContract = function() {
+window.completeContract = function () {
     if (window.contractDetail) {
         window.contractDetail.completeContract();
     }
 };
 
-window.deleteContract = function() {
+window.deleteContract = function () {
     if (window.contractDetail) {
         window.contractDetail.deleteContract();
     }
@@ -331,6 +331,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set CSRF data from JSP
     window.csrfParam = '<c:out value="${_csrf.parameterName}"/>';
     window.csrfToken = '<c:out value="${_csrf.token}"/>';
-    
+
     window.contractDetail = new ContractDetail();
 });

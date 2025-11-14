@@ -1,12 +1,12 @@
 package com.signly.core.auth;
 
-import com.signly.core.auth.dto.LoginRequest;
-import com.signly.core.auth.dto.LoginResponse;
-import com.signly.core.auth.dto.RefreshTokenRequest;
 import com.signly.common.exception.UnauthorizedException;
 import com.signly.common.security.JwtTokenProvider;
 import com.signly.common.security.SecurityUser;
 import com.signly.common.security.TokenRedisService;
+import com.signly.core.auth.dto.LoginRequest;
+import com.signly.core.auth.dto.LoginResponse;
+import com.signly.core.auth.dto.RefreshTokenRequest;
 import com.signly.user.domain.model.Email;
 import com.signly.user.domain.model.Password;
 import com.signly.user.domain.model.User;
@@ -14,7 +14,6 @@ import com.signly.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

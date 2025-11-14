@@ -2,7 +2,6 @@ package com.signly.signature.infrastructure.persistence.repository;
 
 import com.signly.signature.domain.model.FirstPartySignature;
 import com.signly.signature.domain.repository.FirstPartySignatureRepository;
-import com.signly.signature.infrastructure.persistence.entity.FirstPartySignatureEntity;
 import com.signly.signature.infrastructure.persistence.mapper.FirstPartySignatureEntityMapper;
 import com.signly.user.domain.model.UserId;
 import lombok.RequiredArgsConstructor;

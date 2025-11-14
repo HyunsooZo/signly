@@ -2,10 +2,6 @@ package com.signly.contract.domain.model;
 
 import com.signly.common.exception.ValidationException;
 import com.signly.common.util.UlidGenerator;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-import java.util.Objects;
 
 public record ContractId(String value) {
 
@@ -15,6 +11,7 @@ public record ContractId(String value) {
         }
         return new ContractId(value);
     }
+
     public static ContractId generate() {
         return new ContractId(UlidGenerator.generate());
     }

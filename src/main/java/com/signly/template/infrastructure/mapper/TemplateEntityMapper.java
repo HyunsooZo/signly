@@ -1,8 +1,10 @@
 package com.signly.template.infrastructure.mapper;
 
-import com.signly.template.domain.model.*;
-import com.signly.user.domain.model.UserId;
+import com.signly.template.domain.model.ContractTemplate;
+import com.signly.template.domain.model.TemplateContent;
+import com.signly.template.domain.model.TemplateId;
 import com.signly.template.infrastructure.entity.TemplateEntity;
+import com.signly.user.domain.model.UserId;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,7 +43,10 @@ public class TemplateEntityMapper {
         );
     }
 
-    public void updateEntity(TemplateEntity entity, ContractTemplate template) {
+    public void updateEntity(
+            TemplateEntity entity,
+            ContractTemplate template
+    ) {
         entity.setTitle(template.getTitle());
         entity.setContent(template.getContent().jsonContent());
         entity.setVersion(template.getVersion());

@@ -1,11 +1,12 @@
 package com.signly.common.config;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -14,10 +15,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 
 @Slf4j
 @Configuration
@@ -46,7 +43,10 @@ public class RateLimitConfig {
     }
 
     @Bean
-    public RateLimitService rateLimitService(RateLimiterRegistry rateLimiterRegistry, RateLimitProperties properties) {
+    public RateLimitService rateLimitService(
+            RateLimiterRegistry rateLimiterRegistry,
+            RateLimitProperties properties
+    ) {
         return new RateLimitService(rateLimiterRegistry, properties);
     }
 
@@ -158,12 +158,12 @@ public class RateLimitConfig {
         public String getClientIp(HttpServletRequest request) {
             // 신뢰할 수 있는 프록시 목록 (Nginx, CloudFlare, AWS ALB 등)
             String remoteAddr = request.getRemoteAddr();
-            
+
             // 프록시를 통하지 않은 직접 연결인 경우
             if (!isTrustedProxy(remoteAddr)) {
                 return remoteAddr;
             }
-            
+
             // 신뢰할 수 있는 프록시를 통한 경우에만 X-Forwarded-For 사용
             String xfHeader = request.getHeader("X-Forwarded-For");
             if (xfHeader != null && !xfHeader.isEmpty()) {
@@ -174,19 +174,19 @@ public class RateLimitConfig {
                     return clientIp;
                 }
             }
-            
+
             return remoteAddr;
         }
-        
+
         private boolean isTrustedProxy(String ip) {
             // 로컬 환경 또는 신뢰할 수 있는 프록시 IP 대역
-            return ip.equals("127.0.0.1") || 
-                   ip.equals("::1") ||
-                   ip.startsWith("10.") ||      // Private network
-                   ip.startsWith("172.16.") ||  // Private network
-                   ip.startsWith("192.168.");   // Private network
+            return ip.equals("127.0.0.1") ||
+                    ip.equals("::1") ||
+                    ip.startsWith("10.") ||      // Private network
+                    ip.startsWith("172.16.") ||  // Private network
+                    ip.startsWith("192.168.");   // Private network
         }
-        
+
         private boolean isValidIp(String ip) {
             // IPv4 형식 검증 (간단한 정규식)
             return ip.matches("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$");

@@ -23,7 +23,7 @@ public class Contract extends AggregateRoot {
     private final List<Signature> signatures;
     private SignToken signToken;
     private LocalDateTime expiresAt;
-    private PresetType presetType;
+    private final PresetType presetType;
     private String pdfPath;  // 완료된 계약서 PDF 파일 경로
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

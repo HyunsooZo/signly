@@ -16,13 +16,23 @@ public interface TemplateRepository {
 
     Optional<ContractTemplate> findById(TemplateId templateId);
 
-    Page<ContractTemplate> findByOwnerId(UserId ownerId, Pageable pageable);
+    Page<ContractTemplate> findByOwnerId(
+            UserId ownerId,
+            Pageable pageable
+    );
 
-    Page<ContractTemplate> findByOwnerIdAndStatus(UserId ownerId, TemplateStatus status, Pageable pageable);
+    Page<ContractTemplate> findByOwnerIdAndStatus(
+            UserId ownerId,
+            TemplateStatus status,
+            Pageable pageable
+    );
 
     List<ContractTemplate> findActiveTemplatesByOwnerId(UserId ownerId);
 
-    boolean existsByOwnerIdAndTitle(UserId ownerId, String title);
+    boolean existsByOwnerIdAndTitle(
+            UserId ownerId,
+            String title
+    );
 
     void delete(ContractTemplate template);
 

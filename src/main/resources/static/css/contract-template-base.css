@@ -227,11 +227,11 @@ li {
         margin: 0;
         padding: 15mm;
     }
-    
+
     .signature-section {
         page-break-inside: avoid;
     }
-    
+
     .page-break {
         page-break-before: always;
     }

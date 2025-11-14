@@ -26,7 +26,10 @@ public class LocalFileStorageService implements FileStorageService {
     }
 
     @Override
-    public String storeFile(byte[] fileData, FileMetadata metadata) {
+    public String storeFile(
+            byte[] fileData,
+            FileMetadata metadata
+    ) {
         try {
             String datePath = LocalDate.now().toString();
             String fileName = generateFileName(metadata.fileName());
@@ -102,6 +105,6 @@ public class LocalFileStorageService implements FileStorageService {
         if (lastDotIndex > 0) {
             extension = originalFileName.substring(lastDotIndex);
         }
-        return UUID.randomUUID().toString() + extension;
+        return UUID.randomUUID() + extension;
     }
 }

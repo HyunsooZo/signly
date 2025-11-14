@@ -11,13 +11,24 @@ import java.util.Optional;
 
 public interface DocumentRepository {
     Document save(Document document);
+
     Optional<Document> findById(DocumentId documentId);
+
     void delete(Document document);
 
     List<Document> findByContractId(ContractId contractId);
-    List<Document> findByContractIdAndType(ContractId contractId, DocumentType type);
+
+    List<Document> findByContractIdAndType(
+            ContractId contractId,
+            DocumentType type
+    );
+
     List<Document> findByUploadedBy(UserId userId);
 
-    boolean existsByContractIdAndType(ContractId contractId, DocumentType type);
+    boolean existsByContractIdAndType(
+            ContractId contractId,
+            DocumentType type
+    );
+
     long countByContractId(ContractId contractId);
 }

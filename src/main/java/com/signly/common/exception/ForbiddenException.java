@@ -6,7 +6,10 @@ public class ForbiddenException extends BusinessException {
         super("FORBIDDEN", message);
     }
 
-    public ForbiddenException(String message, Throwable cause) {
+    public ForbiddenException(
+            String message,
+            Throwable cause
+    ) {
         super("FORBIDDEN", message, cause);
     }
 }

@@ -13,9 +13,15 @@ public interface SignatureRepository {
 
     List<Signature> findByContractId(ContractId contractId);
 
-    Optional<Signature> findByContractIdAndSignerEmail(ContractId contractId, String signerEmail);
+    Optional<Signature> findByContractIdAndSignerEmail(
+            ContractId contractId,
+            String signerEmail
+    );
 
-    boolean existsByContractIdAndSignerEmail(ContractId contractId, String signerEmail);
+    boolean existsByContractIdAndSignerEmail(
+            ContractId contractId,
+            String signerEmail
+    );
 
     void delete(String signatureId);
 }

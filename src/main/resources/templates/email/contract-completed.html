@@ -7,37 +7,37 @@
     <th:block th:replace="~{fragments/email-style.html :: emailStyles}"></th:block>
 </head>
 <body class="email-body">
-    <div class="email-wrapper">
-        <div class="email-card">
-            <div class="email-header email-header--success">
-                <div class="email-logo email-logo--success" th:text="${companyName}">Signly</div>
+<div class="email-wrapper">
+    <div class="email-card">
+        <div class="email-header email-header--success">
+            <div class="email-logo email-logo--success" th:text="${companyName}">Signly</div>
+        </div>
+
+        <div class="email-content">
+            <div class="email-success-icon">✅</div>
+
+            <h2 class="email-title email-title--success email-center">계약서가 완료되었습니다</h2>
+
+            <p><strong th:text="${firstPartyName}">갑</strong>님과 <strong th:text="${secondPartyName}">을</strong>님이 체결한
+                <strong th:text="${contractTitle}">계약서</strong>가 완료되었습니다.</p>
+
+            <div class="email-highlight email-highlight--success">
+                <p class="email-meta"><strong>완료 일시:</strong> <span th:text="${completedAt}">-</span></p>
             </div>
 
-            <div class="email-content">
-                <div class="email-success-icon">✅</div>
-
-                <h2 class="email-title email-title--success email-center">계약서가 완료되었습니다</h2>
-
-                <p><strong th:text="${firstPartyName}">갑</strong>님과 <strong th:text="${secondPartyName}">을</strong>님이 체결한
-                    <strong th:text="${contractTitle}">계약서</strong>가 완료되었습니다.</p>
-
-                <div class="email-highlight email-highlight--success">
-                    <p class="email-meta"><strong>완료 일시:</strong> <span th:text="${completedAt}">-</span></p>
-                </div>
-
-                <div th:if="${firstPartySignatureImage}" class="email-center">
-                    <p><strong>갑 서명:</strong></p>
-                    <img th:src="${firstPartySignatureImage}" alt="갑 서명" class="email-signature-image"/>
-                </div>
-
-                <p>감사합니다.</p>
+            <div th:if="${firstPartySignatureImage}" class="email-center">
+                <p><strong>갑 서명:</strong></p>
+                <img th:src="${firstPartySignatureImage}" alt="갑 서명" class="email-signature-image"/>
             </div>
 
-            <div class="email-footer">
-                <p>이 이메일은 <span th:text="${companyName}">Signly</span> 전자계약 시스템에서 자동으로 발송되었습니다.</p>
-                <p>본 이메일에 회신하지 마세요.</p>
-            </div>
+            <p>감사합니다.</p>
+        </div>
+
+        <div class="email-footer">
+            <p>이 이메일은 <span th:text="${companyName}">Signly</span> 전자계약 시스템에서 자동으로 발송되었습니다.</p>
+            <p>본 이메일에 회신하지 마세요.</p>
         </div>
     </div>
+</div>
 </body>
 </html>

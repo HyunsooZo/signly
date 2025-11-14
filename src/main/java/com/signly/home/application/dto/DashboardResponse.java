@@ -10,9 +10,9 @@ import java.util.Map;
  * 대시보드 데이터 응답 DTO
  */
 public record DashboardResponse(
-    List<TemplateResponse> recentTemplates,
-    List<ContractResponse> recentContracts,
-    Map<String, Long> templateStats,
-    Map<String, Long> contractStats
+        List<TemplateResponse> recentTemplates,
+        List<ContractResponse> recentContracts,
+        Map<String, Long> templateStats,
+        Map<String, Long> contractStats
 ) {
 }

@@ -1,16 +1,16 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
-    <jsp:param name="additionalCss" value="/css/template-builder.css" />
-    <jsp:param name="additionalCss2" value="/css/modal.css" />
+    <jsp:param name="additionalCss" value="/css/template-builder.css"/>
+    <jsp:param name="additionalCss2" value="/css/modal.css"/>
 </jsp:include>
 <body>
-    <jsp:include page="../common/navbar.jsp">
-        <jsp:param name="currentPage" value="templates" />
-    </jsp:include>
+<jsp:include page="../common/navbar.jsp">
+    <jsp:param name="currentPage" value="templates"/>
+</jsp:include>
 
 <div class="container mt-4">
     <!-- 프리셋 템플릿 선택 영역 -->
@@ -183,10 +183,11 @@
 </div>
 
 <!-- Hidden form for submission -->
-<c:set var="formAction" value="${not empty templateId && templateId ne 'new' ? '/templates/'.concat(templateId) : '/templates'}" />
+<c:set var="formAction"
+       value="${not empty templateId && templateId ne 'new' ? '/templates/'.concat(templateId) : '/templates'}"/>
 <form id="templateForm" method="post" action="${formAction}" class="template-form-hidden">
     <c:if test="${not empty _csrf}">
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     </c:if>
     <input type="hidden" name="title" id="formTitle">
     <input type="hidden" name="sectionsJson" id="sectionsJson">
@@ -210,13 +211,13 @@
     </div>
 </div>
 
-    <!-- External JavaScript -->
-    <script src="/js/template-form.js"></script>
+<!-- External JavaScript -->
+<script src="/js/template-form.js"></script>
 
-<c:set var="sectionsJsonRaw" value="${empty template.sectionsJson ? '[]' : template.sectionsJson}" />
-<c:set var="sectionsJsonSafe" value="${fn:replace(sectionsJsonRaw, '</script>', '<&#92;/script>')}" />
-<script id="initialSections" type="application/json"><c:out value="${sectionsJsonSafe}" escapeXml="false" /></script>
+<c:set var="sectionsJsonRaw" value="${empty template.sectionsJson ? '[]' : template.sectionsJson}"/>
+<c:set var="sectionsJsonSafe" value="${fn:replace(sectionsJsonRaw, '</script>', '<&#92;/script>')}"/>
+<script id="initialSections" type="application/json"><c:out value="${sectionsJsonSafe}" escapeXml="false"/></script>
 
-<jsp:include page="../common/footer.jsp" />
+<jsp:include page="../common/footer.jsp"/>
 </body>
 </html>

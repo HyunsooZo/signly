@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 /**
  * 템플릿 콘텐츠 렌더링 서비스
  * SRP: 템플릿 콘텐츠를 다양한 형식으로 렌더링 담당
- *
+ * <p>
  * Refactored to use unified utilities and eliminate duplicate code.
  */
 @Service

@@ -3,7 +3,7 @@
  * 사용자 정보, 서명 데이터 등을 안전하게 저장/조회
  */
 
-window.SignlyStorage = (function() {
+window.SignlyStorage = (function () {
     'use strict';
 
     const STORAGE_KEYS = {
@@ -127,13 +127,13 @@ window.SignlyStorage = (function() {
             if (!parsed || typeof parsed !== 'object') {
                 return null;
             }
-            
+
             // 만료 시간 체크
             if (maxAge && parsed.timestamp && (Date.now() - parsed.timestamp > maxAge)) {
                 localStorage.removeItem(key);
                 return null;
             }
-            
+
             return parsed.data;
         } catch (error) {
             console.warn('[WARN] 폼 데이터 읽기 실패:', error);
@@ -220,7 +220,7 @@ window.SignlyStorage = (function() {
         try {
             let totalSize = 0;
             const keys = Object.keys(localStorage);
-            
+
             keys.forEach(key => {
                 const value = localStorage.getItem(key);
                 if (value) {

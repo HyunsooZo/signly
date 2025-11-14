@@ -17,7 +17,10 @@ public class SignatureRepositoryImpl implements SignatureRepository {
     private final SignatureJpaRepository jpaRepository;
     private final SignatureEntityMapper mapper;
 
-    public SignatureRepositoryImpl(SignatureJpaRepository jpaRepository, SignatureEntityMapper mapper) {
+    public SignatureRepositoryImpl(
+            SignatureJpaRepository jpaRepository,
+            SignatureEntityMapper mapper
+    ) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
     }
@@ -43,13 +46,19 @@ public class SignatureRepositoryImpl implements SignatureRepository {
     }
 
     @Override
-    public Optional<Signature> findByContractIdAndSignerEmail(ContractId contractId, String signerEmail) {
+    public Optional<Signature> findByContractIdAndSignerEmail(
+            ContractId contractId,
+            String signerEmail
+    ) {
         return jpaRepository.findByContractIdAndSignerEmail(contractId.value(), signerEmail)
                 .map(mapper::toDomain);
     }
 
     @Override
-    public boolean existsByContractIdAndSignerEmail(ContractId contractId, String signerEmail) {
+    public boolean existsByContractIdAndSignerEmail(
+            ContractId contractId,
+            String signerEmail
+    ) {
         return jpaRepository.existsByContractIdAndSignerEmail(contractId.value(), signerEmail);
     }
 

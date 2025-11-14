@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><c:out value="${pageTitle != null ? pageTitle : 'Signly'}" /></title>
+    <title><c:out value="${pageTitle != null ? pageTitle : 'Signly'}"/></title>
 
     <!-- CSS -->
     <link href="<c:url value='/css/common.css' />" rel="stylesheet">
@@ -24,76 +24,76 @@
 
     <!-- 파비콘 -->
     <link rel="icon" type="image/png" href="<c:url value='/images/favicon.png' />">
-    
+
     <!-- CSRF Protection -->
-    <meta name="_csrf" content="${_csrf.token}" />
-    <meta name="_csrf_header" content="${_csrf.headerName}" />
+    <meta name="_csrf" content="${_csrf.token}"/>
+    <meta name="_csrf_header" content="${_csrf.headerName}"/>
 </head>
 <body>
-    <!-- 헤더 -->
-    <jsp:include page="header.jsp" />
+<!-- 헤더 -->
+<jsp:include page="header.jsp"/>
 
-    <!-- 메인 컨테이너 -->
-    <div class="main-container">
-        <!-- 사이드바 (로그인한 사용자만) -->
-        <c:if test="${not empty sessionScope.user}">
-            <jsp:include page="sidebar.jsp" />
+<!-- 메인 컨테이너 -->
+<div class="main-container">
+    <!-- 사이드바 (로그인한 사용자만) -->
+    <c:if test="${not empty sessionScope.user}">
+        <jsp:include page="sidebar.jsp"/>
+    </c:if>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content <c:if test='${not empty sessionScope.user}'>with-sidebar</c:if>">
+        <!-- 알림 메시지 -->
+        <c:if test="${not empty sessionScope.successMessage}">
+            <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
+                <c:out value="${sessionScope.successMessage}"/>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <c:remove var="successMessage" scope="session"/>
         </c:if>
 
-        <!-- 메인 컨텐츠 -->
-        <main class="main-content <c:if test='${not empty sessionScope.user}'>with-sidebar</c:if>">
-            <!-- 알림 메시지 -->
-            <c:if test="${not empty sessionScope.successMessage}">
-                <div class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                    <c:out value="${sessionScope.successMessage}" />
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                <c:remove var="successMessage" scope="session" />
-            </c:if>
-
-            <c:if test="${not empty sessionScope.errorMessage}">
-                <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                    <c:out value="${sessionScope.errorMessage}" />
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                <c:remove var="errorMessage" scope="session" />
-            </c:if>
-
-            <c:if test="${not empty sessionScope.warningMessage}">
-                <div class="alert alert-warning alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                    <c:out value="${sessionScope.warningMessage}" />
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                <c:remove var="warningMessage" scope="session" />
-            </c:if>
-
-            <!-- 페이지 컨텐츠 -->
-            <div class="container">
-                <!-- 여기에 각 페이지의 내용이 들어갑니다 -->
-                <!-- 이 부분은 각 JSP 페이지에서 오버라이드됩니다 -->
+        <c:if test="${not empty sessionScope.errorMessage}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
+                <c:out value="${sessionScope.errorMessage}"/>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        </main>
-    </div>
+            <c:remove var="errorMessage" scope="session"/>
+        </c:if>
 
-    <!-- 푸터 -->
-    <jsp:include page="footer.jsp" />
+        <c:if test="${not empty sessionScope.warningMessage}">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert" data-auto-dismiss="true">
+                <c:out value="${sessionScope.warningMessage}"/>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <c:remove var="warningMessage" scope="session"/>
+        </c:if>
 
-    <!-- JavaScript -->
-    <script src="<c:url value='/js/common.js' />"></script>
-    <script src="<c:url value='/js/common/csrf.js' />"></script>
-    <script src="<c:url value='/js/auth.js' />"></script>
-    <script src="<c:url value='/js/alerts.js' />"></script>
-    <c:if test="${not empty additionalJs}">
-        <c:forEach items="${additionalJs}" var="js">
-            <script src="<c:url value='/js/${js}' />"></script>
-        </c:forEach>
-    </c:if>
+        <!-- 페이지 컨텐츠 -->
+        <div class="container">
+            <!-- 여기에 각 페이지의 내용이 들어갑니다 -->
+            <!-- 이 부분은 각 JSP 페이지에서 오버라이드됩니다 -->
+        </div>
+    </main>
+</div>
 
-    <!-- 페이지별 추가 스크립트 -->
-    <c:if test="${not empty pageScript}">
-        <script>
-            <c:out value="${pageScript}"/>
-        </script>
-    </c:if>
+<!-- 푸터 -->
+<jsp:include page="footer.jsp"/>
+
+<!-- JavaScript -->
+<script src="<c:url value='/js/common.js' />"></script>
+<script src="<c:url value='/js/common/csrf.js' />"></script>
+<script src="<c:url value='/js/auth.js' />"></script>
+<script src="<c:url value='/js/alerts.js' />"></script>
+<c:if test="${not empty additionalJs}">
+    <c:forEach items="${additionalJs}" var="js">
+        <script src="<c:url value='/js/${js}' />"></script>
+    </c:forEach>
+</c:if>
+
+<!-- 페이지별 추가 스크립트 -->
+<c:if test="${not empty pageScript}">
+    <script>
+        <c:out value="${pageScript}"/>
+    </script>
+</c:if>
 </body>
 </html>

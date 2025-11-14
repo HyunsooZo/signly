@@ -3,7 +3,6 @@ package com.signly.contract.infrastructure.entity;
 import com.signly.common.domain.BaseEntity;
 import com.signly.contract.domain.model.ContractStatus;
 import com.signly.contract.domain.model.PresetType;
-import com.signly.contract.infrastructure.entity.SignatureEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,16 +14,16 @@ import java.util.List;
 @Getter
 @Entity
 @Table(name = "contracts", indexes = {
-    @Index(name = "idx_contract_creator_id", columnList = "creator_id"),
-    @Index(name = "idx_contract_template_id", columnList = "template_id"),
-    @Index(name = "idx_contract_status", columnList = "status"),
-    @Index(name = "idx_contract_first_party_email", columnList = "first_party_email"),
-    @Index(name = "idx_contract_second_party_email", columnList = "second_party_email"),
-    @Index(name = "idx_contract_expires_at", columnList = "expires_at"),
-    @Index(name = "idx_contract_sign_token", columnList = "sign_token"),
-    @Index(name = "idx_contract_creator_status", columnList = "creator_id, status"),
-    @Index(name = "idx_contract_status_expires", columnList = "status, expires_at"),
-    @Index(name = "idx_contract_party_emails", columnList = "first_party_email, second_party_email")
+        @Index(name = "idx_contract_creator_id", columnList = "creator_id"),
+        @Index(name = "idx_contract_template_id", columnList = "template_id"),
+        @Index(name = "idx_contract_status", columnList = "status"),
+        @Index(name = "idx_contract_first_party_email", columnList = "first_party_email"),
+        @Index(name = "idx_contract_second_party_email", columnList = "second_party_email"),
+        @Index(name = "idx_contract_expires_at", columnList = "expires_at"),
+        @Index(name = "idx_contract_sign_token", columnList = "sign_token"),
+        @Index(name = "idx_contract_creator_status", columnList = "creator_id, status"),
+        @Index(name = "idx_contract_status_expires", columnList = "status, expires_at"),
+        @Index(name = "idx_contract_party_emails", columnList = "first_party_email, second_party_email")
 })
 public class ContractJpaEntity extends BaseEntity {
 
@@ -75,7 +74,7 @@ public class ContractJpaEntity extends BaseEntity {
     private ContractStatus status;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<SignatureEntity> signatures = new ArrayList<>();
+    private final List<SignatureEntity> signatures = new ArrayList<>();
 
     @Setter
     @Column(name = "sign_token", nullable = false, unique = true, length = 26)
@@ -96,22 +95,22 @@ public class ContractJpaEntity extends BaseEntity {
     protected ContractJpaEntity() {}
 
     public ContractJpaEntity(
-        String id,
-        String creatorId,
-        String templateId,
-        String title,
-        String content,
-        String templateData,
-        String firstPartyName,
-        String firstPartyEmail,
-        String firstPartyOrganization,
-        String secondPartyName,
-        String secondPartyEmail,
-        String secondPartyOrganization,
-        ContractStatus status,
-        String signToken,
-        LocalDateTime expiresAt,
-        PresetType presetType
+            String id,
+            String creatorId,
+            String templateId,
+            String title,
+            String content,
+            String templateData,
+            String firstPartyName,
+            String firstPartyEmail,
+            String firstPartyOrganization,
+            String secondPartyName,
+            String secondPartyEmail,
+            String secondPartyOrganization,
+            ContractStatus status,
+            String signToken,
+            LocalDateTime expiresAt,
+            PresetType presetType
     ) {
         this.id = id;
         this.creatorId = creatorId;

@@ -4,10 +4,10 @@ import com.signly.template.domain.model.ContractTemplate;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.template.domain.model.TemplateStatus;
 import com.signly.template.domain.repository.TemplateRepository;
-import com.signly.user.domain.model.UserId;
 import com.signly.template.infrastructure.entity.TemplateEntity;
 import com.signly.template.infrastructure.mapper.TemplateEntityMapper;
 import com.signly.template.infrastructure.repository.TemplateJpaRepository;
+import com.signly.user.domain.model.UserId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -22,7 +22,10 @@ public class TemplateRepositoryImpl implements TemplateRepository {
     private final TemplateJpaRepository templateJpaRepository;
     private final TemplateEntityMapper templateEntityMapper;
 
-    public TemplateRepositoryImpl(TemplateJpaRepository templateJpaRepository, TemplateEntityMapper templateEntityMapper) {
+    public TemplateRepositoryImpl(
+            TemplateJpaRepository templateJpaRepository,
+            TemplateEntityMapper templateEntityMapper
+    ) {
         this.templateJpaRepository = templateJpaRepository;
         this.templateEntityMapper = templateEntityMapper;
     }
@@ -50,13 +53,20 @@ public class TemplateRepositoryImpl implements TemplateRepository {
     }
 
     @Override
-    public Page<ContractTemplate> findByOwnerId(UserId ownerId, Pageable pageable) {
+    public Page<ContractTemplate> findByOwnerId(
+            UserId ownerId,
+            Pageable pageable
+    ) {
         Page<TemplateEntity> entities = templateJpaRepository.findByOwnerId(ownerId.value(), pageable);
         return entities.map(templateEntityMapper::toDomain);
     }
 
     @Override
-    public Page<ContractTemplate> findByOwnerIdAndStatus(UserId ownerId, TemplateStatus status, Pageable pageable) {
+    public Page<ContractTemplate> findByOwnerIdAndStatus(
+            UserId ownerId,
+            TemplateStatus status,
+            Pageable pageable
+    ) {
         Page<TemplateEntity> entities = templateJpaRepository.findByOwnerIdAndStatus(ownerId.value(), status, pageable);
         return entities.map(templateEntityMapper::toDomain);
     }
@@ -70,7 +80,10 @@ public class TemplateRepositoryImpl implements TemplateRepository {
     }
 
     @Override
-    public boolean existsByOwnerIdAndTitle(UserId ownerId, String title) {
+    public boolean existsByOwnerIdAndTitle(
+            UserId ownerId,
+            String title
+    ) {
         return templateJpaRepository.existsByOwnerIdAndTitle(ownerId.value(), title);
     }
 

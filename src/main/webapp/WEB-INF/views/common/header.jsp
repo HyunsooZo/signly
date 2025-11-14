@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+          rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
     <c:if test="${not empty param.additionalCss}">
         <link href="<c:out value='${param.additionalCss}'/>" rel="stylesheet">
@@ -25,7 +26,7 @@
     <c:if test="${not empty param.additionalCss5}">
         <link href="<c:out value='${param.additionalCss5}'/>" rel="stylesheet">
     </c:if>
-    
+
     <!-- NProgress 로딩 바 -->
     <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
     <link href="/css/page-loader.css" rel="stylesheet">

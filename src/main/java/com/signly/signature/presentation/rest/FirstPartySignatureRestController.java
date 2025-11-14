@@ -2,7 +2,6 @@ package com.signly.signature.presentation.rest;
 
 import com.signly.common.exception.ValidationException;
 import com.signly.signature.application.FirstPartySignatureService;
-import com.signly.signature.application.dto.FirstPartySignatureResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

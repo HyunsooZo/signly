@@ -3,14 +3,11 @@ package com.signly.notification.application;
 import com.signly.contract.application.ContractPdfService;
 import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.model.GeneratedPdf;
+import com.signly.document.application.DocumentService;
 import com.signly.notification.domain.model.EmailAttachment;
 import com.signly.notification.domain.model.EmailOutbox;
 import com.signly.notification.domain.model.EmailTemplate;
 import com.signly.notification.domain.repository.EmailOutboxRepository;
-import com.signly.signature.application.FirstPartySignatureService;
-
-import com.signly.contract.domain.repository.SignatureRepository;
-import com.signly.document.application.DocumentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
