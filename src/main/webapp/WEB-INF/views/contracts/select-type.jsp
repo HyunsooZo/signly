@@ -3,7 +3,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
-    <jsp:param name="additionalCss" value="/css/contracts.css" />
+    <jsp:param name="additionalCss" value="/css/contract-template-base.css" />
+    <jsp:param name="additionalCss2" value="/css/contract-template-preview.css" />
+    <jsp:param name="additionalCss3" value="/css/contracts.css" />
+    <jsp:param name="additionalCss4" value="/css/templates.css" />
 </jsp:include>
 <body>
     <jsp:include page="../common/navbar.jsp">
@@ -30,10 +33,11 @@
                          data-template-id="<c:out value='${preset.id}'/>"
                          data-template-type="preset">
                         <div class="template-card-body">
-                            <div class="template-preview" data-preset-id="<c:out value='${preset.id}'/>">
-                                <div class="template-preview-badge preset-badge">
-                                    <i class="bi bi-file-earmark-text"></i>
-                                    기본
+                            <!-- ✅ preset-document 클래스 추가 -->
+                            <div class="template-preview preset-document" data-preset-id="<c:out value='${preset.id}'/>">
+                                <!-- ✅ template-status-badge로 변경 (Templates와 통일) -->
+                                <div class="template-status-badge">
+                                    <span class="badge bg-primary">기본</span>
                                 </div>
                                 <p class="text-muted small">미리보기 로딩 중...</p>
                             </div>
@@ -86,15 +90,22 @@
                      const response = await fetch('/api/templates/preset/' + presetId);
                     if (response.ok) {
                         const data = await response.json();
+                        
+                        // ✅ 배지 HTML 생성 (Templates와 동일)
+                        const badgeHtml = '<div class="template-status-badge"><span class="badge bg-primary">기본</span></div>';
+                        
                         if (data.renderedHtml) {
-                            div.innerHTML = '<div class="template-preview-badge preset-badge"><i class="bi bi-file-earmark-text"></i> 기본</div>' + data.renderedHtml;
+                            // ✅ 배지 + 렌더링된 HTML
+                            div.innerHTML = badgeHtml + data.renderedHtml;
                         } else {
-                            div.innerHTML = '<div class="template-preview-badge preset-badge"><i class="bi bi-file-earmark-text"></i> 기본</div><p class="text-muted small">미리보기 없음</p>';
+                            // ✅ 배지 + 에러 메시지
+                            div.innerHTML = badgeHtml + '<p class="text-muted small">미리보기 없음</p>';
                         }
                     }
                 } catch (error) {
                     console.error('프리셋 미리보기 로드 실패:', error);
-                    div.innerHTML = '<div class="template-preview-badge preset-badge"><i class="bi bi-file-earmark-text"></i> 기본</div><p class="text-muted small">미리보기 로드 실패</p>';
+                    const badgeHtml = '<div class="template-status-badge"><span class="badge bg-primary">기본</span></div>';
+                    div.innerHTML = badgeHtml + '<p class="text-muted small">미리보기 로드 실패</p>';
                 }
             }
         }
@@ -129,16 +140,17 @@
             const col = document.createElement('div');
             col.className = 'col-md-6 col-lg-3';
             
-             col.innerHTML = `
+            col.innerHTML = `
                 <div class="template-card template-card-clickable" 
                      onclick="selectUserTemplate('` + template.templateId + `')"
                      data-template-id="` + template.templateId + `"
                      data-template-type="user">
                     <div class="template-card-body">
-                        <div class="template-preview">
-                            <div class="template-preview-badge user-badge">
-                                <i class="bi bi-file-earmark-text"></i>
-                                내 템플릿
+                        <!-- ✅ preset-document 클래스 추가 -->
+                        <div class="template-preview preset-document">
+                            <!-- ✅ template-status-badge로 변경 -->
+                            <div class="template-status-badge">
+                                <span class="badge bg-success">내 템플릿</span>
                             </div>
                         </div>
                         <h5 class="template-title">` + template.title + `</h5>
@@ -148,7 +160,9 @@
             
             const previewDiv = col.querySelector('.template-preview');
             if (previewDiv && template.renderedHtml) {
-                previewDiv.innerHTML = '<div class="template-preview-badge user-badge"><i class="bi bi-file-earmark-text"></i> 내 템플릿</div>' + template.renderedHtml;
+                // ✅ 배지 구조 변경 + HTML 추가 (덮어쓰지 않고 추가)
+                const badgeHtml = '<div class="template-status-badge"><span class="badge bg-success">내 템플릿</span></div>';
+                previewDiv.innerHTML = badgeHtml + template.renderedHtml;
             }
             
             return col;

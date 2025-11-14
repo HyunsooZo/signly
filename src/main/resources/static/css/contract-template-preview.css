@@ -1,6 +1,10 @@
 /* 계약서 템플릿 웹 미리보기 확장 스타일 */
 
-/* 템플릿 미리보기 컨테이너 */
+/* ========================================
+   Templates 페이지 카드 미리보기 스타일
+   - 목록에서 여러 템플릿을 작은 카드로 표시
+   - 공간 효율성을 위해 작은 폰트와 높이 제한
+   ======================================== */
 .template-preview {
     font-size: 0.35rem;
     color: #495057;
@@ -28,7 +32,24 @@
     pointer-events: none;
 }
 
-/* 템플릿 미리보기 내부 HTML 스타일 */
+/* ========================================
+   Contracts 페이지 편집 미리보기 스타일  
+   - 단일 템플릿을 상세히 편집하는 화면
+   - 가독성을 위해 큰 폰트와 넓은 패딩 사용
+   ======================================== */
+.preset-preview-body {
+    background-color: #fff;
+    padding: 3rem;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* #presetHtmlContainer 스타일 제거 - contract-template-base.css의 .preset-document 스타일로 대체 */
+
+/* ========================================
+   Templates 카드 내부 HTML 스타일
+   ======================================== */
 .template-preview * {
     font-size: inherit !important;
     line-height: inherit !important;
@@ -43,6 +64,22 @@
 
 .template-preview .template-preview-badge i {
     font-size: 0.85rem !important;
+}
+
+/* ========================================
+   새 템플릿 만들기 카드 스타일
+   ======================================== */
+.template-card-new .template-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 2px dashed #667eea;
+}
+
+.template-card-new .template-preview::after {
+    display: none;
 }
 
 /* 템플릿 미리보기 제목 */
@@ -133,16 +170,7 @@
     padding: 3rem;
 }
 
-#presetHtmlContainer {
-    font-family: 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', sans-serif;
-    line-height: 1.6;
-    font-size: 13px;
-    color: #222;
-}
-
-#presetHtmlContainer.preset-document {
-    max-width: 100%;
-}
+/* #presetHtmlContainer 스타일 제거 - contract-template-base.css의 .preset-document 스타일로 대체 */
 
 /* 프리셋 문서 내 변수 스타일 */
 .preset-document .blank-line {
@@ -238,6 +266,33 @@
     padding-top: 1rem;
     text-align: right;
     color: #495057;
+}
+
+/* ========================================
+   Select-Type 페이지 전용 스타일
+   ======================================== */
+
+/* Select-Type: 클릭 가능한 카드 호버 효과 강화 */
+.template-card-clickable:hover {
+    transform: translateY(-12px) scale(1.03);
+    box-shadow: 0 16px 32px rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
+    cursor: pointer;
+}
+
+/* Select-Type: 배지 위치 조정 */
+.template-card-clickable .template-status-badge {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.template-card-clickable .template-status-badge .badge {
+    background-color: rgba(0, 0, 0, 0.75) !important;
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.75rem !important;
 }
 
 /* 반응형 디자인 */
