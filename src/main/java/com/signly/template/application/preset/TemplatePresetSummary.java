@@ -1,5 +1,12 @@
 package com.signly.template.application.preset;
 
-public record TemplatePresetSummary(String id, String name, String description) {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
+@AllArgsConstructor
+public class TemplatePresetSummary {
+    private final String id;
+    private final String name;
+    private final String description;
 }

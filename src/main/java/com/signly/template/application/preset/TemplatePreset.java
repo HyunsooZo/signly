@@ -1,22 +1,26 @@
 package com.signly.template.application.preset;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public record TemplatePreset(
-        String id,
-        String name,
-        String description,
-        List<PresetSection> sections
-) {
+@Getter
+@AllArgsConstructor
+public final class TemplatePreset {
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\[([^\\]]+)\\]");
+    private final String id;
+    private final String name;
+    private final String description;
+    private final List<PresetSection> sections;
 
     public String renderHtml() {
         return sections.stream()
-                .sorted((a, b) -> Integer.compare(a.order(), b.order()))
-                .map(section -> convertVariablesToUnderlines(section.content()))
+                .sorted((a, b) -> Integer.compare(a.getOrder(), b.getOrder()))
+                .map(section -> convertVariablesToUnderlines(section.getContent()))
                 .collect(Collectors.joining("\n"));
     }
 
@@ -26,7 +30,7 @@ public record TemplatePreset(
         }
 
         Matcher matcher = VARIABLE_PATTERN.matcher(content);
-        StringBuilder result = new StringBuilder();
+        StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
             String variableName = matcher.group(1);

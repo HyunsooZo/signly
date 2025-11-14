@@ -2,6 +2,7 @@ package com.signly.common.security;
 
 import com.signly.user.domain.model.User;
 import com.signly.user.domain.model.UserStatus;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
+@Getter
 public class SecurityUser implements UserDetails {
 
     private final User user;
@@ -52,10 +54,6 @@ public class SecurityUser implements UserDetails {
     @Override
     public boolean isEnabled() {
         return user.getStatus() == UserStatus.ACTIVE;
-    }
-
-    public User getUser() {
-        return user;
     }
 
     public String getUserId() {

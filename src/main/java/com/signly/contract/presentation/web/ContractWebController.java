@@ -22,7 +22,9 @@ import com.signly.template.domain.model.TemplateStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -136,7 +138,7 @@ public class ContractWebController extends BaseWebController {
             var presetOpt = templatePresetService.getPreset(templateId);
             if (presetOpt.isPresent()) {
                 var preset = presetOpt.get();
-                templateTitle = preset.name();
+                templateTitle = preset.getName();
                 templateContent = ""; // preset은 content가 없음
                 renderedHtml = preset.renderHtml();
                 logger.info("[DEBUG] Loaded preset template: {}, renderedHtmlLength={}",
@@ -686,6 +688,8 @@ public class ContractWebController extends BaseWebController {
         }
     }
 
+    @Setter
+    @Getter
     public static class ContractForm {
         private String templateId;
         private String title;
@@ -702,52 +706,9 @@ public class ContractWebController extends BaseWebController {
 
         private static final DateTimeFormatter EXPIRES_AT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
-        public String getTemplateId() {return templateId;}
-
-        public void setTemplateId(String templateId) {this.templateId = templateId;}
-
-        public String getTitle() {return title;}
-
-        public void setTitle(String title) {this.title = title;}
-
-        public String getContent() {return content;}
-
-        public void setContent(String content) {this.content = content;}
-
-        public String getFirstPartyName() {return firstPartyName;}
-
-        public void setFirstPartyName(String firstPartyName) {this.firstPartyName = firstPartyName;}
-
-        public String getFirstPartyEmail() {return firstPartyEmail;}
-
-        public void setFirstPartyEmail(String firstPartyEmail) {this.firstPartyEmail = firstPartyEmail;}
-
-        public String getFirstPartyAddress() {return firstPartyAddress;}
-
-        public void setFirstPartyAddress(String firstPartyAddress) {this.firstPartyAddress = firstPartyAddress;}
-
-        public String getSecondPartyName() {return secondPartyName;}
-
-        public void setSecondPartyName(String secondPartyName) {this.secondPartyName = secondPartyName;}
-
-        public String getSecondPartyEmail() {return secondPartyEmail;}
-
-        public void setSecondPartyEmail(String secondPartyEmail) {this.secondPartyEmail = secondPartyEmail;}
-
-        public String getSecondPartyAddress() {return secondPartyAddress;}
-
-        public void setSecondPartyAddress(String secondPartyAddress) {this.secondPartyAddress = secondPartyAddress;}
-
-        public LocalDateTime getExpiresAt() {return expiresAt;}
-
-        public void setExpiresAt(LocalDateTime expiresAt) {this.expiresAt = expiresAt;}
-
         public String getExpiresAtInputValue() {
             return expiresAt != null ? expiresAt.format(EXPIRES_AT_FORMATTER) : "";
         }
 
-        public String getSelectedPreset() {return selectedPreset;}
-
-        public void setSelectedPreset(String selectedPreset) {this.selectedPreset = selectedPreset;}
     }
 }

@@ -231,11 +231,11 @@ public class TemplateWebController extends BaseWebController {
     public ResponseEntity<TemplatePresetResponse> getPreset(@PathVariable String presetId) {
         return templatePresetService.getPreset(presetId)
                 .map(preset -> {
-                    String renderedHtml = preset.sections().stream()
-                            .map(section -> section.content() != null ? section.content() : "")
+                    String renderedHtml = preset.getSections().stream()
+                            .map(section -> section.getContent() != null ? section.getContent() : "")
                             .collect(java.util.stream.Collectors.joining("\n"));
                     return ResponseEntity.ok(
-                            new TemplatePresetResponse(preset.id(), preset.name(), preset.sections(), renderedHtml)
+                            new TemplatePresetResponse(preset.getId(), preset.getName(), preset.getSections(), renderedHtml)
                     );
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -252,7 +252,7 @@ public class TemplateWebController extends BaseWebController {
     public ResponseEntity<TemplatePresetSectionsResponse> getPresetSections(@PathVariable String presetId) {
         return templatePresetService.getPreset(presetId)
                 .map(preset -> ResponseEntity.ok(
-                        new TemplatePresetSectionsResponse(preset.id(), preset.name(), preset.sections())
+                        new TemplatePresetSectionsResponse(preset.getId(), preset.getName(), preset.getSections())
                 ))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

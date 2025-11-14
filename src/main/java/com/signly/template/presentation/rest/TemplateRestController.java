@@ -52,9 +52,9 @@ public class TemplateRestController {
         List<Map<String, Object>> presets = presetService.getSummaries().stream()
                 .map(summary -> {
                     Map<String, Object> response = new HashMap<>();
-                    response.put("presetId", summary.id());
-                    response.put("title", summary.name());
-                    response.put("description", summary.description());
+                    response.put("presetId", summary.getId());
+                    response.put("title", summary.getName());
+                    response.put("description", summary.getDescription());
                     return response;
                 })
                 .toList();
@@ -67,9 +67,9 @@ public class TemplateRestController {
         return presetService.getPreset(presetId)
                 .map(preset -> {
                     Map<String, Object> response = new HashMap<>();
-                    response.put("presetId", preset.id());
-                    response.put("title", preset.name());
-                    response.put("description", preset.description());
+                    response.put("presetId", preset.getId());
+                    response.put("title", preset.getName());
+                    response.put("description", preset.getDescription());
                     response.put("renderedHtml", preset.renderHtml());
                     return ResponseEntity.ok(response);
                 })
