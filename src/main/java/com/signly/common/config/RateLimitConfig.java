@@ -4,7 +4,9 @@ import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -48,60 +50,40 @@ public class RateLimitConfig {
         return new RateLimitService(rateLimiterRegistry, properties);
     }
 
+    @Setter
+    @Getter
     @ConfigurationProperties(prefix = "app.rate-limit")
     public static class RateLimitProperties {
         private boolean enabled = true;
         private AuthProperties auth = new AuthProperties();
         private ApiProperties api = new ApiProperties();
 
-        public boolean isEnabled() {return enabled;}
-
-        public void setEnabled(boolean enabled) {this.enabled = enabled;}
-
-        public AuthProperties getAuth() {return auth;}
-
-        public void setAuth(AuthProperties auth) {this.auth = auth;}
-
-        public ApiProperties getApi() {return api;}
-
-        public void setApi(ApiProperties api) {this.api = api;}
-
+        @Setter
+        @Getter
         public static class AuthProperties {
             private EndpointProperties login = new EndpointProperties(5, "1m");
             private EndpointProperties register = new EndpointProperties(3, "5m");
             private EndpointProperties forgotPassword = new EndpointProperties(3, "15m");
 
-            public EndpointProperties getLogin() {return login;}
-
-            public void setLogin(EndpointProperties login) {this.login = login;}
-
-            public EndpointProperties getRegister() {return register;}
-
-            public void setRegister(EndpointProperties register) {this.register = register;}
-
-            public EndpointProperties getForgotPassword() {return forgotPassword;}
-
-            public void setForgotPassword(EndpointProperties forgotPassword) {this.forgotPassword = forgotPassword;}
         }
 
         public static class ApiProperties {
             private EndpointProperties default_ = new EndpointProperties(100, "1h");
+            @Setter
+            @Getter
             private EndpointProperties upload = new EndpointProperties(10, "1h");
+            @Setter
+            @Getter
             private EndpointProperties pdfGeneration = new EndpointProperties(20, "1h");
 
             public EndpointProperties getDefault() {return default_;}
 
             public void setDefault(EndpointProperties default_) {this.default_ = default_;}
 
-            public EndpointProperties getUpload() {return upload;}
-
-            public void setUpload(EndpointProperties upload) {this.upload = upload;}
-
-            public EndpointProperties getPdfGeneration() {return pdfGeneration;}
-
-            public void setPdfGeneration(EndpointProperties pdfGeneration) {this.pdfGeneration = pdfGeneration;}
         }
 
+        @Setter
+        @Getter
         public static class EndpointProperties {
             private int limit;
             private String window;
@@ -115,14 +97,6 @@ public class RateLimitConfig {
                 this.limit = limit;
                 this.window = window;
             }
-
-            public int getLimit() {return limit;}
-
-            public void setLimit(int limit) {this.limit = limit;}
-
-            public String getWindow() {return window;}
-
-            public void setWindow(String window) {this.window = window;}
 
             public Duration getWindowDuration() {
                 if (window.endsWith("m")) {
@@ -138,6 +112,7 @@ public class RateLimitConfig {
     }
 
     public static class RateLimitService {
+        @Getter
         private final RateLimiterRegistry rateLimiterRegistry;
         private final RateLimitProperties properties;
         private final Cache<String, RateLimiter> ipLimiters;
@@ -216,5 +191,6 @@ public class RateLimitConfig {
             // IPv4 형식 검증 (간단한 정규식)
             return ip.matches("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$");
         }
+
     }
 }

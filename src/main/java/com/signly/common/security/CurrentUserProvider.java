@@ -10,10 +10,12 @@ public class CurrentUserProvider {
 
     public static final String DEMO_OWNER_ID = "01ARZ3NDEKTSV4RRFFQ69G5FAV";
 
-    public String resolveUserId(SecurityUser securityUser,
-                                HttpServletRequest request,
-                                String headerUserId,
-                                boolean required) {
+    public String resolveUserId(
+            SecurityUser securityUser,
+            HttpServletRequest request,
+            String headerUserId,
+            boolean required
+    ) {
 
         if (securityUser != null && StringUtils.hasText(securityUser.getUserId())) {
             return securityUser.getUserId();

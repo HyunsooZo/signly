@@ -24,16 +24,17 @@ public class FileStorageService {
 
     public FileStorageService(
             @Value("${app.file.upload-dir:./uploads}") String uploadDir,
-            @Value("${app.file.max-size:10485760}") long maxFileSize) {
+            @Value("${app.file.max-size:10485760}") long maxFileSize
+    ) {
         this.uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
         this.maxFileSize = maxFileSize;
         this.allowedContentTypes = Set.of(
-            "application/pdf",
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "application/msword",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                "application/pdf",
+                "image/jpeg",
+                "image/png",
+                "image/gif",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         );
 
         try {
@@ -43,7 +44,10 @@ public class FileStorageService {
         }
     }
 
-    public StoredFile storeFile(MultipartFile file, String category) {
+    public StoredFile storeFile(
+            MultipartFile file,
+            String category
+    ) {
         validateFile(file.getOriginalFilename(), file.getContentType(), file.getSize());
         try {
             return storeFile(file.getBytes(),
@@ -55,10 +59,12 @@ public class FileStorageService {
         }
     }
 
-    public StoredFile storeFile(byte[] data,
-                               String originalFilename,
-                               String contentType,
-                               String category) {
+    public StoredFile storeFile(
+            byte[] data,
+            String originalFilename,
+            String contentType,
+            String category
+    ) {
         validateFile(originalFilename, contentType, data.length);
 
         String fileExtension = getFileExtension(originalFilename);
@@ -126,7 +132,11 @@ public class FileStorageService {
         return file.startsWith(uploadPath) && Files.exists(file);
     }
 
-    private void validateFile(String originalFilename, String contentType, long fileSize) {
+    private void validateFile(
+            String originalFilename,
+            String contentType,
+            long fileSize
+    ) {
         if (fileSize <= 0) {
             throw new ValidationException("빈 파일은 업로드할 수 없습니다");
         }

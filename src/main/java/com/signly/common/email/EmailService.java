@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+
 import java.util.Map;
 
 @Service
@@ -16,13 +17,19 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final String fromEmail;
 
-    public EmailService(JavaMailSender mailSender,
-                       @Value("${app.email.from:noreply@signly.com}") String fromEmail) {
+    public EmailService(
+            JavaMailSender mailSender,
+            @Value("${app.email.from:noreply@signly.com}") String fromEmail
+    ) {
         this.mailSender = mailSender;
         this.fromEmail = fromEmail;
     }
 
-    public void sendSimpleEmail(String to, String subject, String text) {
+    public void sendSimpleEmail(
+            String to,
+            String subject,
+            String text
+    ) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(to);
@@ -32,7 +39,11 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    public void sendTemplateEmail(String to, EmailTemplate template, Map<String, Object> variables) {
+    public void sendTemplateEmail(
+            String to,
+            EmailTemplate template,
+            Map<String, Object> variables
+    ) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -52,7 +63,10 @@ public class EmailService {
         }
     }
 
-    private String generateEmailTemplate(EmailTemplate template, Map<String, Object> variables) {
+    private String generateEmailTemplate(
+            EmailTemplate template,
+            Map<String, Object> variables
+    ) {
         // 간단한 템플릿 생성 (추후 개선 필요)
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html>");
@@ -88,71 +102,98 @@ public class EmailService {
         return html.toString();
     }
 
-    public void sendContractSigningRequest(String to, String contractTitle, String signerName, String contractUrl) {
+    public void sendContractSigningRequest(
+            String to,
+            String contractTitle,
+            String signerName,
+            String contractUrl
+    ) {
         Map<String, Object> variables = Map.of(
-            "signerName", signerName,
-            "contractTitle", contractTitle,
-            "contractUrl", contractUrl,
-            "companyName", "Signly"
+                "signerName", signerName,
+                "contractTitle", contractTitle,
+                "contractUrl", contractUrl,
+                "companyName", "Signly"
         );
 
         sendTemplateEmail(to, EmailTemplate.CONTRACT_SIGNING_REQUEST, variables);
     }
 
-    public void sendContractSigned(String to, String contractTitle, String signerName) {
+    public void sendContractSigned(
+            String to,
+            String contractTitle,
+            String signerName
+    ) {
         Map<String, Object> variables = Map.of(
-            "contractTitle", contractTitle,
-            "signerName", signerName,
-            "companyName", "Signly"
+                "contractTitle", contractTitle,
+                "signerName", signerName,
+                "companyName", "Signly"
         );
 
         sendTemplateEmail(to, EmailTemplate.CONTRACT_SIGNED, variables);
     }
 
-    public void sendContractCompleted(String to, String contractTitle) {
+    public void sendContractCompleted(
+            String to,
+            String contractTitle
+    ) {
         Map<String, Object> variables = Map.of(
-            "contractTitle", contractTitle,
-            "companyName", "Signly"
+                "contractTitle", contractTitle,
+                "companyName", "Signly"
         );
 
         sendTemplateEmail(to, EmailTemplate.CONTRACT_COMPLETED, variables);
     }
 
-    public void sendContractCancelled(String to, String contractTitle, String reason) {
+    public void sendContractCancelled(
+            String to,
+            String contractTitle,
+            String reason
+    ) {
         Map<String, Object> variables = Map.of(
-            "contractTitle", contractTitle,
-            "reason", reason,
-            "companyName", "Signly"
+                "contractTitle", contractTitle,
+                "reason", reason,
+                "companyName", "Signly"
         );
 
         sendTemplateEmail(to, EmailTemplate.CONTRACT_CANCELLED, variables);
     }
 
-    public void sendContractExpired(String to, String contractTitle) {
+    public void sendContractExpired(
+            String to,
+            String contractTitle
+    ) {
         Map<String, Object> variables = Map.of(
-            "contractTitle", contractTitle,
-            "companyName", "Signly"
+                "contractTitle", contractTitle,
+                "companyName", "Signly"
         );
 
         sendTemplateEmail(to, EmailTemplate.CONTRACT_EXPIRED, variables);
     }
 
-    public void sendWelcomeEmail(String to, String userName) {
+    public void sendWelcomeEmail(
+            String to,
+            String userName
+    ) {
         Map<String, Object> variables = Map.of(
-            "userName", userName,
-            "companyName", "Signly"
+                "userName", userName,
+                "companyName", "Signly"
         );
 
         sendTemplateEmail(to, EmailTemplate.USER_WELCOME, variables);
     }
 
-    public void sendPasswordResetEmail(String to, String userName, String resetToken, String baseUrl) {
+    public void sendPasswordResetEmail(
+            String to,
+            String userName,
+            String resetToken,
+            String baseUrl
+    ) {
         String resetUrl = baseUrl + "/reset-password?token=" + resetToken;
         Map<String, Object> variables = Map.of(
-            "userName", userName,
-            "resetUrl", resetUrl,
-            "expiryHours", "24",
-            "companyName", "Signly"
+                "userName", userName,
+                "resetUrl", resetUrl,
+                "expiryHours", "24",
+                "companyName", "Signly"
         );
 
         sendTemplateEmail(to, EmailTemplate.PASSWORD_RESET, variables);

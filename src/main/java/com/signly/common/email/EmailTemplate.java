@@ -1,5 +1,10 @@
 package com.signly.common.email;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum EmailTemplate {
     CONTRACT_SIGNING_REQUEST("계약서 서명 요청", "contract-signing-request"),
     CONTRACT_SIGNED("계약서 서명 완료", "contract-signed"),
@@ -12,16 +17,4 @@ public enum EmailTemplate {
     private final String subject;
     private final String templateName;
 
-    EmailTemplate(String subject, String templateName) {
-        this.subject = subject;
-        this.templateName = templateName;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public String getTemplateName() {
-        return templateName;
-    }
 }

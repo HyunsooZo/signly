@@ -2,6 +2,7 @@ package com.signly.common.security;
 
 import com.signly.common.config.RateLimitConfig;
 import com.signly.common.config.RateLimitFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -36,18 +38,6 @@ public class SecurityConfig {
 
     @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:8080}")
     private String allowedOrigins;
-
-    public SecurityConfig(
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
-            RateLimitConfig.RateLimitService rateLimitService,
-            RateLimitConfig.RateLimitProperties rateLimitProperties
-    ) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
-        this.rateLimitService = rateLimitService;
-        this.rateLimitProperties = rateLimitProperties;
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

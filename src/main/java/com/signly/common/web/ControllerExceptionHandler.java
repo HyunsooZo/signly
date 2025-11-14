@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -16,13 +17,13 @@ public class ControllerExceptionHandler {
 
     /**
      * 예외가 발생할 수 있는 작업을 안전하게 실행하고 예외를 표준화된 방식으로 처리
-     * 
-     * @param operation 실행할 작업
-     * @param logger 로거
+     *
+     * @param operation     실행할 작업
+     * @param logger        로거
      * @param operationName 작업 이름 (로깅용)
      * @param errorViewName 에러 시 반환할 뷰 이름
-     * @param model 모델
-     * @param errorMessage 사용자에게 표시할 에러 메시지
+     * @param model         모델
+     * @param errorMessage  사용자에게 표시할 에러 메시지
      * @return 성공 시 뷰 이름, 실패 시 errorViewName
      */
     public static String handleOperation(
@@ -163,7 +164,7 @@ public class ControllerExceptionHandler {
     private static String determineErrorView(Model model) {
         // 모델에 이미 설정된 뷰 속성이 있으면 사용, 없으면 기본 에러 페이지
         if (model.containsAttribute("viewName")) {
-            return model.getAttribute("viewName").toString();
+            return Objects.requireNonNull(model.getAttribute("viewName")).toString();
         }
         return "error"; // 기본 에러 페이지
     }
@@ -171,28 +172,40 @@ public class ControllerExceptionHandler {
     /**
      * 성공 메시지를 리다이렉트 속성에 추가
      */
-    public static void addSuccessMessage(RedirectAttributes redirectAttributes, String message) {
+    public static void addSuccessMessage(
+            RedirectAttributes redirectAttributes,
+            String message
+    ) {
         redirectAttributes.addFlashAttribute("successMessage", message);
     }
 
     /**
      * 에러 메시지를 리다이렉트 속성에 추가
      */
-    public static void addErrorMessage(RedirectAttributes redirectAttributes, String message) {
+    public static void addErrorMessage(
+            RedirectAttributes redirectAttributes,
+            String message
+    ) {
         redirectAttributes.addFlashAttribute("errorMessage", message);
     }
 
     /**
      * 에러 메시지를 모델에 추가
      */
-    public static void addErrorMessage(Model model, String message) {
+    public static void addErrorMessage(
+            Model model,
+            String message
+    ) {
         model.addAttribute("errorMessage", message);
     }
 
     /**
      * 페이지 타이틀을 모델에 추가
      */
-    public static void addPageTitle(Model model, String title) {
+    public static void addPageTitle(
+            Model model,
+            String title
+    ) {
         model.addAttribute("pageTitle", title);
     }
 }

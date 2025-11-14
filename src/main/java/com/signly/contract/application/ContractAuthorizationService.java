@@ -12,13 +12,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class ContractAuthorizationService {
 
-    public void validateOwnership(String userId, Contract contract) {
+    public void validateOwnership(
+            String userId,
+            Contract contract
+    ) {
         if (!contract.getCreatorId().value().equals(userId)) {
             throw new ForbiddenException("해당 계약서에 대한 권한이 없습니다");
         }
     }
 
-    public void validateAccess(String userId, Contract contract) {
+    public void validateAccess(
+            String userId,
+            Contract contract
+    ) {
         if (!contract.getCreatorId().value().equals(userId) &&
                 !contract.getFirstParty().email().equals(userId) &&
                 !contract.getSecondParty().email().equals(userId)) {
@@ -26,13 +32,19 @@ public class ContractAuthorizationService {
         }
     }
 
-    public void validateTemplateOwnership(String userId, ContractTemplate template) {
+    public void validateTemplateOwnership(
+            String userId,
+            ContractTemplate template
+    ) {
         if (!template.getOwnerId().value().equals(userId)) {
             throw new ForbiddenException("해당 템플릿에 대한 권한이 없습니다");
         }
     }
 
-    public void validateSigningAccess(String signerEmail, Contract contract) {
+    public void validateSigningAccess(
+            String signerEmail,
+            Contract contract
+    ) {
         if (!contract.getFirstParty().email().equals(signerEmail) &&
                 !contract.getSecondParty().email().equals(signerEmail)) {
             throw new ForbiddenException("해당 계약서에 접근할 권한이 없습니다");

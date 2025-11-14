@@ -12,9 +12,13 @@ import java.io.IOException;
 public class CsrfTokenFilter extends OncePerRequestFilter {
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    )
             throws ServletException, IOException {
-        
+
         CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
         if (csrfToken != null) {
             // Set CSRF token as request attribute for JSP access
@@ -22,7 +26,7 @@ public class CsrfTokenFilter extends OncePerRequestFilter {
             // Set CSRF token as header for JavaScript access
             response.setHeader("X-CSRF-TOKEN", csrfToken.getToken());
         }
-        
+
         filterChain.doFilter(request, response);
     }
 }

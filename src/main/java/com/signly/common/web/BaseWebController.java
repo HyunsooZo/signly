@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -83,32 +84,48 @@ public abstract class BaseWebController {
     /**
      * 성공 메시지 추가
      */
-    protected void addSuccessMessage(RedirectAttributes redirectAttributes, String message) {
+    protected void addSuccessMessage(
+            RedirectAttributes redirectAttributes,
+            String message
+    ) {
         ControllerExceptionHandler.addSuccessMessage(redirectAttributes, message);
     }
 
     /**
      * 에러 메시지 추가
      */
-    protected void addErrorMessage(RedirectAttributes redirectAttributes, String message) {
+    protected void addErrorMessage(
+            RedirectAttributes redirectAttributes,
+            String message
+    ) {
         ControllerExceptionHandler.addErrorMessage(redirectAttributes, message);
     }
 
-    protected void addErrorMessage(Model model, String message) {
+    protected void addErrorMessage(
+            Model model,
+            String message
+    ) {
         ControllerExceptionHandler.addErrorMessage(model, message);
     }
 
     /**
      * 페이지 타이틀 추가
      */
-    protected void addPageTitle(Model model, String title) {
+    protected void addPageTitle(
+            Model model,
+            String title
+    ) {
         ControllerExceptionHandler.addPageTitle(model, title);
     }
 
     /**
      * ValidationException 처리를 위한 간편 메소드
      */
-    protected String handleValidationException(ValidationException e, Model model, String customMessage) {
+    protected String handleValidationException(
+            ValidationException e,
+            Model model,
+            String customMessage
+    ) {
         logger.warn("유효성 검사 실패: {}", e.getMessage());
         addErrorMessage(model, customMessage != null ? customMessage : e.getMessage());
         return determineErrorView(model);
@@ -117,7 +134,11 @@ public abstract class BaseWebController {
     /**
      * BusinessException 처리를 위한 간편 메소드
      */
-    protected String handleBusinessException(BusinessException e, Model model, String customMessage) {
+    protected String handleBusinessException(
+            BusinessException e,
+            Model model,
+            String customMessage
+    ) {
         logger.warn("비즈니스 로직 실패: {}", e.getMessage());
         addErrorMessage(model, customMessage != null ? customMessage : e.getMessage());
         return determineErrorView(model);
@@ -126,7 +147,12 @@ public abstract class BaseWebController {
     /**
      * 일반 예외 처리를 위한 간편 메소드
      */
-    protected String handleGenericException(Exception e, Model model, String operationName, String customMessage) {
+    protected String handleGenericException(
+            Exception e,
+            Model model,
+            String operationName,
+            String customMessage
+    ) {
         logger.error("{} 중 예상치 못한 오류 발생", operationName, e);
         addErrorMessage(model, customMessage != null ? customMessage : "처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
         return determineErrorView(model);
@@ -137,7 +163,7 @@ public abstract class BaseWebController {
      */
     private String determineErrorView(Model model) {
         if (model.containsAttribute("viewName")) {
-            return model.getAttribute("viewName").toString();
+            return Objects.requireNonNull(model.getAttribute("viewName")).toString();
         }
         return "error";
     }

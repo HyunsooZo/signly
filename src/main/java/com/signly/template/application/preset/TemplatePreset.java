@@ -4,6 +4,7 @@ import com.signly.template.domain.service.TemplateVariableUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,7 @@ public final class TemplatePreset {
      */
     public String renderHtml() {
         return sections.stream()
-                .sorted((a, b) -> Integer.compare(a.getOrder(), b.getOrder()))
+                .sorted(Comparator.comparingInt(PresetSection::getOrder))
                 .map(section -> TemplateVariableUtils.convertVariablesToUnderlines(section.getContent()))
                 .collect(Collectors.joining("\n"));
     }

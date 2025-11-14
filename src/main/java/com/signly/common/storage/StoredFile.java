@@ -3,12 +3,12 @@ package com.signly.common.storage;
 import java.time.LocalDateTime;
 
 public record StoredFile(
-    String storedFilename,
-    String originalFilename,
-    String filePath,
-    String contentType,
-    long size,
-    LocalDateTime uploadedAt
+        String storedFilename,
+        String originalFilename,
+        String filePath,
+        String contentType,
+        long size,
+        LocalDateTime uploadedAt
 ) {
 
     public String getFileExtension() {
@@ -32,8 +32,8 @@ public record StoredFile(
 
     public boolean isDocument() {
         return contentType != null && (
-            contentType.equals("application/msword") ||
-            contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                contentType.equals("application/msword") ||
+                        contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
         );
     }
 }
