@@ -5,9 +5,11 @@
 <!DOCTYPE html>
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
-    <jsp:param name="additionalCss" value="/css/contracts.css" />
-    <jsp:param name="additionalCss2" value="/css/templates.css" />
-    <jsp:param name="additionalCss3" value="/css/modal.css" />
+    <jsp:param name="additionalCss" value="/css/contract-template-base.css" />
+    <jsp:param name="additionalCss2" value="/css/contract-template-preview.css" />
+    <jsp:param name="additionalCss3" value="/css/contracts.css" />
+    <jsp:param name="additionalCss4" value="/css/templates.css" />
+    <jsp:param name="additionalCss5" value="/css/modal.css" />
 </jsp:include>
 <body>
     <jsp:include page="../common/navbar.jsp">
@@ -283,9 +285,9 @@
             let decoded = decodeHtml(htmlContent).trim();
 
             // 변수를 밑줄로 변환
-            decoded = decoded.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, '<span class="template-variable-underline"></span>');
+            decoded = decoded.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, '<span class="blank-line"></span>');
             // [VARIABLE_NAME] 형식도 밑줄로 변환
-            decoded = decoded.replace(/\[[\w_]+\]/g, '<span class="template-variable-underline"></span>');
+            decoded = decoded.replace(/\[[\w_]+\]/g, '<span class="blank-line"></span>');
 
             const previewContent = decoded ? decoded : '<p class="text-muted">템플릿 내용이 비어있습니다.</p>';
 

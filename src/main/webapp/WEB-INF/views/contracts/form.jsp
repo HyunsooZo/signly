@@ -5,8 +5,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
-    <jsp:param name="additionalCss" value="/css/contracts.css" />
-    <jsp:param name="additionalCss2" value="/css/contract-common.css" />
+    <jsp:param name="additionalCss" value="/css/contract-template-base.css" />
+    <jsp:param name="additionalCss2" value="/css/contract-template-preview.css" />
+    <jsp:param name="additionalCss3" value="/css/contracts.css" />
 </jsp:include>
 <body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
 <jsp:include page="../common/navbar.jsp">
@@ -52,14 +53,14 @@
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
             </c:if>
             <c:if test="${not empty selectedPreset}">
-                <input type="hidden" name="selectedPreset" value="${selectedPreset}" />
+                <input type="hidden" name="selectedPreset" value="<c:out value='${selectedPreset}'/>" />
             </c:if>
-            <input type="hidden" id="templateId" name="templateId" value="${contract.templateId}">
-            <c:if test="${not empty selectedTemplate}">
-                <script type="application/json" id="selectedTemplateData">${selectedTemplateContent}</script>
+            <input type="hidden" id="templateId" name="templateId" value="<c:out value='${contract.templateId}'/>">
+            <c:if test="${not empty selectedTemplateContent}">
+                <script type="application/json" id="selectedTemplateData"><c:out value="${selectedTemplateContent}" escapeXml="false"/></script>
             </c:if>
             <c:if test="${not empty existingContractJson}">
-                <script type="application/json" id="existingContractData">${existingContractJson}</script>
+                <script type="application/json" id="existingContractData"><c:out value="${existingContractJson}" escapeXml="false"/></script>
             </c:if>
 
             <!-- 템플릿 레이아웃 -->

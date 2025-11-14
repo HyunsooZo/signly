@@ -1,0 +1,238 @@
+/* 계약서 템플릿 기본 스타일 - PDF와 웹 공통 */
+
+/* 기본 레이아웃 - 문서 컨테이너에만 적용 */
+.preset-document,
+.contract-content,
+.template-document,
+body:not(:has(.navbar)) {
+    font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+    font-size: 13px;
+    color: #222;
+}
+
+/* iframe 내부(미리보기)에만 적용 */
+body:not(:has(.navbar)) {
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 20mm;
+}
+
+/* 제목 */
+.title,
+.contract-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    letter-spacing: 6px;
+    font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+}
+
+.contract-body > .title:first-child {
+    display: none;
+}
+
+/* 인트로 */
+.contract-intro {
+    text-align: justify;
+    margin: 18px 0;
+}
+
+/* 섹션 공통 */
+.section,
+.section-text,
+.section-signature,
+.section-footer,
+.section-title,
+.section-dotted,
+.section-clause {
+    margin: 16px 0;
+}
+
+/* 섹션 번호 */
+.section-number {
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+/* 들여쓰기 */
+.indent {
+    margin-left: 20px;
+}
+
+/* 날짜 섹션 */
+.date-section {
+    text-align: right;
+    margin: 30px 0;
+    font-weight: 600;
+}
+
+/* 서명 섹션 */
+.signature-section {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.signature-block {
+    flex: 1;
+}
+
+.signature-line {
+    margin: 8px 0;
+    max-width: fit-content;
+    width: fit-content;
+}
+
+.signature-line--seal {
+    position: relative;
+    min-height: 40px;
+    white-space: nowrap;
+}
+
+.signature-stamp-label {
+    margin-left: 8px;
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ccc;
+    text-align: center;
+    line-height: 40px;
+    font-size: 12px;
+    color: #666;
+}
+
+.signature-stamp-wrapper {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* 밑줄 변수 스타일 - PDF와 웹 공통 */
+.blank-line {
+    display: inline-block;
+    border-bottom: 1px solid #000;
+    min-width: 60px;
+    height: 1em;
+    margin: 0 4px;
+    vertical-align: baseline;
+}
+
+/* 점선 박스 */
+.section-dotted,
+.template-dotted-box {
+    border: 2px dashed #999;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+/* 텍스트 정렬 */
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-justify {
+    text-align: justify;
+}
+
+/* 마진 */
+.mt-20 {
+    margin-top: 20px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.mt-30 {
+    margin-top: 30px;
+}
+
+.mb-30 {
+    margin-bottom: 30px;
+}
+
+/* 월급 섹션 */
+.wage-section {
+    margin-top: 10px;
+}
+
+.wage-item {
+    margin: 5px 0;
+}
+
+/* 노트 */
+.note {
+    font-size: 11px;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* 테이블 스타일 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+table th,
+table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+/* 리스트 스타일 */
+ul, ol {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+li {
+    margin: 5px 0;
+}
+
+/* 강조 */
+.bold {
+    font-weight: 600;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+/* 페이지 나누기 (PDF용) */
+.page-break {
+    page-break-before: always;
+}
+
+/* 인쇄용 스타일 */
+@media print {
+    body {
+        margin: 0;
+        padding: 15mm;
+    }
+    
+    .signature-section {
+        page-break-inside: avoid;
+    }
+    
+    .page-break {
+        page-break-before: always;
+    }
+}

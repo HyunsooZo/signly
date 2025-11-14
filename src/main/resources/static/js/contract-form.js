@@ -72,18 +72,31 @@ class ContractForm {
         // 먼저 JSON 데이터 파싱
         this.parseJsonData();
         
+        console.log('[DEBUG] init - selectedTemplateData:', this.selectedTemplateData);
+        console.log('[DEBUG] init - existingContractData:', this.existingContractData);
+        
+        // Check if script tag exists
+        const templateEl = document.getElementById('selectedTemplateData');
+        console.log('[DEBUG] selectedTemplateData element exists:', !!templateEl);
+        if (templateEl) {
+            console.log('[DEBUG] selectedTemplateData content:', templateEl.textContent);
+        }
+        
         // 초기 레이아웃 설정
-        if (this.hasSelectedPreset) {
-            this.switchToTemplateMode();
-            this.loadPresetById('standard-employment-contract');
-        } else if (this.selectedTemplateData) {
+        if (this.selectedTemplateData) {
+            console.log('[DEBUG] Loading template with data:', {
+                title: this.selectedTemplateData.title,
+                hasHtml: !!this.selectedTemplateData.renderedHtml,
+                htmlLength: this.selectedTemplateData.renderedHtml?.length || 0
+            });
             this.switchToTemplateMode();
             this.loadTemplateAsPreset(
                 this.selectedTemplateData.title || '',
-                this.selectedTemplateData.content || '',
+                this.selectedTemplateData.renderedHtml || '',
                 this.selectedTemplateData.variables || {}
             );
         } else {
+            console.log('[DEBUG] No template data, redirecting to select-type');
             // 파라미터 없으면 select-type.jsp로 리다이렉트
             window.location.href = '/contracts/select-type';
         }
@@ -429,6 +442,65 @@ class ContractForm {
     }
     
     replaceVariablesWithInputs(container) {
+        // 먼저 data-variable-name 속성을 가진 요소들을 찾아서 input으로 교체
+        const variableElements = container.querySelectorAll('[data-variable-name]');
+        variableElements.forEach(element => {
+            const varName = element.getAttribute('data-variable-name');
+            if (!varName) return;
+            
+            // 이미 input이 있으면 스킵
+            if (element.querySelector('input')) return;
+            
+            // 서명 이미지 처리
+            if (varName === 'EMPLOYER_SIGNATURE_IMAGE') {
+                const signatureImg = this.createSignatureImage();
+                element.innerHTML = '';
+                element.appendChild(signatureImg);
+                return;
+            }
+            
+            // 변수를 input으로 교체
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'contract-input-inline';
+            input.setAttribute('data-variable-name', varName);
+
+            // 변수 타입에 따라 size 설정
+            const upper = varName.toUpperCase();
+            const normalized = upper.replace(/[-_\s]/g, '');
+            let inputSize = 10;
+            let maxLength = null;
+
+            if (normalized.includes('NAME') || upper === 'EMPLOYER' || upper === 'EMPLOYEE' ||
+                upper.includes('이름') || upper === '사업주' || upper === '근로자') {
+                inputSize = 6;
+                maxLength = 10;
+            } else if (normalized.includes('DATE') || upper.includes('날짜')) {
+                inputSize = 11;
+                maxLength = 10;
+            } else if (normalized.includes('ADDRESS') || upper.includes('주소')) {
+                inputSize = 20;
+                maxLength = 50;
+            } else if (normalized.includes('PHONE') || upper.includes('전화')) {
+                inputSize = 13;
+                maxLength = 15;
+            }
+
+            input.size = inputSize;
+            if (maxLength) input.maxLength = maxLength;
+            input.placeholder = this.getPlaceholderExample(varName, upper, normalized);
+
+            const value = this.getDefaultValueForVariable(varName);
+            if (value) input.value = value;
+
+            input.addEventListener('input', () => this.updateTemplateContent());
+
+            // ✅ 핵심 수정: wrapper 구조 보존
+            element.innerHTML = '';
+            element.appendChild(input);
+        });
+        
+        // 텍스트 노드에서 [변수명] 또는 {변수명} 패턴도 처리
         const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
         const textNodes = [];
 
@@ -450,19 +522,16 @@ class ContractForm {
             let match;
 
             while ((match = regex.exec(text)) !== null) {
-                // 매치 전 텍스트 추가
                 if (match.index > lastIndex) {
                     fragment.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
                 }
 
                 const varName = match[1] || match[2];
 
-                // 서명 이미지는 localStorage에서 가져와서 img 태그로 교체
                 if (varName === 'EMPLOYER_SIGNATURE_IMAGE') {
                     const signatureImg = this.createSignatureImage();
                     fragment.appendChild(signatureImg);
                 } else {
-                    // 입력 필드 생성
                     const input = this.createVariableInput(varName);
                     fragment.appendChild(input);
                 }
@@ -470,13 +539,18 @@ class ContractForm {
                 lastIndex = regex.lastIndex;
             }
 
-            // 나머지 텍스트 추가
             if (lastIndex < text.length) {
                 fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
             }
 
             parent.replaceChild(fragment, node);
         });
+
+        // TODO: [REFACTORING] This method violates SRP and needs refactoring
+        // - Extract VariableTypeResolver domain service for type inference
+        // - Extract VariableInputRenderer UI component for element creation
+        // - Extract VariableValueResolver for default value resolution
+        // See GitHub Issue #XXX for detailed refactoring plan
 
         // 사업주 정보 자동 입력
         this.applyOwnerInfoToTemplateForm();
@@ -574,7 +648,7 @@ class ContractForm {
 
         const input = document.createElement('input');
         input.type = 'text';
-        input.className = 'form-control contract-input-inline';
+        input.className = 'contract-input-inline';
         input.size = inputSize;
         if (maxLength) {
             input.maxLength = maxLength;
@@ -911,7 +985,9 @@ class ContractForm {
     
     loadTemplateAsPreset(templateTitle, templateHtml, templateVariables) {
         console.log('[DEBUG] Loading template as preset:', templateTitle);
+        console.log('[DEBUG] Template HTML length:', templateHtml ? templateHtml.length : 0);
         console.log('[DEBUG] Template variables:', templateVariables);
+        console.log('[DEBUG] templateHtmlContainer exists:', !!this.templateHtmlContainer);
 
         let rendered = templateHtml || '';
 
@@ -920,6 +996,9 @@ class ContractForm {
             console.log('[DEBUG] Decoding HTML entities...');
             rendered = this.decodeHtmlEntities(rendered);
         }
+
+        console.log('[DEBUG] Rendered HTML length after decode:', rendered.length);
+        console.log('[DEBUG] First 200 chars:', rendered.substring(0, 200));
 
         // 템플릿 모드로 전환
         this.switchToTemplateMode();

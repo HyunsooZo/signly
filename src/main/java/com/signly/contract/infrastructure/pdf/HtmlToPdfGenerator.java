@@ -30,7 +30,7 @@ import java.util.Optional;
 public class HtmlToPdfGenerator implements PdfGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(HtmlToPdfGenerator.class);
-    private static final List<String> PDF_CSS_RESOURCES = List.of("static/css/contract-common.css");
+    private static final List<String> PDF_CSS_RESOURCES = List.of("static/css/contract-template-base.css");
     private static final List<String> FONT_RESOURCES = List.of("fonts/NanumGothic-Regular.ttf", "fonts/NanumGothic-Bold.ttf");
 
     @Override
@@ -180,11 +180,54 @@ public class HtmlToPdfGenerator implements PdfGenerator {
     }
 
     private String adaptCssForPdf(String css) {
-        String adapted = css.replace("body:not(:has(.navbar))", "body");
+        // 웹 전용 스타일 필터링
+        String adapted = filterWebOnlyStyles(css);
+        
+        // 기존 폰트 변환 로직
+        adapted = adapted.replace("body:not(:has(.navbar))", "body");
         adapted = adapted.replace("'Malgun Gothic'", "'NanumGothic', 'Nanum Gothic', 'Malgun Gothic'");
         adapted = adapted.replace("\"Malgun Gothic\"", "'NanumGothic', 'Nanum Gothic', 'Malgun Gothic'");
         adapted = adapted.replace("font-family: Malgun Gothic", "font-family: NanumGothic, Nanum Gothic, Malgun Gothic");
         return adapted;
+    }
+
+    /**
+     * PDF에 불필요한 웹 전용 스타일 필터링
+     */
+    private String filterWebOnlyStyles(String css) {
+        // .template-preview 관련 스타일 제거
+        css = css.replaceAll("(?s)/\\* 템플릿 미리보기.*?\\*/", "");
+        css = css.replaceAll("(?s)\\.template-preview[^}]*\\}", "");
+        css = css.replaceAll("(?s)\\.preset-preview-body[^}]*\\}", "");
+        css = css.replaceAll("(?s)#presetHtmlContainer[^}]*\\}", "");
+        
+        // !important 속성 제거 (PDF에서는 불필요)
+        css = css.replaceAll("\\s*!important\\s*", "");
+        
+        // 웹 전용 미디어 쿼리 제거
+        css = css.replaceAll("(?s)@media[^{]*\\{[^}]*\\}", "");
+        
+        // 웹 전용 가상 클래스 제거
+        css = css.replaceAll(":hover[^{]*\\{[^}]*\\}", "");
+        css = css.replaceAll(":focus[^{]*\\{[^}]*\\}", "");
+        
+        // cursor 관련 속성 제거
+        css = css.replaceAll("cursor:[^;]*;", "");
+        
+        // transition 관련 속성 제거
+        css = css.replaceAll("transition:[^;]*;", "");
+        
+        // transform 관련 속성 제거
+        css = css.replaceAll("transform:[^;]*;", "");
+        
+        // box-shadow 관련 속성 제거 (PDF에서는 지원 안됨)
+        css = css.replaceAll("box-shadow:[^;]*;", "");
+        
+        // background 관련 복잡한 속성 단순화
+        css = css.replaceAll("background:[^;]*gradient[^;]*;", "background: #fff;");
+        css = css.replaceAll("background:[^;]*rgba[^;]*;", "background: #fff;");
+        
+        return css;
     }
 
     private void appendCss(StringBuilder builder, String css) {

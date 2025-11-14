@@ -47,7 +47,7 @@ public class TemplateContentRenderer {
     }
 
     /**
-     * 변수 [변수명]을 빈 밑줄로 변환
+     * 변수 [변수명]을 빈 밑줄로 변환 (서명 이미지 변수 제외)
      */
     private String convertVariablesToUnderlines(String content) {
         if (content == null) {
@@ -59,6 +59,13 @@ public class TemplateContentRenderer {
         
         while (matcher.find()) {
             String variableName = matcher.group(1);
+            
+            // 서명 이미지 변수는 밑줄로 변환하지 않음
+            if (variableName.endsWith("_SIGNATURE_IMAGE")) {
+                matcher.appendReplacement(result, matcher.group(0));
+                continue;
+            }
+            
             String replacement = "<span class=\"blank-line\" data-variable-name=\"" + 
                                escapeHtml(variableName) + "\"></span>";
             matcher.appendReplacement(result, replacement);

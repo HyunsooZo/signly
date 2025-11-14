@@ -155,7 +155,7 @@
         }
 
         function selectPreset(presetId) {
-            window.location.href = '/contracts/new?preset=' + presetId;
+            window.location.href = '/contracts/new?templateId=' + presetId;
         }
 
         function selectUserTemplate(templateId) {
