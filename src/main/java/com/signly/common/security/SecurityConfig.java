@@ -76,6 +76,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/register", "/api/users/login", "/api/users/check-email").permitAll()
                         // 템플릿 API는 임시로 공개 허용 (개발/테스트용)
                         .requestMatchers("/api/templates/**").permitAll()
+                        // 프리셋 템플릿은 공개 허용
+                        .requestMatchers("/templates/presets/**").permitAll()
                         // 서명 API는 공개 허용 (토큰 검증은 별도 로직에서)
                         .requestMatchers("/api/sign/**").permitAll()
                         // 인증 관련 페이지는 공개 허용
@@ -90,8 +92,8 @@ public class SecurityConfig {
                         .requestMatchers("/WEB-INF/views/**").permitAll()
                         // 프로필 관리 페이지는 인증 필요
                         .requestMatchers("/profile/**").authenticated()
-                        // 홈, 템플릿, 계약서 페이지는 인증 필요
-                        .requestMatchers("/home", "/templates/**", "/contracts/**").authenticated()
+                        // 홈, 템플릿(프리셋 제외), 계약서 페이지는 인증 필요
+                        .requestMatchers("/home", "/templates", "/contracts/**").authenticated()
                         // 나머지 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )

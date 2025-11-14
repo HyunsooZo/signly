@@ -1,20 +1,23 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
-    <jsp:param name="additionalCss" value="/css/template-builder.css"/>
-    <jsp:param name="additionalCss2" value="/css/modal.css"/>
+    <jsp:param name="additionalCss" value="/css/template-builder.css" />
+    <jsp:param name="additionalCss2" value="/css/modal.css" />
 </jsp:include>
 <body>
-<jsp:include page="../common/navbar.jsp">
-    <jsp:param name="currentPage" value="templates"/>
-</jsp:include>
+    <jsp:include page="../common/navbar.jsp">
+        <jsp:param name="currentPage" value="templates" />
+    </jsp:include>
 
-<div class="container mt-4">
+<div class="builder-container">
     <!-- 프리셋 템플릿 선택 영역 -->
-    <div class="preset-section" id="presetSection">
+    <div class="main-content-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="preset-section" id="presetSection">
         <div class="preset-header">
             <h5 class="preset-title">
                 <i class="bi bi-lightning-charge"></i>
@@ -35,10 +38,10 @@
                 <!-- 프리셋 카드들이 여기에 동적으로 추가됩니다 -->
             </div>
         </div>
-    </div>
+                </div>
 
-    <!-- 툴바 -->
-    <div class="toolbar">
+                <!-- 툴바 -->
+                <div class="toolbar">
         <div class="d-flex align-items-center flex-wrap gap-2">
             <strong class="me-2 toolbar-label">변수 추가하기:</strong>
             <button class="toolbar-btn toolbar-btn-sm" onclick="insertVariable('[EMPLOYER]')" title="사업주">
@@ -66,10 +69,9 @@
                 <i class="bi bi-braces"></i> 더보기
             </button>
         </div>
-    </div>
 
-    <!-- 문서 편집 영역 -->
-    <div class="document-container">
+                <!-- 문서 편집 영역 -->
+                <div class="document-container">
         <div class="document-header">
             <input type="text"
                    class="document-title-input"
@@ -91,6 +93,10 @@
             <div class="add-section-placeholder" onclick="showAddSectionMenu(this)">
                 <i class="bi bi-plus-circle"></i>
                 <div>여기를 클릭하여 섹션을 추가하세요</div>
+            </div>
+        </div>
+    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -183,11 +189,10 @@
 </div>
 
 <!-- Hidden form for submission -->
-<c:set var="formAction"
-       value="${not empty templateId && templateId ne 'new' ? '/templates/'.concat(templateId) : '/templates'}"/>
+<c:set var="formAction" value="${not empty templateId && templateId ne 'new' ? '/templates/'.concat(templateId) : '/templates'}" />
 <form id="templateForm" method="post" action="${formAction}" class="template-form-hidden">
     <c:if test="${not empty _csrf}">
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
     </c:if>
     <input type="hidden" name="title" id="formTitle">
     <input type="hidden" name="sectionsJson" id="sectionsJson">
@@ -211,13 +216,13 @@
     </div>
 </div>
 
-<!-- External JavaScript -->
-<script src="/js/template-form.js"></script>
 
-<c:set var="sectionsJsonRaw" value="${empty template.sectionsJson ? '[]' : template.sectionsJson}"/>
-<c:set var="sectionsJsonSafe" value="${fn:replace(sectionsJsonRaw, '</script>', '<&#92;/script>')}"/>
-<script id="initialSections" type="application/json"><c:out value="${sectionsJsonSafe}" escapeXml="false"/></script>
 
-<jsp:include page="../common/footer.jsp"/>
+<c:set var="sectionsJsonRaw" value="${empty template.sectionsJson ? '[]' : template.sectionsJson}" />
+<c:set var="sectionsJsonSafe" value="${fn:replace(sectionsJsonRaw, '</script>', '<&#92;/script>')}" />
+<script id="initialSections" type="application/json"><c:out value="${sectionsJsonSafe}" escapeXml="false" /></script>
+
+<jsp:include page="../common/footer.jsp" />
+<script src="/js/template-builder.js"></script>
 </body>
 </html>
