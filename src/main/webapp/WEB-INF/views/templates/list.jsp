@@ -76,7 +76,7 @@
                                 <div class="col-md-6 col-lg-3">
                                     <div class="template-card">
                                         <div class="template-card-body">
-                                            <div class="template-preview" data-template-id="<c:out value='${template.templateId}'/>">
+                                            <div class="template-preview preset-document" data-template-id="<c:out value='${template.templateId}'/>">
                                                 <c:choose>
                                                     <c:when test="${not empty template.renderedHtml}">
                                                         <c:out value="${template.renderedHtml}" escapeXml="false"/>
@@ -284,11 +284,7 @@
         function previewTemplateModal(templateId, title, htmlContent) {
             let decoded = decodeHtml(htmlContent).trim();
 
-            // 변수를 밑줄로 변환
-            decoded = decoded.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, '<span class="blank-line"></span>');
-            // [VARIABLE_NAME] 형식도 밑줄로 변환
-            decoded = decoded.replace(/\[[\w_]+\]/g, '<span class="blank-line"></span>');
-
+            // 백엔드에서 이미 렌더링된 HTML을 그대로 사용 (추가 변환 불필요)
             const previewContent = decoded ? decoded : '<p class="text-muted">템플릿 내용이 비어있습니다.</p>';
 
             document.getElementById('previewModalTitle').textContent = title;

@@ -406,8 +406,7 @@ class ContractForm {
         console.log('[DEBUG] renderTemplateHtml - Input HTML length:', html.length);
         console.log('[DEBUG] renderTemplateHtml - First 500 chars:', html.substring(0, 500));
 
-        // CSS는 통일된 contract-common.css에서 로드하므로 동적 추출 불필요
-
+        // 백엔드에서 이미 렌더링된 HTML을 그대로 사용
         // body 태그 내용만 추출
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;

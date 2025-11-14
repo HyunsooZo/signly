@@ -8,6 +8,8 @@
     <jsp:param name="additionalCss" value="/css/contract-template-base.css" />
     <jsp:param name="additionalCss2" value="/css/contract-template-preview.css" />
     <jsp:param name="additionalCss3" value="/css/contracts.css" />
+    <jsp:param name="additionalCss4" value="/css/templates.css" />
+    <jsp:param name="additionalCss5" value="/css/modal.css" />
 </jsp:include>
 <body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
 <jsp:include page="../common/navbar.jsp">
