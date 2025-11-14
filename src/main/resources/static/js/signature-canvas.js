@@ -72,10 +72,10 @@ class SignatureCanvas {
     setupHighDPI() {
         const devicePixelRatio = window.devicePixelRatio || 1;
         const backingStoreRatio = this.ctx.webkitBackingStorePixelRatio ||
-            this.ctx.mozBackingStorePixelRatio ||
-            this.ctx.msBackingStorePixelRatio ||
-            this.ctx.oBackingStorePixelRatio ||
-            this.ctx.backingStorePixelRatio || 1;
+                                 this.ctx.mozBackingStorePixelRatio ||
+                                 this.ctx.msBackingStorePixelRatio ||
+                                 this.ctx.oBackingStorePixelRatio ||
+                                 this.ctx.backingStorePixelRatio || 1;
 
         const ratio = devicePixelRatio / backingStoreRatio;
 
@@ -138,14 +138,10 @@ class SignatureCanvas {
      */
     getTouchEventType(touchEventType) {
         switch (touchEventType) {
-            case 'touchstart':
-                return 'mousedown';
-            case 'touchmove':
-                return 'mousemove';
-            case 'touchend':
-                return 'mouseup';
-            default:
-                return touchEventType;
+            case 'touchstart': return 'mousedown';
+            case 'touchmove': return 'mousemove';
+            case 'touchend': return 'mouseup';
+            default: return touchEventType;
         }
     }
 
@@ -400,15 +396,15 @@ class SignaturePad {
                 </div>
                 <div class="signature-controls">
                     ${this.options.showClearButton ?
-            `<button type="button" class="btn btn-secondary signature-clear">
+                        `<button type="button" class="btn btn-secondary signature-clear">
                             ${this.options.clearButtonText}
                         </button>` : ''
-        }
+                    }
                     ${this.options.showSubmitButton ?
-            `<button type="button" class="btn btn-primary signature-submit">
+                        `<button type="button" class="btn btn-primary signature-submit">
                             ${this.options.submitButtonText}
                         </button>` : ''
-        }
+                    }
                 </div>
                 <div class="signature-error" style="display: none;"></div>
             </div>
@@ -515,7 +511,7 @@ class SignaturePad {
 
         // 이벤트 발생
         const event = new CustomEvent('signatureSubmit', {
-            detail: {signatureData}
+            detail: { signatureData }
         });
 
         this.container.dispatchEvent(event);

@@ -372,24 +372,7 @@
     background: white;
     border-color: var(--primary-color);
     outline: none;
-}
-
-border-color:
-
-rgba
-(
-255
-,
-255
-,
-255
-,
-.5
-)
-;
-outline: none
-
-;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.12);
 }
 
 .document-actions {

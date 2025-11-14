@@ -465,18 +465,18 @@ class TemplateForm {
             method: 'POST',
             body: formData
         })
-            .then(response => response.text())
-            .then(html => {
-                const previewWindow = window.open('', '_blank');
-                previewWindow.document.write(html);
-                previewWindow.document.close();
-            })
-            .catch(error => {
-                console.error('Preview failed:', error);
-                if (window.showAlertModal) {
-                    showAlertModal('미리보기 생성 중 오류가 발생했습니다.');
-                }
-            });
+        .then(response => response.text())
+        .then(html => {
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(html);
+            previewWindow.document.close();
+        })
+        .catch(error => {
+            console.error('Preview failed:', error);
+            if (window.showAlertModal) {
+                showAlertModal('미리보기 생성 중 오류가 발생했습니다.');
+            }
+        });
     }
 
     loadPresets() {
@@ -621,55 +621,55 @@ class TemplateForm {
 }
 
 // Global functions for onclick handlers
-window.insertVariable = function (variable) {
+window.insertVariable = function(variable) {
     if (window.templateForm) {
         window.templateForm.insertVariable(variable);
     }
 };
 
-window.togglePresetSection = function () {
+window.togglePresetSection = function() {
     if (window.templateForm) {
         window.templateForm.togglePresetSection();
     }
 };
 
-window.addSection = function (type) {
+window.addSection = function(type) {
     if (window.templateForm) {
         window.templateForm.addSection(type);
     }
 };
 
-window.deleteSection = function () {
+window.deleteSection = function() {
     if (window.templateForm) {
         window.templateForm.deleteSection();
     }
 };
 
-window.duplicateSection = function () {
+window.duplicateSection = function() {
     if (window.templateForm) {
         window.templateForm.duplicateSection();
     }
 };
 
-window.saveTemplate = function () {
+window.saveTemplate = function() {
     if (window.templateForm) {
         window.templateForm.saveTemplate();
     }
 };
 
-window.previewTemplate = function () {
+window.previewTemplate = function() {
     if (window.templateForm) {
         window.templateForm.previewTemplate();
     }
 };
 
-window.showVariableModal = function () {
+window.showVariableModal = function() {
     if (window.templateForm) {
         window.templateForm.showVariableModal();
     }
 };
 
-window.showSectionModal = function () {
+window.showSectionModal = function() {
     if (window.templateForm) {
         window.templateForm.showSectionModal();
     }

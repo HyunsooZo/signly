@@ -296,31 +296,31 @@ class ContractDetail {
 }
 
 // Global functions for onclick handlers
-window.downloadPdf = function () {
+window.downloadPdf = function() {
     if (window.contractDetail) {
         window.contractDetail.downloadPdf();
     }
 };
 
-window.resendEmail = function () {
+window.resendEmail = function() {
     if (window.contractDetail) {
         window.contractDetail.resendEmail();
     }
 };
 
-window.cancelContract = function () {
+window.cancelContract = function() {
     if (window.contractDetail) {
         window.contractDetail.cancelContract();
     }
 };
 
-window.completeContract = function () {
+window.completeContract = function() {
     if (window.contractDetail) {
         window.contractDetail.completeContract();
     }
 };
 
-window.deleteContract = function () {
+window.deleteContract = function() {
     if (window.contractDetail) {
         window.contractDetail.deleteContract();
     }

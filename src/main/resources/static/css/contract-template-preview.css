@@ -18,7 +18,7 @@
     padding: 0.4rem;
     border-radius: 8px;
     border: 1px solid #e9ecef;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .template-preview::after {
@@ -42,7 +42,7 @@
     padding: 3rem;
     border-radius: 8px;
     border: 1px solid #e9ecef;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 /* #presetHtmlContainer 스타일 제거 - contract-template-base.css의 .preset-document 스타일로 대체 */

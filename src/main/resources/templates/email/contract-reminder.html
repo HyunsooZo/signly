@@ -7,43 +7,43 @@
     <th:block th:replace="~{email/fragments/email-style :: emailStyles}"></th:block>
 </head>
 <body class="email-body">
-<div class="email-wrapper">
-    <div class="email-card">
-        <div class="email-header email-header--info">
-            <div class="email-logo email-logo--info" th:text="${companyName}">Signly</span></div>
-        </div>
-
-        <div class="email-content">
-            <h2 class="email-title email-center">계약서 서명 독촉</h2>
-
-            <p>안녕하세요, <strong th:text="${signerName}">서명자</strong>님!</p>
-
-            <p>아직 서명하지 않으신 계약서가 있습니다:</p>
-
-            <div class="email-highlight email-highlight--info">
-                <p class="email-meta"><strong>계약서 제목:</strong> <span th:text="${contractTitle}">계약서 제목</span></p>
-                <p class="email-meta"><strong>발송 일시:</strong> <span th:text="${sentAt}">-</span></p>
-                <p class="email-meta"><strong>만료 일시:</strong> <span th:text="${expiresAt}">-</span></p>
+    <div class="email-wrapper">
+        <div class="email-card">
+            <div class="email-header email-header--info">
+                <div class="email-logo email-logo--info" th:text="${companyName}">Signly</span></div>
             </div>
 
-            <p>가능한 빠른 시일 내에 계약서를 검토하고 서명해 주시기 바랍니다.</p>
+            <div class="email-content">
+                <h2 class="email-title email-center">계약서 서명 독촉</h2>
 
-            <div class="email-center">
-                <a th:href="${contractUrl}" class="email-button email-button--primary">계약서 서명하기</a>
+                <p>안녕하세요, <strong th:text="${signerName}">서명자</strong>님!</p>
+
+                <p>아직 서명하지 않으신 계약서가 있습니다:</p>
+
+                <div class="email-highlight email-highlight--info">
+                    <p class="email-meta"><strong>계약서 제목:</strong> <span th:text="${contractTitle}">계약서 제목</span></p>
+                    <p class="email-meta"><strong>발송 일시:</strong> <span th:text="${sentAt}">-</span></p>
+                    <p class="email-meta"><strong>만료 일시:</strong> <span th:text="${expiresAt}">-</span></p>
+                </div>
+
+                <p>가능한 빠른 시일 내에 계약서를 검토하고 서명해 주시기 바랍니다.</p>
+
+                <div class="email-center">
+                    <a th:href="${contractUrl}" class="email-button email-button--primary">계약서 서명하기</a>
+                </div>
+
+                <p><strong>참고사항:</strong></p>
+                <ul class="email-list">
+                    <li>계약서를 신중히 검토한 후 서명해 주세요.</li>
+                    <li>문의사항이 있으시면 계약서 작성자에게 연락해 주세요.</li>
+                </ul>
             </div>
 
-            <p><strong>참고사항:</strong></p>
-            <ul class="email-list">
-                <li>계약서를 신중히 검토한 후 서명해 주세요.</li>
-                <li>문의사항이 있으시면 계약서 작성자에게 연락해 주세요.</li>
-            </ul>
-        </div>
-
-        <div class="email-footer">
-            <p>이 이메일은 <span th:text="${companyName}">Signly</span> 전자계약 시스템에서 자동으로 발송되었습니다.</p>
-            <p>본 이메일에 회신하지 마세요.</p>
+            <div class="email-footer">
+                <p>이 이메일은 <span th:text="${companyName}">Signly</span> 전자계약 시스템에서 자동으로 발송되었습니다.</p>
+                <p>본 이메일에 회신하지 마세요.</p>
+            </div>
         </div>
     </div>
-</div>
 </body>
 </html>

@@ -7,29 +7,29 @@
     <th:block th:replace="~{fragments/email-style.html :: emailStyles}"></th:block>
 </head>
 <body class="email-body">
-<div class="email-wrapper">
-    <div class="email-card">
-        <div class="email-header email-header--warning">
-            <div class="email-logo email-logo--warning" th:text="${companyName}">Signly</div>
-        </div>
-
-        <div class="email-content">
-            <h2 class="email-title email-title--warning">🚫 계약서가 취소되었습니다</h2>
-
-            <p><strong th:text="${contractTitle}">계약서</strong>가 취소 처리되었습니다.</p>
-
-            <div class="email-highlight email-highlight--warning">
-                <p class="email-meta"><strong>취소 일시:</strong> <span th:text="${cancelledAt}">-</span></p>
+    <div class="email-wrapper">
+        <div class="email-card">
+            <div class="email-header email-header--warning">
+                <div class="email-logo email-logo--warning" th:text="${companyName}">Signly</div>
             </div>
 
-            <p>감사합니다.</p>
-        </div>
+            <div class="email-content">
+                <h2 class="email-title email-title--warning">🚫 계약서가 취소되었습니다</h2>
 
-        <div class="email-footer">
-            <p>이 이메일은 <span th:text="${companyName}">Signly</span> 전자계약 시스템에서 자동으로 발송되었습니다.</p>
-            <p>본 이메일에 회신하지 마세요.</p>
+                <p><strong th:text="${contractTitle}">계약서</strong>가 취소 처리되었습니다.</p>
+
+                <div class="email-highlight email-highlight--warning">
+                    <p class="email-meta"><strong>취소 일시:</strong> <span th:text="${cancelledAt}">-</span></p>
+                </div>
+
+                <p>감사합니다.</p>
+            </div>
+
+            <div class="email-footer">
+                <p>이 이메일은 <span th:text="${companyName}">Signly</span> 전자계약 시스템에서 자동으로 발송되었습니다.</p>
+                <p>본 이메일에 회신하지 마세요.</p>
+            </div>
         </div>
     </div>
-</div>
 </body>
 </html>
