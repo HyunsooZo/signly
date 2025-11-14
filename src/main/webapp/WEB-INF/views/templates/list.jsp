@@ -298,20 +298,32 @@
             return textarea.value;
         }
 
-        const csrfParam = '<c:out value="${_csrf.parameterName}"/>';
-        const csrfToken = '<c:out value="${_csrf.token}"/>';
+        // 전역 변수로 선언
+        window.csrfParam = '${_csrf.parameterName}';
+        window.csrfToken = '${_csrf.token}';
 
         function submitPost(action) {
             const form = document.createElement('form');
             form.method = 'post';
             form.action = action;
 
-            if (csrfParam && csrfToken) {
+            // 전역 변수 사용
+            if (window.csrfParam && window.csrfToken) {
                 const input = document.createElement('input');
                 input.type = 'hidden';
-                input.name = csrfParam;
-                input.value = csrfToken;
+                input.name = window.csrfParam;
+                input.value = window.csrfToken;
                 form.appendChild(input);
+            } else {
+                // 폴백: 페이지에서 찾기
+                const existingCsrfInput = document.querySelector('input[name="_csrf"]');
+                if (existingCsrfInput) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = '_csrf';
+                    input.value = existingCsrfInput.value;
+                    form.appendChild(input);
+                }
             }
 
             document.body.appendChild(form);

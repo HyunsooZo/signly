@@ -242,8 +242,9 @@
     </div>
 
     <script>
-        const csrfParam = '<c:out value="${_csrf.parameterName}"/>';
-        const csrfToken = '<c:out value="${_csrf.token}"/>';
+        // 전역 변수로 선언
+        window.csrfParam = '${_csrf.parameterName}';
+        window.csrfToken = '${_csrf.token}';
 
         // 페이지 로드 시 템플릿 내용 디코딩 및 표시
         document.addEventListener('DOMContentLoaded', function() {
@@ -270,14 +271,24 @@
         });
 
         function appendCsrfField(form) {
-            if (!csrfParam || !csrfToken) {
-                return;
+            // 전역 변수 사용
+            if (window.csrfParam && window.csrfToken) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = window.csrfParam;
+                input.value = window.csrfToken;
+                form.appendChild(input);
+            } else {
+                // 폴백: 페이지에서 찾기
+                const existingCsrfInput = document.querySelector('input[name="_csrf"]');
+                if (existingCsrfInput) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = '_csrf';
+                    input.value = existingCsrfInput.value;
+                    form.appendChild(input);
+                }
             }
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = csrfParam;
-            input.value = csrfToken;
-            form.appendChild(input);
         }
 
         function previewTemplate() {
