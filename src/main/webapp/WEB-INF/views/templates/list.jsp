@@ -200,6 +200,13 @@
         </div>
     </div>
 
+    <!-- Hidden action form -->
+    <form id="templateActionForm" method="post" class="d-none">
+        <c:if test="${not empty _csrf}">
+            <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>" value="<c:out value='${_csrf.token}'/>" />
+        </c:if>
+    </form>
+
     <!-- 삭제 확인 모달 -->
     <div class="modal fade" id="deleteModal" tabindex="-1">
         <div class="modal-dialog">
@@ -272,6 +279,13 @@
                     el.textContent = text;
                 }
             });
+
+            const deleteForm = document.getElementById('deleteForm');
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', function() {
+                    ensureCsrf(deleteForm);
+                });
+            }
         });
 
         function previewTemplateButton(button) {
@@ -299,34 +313,51 @@
         }
 
         // 전역 변수로 선언
-        window.csrfParam = '${_csrf.parameterName}';
-        window.csrfToken = '${_csrf.token}';
+        window.csrfParam = '<c:out value="${_csrf.parameterName}" default="_csrf"/>';
+        window.csrfToken = '<c:out value="${_csrf.token}" default=""/>';
 
-        function submitPost(action) {
-            const form = document.createElement('form');
-            form.method = 'post';
-            form.action = action;
+        function readCsrfFromCookie() {
+            const match = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='));
+            return match ? decodeURIComponent(match.substring('XSRF-TOKEN='.length)) : '';
+        }
 
-            // 전역 변수 사용
-            if (window.csrfParam && window.csrfToken) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = window.csrfParam;
-                input.value = window.csrfToken;
-                form.appendChild(input);
-            } else {
-                // 폴백: 페이지에서 찾기
-                const existingCsrfInput = document.querySelector('input[name="_csrf"]');
-                if (existingCsrfInput) {
-                    const input = document.createElement('input');
+        function ensureCsrf(form) {
+            if (!form) {
+                return;
+            }
+            const tokenValue = readCsrfFromCookie() || window.csrfToken;
+            if (window.csrfParam && tokenValue) {
+                let input = form.querySelector('input[name="' + window.csrfParam + '"]');
+                if (!input) {
+                    input = document.createElement('input');
                     input.type = 'hidden';
-                    input.name = '_csrf';
-                    input.value = existingCsrfInput.value;
+                    input.name = window.csrfParam;
                     form.appendChild(input);
                 }
+                input.value = tokenValue;
+            } else {
+                const existing = document.querySelector('input[name="_csrf"]');
+                if (existing) {
+                    let input = form.querySelector('input[name="_csrf"]');
+                    if (!input) {
+                        input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = '_csrf';
+                        form.appendChild(input);
+                    }
+                    input.value = existing.value;
+                }
             }
+        }
 
-            document.body.appendChild(form);
+        function submitPost(action) {
+            const form = document.getElementById('templateActionForm');
+            if (!form) {
+                console.warn('templateActionForm not found');
+                return;
+            }
+            form.action = action;
+            ensureCsrf(form);
             form.submit();
         }
 
