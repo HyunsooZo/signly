@@ -151,7 +151,7 @@ public class AuthWebController {
         return "auth/register";
     }
 
-    @PostMapping("/logout")
+    @GetMapping("/logout")
     public String logout(
             @AuthenticationPrincipal SecurityUser securityUser,
             HttpServletResponse response,
