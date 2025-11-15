@@ -13,7 +13,7 @@ class ContractContentTest {
 
         ContractContent contractContent = ContractContent.of(content);
 
-        assertThat(contractContent.getValue()).isEqualTo(content);
+        assertThat(contractContent.content()).isEqualTo(content);
     }
 
     @Test
@@ -22,7 +22,7 @@ class ContractContentTest {
 
         ContractContent contractContent = ContractContent.of(content);
 
-        assertThat(contractContent.getValue()).isEqualTo("계약서 내용입니다.");
+        assertThat(contractContent.content()).isEqualTo("계약서 내용입니다.");
     }
 
     @Test
@@ -61,7 +61,7 @@ class ContractContentTest {
 
         ContractContent contractContent = ContractContent.of(maxContent);
 
-        assertThat(contractContent.getValue()).isEqualTo(maxContent);
+        assertThat(contractContent.content()).isEqualTo(maxContent);
         assertThat(contractContent.getLength()).isEqualTo(50000);
     }
 

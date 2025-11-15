@@ -22,6 +22,9 @@ import com.signly.template.domain.model.TemplateStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -48,6 +51,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/contracts")
+@RequiredArgsConstructor
 public class ContractWebController extends BaseWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractWebController.class);
@@ -58,22 +62,7 @@ public class ContractWebController extends BaseWebController {
     private final CurrentUserProvider currentUserProvider;
     private final FirstPartySignatureService firstPartySignatureService;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    public ContractWebController(
-            ContractService contractService,
-            ContractPdfService contractPdfService,
-            TemplateService templateService,
-            TemplatePresetService templatePresetService,
-            CurrentUserProvider currentUserProvider,
-            FirstPartySignatureService firstPartySignatureService
-    ) {
-        this.contractService = contractService;
-        this.contractPdfService = contractPdfService;
-        this.templateService = templateService;
-        this.templatePresetService = templatePresetService;
-        this.currentUserProvider = currentUserProvider;
-        this.firstPartySignatureService = firstPartySignatureService;
-    }
+    private final com.signly.common.storage.FileStorageService fileStorageService;
 
     @GetMapping
     public String contractList(
@@ -109,7 +98,6 @@ public class ContractWebController extends BaseWebController {
     @GetMapping("/new")
     public String newContractForm(
             @RequestParam(value = "templateId", required = false) String templateId,
-            @RequestParam(value = "preset", required = false) String preset,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
             @AuthenticationPrincipal SecurityUser securityUser,
             HttpServletRequest request,
@@ -124,13 +112,13 @@ public class ContractWebController extends BaseWebController {
             if (!firstPartySignatureService.hasSignature(resolvedUserId)) {
                 logger.warn("서명 없이 계약서 생성 시도: userId={}", resolvedUserId);
                 redirectAttributes.addFlashAttribute("errorMessage",
-                    "계약서를 생성하려면 먼저 서명을 등록해야 합니다.");
+                        "계약서를 생성하려면 먼저 서명을 등록해야 합니다.");
                 redirectAttributes.addFlashAttribute("showSignatureAlert", true);
                 return "redirect:/profile/signature";
             }
 
-            // preset이나 templateId가 없으면 유형 선택 화면으로 이동
-            if (preset == null && templateId == null) {
+            // templateId가 없으면 유형 선택 화면으로 이동
+            if (templateId == null) {
                 model.addAttribute("pageTitle", "계약서 유형 선택");
                 model.addAttribute("presets", templatePresetService.getSummaries());
                 return "contracts/select-type";
@@ -140,24 +128,48 @@ public class ContractWebController extends BaseWebController {
             ContractForm form = new ContractForm();
             form.setExpiresAt(LocalDateTime.now().plusHours(24));
 
-            // 템플릿이 지정된 경우 템플릿 정보 로드 (프리셋 레이아웃으로 표시)
-            if (templateId != null && !templateId.isEmpty()) {
+            // 템플릿 정보 로드 (preset 또는 user template)
+            String templateTitle;
+            String templateContent;
+            String renderedHtml;
+            Object variables = new LinkedHashMap<>();
+
+            // 먼저 preset인지 확인
+            var presetOpt = templatePresetService.getPreset(templateId);
+            if (presetOpt.isPresent()) {
+                var preset = presetOpt.get();
+                templateTitle = preset.getName();
+                templateContent = ""; // preset은 content가 없음
+                renderedHtml = preset.renderHtml();
+                logger.info("[DEBUG] Loaded preset template: {}, renderedHtmlLength={}",
+                        templateId, renderedHtml != null ? renderedHtml.length() : 0);
+            } else {
+                // preset이 아니면 user template 로드
                 TemplateResponse template = templateService.getTemplate(resolvedUserId, templateId);
-                form.setTemplateId(templateId);
-                form.setTitle(template.getTitle());
-                form.setContent(template.getContent());
-                // 템플릿을 프리셋처럼 사용
-                model.addAttribute("selectedTemplate", templateId);
-                try {
-                    Map<String, Object> templatePayload = new LinkedHashMap<>();
-                    templatePayload.put("templateId", template.getTemplateId());
-                    templatePayload.put("title", template.getTitle());
-                    templatePayload.put("renderedHtml", template.getRenderedHtml());
-                    templatePayload.put("variables", template.getVariables());
-                    model.addAttribute("selectedTemplateContent", objectMapper.writeValueAsString(templatePayload));
-                } catch (Exception e) {
-                    logger.warn("[DEBUG] New form - Failed to build template JSON: {}", e.getMessage());
-                }
+                templateTitle = template.getTitle();
+                templateContent = template.getContent();
+                renderedHtml = template.getRenderedHtml();
+                variables = template.getVariables() != null ? template.getVariables() : new LinkedHashMap<>();
+                logger.info("[DEBUG] Loaded user template: {}, renderedHtmlLength={}",
+                        templateId, renderedHtml != null ? renderedHtml.length() : 0);
+            }
+
+            form.setTemplateId(templateId);
+            form.setTitle(templateTitle);
+            form.setContent(templateContent);
+
+            model.addAttribute("selectedTemplate", templateId);
+            try {
+                Map<String, Object> templatePayload = new LinkedHashMap<>();
+                templatePayload.put("templateId", templateId);
+                templatePayload.put("title", templateTitle);
+                templatePayload.put("renderedHtml", renderedHtml);
+                templatePayload.put("variables", variables);
+                String jsonPayload = objectMapper.writeValueAsString(templatePayload);
+                logger.info("[DEBUG] Template JSON payload length: {}", jsonPayload.length());
+                model.addAttribute("selectedTemplateContent", jsonPayload);
+            } catch (Exception e) {
+                logger.error("[ERROR] Failed to build template JSON", e);
             }
 
             // 활성 템플릿 목록 로드
@@ -169,7 +181,6 @@ public class ContractWebController extends BaseWebController {
             model.addAttribute("contract", form);
             model.addAttribute("templates", activeTemplates.getContent());
             model.addAttribute("presets", templatePresetService.getSummaries());
-            model.addAttribute("selectedPreset", preset);
             return "contracts/form";
 
         } catch (Exception e) {
@@ -570,26 +581,42 @@ public class ContractWebController extends BaseWebController {
                 return;
             }
 
-            // PDF 생성
-            GeneratedPdf pdf = contractPdfService.generateContractPdf(contractId);
+            GeneratedPdf pdf;
+
+            // 저장된 PDF가 있으면 파일에서 읽기, 없으면 생성
+            if (contract.getPdfPath() != null && !contract.getPdfPath().isEmpty()) {
+                logger.info("저장된 PDF 파일 제공: contractId={}, path={}", contractId, contract.getPdfPath());
+                try {
+                    byte[] pdfContent = fileStorageService.loadFile(contract.getPdfPath());
+                    String fileName = contract.getTitle() + "_" +
+                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".pdf";
+                    pdf = GeneratedPdf.of(pdfContent, fileName);
+                } catch (Exception e) {
+                    logger.warn("저장된 PDF 로드 실패, 새로 생성: contractId={}", contractId, e);
+                    pdf = contractPdfService.generateContractPdf(contractId);
+                }
+            } else {
+                logger.info("저장된 PDF 없음, 새로 생성: contractId={}", contractId);
+                pdf = contractPdfService.generateContractPdf(contractId);
+            }
 
             // 파일명 인코딩 (한글 파일명 지원)
-            String encodedFileName = URLEncoder.encode(pdf.getFileName(), StandardCharsets.UTF_8)
+            String encodedFileName = URLEncoder.encode(pdf.fileName(), StandardCharsets.UTF_8)
                     .replace("+", "%20");
 
             // HTTP 응답 헤더 설정
             response.setContentType(MediaType.APPLICATION_PDF_VALUE);
-            response.setContentLengthLong(pdf.getSizeInBytes());
+            response.setContentLengthLong(pdf.sizeInBytes());
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
 
             // PDF 바이트 스트림으로 전송
             try (OutputStream out = response.getOutputStream()) {
-                out.write(pdf.getContent());
+                out.write(pdf.content());
                 out.flush();
             }
 
-            logger.info("PDF 다운로드 성공: contractId={}, fileName={}", contractId, pdf.getFileName());
+            logger.info("PDF 다운로드 성공: contractId={}, fileName={}", contractId, pdf.fileName());
 
         } catch (Exception e) {
             logger.error("PDF 다운로드 중 오류 발생: contractId={}", contractId, e);
@@ -618,26 +645,42 @@ public class ContractWebController extends BaseWebController {
                 return;
             }
 
-            // PDF 생성
-            GeneratedPdf pdf = contractPdfService.generateContractPdf(contractId);
+            GeneratedPdf pdf;
+
+            // 저장된 PDF가 있으면 파일에서 읽기, 없으면 생성
+            if (contract.getPdfPath() != null && !contract.getPdfPath().isEmpty()) {
+                logger.info("저장된 PDF 파일 제공: contractId={}, path={}", contractId, contract.getPdfPath());
+                try {
+                    byte[] pdfContent = fileStorageService.loadFile(contract.getPdfPath());
+                    String fileName = contract.getTitle() + "_" +
+                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".pdf";
+                    pdf = GeneratedPdf.of(pdfContent, fileName);
+                } catch (Exception e) {
+                    logger.warn("저장된 PDF 로드 실패, 새로 생성: contractId={}", contractId, e);
+                    pdf = contractPdfService.generateContractPdf(contractId);
+                }
+            } else {
+                logger.info("저장된 PDF 없음, 새로 생성: contractId={}", contractId);
+                pdf = contractPdfService.generateContractPdf(contractId);
+            }
 
             // 파일명 인코딩
-            String encodedFileName = URLEncoder.encode(pdf.getFileName(), StandardCharsets.UTF_8)
+            String encodedFileName = URLEncoder.encode(pdf.fileName(), StandardCharsets.UTF_8)
                     .replace("+", "%20");
 
             // HTTP 응답 헤더 설정 (inline으로 표시)
             response.setContentType(MediaType.APPLICATION_PDF_VALUE);
-            response.setContentLengthLong(pdf.getSizeInBytes());
+            response.setContentLengthLong(pdf.sizeInBytes());
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                     "inline; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
 
             // PDF 바이트 스트림으로 전송
             try (OutputStream out = response.getOutputStream()) {
-                out.write(pdf.getContent());
+                out.write(pdf.content());
                 out.flush();
             }
 
-            logger.info("PDF 인라인 뷰 성공: contractId={}, fileName={}", contractId, pdf.getFileName());
+            logger.info("PDF 인라인 뷰 성공: contractId={}, fileName={}", contractId, pdf.fileName());
 
         } catch (Exception e) {
             logger.error("PDF 인라인 뷰 중 오류 발생: contractId={}", contractId, e);
@@ -645,6 +688,8 @@ public class ContractWebController extends BaseWebController {
         }
     }
 
+    @Setter
+    @Getter
     public static class ContractForm {
         private String templateId;
         private String title;
@@ -661,52 +706,9 @@ public class ContractWebController extends BaseWebController {
 
         private static final DateTimeFormatter EXPIRES_AT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
-        public String getTemplateId() {return templateId;}
-
-        public void setTemplateId(String templateId) {this.templateId = templateId;}
-
-        public String getTitle() {return title;}
-
-        public void setTitle(String title) {this.title = title;}
-
-        public String getContent() {return content;}
-
-        public void setContent(String content) {this.content = content;}
-
-        public String getFirstPartyName() {return firstPartyName;}
-
-        public void setFirstPartyName(String firstPartyName) {this.firstPartyName = firstPartyName;}
-
-        public String getFirstPartyEmail() {return firstPartyEmail;}
-
-        public void setFirstPartyEmail(String firstPartyEmail) {this.firstPartyEmail = firstPartyEmail;}
-
-        public String getFirstPartyAddress() {return firstPartyAddress;}
-
-        public void setFirstPartyAddress(String firstPartyAddress) {this.firstPartyAddress = firstPartyAddress;}
-
-        public String getSecondPartyName() {return secondPartyName;}
-
-        public void setSecondPartyName(String secondPartyName) {this.secondPartyName = secondPartyName;}
-
-        public String getSecondPartyEmail() {return secondPartyEmail;}
-
-        public void setSecondPartyEmail(String secondPartyEmail) {this.secondPartyEmail = secondPartyEmail;}
-
-        public String getSecondPartyAddress() {return secondPartyAddress;}
-
-        public void setSecondPartyAddress(String secondPartyAddress) {this.secondPartyAddress = secondPartyAddress;}
-
-        public LocalDateTime getExpiresAt() {return expiresAt;}
-
-        public void setExpiresAt(LocalDateTime expiresAt) {this.expiresAt = expiresAt;}
-
         public String getExpiresAtInputValue() {
             return expiresAt != null ? expiresAt.format(EXPIRES_AT_FORMATTER) : "";
         }
 
-        public String getSelectedPreset() {return selectedPreset;}
-
-        public void setSelectedPreset(String selectedPreset) {this.selectedPreset = selectedPreset;}
     }
 }

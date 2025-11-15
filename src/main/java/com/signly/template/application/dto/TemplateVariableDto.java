@@ -13,11 +13,11 @@ public class TemplateVariableDto {
     private final String defaultValue;
 
     public TemplateVariableDto(
-        String name,
-        String label,
-        TemplateVariableType type,
-        boolean required,
-        String defaultValue
+            String name,
+            String label,
+            TemplateVariableType type,
+            boolean required,
+            String defaultValue
     ) {
         this.name = name;
         this.label = label;
@@ -27,15 +27,15 @@ public class TemplateVariableDto {
     }
 
     public static TemplateVariableDto from(
-        String name,
-        TemplateVariable variable
+            String name,
+            TemplateVariable variable
     ) {
         return new TemplateVariableDto(
-            name,
-            variable.getLabel(),
-            variable.getType(),
-            variable.isRequired(),
-            variable.getDefaultValue()
+                name,
+                variable.label(),
+                variable.type(),
+                variable.required(),
+                variable.defaultValue()
         );
     }
 }

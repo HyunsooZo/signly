@@ -4,23 +4,26 @@ import com.signly.common.domain.BaseEntity;
 import com.signly.contract.domain.model.ContractStatus;
 import com.signly.contract.domain.model.PresetType;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 @Entity
 @Table(name = "contracts", indexes = {
-    @Index(name = "idx_contract_creator_id", columnList = "creator_id"),
-    @Index(name = "idx_contract_template_id", columnList = "template_id"),
-    @Index(name = "idx_contract_status", columnList = "status"),
-    @Index(name = "idx_contract_first_party_email", columnList = "first_party_email"),
-    @Index(name = "idx_contract_second_party_email", columnList = "second_party_email"),
-    @Index(name = "idx_contract_expires_at", columnList = "expires_at"),
-    @Index(name = "idx_contract_sign_token", columnList = "sign_token"),
-    @Index(name = "idx_contract_creator_status", columnList = "creator_id, status"),
-    @Index(name = "idx_contract_status_expires", columnList = "status, expires_at"),
-    @Index(name = "idx_contract_party_emails", columnList = "first_party_email, second_party_email")
+        @Index(name = "idx_contract_creator_id", columnList = "creator_id"),
+        @Index(name = "idx_contract_template_id", columnList = "template_id"),
+        @Index(name = "idx_contract_status", columnList = "status"),
+        @Index(name = "idx_contract_first_party_email", columnList = "first_party_email"),
+        @Index(name = "idx_contract_second_party_email", columnList = "second_party_email"),
+        @Index(name = "idx_contract_expires_at", columnList = "expires_at"),
+        @Index(name = "idx_contract_sign_token", columnList = "sign_token"),
+        @Index(name = "idx_contract_creator_status", columnList = "creator_id, status"),
+        @Index(name = "idx_contract_status_expires", columnList = "status, expires_at"),
+        @Index(name = "idx_contract_party_emails", columnList = "first_party_email, second_party_email")
 })
 public class ContractJpaEntity extends BaseEntity {
 
@@ -34,13 +37,16 @@ public class ContractJpaEntity extends BaseEntity {
     @Column(name = "template_id", length = 26)
     private String templateId;
 
+    @Setter
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
+    @Setter
     @Lob
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Setter
     @Column(name = "template_data", columnDefinition = "JSON")
     private String templateData;
 
@@ -62,16 +68,19 @@ public class ContractJpaEntity extends BaseEntity {
     @Column(name = "second_party_organization", length = 200)
     private String secondPartyOrganization;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ContractStatus status;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<SignatureJpaEntity> signatures = new ArrayList<>();
+    private final List<SignatureEntity> signatures = new ArrayList<>();
 
+    @Setter
     @Column(name = "sign_token", nullable = false, unique = true, length = 26)
     private String signToken;
 
+    @Setter
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
@@ -79,25 +88,29 @@ public class ContractJpaEntity extends BaseEntity {
     @Column(name = "preset_type", length = 50, nullable = false)
     private PresetType presetType = PresetType.NONE;
 
+    @Setter
+    @Column(name = "pdf_path", length = 1000)
+    private String pdfPath;
+
     protected ContractJpaEntity() {}
 
     public ContractJpaEntity(
-        String id,
-        String creatorId,
-        String templateId,
-        String title,
-        String content,
-        String templateData,
-        String firstPartyName,
-        String firstPartyEmail,
-        String firstPartyOrganization,
-        String secondPartyName,
-        String secondPartyEmail,
-        String secondPartyOrganization,
-        ContractStatus status,
-        String signToken,
-        LocalDateTime expiresAt,
-        PresetType presetType
+            String id,
+            String creatorId,
+            String templateId,
+            String title,
+            String content,
+            String templateData,
+            String firstPartyName,
+            String firstPartyEmail,
+            String firstPartyOrganization,
+            String secondPartyName,
+            String secondPartyEmail,
+            String secondPartyOrganization,
+            ContractStatus status,
+            String signToken,
+            LocalDateTime expiresAt,
+            PresetType presetType
     ) {
         this.id = id;
         this.creatorId = creatorId;
@@ -117,104 +130,13 @@ public class ContractJpaEntity extends BaseEntity {
         this.presetType = presetType != null ? presetType : PresetType.NONE;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public String getCreatorId() {
-        return creatorId;
-    }
-
-    public String getTemplateId() {
-        return templateId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public String getTemplateData() {
-        return templateData;
-    }
-
-    public void setTemplateData(String templateData) {
-        this.templateData = templateData;
-    }
-
-    public String getFirstPartyName() {
-        return firstPartyName;
-    }
-
-    public String getFirstPartyEmail() {
-        return firstPartyEmail;
-    }
-
-    public String getFirstPartyOrganization() {
-        return firstPartyOrganization;
-    }
-
-    public String getSecondPartyName() {
-        return secondPartyName;
-    }
-
-    public String getSecondPartyEmail() {
-        return secondPartyEmail;
-    }
-
-    public String getSecondPartyOrganization() {
-        return secondPartyOrganization;
-    }
-
-    public ContractStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ContractStatus status) {
-        this.status = status;
-    }
-
-    public List<SignatureJpaEntity> getSignatures() {
-        return signatures;
-    }
-
-    public void addSignature(SignatureJpaEntity signature) {
+    public void addSignature(SignatureEntity signature) {
         signatures.add(signature);
         signature.setContract(this);
-    }
-
-    public LocalDateTime getExpiresAt() {
-        return expiresAt;
-    }
-
-    public void setExpiresAt(LocalDateTime expiresAt) {
-        this.expiresAt = expiresAt;
-    }
-
-    public String getSignToken() {
-        return signToken;
-    }
-
-    public void setSignToken(String signToken) {
-        this.signToken = signToken;
-    }
-
-    public PresetType getPresetType() {
-        return presetType;
     }
 
     public void setPresetType(PresetType presetType) {
         this.presetType = presetType != null ? presetType : PresetType.NONE;
     }
+
 }

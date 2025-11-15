@@ -6,25 +6,29 @@ import com.signly.common.security.TokenRedisService;
 import com.signly.core.auth.dto.LoginRequest;
 import com.signly.core.auth.dto.LoginResponse;
 import com.signly.user.application.UserService;
-import com.signly.user.application.dto.UserResponse;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import java.util.Arrays;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Arrays;
+
 @Controller
+@RequiredArgsConstructor
 public class AuthWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthWebController.class);
@@ -36,20 +40,6 @@ public class AuthWebController {
 
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
-
-    public AuthWebController(
-            AuthService authService,
-            UserService userService,
-            EmailService emailService,
-            TokenRedisService tokenRedisService,
-            Environment environment
-    ) {
-        this.authService = authService;
-        this.userService = userService;
-        this.emailService = emailService;
-        this.tokenRedisService = tokenRedisService;
-        this.environment = environment;
-    }
 
     @GetMapping("/login")
     public String loginForm(
@@ -91,7 +81,7 @@ public class AuthWebController {
 
             // 환경별 보안 설정
             boolean isProduction = Arrays.asList(environment.getActiveProfiles()).contains("prod");
-            
+
             // JWT 액세스 토큰을 쿠키에 저장 (보안 강화)
             Cookie authCookie = new Cookie("authToken", loginResponse.accessToken());
             authCookie.setHttpOnly(true); // XSS 방어를 위해 JavaScript 접근 차단
@@ -99,9 +89,7 @@ public class AuthWebController {
             authCookie.setPath("/");
             // SameSite는 Servlet 4.0+에서 지원, 하위 버전에서는 Response Header로 처리
             if (isProduction) {
-                response.setHeader("Set-Cookie", 
-                    String.format("%s; Path=/; HttpOnly; Secure; SameSite=Strict", 
-                        authCookie.getName() + "=" + authCookie.getValue()));
+                response.setHeader("Set-Cookie", String.format("%s; Path=/; HttpOnly; Secure; SameSite=Strict", authCookie.getName() + "=" + authCookie.getValue()));
             }
             authCookie.setMaxAge(60 * 60); // 1시간
             response.addCookie(authCookie);
@@ -114,9 +102,9 @@ public class AuthWebController {
                 refreshCookie.setPath("/");
                 // SameSite는 Servlet 4.0+에서 지원, 하위 버전에서는 Response Header로 처리
                 if (isProduction) {
-                    response.setHeader("Set-Cookie", 
-                        String.format("%s; Path=/; HttpOnly; Secure; SameSite=Strict", 
-                            refreshCookie.getName() + "=" + refreshCookie.getValue()));
+                    response.setHeader("Set-Cookie",
+                            String.format("%s; Path=/; HttpOnly; Secure; SameSite=Strict",
+                                    refreshCookie.getName() + "=" + refreshCookie.getValue()));
                 }
                 refreshCookie.setMaxAge(30 * 24 * 60 * 60); // 30일
                 response.addCookie(refreshCookie);
@@ -127,7 +115,7 @@ public class AuthWebController {
 
             // Redis에 액세스 토큰 저장
             tokenRedisService.saveAccessToken(loginResponse.userId(), loginResponse.accessToken());
-            
+
             logger.info("로그인 성공: {}", loginRequest.email());
             redirectAttributes.addFlashAttribute("successMessage", "로그인되었습니다.");
 
@@ -151,7 +139,7 @@ public class AuthWebController {
         return "auth/register";
     }
 
-    @PostMapping("/logout")
+    @GetMapping("/logout")
     public String logout(
             @AuthenticationPrincipal SecurityUser securityUser,
             HttpServletResponse response,
@@ -159,7 +147,7 @@ public class AuthWebController {
     ) {
         // Redis에서 토큰 삭제
         if (securityUser != null) {
-            String userId = securityUser.getUser().getUserId().getValue();
+            String userId = securityUser.getUser().getUserId().value();
             authService.logout(userId);
             logger.info("로그아웃 완료: userId={}", userId);
         }
@@ -200,14 +188,13 @@ public class AuthWebController {
             String token = userService.generatePasswordResetToken(email);
 
             // 사용자 정보 가져오기
-            UserResponse user = userService.getUserByEmail(email);
+            var user = userService.getUserByEmail(email);
 
             // 이메일 발송
             emailService.sendPasswordResetEmail(email, user.name(), token, baseUrl);
 
             logger.info("비밀번호 재설정 이메일 발송 완료: {}", email);
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "비밀번호 재설정 링크를 이메일로 발송했습니다. 이메일을 확인해주세요.");
+            redirectAttributes.addFlashAttribute("successMessage", "비밀번호 재설정 링크를 이메일로 발송했습니다. 이메일을 확인해주세요.");
             return "redirect:/forgot-password";
 
         } catch (Exception e) {

@@ -1,7 +1,11 @@
 package com.signly.common.security;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,19 +18,26 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final SecretKey secretKey;
+    @Getter
     private final long accessTokenValidityInMs;
+    @Getter
     private final long refreshTokenValidityInMs;
 
     public JwtTokenProvider(
             @Value("${app.jwt.secret:mySecretKeyForJWT123456789012345678901234567890}") String secretKeyString,
             @Value("${app.jwt.access-token-validity-in-ms:3600000}") long accessTokenValidityInMs,
-            @Value("${app.jwt.refresh-token-validity-in-ms:86400000}") long refreshTokenValidityInMs) {
+            @Value("${app.jwt.refresh-token-validity-in-ms:86400000}") long refreshTokenValidityInMs
+    ) {
         this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes());
         this.accessTokenValidityInMs = accessTokenValidityInMs;
         this.refreshTokenValidityInMs = refreshTokenValidityInMs;
     }
 
-    public String createAccessToken(String userId, String email, String userType) {
+    public String createAccessToken(
+            String userId,
+            String email,
+            String userType
+    ) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessTokenValidityInMs);
 
@@ -108,14 +119,6 @@ public class JwtTokenProvider {
     public LocalDateTime getExpirationFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
         return claims.getExpiration().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-    }
-
-    public long getAccessTokenValidityInMs() {
-        return accessTokenValidityInMs;
-    }
-
-    public long getRefreshTokenValidityInMs() {
-        return refreshTokenValidityInMs;
     }
 
     private boolean isTokenExpired(Claims claims) {

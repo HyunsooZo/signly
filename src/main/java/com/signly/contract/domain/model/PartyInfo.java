@@ -2,31 +2,31 @@ package com.signly.contract.domain.model;
 
 import com.signly.common.exception.ValidationException;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class PartyInfo {
+public record PartyInfo(String name, String email, String organizationName) {
+
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
-        "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+            "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
     );
 
-    private final String name;
-    private final String email;
-    private final String organizationName;
-
-    private PartyInfo(String name, String email, String organizationName) {
-        this.name = name;
-        this.email = email;
-        this.organizationName = organizationName;
-    }
-
-    public static PartyInfo of(String name, String email, String organizationName) {
+    public PartyInfo {
         validateName(name);
         validateEmail(email);
         validateOrganizationName(organizationName);
 
-        return new PartyInfo(name.trim(), email.trim().toLowerCase(),
-                           organizationName != null ? organizationName.trim() : null);
+        // Normalize values
+        name = name.trim();
+        email = email.trim().toLowerCase();
+        organizationName = organizationName != null ? organizationName.trim() : null;
+    }
+
+    public static PartyInfo of(
+            String name,
+            String email,
+            String organizationName
+    ) {
+        return new PartyInfo(name, email, organizationName);
     }
 
     private static void validateName(String name) {
@@ -53,43 +53,7 @@ public class PartyInfo {
         }
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getOrganizationName() {
-        return organizationName;
-    }
-
     public boolean hasOrganization() {
         return organizationName != null && !organizationName.trim().isEmpty();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        PartyInfo partyInfo = (PartyInfo) o;
-        return Objects.equals(name, partyInfo.name) &&
-               Objects.equals(email, partyInfo.email) &&
-               Objects.equals(organizationName, partyInfo.organizationName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, email, organizationName);
-    }
-
-    @Override
-    public String toString() {
-        return "PartyInfo{" +
-               "name='" + name + '\'' +
-               ", email='" + email + '\'' +
-               ", organizationName='" + organizationName + '\'' +
-               '}';
     }
 }

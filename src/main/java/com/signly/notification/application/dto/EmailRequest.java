@@ -8,16 +8,21 @@ import java.util.List;
 import java.util.Map;
 
 public record EmailRequest(
-    String to,
-    String toName,
-    EmailTemplate template,
-    Map<String, Object> templateVariables,
-    List<EmailAttachment> attachments
+        String to,
+        String toName,
+        EmailTemplate template,
+        Map<String, Object> templateVariables,
+        List<EmailAttachment> attachments
 ) {
     /**
      * 첨부파일이 없는 이메일 요청 생성자
      */
-    public EmailRequest(String to, String toName, EmailTemplate template, Map<String, Object> templateVariables) {
+    public EmailRequest(
+            String to,
+            String toName,
+            EmailTemplate template,
+            Map<String, Object> templateVariables
+    ) {
         this(to, toName, template, templateVariables, Collections.emptyList());
     }
 

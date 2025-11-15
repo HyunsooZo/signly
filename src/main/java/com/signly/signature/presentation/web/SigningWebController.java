@@ -3,9 +3,8 @@ package com.signly.signature.presentation.web;
 import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.ContractResponse;
 import com.signly.signature.application.SignatureService;
-import com.signly.signature.application.dto.CreateSignatureCommand;
-import com.signly.signature.application.dto.SignatureResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -15,19 +14,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/sign")
+@RequiredArgsConstructor
 public class SigningWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(SigningWebController.class);
     private final ContractService contractService;
     private final SignatureService signatureService;
 
-    public SigningWebController(ContractService contractService, SignatureService signatureService) {
-        this.contractService = contractService;
-        this.signatureService = signatureService;
-    }
-
     @GetMapping("/{token}")
-    public String signingPage(@PathVariable String token, Model model) {
+    public String signingPage(
+            @PathVariable String token,
+            Model model
+    ) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -51,7 +49,10 @@ public class SigningWebController {
     }
 
     @GetMapping("/{token}/verify")
-    public String verifyPage(@PathVariable String token, Model model) {
+    public String verifyPage(
+            @PathVariable String token,
+            Model model
+    ) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -69,11 +70,13 @@ public class SigningWebController {
     }
 
     @PostMapping("/{token}/verify")
-    public String verifyAccess(@PathVariable String token,
-                              @RequestParam String signerEmail,
-                              @RequestParam String signerName,
-                              Model model,
-                              RedirectAttributes redirectAttributes) {
+    public String verifyAccess(
+            @PathVariable String token,
+            @RequestParam String signerEmail,
+            @RequestParam String signerName,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -96,11 +99,13 @@ public class SigningWebController {
 
     @PostMapping("/{token}/sign")
     @ResponseBody
-    public String processSignature(@PathVariable String token,
-                                 @RequestParam String signatureData,
-                                 @RequestParam String signerEmail,
-                                 @RequestParam String signerName,
-                                 HttpServletRequest request) {
+    public String processSignature(
+            @PathVariable String token,
+            @RequestParam String signatureData,
+            @RequestParam String signerEmail,
+            @RequestParam String signerName,
+            HttpServletRequest request
+    ) {
         try {
             logger.info("서명 처리 요청: token={}, signerEmail={}", token, signerEmail);
 
@@ -121,7 +126,10 @@ public class SigningWebController {
     }
 
     @GetMapping("/{token}/complete")
-    public String completePage(@PathVariable String token, Model model) {
+    public String completePage(
+            @PathVariable String token,
+            Model model
+    ) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 

@@ -7,6 +7,7 @@ import com.signly.common.web.BaseWebController;
 import com.signly.signature.application.FirstPartySignatureService;
 import com.signly.signature.application.dto.FirstPartySignatureResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,20 +20,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
+@RequiredArgsConstructor
 public class FirstPartySignatureWebController extends BaseWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(FirstPartySignatureWebController.class);
 
     private final FirstPartySignatureService firstPartySignatureService;
     private final CurrentUserProvider currentUserProvider;
-
-    public FirstPartySignatureWebController(
-            FirstPartySignatureService firstPartySignatureService,
-            CurrentUserProvider currentUserProvider
-    ) {
-        this.firstPartySignatureService = firstPartySignatureService;
-        this.currentUserProvider = currentUserProvider;
-    }
 
     @GetMapping("/profile/signature")
     public String viewSignature(

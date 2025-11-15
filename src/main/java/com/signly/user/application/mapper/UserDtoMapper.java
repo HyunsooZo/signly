@@ -11,12 +11,12 @@ public class UserDtoMapper {
     public UserResponse toResponse(User user) {
         Company company = user.getCompany();
         return new UserResponse(
-                user.getUserId().getValue(),
-                user.getEmail().getValue(),
+                user.getUserId().value(),
+                user.getEmail().value(),
                 user.getName(),
-                company != null ? company.getName() : null,
-                company != null ? company.getPhone() : null,
-                company != null ? company.getAddress() : null,
+                company != null ? company.name() : null,
+                company != null ? company.phone() : null,
+                company != null ? company.address() : null,
                 user.getUserType(),
                 user.getStatus(),
                 user.getCreatedAt(),

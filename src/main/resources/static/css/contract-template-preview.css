@@ -1,0 +1,309 @@
+/* 계약서 템플릿 웹 미리보기 확장 스타일 */
+
+/* ========================================
+   Templates 페이지 카드 미리보기 스타일
+   - 목록에서 여러 템플릿을 작은 카드로 표시
+   - 공간 효율성을 위해 작은 폰트와 높이 제한
+   ======================================== */
+.template-preview {
+    font-size: 0.35rem;
+    color: #495057;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    position: relative;
+    background: #fff;
+    padding: 0.4rem;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.template-preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 25px;
+    background: linear-gradient(to bottom, transparent, #fff);
+    pointer-events: none;
+}
+
+/* ========================================
+   Contracts 페이지 편집 미리보기 스타일  
+   - 단일 템플릿을 상세히 편집하는 화면
+   - 가독성을 위해 큰 폰트와 넓은 패딩 사용
+   ======================================== */
+.preset-preview-body {
+    background-color: #fff;
+    padding: 3rem;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* #presetHtmlContainer 스타일 제거 - contract-template-base.css의 .preset-document 스타일로 대체 */
+
+/* ========================================
+   Templates 카드 내부 HTML 스타일
+   ======================================== */
+.template-preview * {
+    font-size: inherit !important;
+    line-height: inherit !important;
+}
+
+/* 배지는 원래 크기 유지 */
+.template-preview .template-preview-badge,
+.template-preview .template-preview-badge * {
+    font-size: 0.65rem !important;
+    line-height: normal !important;
+}
+
+.template-preview .template-preview-badge i {
+    font-size: 0.85rem !important;
+}
+
+/* ========================================
+   새 템플릿 만들기 카드 스타일
+   ======================================== */
+.template-card-new .template-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 2px dashed #667eea;
+}
+
+.template-card-new .template-preview::after {
+    display: none;
+}
+
+/* 템플릿 미리보기 제목 */
+.template-preview .title,
+.template-preview .contract-title {
+    text-align: center;
+    font-size: 0.5rem !important;
+    font-weight: 700 !important;
+    margin: 0.2rem 0 !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* 템플릿 미리보기 헤딩 */
+.template-preview h1,
+.template-preview h2,
+.template-preview h3,
+.template-preview h4,
+.template-preview h5,
+.template-preview h6 {
+    font-weight: 600 !important;
+    color: #212529 !important;
+    margin: 0.15rem 0 !important;
+    font-size: 0.45rem !important;
+}
+
+/* 템플릿 미리보기 단락 */
+.template-preview p {
+    margin: 0.1rem 0 !important;
+    padding: 0 !important;
+}
+
+/* 템플릿 미리보기 섹션 */
+.template-preview .section,
+.template-preview .section-text,
+.template-preview .section-clause,
+.template-preview .template-clause {
+    margin: 0.1rem 0 !important;
+    padding-left: 0.2rem !important;
+}
+
+/* 템플릿 미리보기 점선 박스 */
+.template-preview .section-dotted,
+.template-preview .template-dotted-box {
+    border: 1px dashed #999 !important;
+    padding: 0.2rem !important;
+    margin: 0.2rem 0 !important;
+    border-radius: 2px !important;
+}
+
+/* 템플릿 미리보기 서명 섹션 */
+.template-preview .signature-section {
+    margin-top: 0.3rem !important;
+    font-size: 0.35rem !important;
+}
+
+.template-preview .signature-line {
+    font-size: inherit !important;
+    margin: 2px 0 !important;
+}
+
+/* 템플릿 미리보기 밑줄 변수 스타일 */
+.template-preview .blank-line {
+    display: inline-block !important;
+    border-bottom: 1px solid #000 !important;
+    min-width: 20px !important;
+    height: 0.8em !important;
+    margin: 0 2px !important;
+    vertical-align: bottom !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+}
+
+/* 서명 섹션 내부 밑줄 스타일 */
+.template-preview .signature-line .blank-line {
+    display: inline-block !important;
+    border-bottom: 1px solid #000 !important;
+    min-width: 30px !important;
+    height: 0.8em !important;
+    margin: 0 2px !important;
+    vertical-align: bottom !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+}
+
+/* 프리셋 미리보기 전용 */
+.preset-preview-body {
+    background-color: #fff;
+    padding: 3rem;
+}
+
+/* #presetHtmlContainer 스타일 제거 - contract-template-base.css의 .preset-document 스타일로 대체 */
+
+/* 프리셋 문서 내 변수 스타일 */
+.preset-document .blank-line {
+    display: inline-block;
+    border-bottom: 1px solid #000;
+    min-width: 60px;
+    height: 1em;
+    margin: 0 4px;
+    vertical-align: baseline;
+}
+
+/* 프리셋 문서 내 서명 섹션 */
+.preset-document .signature-section {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.preset-document .signature-line {
+    margin: 8px 0;
+    max-width: fit-content;
+    width: fit-content;
+}
+
+.preset-document .signature-line--seal {
+    position: relative;
+    min-height: 40px;
+    white-space: nowrap;
+}
+
+.preset-document .signature-stamp-label {
+    margin-left: 8px;
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ccc;
+    text-align: center;
+    line-height: 40px;
+    font-size: 12px;
+    color: #666;
+}
+
+/* 모달 미리보기 */
+.preview-surface {
+    background: #fff;
+    padding: 1.5rem;
+    max-height: calc(100vh - 120px);
+    overflow: auto;
+    min-height: 500px;
+    word-wrap: break-word;
+    word-break: break-word;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border-radius: 0 0 12px 12px;
+    cursor: pointer;
+}
+
+.preview-surface .title {
+    font-size: 1.1rem !important;
+}
+
+.preview-surface .section {
+    margin: 8px 0 !important;
+}
+
+.preview-surface .signature-section {
+    margin-top: 15px !important;
+}
+
+.preview-surface .template-header {
+    border-bottom: 2px solid #0d6efd;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.preview-surface .template-paragraph {
+    margin-bottom: 1.25rem;
+}
+
+.preview-surface .template-dotted {
+    border: 2px dashed #adb5bd;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    background-color: #f8f9fa;
+}
+
+.preview-surface .template-footer {
+    border-top: 1px solid #dee2e6;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    text-align: right;
+    color: #495057;
+}
+
+/* ========================================
+   Select-Type 페이지 전용 스타일
+   ======================================== */
+
+/* Select-Type: 클릭 가능한 카드 호버 효과 강화 */
+.template-card-clickable:hover {
+    transform: translateY(-12px) scale(1.03);
+    box-shadow: 0 16px 32px rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
+    cursor: pointer;
+}
+
+/* Select-Type: 배지 위치 조정 */
+.template-card-clickable .template-status-badge {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.template-card-clickable .template-status-badge .badge {
+    background-color: rgba(0, 0, 0, 0.75) !important;
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.75rem !important;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .template-preview {
+        height: 150px;
+        font-size: 0.3rem;
+    }
+
+    .preview-surface {
+        padding: 1rem;
+        font-size: 0.8rem;
+    }
+}

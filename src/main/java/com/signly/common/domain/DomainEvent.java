@@ -1,7 +1,10 @@
 package com.signly.common.domain;
 
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 
+@Getter
 public abstract class DomainEvent {
 
     private final LocalDateTime occurredOn;
@@ -10,7 +13,4 @@ public abstract class DomainEvent {
         this.occurredOn = LocalDateTime.now();
     }
 
-    public LocalDateTime getOccurredOn() {
-        return occurredOn;
-    }
 }

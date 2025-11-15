@@ -14,7 +14,7 @@ class UserIdTest {
 
         UserId userId = UserId.of(validUlid);
 
-        assertThat(userId.getValue()).isEqualTo(validUlid);
+        assertThat(userId.value()).isEqualTo(validUlid);
     }
 
     @Test
@@ -22,8 +22,8 @@ class UserIdTest {
     void generateUserId_ShouldCreateValidUserId() {
         UserId userId = UserId.generate();
 
-        assertThat(userId.getValue()).isNotNull();
-        assertThat(userId.getValue()).hasSize(26);
+        assertThat(userId.value()).isNotNull();
+        assertThat(userId.value()).hasSize(26);
     }
 
     @Test

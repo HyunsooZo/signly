@@ -32,10 +32,10 @@ public class ContractEventHandler {
             contract.getPendingSigners().forEach(signerEmail -> {
                 try {
                     emailService.sendContractSigningRequest(
-                        signerEmail,
-                        contract.getTitle(),
-                        getSignerName(signerEmail, contract),
-                        contractUrl
+                            signerEmail,
+                            contract.getTitle(),
+                            getSignerName(signerEmail, contract),
+                            contractUrl
                     );
                     logger.info("서명 요청 이메일 발송 완료: {}", signerEmail);
                 } catch (Exception e) {
@@ -64,9 +64,9 @@ public class ContractEventHandler {
 
             // 필요시 다른 당사자들에게도 알림 발송
             emailService.sendContractSigned(
-                "creator@example.com", // 실제로는 작성자 이메일을 조회해야 함
-                contract.getTitle(),
-                signerName
+                    "creator@example.com", // 실제로는 작성자 이메일을 조회해야 함
+                    contract.getTitle(),
+                    signerName
             );
 
         } catch (Exception e) {
@@ -84,13 +84,13 @@ public class ContractEventHandler {
 
             // 모든 당사자에게 완료 알림
             emailService.sendContractCompleted(
-                contract.getFirstParty().getEmail(),
-                contract.getTitle()
+                    contract.getFirstParty().email(),
+                    contract.getTitle()
             );
 
             emailService.sendContractCompleted(
-                contract.getSecondParty().getEmail(),
-                contract.getTitle()
+                    contract.getSecondParty().email(),
+                    contract.getTitle()
             );
 
             logger.info("계약서 완료 알림 발송 완료: {}", contract.getTitle());
@@ -111,15 +111,15 @@ public class ContractEventHandler {
 
             // 모든 당사자에게 취소 알림
             emailService.sendContractCancelled(
-                contract.getFirstParty().getEmail(),
-                contract.getTitle(),
-                reason
+                    contract.getFirstParty().email(),
+                    contract.getTitle(),
+                    reason
             );
 
             emailService.sendContractCancelled(
-                contract.getSecondParty().getEmail(),
-                contract.getTitle(),
-                reason
+                    contract.getSecondParty().email(),
+                    contract.getTitle(),
+                    reason
             );
 
             logger.info("계약서 취소 알림 발송 완료: {}", contract.getTitle());
@@ -131,14 +131,17 @@ public class ContractEventHandler {
 
     private String generateContractUrl(Contract contract) {
         // 실제로는 application.properties에서 base URL을 가져와야 함
-        return "https://signly.com/contracts/" + contract.getId().getValue() + "/sign";
+        return "https://signly.com/contracts/" + contract.getId().value() + "/sign";
     }
 
-    private String getSignerName(String signerEmail, Contract contract) {
-        if (contract.getFirstParty().getEmail().equals(signerEmail)) {
-            return contract.getFirstParty().getName();
-        } else if (contract.getSecondParty().getEmail().equals(signerEmail)) {
-            return contract.getSecondParty().getName();
+    private String getSignerName(
+            String signerEmail,
+            Contract contract
+    ) {
+        if (contract.getFirstParty().email().equals(signerEmail)) {
+            return contract.getFirstParty().name();
+        } else if (contract.getSecondParty().email().equals(signerEmail)) {
+            return contract.getSecondParty().name();
         }
         return "서명자";
     }

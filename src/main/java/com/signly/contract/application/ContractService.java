@@ -1,9 +1,13 @@
 package com.signly.contract.application;
 
-import com.signly.contract.application.dto.*;
+import com.signly.contract.application.dto.ContractResponse;
+import com.signly.contract.application.dto.CreateContractCommand;
+import com.signly.contract.application.dto.SignContractCommand;
+import com.signly.contract.application.dto.UpdateContractCommand;
 import com.signly.contract.application.mapper.ContractDtoMapper;
 import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.model.ContractStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,6 +21,7 @@ import java.util.List;
  */
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ContractService {
 
     private final ContractCreationService creationService;
@@ -25,47 +30,49 @@ public class ContractService {
     private final ContractAuthorizationService authorizationService;
     private final ContractDtoMapper contractDtoMapper;
 
-    public ContractService(
-            ContractCreationService creationService,
-            ContractSigningCoordinator signingCoordinator,
-            ContractQueryService queryService,
-            ContractAuthorizationService authorizationService,
-            ContractDtoMapper contractDtoMapper
+    public ContractResponse createContract(
+            String userId,
+            CreateContractCommand command
     ) {
-        this.creationService = creationService;
-        this.signingCoordinator = signingCoordinator;
-        this.queryService = queryService;
-        this.authorizationService = authorizationService;
-        this.contractDtoMapper = contractDtoMapper;
-    }
-
-    // ========== 생성/수정/삭제 ==========
-
-    public ContractResponse createContract(String userId, CreateContractCommand command) {
-        Contract contract = creationService.createContract(userId, command);
+        var contract = creationService.createContract(userId, command);
         return contractDtoMapper.toResponse(contract);
     }
 
-    public ContractResponse updateContract(String userId, String contractId, UpdateContractCommand command) {
-        Contract contract = creationService.updateContract(userId, contractId, command);
+    public ContractResponse updateContract(
+            String userId,
+            String contractId,
+            UpdateContractCommand command
+    ) {
+        var contract = creationService.updateContract(userId, contractId, command);
         return contractDtoMapper.toResponse(contract);
     }
 
-    public void deleteContract(String userId, String contractId) {
+    public void deleteContract(
+            String userId,
+            String contractId
+    ) {
         creationService.deleteContract(userId, contractId);
     }
 
-    // ========== 서명 프로세스 ==========
-
-    public void sendForSigning(String userId, String contractId) {
+    public void sendForSigning(
+            String userId,
+            String contractId
+    ) {
         signingCoordinator.sendForSigning(userId, contractId);
     }
 
-    public void resendSigningEmail(String userId, String contractId) {
+    public void resendSigningEmail(
+            String userId,
+            String contractId
+    ) {
         signingCoordinator.resendSigningEmail(userId, contractId);
     }
 
-    public ContractResponse signContract(String signerEmail, String contractId, SignContractCommand command) {
+    public ContractResponse signContract(
+            String signerEmail,
+            String contractId,
+            SignContractCommand command
+    ) {
         Contract contract = signingCoordinator.signContract(signerEmail, contractId, command);
         return contractDtoMapper.toResponse(contract);
     }
@@ -81,11 +88,17 @@ public class ContractService {
         return contractDtoMapper.toResponse(contract);
     }
 
-    public void completeContract(String userId, String contractId) {
+    public void completeContract(
+            String userId,
+            String contractId
+    ) {
         signingCoordinator.completeContract(userId, contractId);
     }
 
-    public void cancelContract(String userId, String contractId) {
+    public void cancelContract(
+            String userId,
+            String contractId
+    ) {
         signingCoordinator.cancelContract(userId, contractId);
     }
 
@@ -93,24 +106,31 @@ public class ContractService {
         signingCoordinator.expireContracts();
     }
 
-    // ========== 조회 ==========
-
     @Transactional(readOnly = true)
-    public ContractResponse getContract(String userId, String contractId) {
+    public ContractResponse getContract(
+            String userId,
+            String contractId
+    ) {
         Contract contract = queryService.findById(contractId);
         authorizationService.validateAccess(userId, contract);
         return contractDtoMapper.toResponse(contract);
     }
 
     @Transactional(readOnly = true)
-    public ContractResponse getContractForSigning(String signerEmail, String contractId) {
+    public ContractResponse getContractForSigning(
+            String signerEmail,
+            String contractId
+    ) {
         Contract contract = queryService.findById(contractId);
         authorizationService.validateSigningAccess(signerEmail, contract);
         return contractDtoMapper.toResponse(contract);
     }
 
     @Transactional(readOnly = true)
-    public Page<ContractResponse> getContractsByCreator(String userId, Pageable pageable) {
+    public Page<ContractResponse> getContractsByCreator(
+            String userId,
+            Pageable pageable
+    ) {
         return queryService.getContractsByCreator(userId, pageable);
     }
 
@@ -124,7 +144,10 @@ public class ContractService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ContractResponse> getContractsByParty(String email, Pageable pageable) {
+    public Page<ContractResponse> getContractsByParty(
+            String email,
+            Pageable pageable
+    ) {
         return queryService.getContractsByParty(email, pageable);
     }
 
@@ -138,7 +161,10 @@ public class ContractService {
     }
 
     @Transactional(readOnly = true)
-    public List<ContractResponse> getContractsByTemplate(String userId, String templateId) {
+    public List<ContractResponse> getContractsByTemplate(
+            String userId,
+            String templateId
+    ) {
         return queryService.getContractsByTemplate(templateId);
     }
 

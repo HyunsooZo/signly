@@ -24,12 +24,12 @@ public record FirstPartySignatureResponse(
     public static FirstPartySignatureResponse from(FirstPartySignature signature) {
         return new FirstPartySignatureResponse(
                 signature.getSignatureId().value(),
-                signature.getOwnerId().getValue(),
+                signature.getOwnerId().value(),
                 signature.getStoragePath(),
-                signature.getFileMetadata().getFileName(),
-                signature.getFileMetadata().getMimeType(),
-                signature.getFileMetadata().getFileSize(),
-                signature.getFileMetadata().getChecksum(),
+                signature.getFileMetadata().fileName(),
+                signature.getFileMetadata().mimeType(),
+                signature.getFileMetadata().fileSize(),
+                signature.getFileMetadata().checksum(),
                 signature.getUpdatedAt()
         );
     }

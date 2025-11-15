@@ -6,7 +6,10 @@ public class NotFoundException extends BusinessException {
         super("NOT_FOUND", message);
     }
 
-    public NotFoundException(String message, Throwable cause) {
+    public NotFoundException(
+            String message,
+            Throwable cause
+    ) {
         super("NOT_FOUND", message, cause);
     }
 }

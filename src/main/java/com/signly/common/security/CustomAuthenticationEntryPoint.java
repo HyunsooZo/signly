@@ -17,9 +17,11 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     private static final Logger log = LoggerFactory.getLogger(CustomAuthenticationEntryPoint.class);
 
     @Override
-    public void commence(HttpServletRequest request,
-                        HttpServletResponse response,
-                        AuthenticationException authException) throws IOException, ServletException {
+    public void commence(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticationException authException
+    ) throws IOException, ServletException {
 
         String requestUri = request.getRequestURI();
 
@@ -37,7 +39,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         String redirectUrl = "/login";
 
         // 원래 요청 URL을 returnUrl 파라미터로 전달
-        if (requestUri != null && !requestUri.equals("/")) {
+        if (!requestUri.equals("/")) {
             redirectUrl += "?returnUrl=" + requestUri;
         }
 

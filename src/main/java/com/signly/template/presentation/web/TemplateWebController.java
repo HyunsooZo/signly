@@ -13,6 +13,8 @@ import com.signly.template.application.preset.PresetSection;
 import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.application.preset.TemplatePresetSummary;
 import com.signly.template.domain.model.TemplateStatus;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -20,8 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -231,11 +231,11 @@ public class TemplateWebController extends BaseWebController {
     public ResponseEntity<TemplatePresetResponse> getPreset(@PathVariable String presetId) {
         return templatePresetService.getPreset(presetId)
                 .map(preset -> {
-                    String renderedHtml = preset.sections().stream()
-                            .map(section -> section.content() != null ? section.content() : "")
+                    String renderedHtml = preset.getSections().stream()
+                            .map(section -> section.getContent() != null ? section.getContent() : "")
                             .collect(java.util.stream.Collectors.joining("\n"));
                     return ResponseEntity.ok(
-                            new TemplatePresetResponse(preset.id(), preset.name(), preset.sections(), renderedHtml)
+                            new TemplatePresetResponse(preset.getId(), preset.getName(), preset.getSections(), renderedHtml)
                     );
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -252,14 +252,13 @@ public class TemplateWebController extends BaseWebController {
     public ResponseEntity<TemplatePresetSectionsResponse> getPresetSections(@PathVariable String presetId) {
         return templatePresetService.getPreset(presetId)
                 .map(preset -> ResponseEntity.ok(
-                        new TemplatePresetSectionsResponse(preset.id(), preset.name(), preset.sections())
+                        new TemplatePresetSectionsResponse(preset.getId(), preset.getName(), preset.getSections())
                 ))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
 
-
-    private record TemplatePresetSectionsResponse(String id, String name, 
+    private record TemplatePresetSectionsResponse(String id, String name,
                                                   java.util.List<com.signly.template.application.preset.PresetSection> sections) {}
 
     @PostMapping("/{templateId}/activate")
@@ -271,6 +270,7 @@ public class TemplateWebController extends BaseWebController {
             RedirectAttributes redirectAttributes
     ) {
         try {
+            logCsrfDebug("activate", request);
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             templateService.activateTemplate(resolvedUserId, templateId);
             logger.info("템플릿 활성화 성공: templateId={}", templateId);
@@ -291,6 +291,7 @@ public class TemplateWebController extends BaseWebController {
             RedirectAttributes redirectAttributes
     ) {
         try {
+            logCsrfDebug("archive", request);
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             templateService.archiveTemplate(resolvedUserId, templateId);
             logger.info("템플릿 보관 성공: templateId={}", templateId);
@@ -311,6 +312,7 @@ public class TemplateWebController extends BaseWebController {
             RedirectAttributes redirectAttributes
     ) {
         try {
+            logCsrfDebug("delete", request);
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             templateService.deleteTemplate(resolvedUserId, templateId);
             logger.info("템플릿 삭제 성공: templateId={}", templateId);
@@ -320,6 +322,32 @@ public class TemplateWebController extends BaseWebController {
             redirectAttributes.addFlashAttribute("errorMessage", "템플릿 삭제 중 오류가 발생했습니다.");
         }
         return "redirect:/templates";
+    }
+
+    private void logCsrfDebug(
+            String action,
+            HttpServletRequest request
+    ) {
+        try {
+            String paramValue = request.getParameter("_csrf");
+            String headerValue = request.getHeader("X-CSRF-TOKEN");
+            String cookieValue = null;
+            if (request.getCookies() != null) {
+                for (var cookie : request.getCookies()) {
+                    if ("XSRF-TOKEN".equals(cookie.getName())) {
+                        cookieValue = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+            logger.debug("[CSRF-DEBUG] action={}, param={}, header={}, cookie={}",
+                    action,
+                    paramValue,
+                    headerValue,
+                    cookieValue);
+        } catch (Exception e) {
+            logger.debug("[CSRF-DEBUG] failed to log CSRF info: {}", e.getMessage());
+        }
     }
 
     @Getter

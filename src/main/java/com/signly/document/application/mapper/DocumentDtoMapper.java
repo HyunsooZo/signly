@@ -9,16 +9,16 @@ public class DocumentDtoMapper {
 
     public DocumentResponse toResponse(Document document) {
         return new DocumentResponse(
-            document.getId().getValue(),
-            document.getContractId().getValue(),
-            document.getUploadedBy().getValue(),
-            document.getType(),
-            document.getMetadata().getFileName(),
-            document.getMetadata().getMimeType(),
-            document.getMetadata().getFileSize(),
-            document.getStoragePath(),
-            document.getCreatedAt(),
-            document.getUpdatedAt()
+                document.getId().value(),
+                document.getContractId().value(),
+                document.getUploadedBy().value(),
+                document.getType(),
+                document.getMetadata().fileName(),
+                document.getMetadata().mimeType(),
+                document.getMetadata().fileSize(),
+                document.getStoragePath(),
+                document.getCreatedAt(),
+                document.getUpdatedAt()
         );
     }
 }

@@ -6,7 +6,10 @@ public class UnauthorizedException extends BusinessException {
         super("UNAUTHORIZED", message);
     }
 
-    public UnauthorizedException(String message, Throwable cause) {
+    public UnauthorizedException(
+            String message,
+            Throwable cause
+    ) {
         super("UNAUTHORIZED", message, cause);
     }
 }

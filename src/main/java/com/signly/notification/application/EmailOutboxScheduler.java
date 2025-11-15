@@ -4,15 +4,15 @@ import com.signly.notification.application.dto.EmailRequest;
 import com.signly.notification.domain.model.EmailOutbox;
 import com.signly.notification.domain.repository.EmailOutboxRepository;
 import com.signly.notification.infrastructure.EmailSender;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
+@RequiredArgsConstructor
 public class EmailOutboxScheduler {
     private static final Logger logger = LoggerFactory.getLogger(EmailOutboxScheduler.class);
     private static final int BATCH_SIZE = 10; // 한 번에 처리할 이메일 수
@@ -20,16 +20,11 @@ public class EmailOutboxScheduler {
     private final EmailOutboxRepository outboxRepository;
     private final EmailSender emailSender;
 
-    public EmailOutboxScheduler(EmailOutboxRepository outboxRepository, EmailSender emailSender) {
-        this.outboxRepository = outboxRepository;
-        this.emailSender = emailSender;
-    }
-
     @Scheduled(fixedDelay = 10000) // 10초마다 실행
     @Transactional
     public void processPendingEmails() {
         try {
-            List<EmailOutbox> pendingEmails = outboxRepository.findPendingEmails(BATCH_SIZE);
+            var pendingEmails = outboxRepository.findPendingEmails(BATCH_SIZE);
 
             if (pendingEmails.isEmpty()) {
                 return;
@@ -59,7 +54,7 @@ public class EmailOutboxScheduler {
     private boolean processEmail(EmailOutbox outbox) {
         try {
             if (!outbox.canRetry()) {
-                logger.warn("재시도 불가한 이메일: id={}", outbox.getId().getValue());
+                logger.warn("재시도 불가한 이메일: id={}", outbox.getId().value());
                 return false;
             }
 
@@ -78,7 +73,7 @@ public class EmailOutboxScheduler {
             outboxRepository.save(outbox);
 
             logger.info("이메일 발송 성공: id={}, recipient={}, attachments={}",
-                    outbox.getId().getValue(), outbox.getRecipientEmail(),
+                    outbox.getId().value(), outbox.getRecipientEmail(),
                     outbox.getAttachments().size());
 
             return true;
@@ -86,7 +81,7 @@ public class EmailOutboxScheduler {
         } catch (Exception e) {
             // 발송 실패
             logger.error("이메일 발송 실패: id={}, recipient={}",
-                    outbox.getId().getValue(), outbox.getRecipientEmail(), e);
+                    outbox.getId().value(), outbox.getRecipientEmail(), e);
 
             outbox.markAsFailed(e.getMessage());
             outboxRepository.save(outbox);

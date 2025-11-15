@@ -444,6 +444,8 @@
     margin-bottom: 2rem;
 }
 
+
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
     .template-form {
@@ -482,11 +484,4 @@
 
 
 
-/* 템플릿 변수 밑줄 표시 */
-.template-variable-underline {
-    display: inline-block;
-    border-bottom: 1px solid #000;
-    min-width: 60px;
-    height: 16px;
-    margin: 0 3px;
-}
+

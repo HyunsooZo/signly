@@ -6,7 +6,6 @@ import com.signly.notification.domain.model.EmailOutboxStatus;
 import com.signly.notification.domain.repository.EmailOutboxRepository;
 import com.signly.notification.infrastructure.persistence.entity.EmailOutboxEntity;
 import com.signly.notification.infrastructure.persistence.mapper.EmailOutboxEntityMapper;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -19,7 +18,10 @@ public class EmailOutboxRepositoryImpl implements EmailOutboxRepository {
     private final EmailOutboxJpaRepository jpaRepository;
     private final EmailOutboxEntityMapper mapper;
 
-    public EmailOutboxRepositoryImpl(EmailOutboxJpaRepository jpaRepository, EmailOutboxEntityMapper mapper) {
+    public EmailOutboxRepositoryImpl(
+            EmailOutboxJpaRepository jpaRepository,
+            EmailOutboxEntityMapper mapper
+    ) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
     }
@@ -33,7 +35,7 @@ public class EmailOutboxRepositoryImpl implements EmailOutboxRepository {
 
     @Override
     public Optional<EmailOutbox> findById(EmailOutboxId id) {
-        return jpaRepository.findById(id.getValue())
+        return jpaRepository.findById(id.value())
                 .map(mapper::toDomain);
     }
 
@@ -52,6 +54,6 @@ public class EmailOutboxRepositoryImpl implements EmailOutboxRepository {
 
     @Override
     public void delete(EmailOutboxId id) {
-        jpaRepository.deleteById(id.getValue());
+        jpaRepository.deleteById(id.value());
     }
 }

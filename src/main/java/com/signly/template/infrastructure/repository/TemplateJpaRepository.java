@@ -13,14 +13,24 @@ import java.util.Optional;
 
 public interface TemplateJpaRepository extends JpaRepository<TemplateEntity, String> {
 
-    Page<TemplateEntity> findByOwnerId(String ownerId, Pageable pageable);
+    Page<TemplateEntity> findByOwnerId(
+            String ownerId,
+            Pageable pageable
+    );
 
-    Page<TemplateEntity> findByOwnerIdAndStatus(String ownerId, TemplateStatus status, Pageable pageable);
+    Page<TemplateEntity> findByOwnerIdAndStatus(
+            String ownerId,
+            TemplateStatus status,
+            Pageable pageable
+    );
 
     @Query("SELECT t FROM TemplateEntity t WHERE t.ownerId = :ownerId AND t.status = 'ACTIVE'")
     List<TemplateEntity> findActiveTemplatesByOwnerId(@Param("ownerId") String ownerId);
 
-    boolean existsByOwnerIdAndTitle(String ownerId, String title);
+    boolean existsByOwnerIdAndTitle(
+            String ownerId,
+            String title
+    );
 
     long countByOwnerId(String ownerId);
 

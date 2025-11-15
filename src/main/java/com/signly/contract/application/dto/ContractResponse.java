@@ -27,6 +27,7 @@ public class ContractResponse {
     @Getter(AccessLevel.NONE)
     private final LocalDateTime expiresAt;
     private final PresetType presetType;
+    private final String pdfPath;
     @Getter(AccessLevel.NONE)
     private final LocalDateTime createdAt;
     @Getter(AccessLevel.NONE)

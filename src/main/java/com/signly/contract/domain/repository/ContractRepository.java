@@ -15,20 +15,53 @@ import java.util.Optional;
 
 public interface ContractRepository {
     Contract save(Contract contract);
+
     Optional<Contract> findById(ContractId contractId);
+
     Optional<Contract> findBySignToken(SignToken signToken);
+
     void delete(Contract contract);
 
-    Page<Contract> findByCreatorId(UserId creatorId, Pageable pageable);
-    Page<Contract> findByCreatorIdAndStatus(UserId creatorId, ContractStatus status, Pageable pageable);
-    Page<Contract> findByPartyEmail(String email, Pageable pageable);
-    Page<Contract> findByPartyEmailAndStatus(String email, ContractStatus status, Pageable pageable);
+    Page<Contract> findByCreatorId(
+            UserId creatorId,
+            Pageable pageable
+    );
+
+    Page<Contract> findByCreatorIdAndStatus(
+            UserId creatorId,
+            ContractStatus status,
+            Pageable pageable
+    );
+
+    Page<Contract> findByPartyEmail(
+            String email,
+            Pageable pageable
+    );
+
+    Page<Contract> findByPartyEmailAndStatus(
+            String email,
+            ContractStatus status,
+            Pageable pageable
+    );
 
     List<Contract> findByTemplateId(TemplateId templateId);
-    List<Contract> findExpiredContracts(LocalDateTime currentTime);
-    List<Contract> findByStatusAndExpiresAtBefore(ContractStatus status, LocalDateTime dateTime);
 
-    boolean existsByCreatorIdAndTitle(UserId creatorId, String title);
-    long countByCreatorIdAndStatus(UserId creatorId, ContractStatus status);
+    List<Contract> findExpiredContracts(LocalDateTime currentTime);
+
+    List<Contract> findByStatusAndExpiresAtBefore(
+            ContractStatus status,
+            LocalDateTime dateTime
+    );
+
+    boolean existsByCreatorIdAndTitle(
+            UserId creatorId,
+            String title
+    );
+
+    long countByCreatorIdAndStatus(
+            UserId creatorId,
+            ContractStatus status
+    );
+
     long countByTemplateId(TemplateId templateId);
 }

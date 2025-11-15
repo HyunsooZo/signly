@@ -5,9 +5,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 @Table(name = "first_party_signatures")
 public class FirstPartySignatureEntity extends BaseEntity {
@@ -37,15 +39,17 @@ public class FirstPartySignatureEntity extends BaseEntity {
     protected FirstPartySignatureEntity() {
     }
 
-    public FirstPartySignatureEntity(String signatureId,
-                                     String ownerId,
-                                     String storagePath,
-                                     String originalFilename,
-                                     String mimeType,
-                                     long fileSize,
-                                     String checksum,
-                                     LocalDateTime createdAt,
-                                     LocalDateTime updatedAt) {
+    public FirstPartySignatureEntity(
+            String signatureId,
+            String ownerId,
+            String storagePath,
+            String originalFilename,
+            String mimeType,
+            long fileSize,
+            String checksum,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         super(createdAt, updatedAt);
         this.signatureId = signatureId;
         this.ownerId = ownerId;
@@ -56,31 +60,4 @@ public class FirstPartySignatureEntity extends BaseEntity {
         this.checksum = checksum;
     }
 
-    public String getSignatureId() {
-        return signatureId;
-    }
-
-    public String getOwnerId() {
-        return ownerId;
-    }
-
-    public String getStoragePath() {
-        return storagePath;
-    }
-
-    public String getOriginalFilename() {
-        return originalFilename;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    public long getFileSize() {
-        return fileSize;
-    }
-
-    public String getChecksum() {
-        return checksum;
-    }
 }

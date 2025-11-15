@@ -1,5 +1,6 @@
 package com.signly.common.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import java.util.concurrent.TimeUnit;
  * 액세스 토큰을 Redis에 저장하여 토큰 무효화 및 관리
  */
 @Service
+@RequiredArgsConstructor
 public class TokenRedisService {
 
     private static final String ACCESS_TOKEN_PREFIX = "access_token:";
@@ -18,16 +20,13 @@ public class TokenRedisService {
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public TokenRedisService(RedisTemplate<String, String> redisTemplate,
-                           JwtTokenProvider jwtTokenProvider) {
-        this.redisTemplate = redisTemplate;
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
-
     /**
      * 액세스 토큰을 Redis에 저장
      */
-    public void saveAccessToken(String userId, String token) {
+    public void saveAccessToken(
+            String userId,
+            String token
+    ) {
         String key = ACCESS_TOKEN_PREFIX + userId;
         long ttl = jwtTokenProvider.getAccessTokenValidityInMs();
         redisTemplate.opsForValue().set(key, token, ttl, TimeUnit.MILLISECONDS);
@@ -36,7 +35,10 @@ public class TokenRedisService {
     /**
      * 리프레시 토큰을 Redis에 저장
      */
-    public void saveRefreshToken(String userId, String token) {
+    public void saveRefreshToken(
+            String userId,
+            String token
+    ) {
         String key = REFRESH_TOKEN_PREFIX + userId;
         long ttl = jwtTokenProvider.getRefreshTokenValidityInMs();
         redisTemplate.opsForValue().set(key, token, ttl, TimeUnit.MILLISECONDS);
@@ -61,7 +63,10 @@ public class TokenRedisService {
     /**
      * 액세스 토큰이 Redis에 존재하는지 확인
      */
-    public boolean isAccessTokenValid(String userId, String token) {
+    public boolean isAccessTokenValid(
+            String userId,
+            String token
+    ) {
         String storedToken = getAccessToken(userId);
         return token.equals(storedToken);
     }
@@ -69,7 +74,10 @@ public class TokenRedisService {
     /**
      * 리프레시 토큰이 Redis에 존재하는지 확인
      */
-    public boolean isRefreshTokenValid(String userId, String token) {
+    public boolean isRefreshTokenValid(
+            String userId,
+            String token
+    ) {
         String storedToken = getRefreshToken(userId);
         return token.equals(storedToken);
     }
@@ -101,7 +109,10 @@ public class TokenRedisService {
     /**
      * 토큰 갱신 (기존 액세스 토큰 삭제 후 새로운 토큰 저장)
      */
-    public void refreshAccessToken(String userId, String newToken) {
+    public void refreshAccessToken(
+            String userId,
+            String newToken
+    ) {
         deleteAccessToken(userId);
         saveAccessToken(userId, newToken);
     }

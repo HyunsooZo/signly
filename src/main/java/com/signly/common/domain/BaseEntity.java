@@ -1,6 +1,8 @@
 package com.signly.common.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+
 import java.time.LocalDateTime;
 
 @MappedSuperclass
@@ -17,7 +19,10 @@ public abstract class BaseEntity {
         this.updatedAt = LocalDateTime.now();
     }
 
-    protected BaseEntity(LocalDateTime createdAt, LocalDateTime updatedAt) {
+    protected BaseEntity(
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }

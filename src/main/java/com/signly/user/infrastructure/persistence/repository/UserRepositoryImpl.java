@@ -16,14 +16,17 @@ public class UserRepositoryImpl implements UserRepository {
     private final UserJpaRepository userJpaRepository;
     private final UserEntityMapper userEntityMapper;
 
-    public UserRepositoryImpl(UserJpaRepository userJpaRepository, UserEntityMapper userEntityMapper) {
+    public UserRepositoryImpl(
+            UserJpaRepository userJpaRepository,
+            UserEntityMapper userEntityMapper
+    ) {
         this.userJpaRepository = userJpaRepository;
         this.userEntityMapper = userEntityMapper;
     }
 
     @Override
     public User save(User user) {
-        Optional<UserEntity> existingEntity = userJpaRepository.findById(user.getUserId().getValue());
+        Optional<UserEntity> existingEntity = userJpaRepository.findById(user.getUserId().value());
 
         if (existingEntity.isPresent()) {
             UserEntity entity = existingEntity.get();
@@ -39,23 +42,23 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findById(UserId userId) {
-        return userJpaRepository.findById(userId.getValue())
+        return userJpaRepository.findById(userId.value())
                 .map(userEntityMapper::toDomain);
     }
 
     @Override
     public Optional<User> findByEmail(Email email) {
-        return userJpaRepository.findByEmail(email.getValue())
+        return userJpaRepository.findByEmail(email.value())
                 .map(userEntityMapper::toDomain);
     }
 
     @Override
     public boolean existsByEmail(Email email) {
-        return userJpaRepository.existsByEmail(email.getValue());
+        return userJpaRepository.existsByEmail(email.value());
     }
 
     @Override
     public void delete(User user) {
-        userJpaRepository.deleteById(user.getUserId().getValue());
+        userJpaRepository.deleteById(user.getUserId().value());
     }
 }

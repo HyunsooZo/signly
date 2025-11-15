@@ -4,8 +4,8 @@ import com.signly.common.storage.FileStorageService;
 import com.signly.contract.domain.model.*;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.contract.domain.service.PdfGenerator;
-import com.signly.signature.domain.model.ContractSignature;
-import com.signly.signature.domain.repository.SignatureRepository;
+import com.signly.contract.domain.model.Signature;
+import com.signly.contract.domain.repository.SignatureRepository;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,30 +64,31 @@ class ContractPdfServiceTest {
                 SignToken.generate(),
                 LocalDateTime.now().plusDays(1),
                 PresetType.NONE,
-                LocalDateTime.now().minusDays(1),
-                LocalDateTime.now()
+                null, // pdfPath
+                LocalDateTime.now(), // createdAt
+                LocalDateTime.now() // updatedAt
         );
 
         when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
 
-        ContractSignature signature = ContractSignature.create(
-                contractId,
-                "data:image/png;base64,aGVsbG8=",
-                secondParty.getEmail(),
+        Signature signature = Signature.create(
+                secondParty.email(),
                 "을",
+                "data:image/png;base64,aGVsbG8=",
                 "127.0.0.1",
-                "Chrome"
+                "Chrome",
+                null
         );
-        when(signatureRepository.findByContractIdAndSignerEmail(contractId, firstParty.getEmail()))
+        when(signatureRepository.findByContractIdAndSignerEmail(contractId, firstParty.email()))
                 .thenReturn(Optional.empty());
-        when(signatureRepository.findByContractIdAndSignerEmail(contractId, secondParty.getEmail()))
+        when(signatureRepository.findByContractIdAndSignerEmail(contractId, secondParty.email()))
                 .thenReturn(Optional.of(signature));
 
         ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.forClass(String.class);
         when(pdfGenerator.generateFromHtml(htmlCaptor.capture(), anyString()))
                 .thenReturn(GeneratedPdf.of(new byte[]{1}, "dummy.pdf"));
 
-        contractPdfService.generateContractPdf(contractId.getValue());
+        contractPdfService.generateContractPdf(contractId.value());
 
         String finalHtml = htmlCaptor.getValue();
         assertThat(finalHtml).contains("<img src=\"data:image/png;base64,aGVsbG8=\"");
@@ -114,40 +115,41 @@ class ContractPdfServiceTest {
                 SignToken.generate(),
                 LocalDateTime.now().plusDays(1),
                 PresetType.NONE,
-                LocalDateTime.now().minusDays(1),
-                LocalDateTime.now()
+                null, // pdfPath
+                LocalDateTime.now(), // createdAt
+                LocalDateTime.now() // updatedAt
         );
 
         when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
 
-        ContractSignature firstSignature = ContractSignature.create(
-                contractId,
-                "data:image/png;base64,Zmlyc3Q=",
-                firstParty.getEmail(),
+        Signature firstSignature = Signature.create(
+                firstParty.email(),
                 "갑",
+                "data:image/png;base64,Zmlyc3Q=",
                 "127.0.0.1",
-                "Chrome"
+                "Chrome",
+                null
         );
 
-        ContractSignature secondSignature = ContractSignature.create(
-                contractId,
-                "data:image/png;base64,c2Vjb25k",
-                secondParty.getEmail(),
+        Signature secondSignature = Signature.create(
+                secondParty.email(),
                 "을",
+                "data:image/png;base64,c2Vjb25k",
                 "127.0.0.1",
-                "Chrome"
+                "Chrome",
+                null
         );
 
-        when(signatureRepository.findByContractIdAndSignerEmail(contractId, firstParty.getEmail()))
+        when(signatureRepository.findByContractIdAndSignerEmail(contractId, firstParty.email()))
                 .thenReturn(Optional.of(firstSignature));
-        when(signatureRepository.findByContractIdAndSignerEmail(contractId, secondParty.getEmail()))
+        when(signatureRepository.findByContractIdAndSignerEmail(contractId, secondParty.email()))
                 .thenReturn(Optional.of(secondSignature));
 
         ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.forClass(String.class);
         when(pdfGenerator.generateFromHtml(htmlCaptor.capture(), anyString()))
                 .thenReturn(GeneratedPdf.of(new byte[]{1}, "dummy.pdf"));
 
-        contractPdfService.generateContractPdf(contractId.getValue());
+        contractPdfService.generateContractPdf(contractId.value());
 
         String finalHtml = htmlCaptor.getValue();
         assertThat(finalHtml).contains("data:image/png;base64,Zmlyc3Q=");

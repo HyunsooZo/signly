@@ -1,40 +1,40 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
-    <jsp:param name="additionalCss" value="/css/dashboard.css" />
+    <jsp:param name="additionalCss" value="/css/dashboard.css"/>
 </jsp:include>
 <body>
-    <jsp:include page="../common/navbar.jsp">
-        <jsp:param name="currentPage" value="home" />
-    </jsp:include>
+<jsp:include page="../common/navbar.jsp">
+    <jsp:param name="currentPage" value="home"/>
+</jsp:include>
 
-    <div class="container mt-4">
-        <div class="main-content-card">
-            <!-- 헤더 -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h2 class="mb-2">
-                        <i class="bi bi-house-door text-primary me-2"></i>
-                        대시보드
-                    </h2>
-                    <p class="text-muted mb-0">Signly 전자계약 시스템에 오신 것을 환영합니다</p>
-                </div>
+<div class="container mt-4">
+    <div class="main-content-card">
+        <!-- 헤더 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="mb-2">
+                    <i class="bi bi-house-door text-primary me-2"></i>
+                    대시보드
+                </h2>
+                <p class="text-muted mb-0">Signly 전자계약 시스템에 오신 것을 환영합니다</p>
             </div>
+        </div>
 
         <!-- 알림 메시지 -->
         <c:if test="${not empty successMessage}">
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle me-2"></i>${successMessage}
+                <i class="bi bi-check-circle me-2"></i><c:out value="${successMessage}"/>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
 
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
+                <i class="bi bi-exclamation-triangle me-2"></i><c:out value="${errorMessage}"/>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
@@ -48,7 +48,7 @@
                             <i class="bi bi-file-earmark-text"></i>
                         </div>
                         <div class="stats-info">
-                            <h3>${templateStats.total}</h3>
+                            <h3><c:out value="${templateStats.total}"/></h3>
                             <p>총 템플릿</p>
                         </div>
                     </div>
@@ -67,7 +67,7 @@
                             <i class="bi bi-check-circle"></i>
                         </div>
                         <div class="stats-info">
-                            <h3>${templateStats.active}</h3>
+                            <h3><c:out value="${templateStats.active}"/></h3>
                             <p>활성 템플릿</p>
                         </div>
                     </div>
@@ -86,7 +86,7 @@
                             <i class="bi bi-file-earmark-check"></i>
                         </div>
                         <div class="stats-info">
-                            <h3>${contractStats.total}</h3>
+                            <h3><c:out value="${contractStats.total}"/></h3>
                             <p>총 계약서</p>
                         </div>
                     </div>
@@ -105,7 +105,7 @@
                             <i class="bi bi-clock"></i>
                         </div>
                         <div class="stats-info">
-                            <h3>${contractStats.pending}</h3>
+                            <h3><c:out value="${contractStats.pending}"/></h3>
                             <p>서명 대기</p>
                         </div>
                     </div>
@@ -210,12 +210,14 @@
                                         </div>
                                         <div class="recent-item-content">
                                             <h6 class="mb-1">
-                                                <a href="/templates/${template.templateId}" class="text-decoration-none">
-                                                    ${template.title}
+                                                <a href="/templates/<c:out value='${template.templateId}'/>"
+                                                   class="text-decoration-none">
+                                                    <c:out value="${template.title}"/>
                                                 </a>
                                             </h6>
                                             <small class="text-muted">
-                                                <fmt:formatDate value="${template.updatedAtDate}" pattern="yyyy-MM-dd HH:mm"/>
+                                                <fmt:formatDate value="${template.updatedAtDate}"
+                                                                pattern="yyyy-MM-dd HH:mm"/>
                                             </small>
                                         </div>
                                         <div class="recent-item-status">
@@ -230,7 +232,8 @@
                                                     <span class="badge bg-warning">보관</span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <span class="badge bg-light text-dark">${template.status}</span>
+                                                    <span class="badge bg-light text-dark"><c:out
+                                                            value="${template.status}"/></span>
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
@@ -268,12 +271,14 @@
                                         </div>
                                         <div class="recent-item-content">
                                             <h6 class="mb-1">
-                                                <a href="/contracts/${contract.id}" class="text-decoration-none">
-                                                    ${contract.title}
+                                                <a href="/contracts/<c:out value='${contract.id}'/>"
+                                                   class="text-decoration-none">
+                                                    <c:out value="${contract.title}"/>
                                                 </a>
                                             </h6>
                                             <small class="text-muted">
-                                                <fmt:formatDate value="${contract.updatedAt}" pattern="yyyy-MM-dd HH:mm"/>
+                                                <fmt:formatDate value="${contract.updatedAt}"
+                                                                pattern="yyyy-MM-dd HH:mm"/>
                                             </small>
                                         </div>
                                         <div class="recent-item-status">
@@ -297,7 +302,8 @@
                                                     <span class="badge bg-dark">만료</span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <span class="badge bg-light text-dark">${contract.status}</span>
+                                                    <span class="badge bg-light text-dark"><c:out
+                                                            value="${contract.status}"/></span>
                                                 </c:otherwise>
                                             </c:choose>
                                         </div>
@@ -309,58 +315,58 @@
                 </div>
             </div>
         </div>
-        </div>
     </div>
+</div>
 
-    <script>
-        // 로그인 시 사용자 정보를 로컬스토리지에 저장
-        <c:if test="${not empty currentUserName}">
-        (function() {
-            const userInfo = {
-                name: '${currentUserName}',
-                email: '${currentUserEmail}',
-                userId: '${currentUserId}',
-                companyName: '${currentUserCompany}' || '',
-                businessPhone: '${currentUserBusinessPhone}' || '',
-                businessAddress: '${currentUserBusinessAddress}' || '',
-                updatedAt: new Date().toISOString()
-            };
-            localStorage.setItem('signly_user_info', JSON.stringify(userInfo));
-            console.log('[INFO] 사용자 정보 로컬스토리지 저장:', userInfo);
+<script>
+    // 로그인 시 사용자 정보를 로컬스토리지에 저장
+    <c:if test="${not empty currentUserName}">
+    (function () {
+        const userInfo = {
+            name: '${currentUserName}',
+            email: '${currentUserEmail}',
+            userId: '${currentUserId}',
+            companyName: '${currentUserCompany}' || '',
+            businessPhone: '${currentUserBusinessPhone}' || '',
+            businessAddress: '${currentUserBusinessAddress}' || '',
+            updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem('signly_user_info', JSON.stringify(userInfo));
+        console.log('[INFO] 사용자 정보 로컬스토리지 저장:', userInfo);
 
-            if (userInfo.userId) {
-                fetch('/api/first-party-signature/me', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-User-Id': userInfo.userId
-                    }
-                }).then(response => {
-                    if (response.status === 204) {
-                        localStorage.removeItem('signly_owner_signature');
-                        return null;
-                    }
-                    if (!response.ok) {
-                        throw new Error('status ' + response.status);
-                    }
-                    return response.json();
-                }).then(payload => {
-                    if (!payload) {
-                        return;
-                    }
-                    const signaturePayload = {
-                        dataUrl: payload.dataUrl,
-                        updatedAt: payload.updatedAt || new Date().toISOString()
-                    };
-                    localStorage.setItem('signly_owner_signature', JSON.stringify(signaturePayload));
-                    console.log('[INFO] 사업주 서명 정보를 로컬스토리지에 동기화했습니다.');
-                }).catch(error => {
-                    console.warn('[WARN] 사업주 서명 정보를 가져오지 못했습니다:', error);
-                });
-            }
-        })();
-        </c:if>
-    </script>
-    <jsp:include page="../common/footer.jsp" />
+        if (userInfo.userId) {
+            fetch('/api/first-party-signature/me', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-User-Id': userInfo.userId
+                }
+            }).then(response => {
+                if (response.status === 204) {
+                    localStorage.removeItem('signly_owner_signature');
+                    return null;
+                }
+                if (!response.ok) {
+                    throw new Error('status ' + response.status);
+                }
+                return response.json();
+            }).then(payload => {
+                if (!payload) {
+                    return;
+                }
+                const signaturePayload = {
+                    dataUrl: payload.dataUrl,
+                    updatedAt: payload.updatedAt || new Date().toISOString()
+                };
+                localStorage.setItem('signly_owner_signature', JSON.stringify(signaturePayload));
+                console.log('[INFO] 사업주 서명 정보를 로컬스토리지에 동기화했습니다.');
+            }).catch(error => {
+                console.warn('[WARN] 사업주 서명 정보를 가져오지 못했습니다:', error);
+            });
+        }
+    })();
+    </c:if>
+</script>
+<jsp:include page="../common/footer.jsp"/>
 </body>
 </html>

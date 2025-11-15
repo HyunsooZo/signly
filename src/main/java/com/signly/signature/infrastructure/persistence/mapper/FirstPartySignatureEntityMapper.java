@@ -14,12 +14,12 @@ public class FirstPartySignatureEntityMapper {
         FileMetadata metadata = signature.getFileMetadata();
         return new FirstPartySignatureEntity(
                 signature.getSignatureId().value(),
-                signature.getOwnerId().getValue(),
+                signature.getOwnerId().value(),
                 signature.getStoragePath(),
-                metadata.getFileName(),
-                metadata.getMimeType(),
-                metadata.getFileSize(),
-                metadata.getChecksum(),
+                metadata.fileName(),
+                metadata.mimeType(),
+                metadata.fileSize(),
+                metadata.checksum(),
                 signature.getCreatedAt(),
                 signature.getUpdatedAt()
         );

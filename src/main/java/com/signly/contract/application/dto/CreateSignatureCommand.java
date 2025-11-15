@@ -1,4 +1,4 @@
-package com.signly.signature.application.dto;
+package com.signly.contract.application.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

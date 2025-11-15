@@ -6,7 +6,10 @@ public class InfrastructureException extends RuntimeException {
         super(message);
     }
 
-    public InfrastructureException(String message, Throwable cause) {
+    public InfrastructureException(
+            String message,
+            Throwable cause
+    ) {
         super(message, cause);
     }
 }

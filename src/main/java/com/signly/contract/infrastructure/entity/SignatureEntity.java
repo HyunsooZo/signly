@@ -1,10 +1,12 @@
-package com.signly.signature.infrastructure.persistence.entity;
+package com.signly.contract.infrastructure.entity;
 
 import com.signly.common.domain.BaseEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Entity
 @Table(name = "contract_signatures")
 public class SignatureEntity extends BaseEntity {
@@ -13,8 +15,9 @@ public class SignatureEntity extends BaseEntity {
     @Column(name = "signature_id", length = 26)
     private String signatureId;
 
-    @Column(name = "contract_id", length = 26, nullable = false)
-    private String contractId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_id", nullable = false)
+    private ContractJpaEntity contract;
 
     @Column(name = "signer_email", length = 255, nullable = false)
     private String signerEmail;
@@ -41,11 +44,19 @@ public class SignatureEntity extends BaseEntity {
 
     protected SignatureEntity() {}
 
-    public SignatureEntity(String signatureId, String contractId, String signerEmail, String signerName,
-                          String signatureData, LocalDateTime signedAt, String ipAddress,
-                          String deviceInfo, String signaturePath) {
+    public SignatureEntity(
+            String signatureId,
+            ContractJpaEntity contract,
+            String signerEmail,
+            String signerName,
+            String signatureData,
+            LocalDateTime signedAt,
+            String ipAddress,
+            String deviceInfo,
+            String signaturePath
+    ) {
         this.signatureId = signatureId;
-        this.contractId = contractId;
+        this.contract = contract;
         this.signerEmail = signerEmail;
         this.signerName = signerName;
         this.signatureData = signatureData;
@@ -55,39 +66,8 @@ public class SignatureEntity extends BaseEntity {
         this.signaturePath = signaturePath;
     }
 
-    public String getSignatureId() {
-        return signatureId;
+    public void setContract(ContractJpaEntity contract) {
+        this.contract = contract;
     }
 
-    public String getContractId() {
-        return contractId;
-    }
-
-    public String getSignerEmail() {
-        return signerEmail;
-    }
-
-    public String getSignerName() {
-        return signerName;
-    }
-
-    public String getSignatureData() {
-        return signatureData;
-    }
-
-    public LocalDateTime getSignedAt() {
-        return signedAt;
-    }
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public String getDeviceInfo() {
-        return deviceInfo;
-    }
-
-    public String getSignaturePath() {
-        return signaturePath;
-    }
 }

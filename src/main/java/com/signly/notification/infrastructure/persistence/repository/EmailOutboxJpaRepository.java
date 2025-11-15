@@ -12,8 +12,8 @@ import java.util.List;
 public interface EmailOutboxJpaRepository extends JpaRepository<EmailOutboxEntity, String> {
 
     @Query("SELECT e FROM EmailOutboxEntity e WHERE e.status = :status " +
-           "AND (e.nextRetryAt IS NULL OR e.nextRetryAt <= :now) " +
-           "ORDER BY e.createdAt ASC")
+            "AND (e.nextRetryAt IS NULL OR e.nextRetryAt <= :now) " +
+            "ORDER BY e.createdAt ASC")
     List<EmailOutboxEntity> findPendingEmails(
             @Param("status") EmailOutboxStatus status,
             @Param("now") LocalDateTime now,

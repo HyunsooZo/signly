@@ -2,7 +2,6 @@ package com.signly.template.presentation.rest;
 
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.dto.TemplateResponse;
-import com.signly.template.application.preset.TemplatePreset;
 import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.domain.model.TemplateStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,7 +27,10 @@ public class TemplateRestController {
     private final TemplateService templateService;
     private final TemplatePresetService presetService;
 
-    public TemplateRestController(TemplateService templateService, TemplatePresetService presetService) {
+    public TemplateRestController(
+            TemplateService templateService,
+            TemplatePresetService presetService
+    ) {
         this.templateService = templateService;
         this.presetService = presetService;
     }
@@ -38,7 +40,8 @@ public class TemplateRestController {
     public ResponseEntity<Page<TemplateResponse>> getTemplates(
             @Parameter(description = "사용자 ID", required = true) @RequestHeader("X-User-Id") String userId,
             @Parameter(description = "템플릿 상태") @RequestParam(required = false) TemplateStatus status,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
 
         Page<TemplateResponse> response = status != null ?
                 templateService.getTemplatesByOwnerAndStatus(userId, status, pageable) :
@@ -68,9 +71,9 @@ public class TemplateRestController {
         return presetService.getPreset(presetId)
                 .map(preset -> {
                     Map<String, Object> response = new HashMap<>();
-                    response.put("presetId", preset.id());
-                    response.put("title", preset.name());
-                    response.put("description", preset.description());
+                    response.put("presetId", preset.getId());
+                    response.put("title", preset.getName());
+                    response.put("description", preset.getDescription());
                     response.put("renderedHtml", preset.renderHtml());
                     return ResponseEntity.ok(response);
                 })

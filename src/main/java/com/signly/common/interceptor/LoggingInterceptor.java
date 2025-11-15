@@ -13,7 +13,11 @@ public class LoggingInterceptor implements HandlerInterceptor {
     private static final Logger logger = LoggerFactory.getLogger(LoggingInterceptor.class);
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler
+    ) throws Exception {
         String method = request.getMethod();
         String uri = request.getRequestURI();
         String queryString = request.getQueryString();
@@ -37,7 +41,12 @@ public class LoggingInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler,
+            Exception ex
+    ) throws Exception {
         long startTime = (Long) request.getAttribute("startTime");
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;

@@ -5,34 +5,27 @@ import com.signly.common.security.SecurityUser;
 import com.signly.common.web.BaseWebController;
 import com.signly.home.application.DashboardService;
 import com.signly.home.application.dto.DashboardResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 홈/대시보드 웹 컨트롤러
  * SRP: 뷰 렌더링과 요청/응답 처리만 담당
  */
 @Controller
+@RequiredArgsConstructor
 public class HomeWebController extends BaseWebController {
 
     private static final Logger logger = LoggerFactory.getLogger(HomeWebController.class);
     private final DashboardService dashboardService;
     private final CurrentUserProvider currentUserProvider;
-
-    public HomeWebController(
-            DashboardService dashboardService,
-            CurrentUserProvider currentUserProvider
-    ) {
-        this.dashboardService = dashboardService;
-        this.currentUserProvider = currentUserProvider;
-    }
 
     @GetMapping("/")
     public String root() {

@@ -20,7 +20,10 @@ public class DocumentRepositoryImpl implements DocumentRepository {
     private final DocumentJpaRepository jpaRepository;
     private final DocumentJpaMapper mapper;
 
-    public DocumentRepositoryImpl(DocumentJpaRepository jpaRepository, DocumentJpaMapper mapper) {
+    public DocumentRepositoryImpl(
+            DocumentJpaRepository jpaRepository,
+            DocumentJpaMapper mapper
+    ) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
     }
@@ -34,36 +37,39 @@ public class DocumentRepositoryImpl implements DocumentRepository {
 
     @Override
     public Optional<Document> findById(DocumentId id) {
-        return jpaRepository.findById(id.getValue())
-            .map(mapper::toDomain);
+        return jpaRepository.findById(id.value())
+                .map(mapper::toDomain);
     }
 
     @Override
     public List<Document> findByContractId(ContractId contractId) {
-        return jpaRepository.findByContractIdOrderByCreatedAtDesc(contractId.getValue())
-            .stream()
-            .map(mapper::toDomain)
-            .toList();
+        return jpaRepository.findByContractIdOrderByCreatedAtDesc(contractId.value())
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override
     public List<Document> findByUploadedBy(UserId uploadedBy) {
-        return jpaRepository.findByUploadedByOrderByCreatedAtDesc(uploadedBy.getValue())
-            .stream()
-            .map(mapper::toDomain)
-            .toList();
+        return jpaRepository.findByUploadedByOrderByCreatedAtDesc(uploadedBy.value())
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override
     public void delete(Document document) {
-        jpaRepository.deleteById(document.getId().getValue());
+        jpaRepository.deleteById(document.getId().value());
     }
 
     @Override
-    public List<Document> findByContractIdAndType(ContractId contractId, DocumentType type) {
+    public List<Document> findByContractIdAndType(
+            ContractId contractId,
+            DocumentType type
+    ) {
         return jpaRepository.findByContractIdAndTypeOrderByCreatedAtDesc(
-                    contractId.getValue(), 
-                    type.name()
+                        contractId.value(),
+                        type.name()
                 )
                 .stream()
                 .map(mapper::toDomain)
@@ -71,15 +77,18 @@ public class DocumentRepositoryImpl implements DocumentRepository {
     }
 
     @Override
-    public boolean existsByContractIdAndType(ContractId contractId, DocumentType type) {
+    public boolean existsByContractIdAndType(
+            ContractId contractId,
+            DocumentType type
+    ) {
         return jpaRepository.existsByContractIdAndType(
-                    contractId.getValue(), 
-                    type.name()
-                );
+                contractId.value(),
+                type.name()
+        );
     }
 
     @Override
     public long countByContractId(ContractId contractId) {
-        return jpaRepository.countByContractId(contractId.getValue());
+        return jpaRepository.countByContractId(contractId.value());
     }
 }

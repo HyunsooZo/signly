@@ -130,21 +130,7 @@
     display: none;
 }
 
-.preset-preview-body {
-    background-color: #fff;
-    padding: 3rem;
-}
-
-#presetHtmlContainer {
-    font-family: 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', sans-serif;
-    line-height: 1.6;
-    font-size: 13px;
-    color: #222;
-}
-
-#presetHtmlContainer.preset-document {
-    max-width: 100%;
-}
+/* preset-preview-body 스타일은 contract-template-preview.css로 이동 */
 
 
 .custom-content-preview {
@@ -154,36 +140,38 @@
 }
 
 .custom-variable-inline {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background-color: rgba(255, 243, 205, 0.8);
-    border: 1px dashed #f0ad4e;
-    border-radius: 6px;
-    padding: 2px 6px;
-    margin: 0 2px;
+    position: relative;
+    display: inline-block;
+    min-width: 90px;
+    margin: 0 4px;
+    padding-top: 14px;
+    border-bottom: 2px solid #222;
+    vertical-align: bottom;
 }
 
 .custom-variable-inline-label {
-    font-size: 0.75rem;
-    color: #b58105;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -80%);
+    font-size: 0.7rem;
+    color: #6c757d;
     font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
 }
 
 .custom-variable-inline-input {
-    width: auto;
-    min-width: 60px;
+    width: 100%;
     border: none;
     background: transparent;
-    border-bottom: 1px solid #f0ad4e;
-    padding: 0 2px;
-    font-size: 0.85rem;
+    text-align: center;
+    font-size: 0.92rem;
+    padding: 0 2px 2px;
 }
 
 .custom-variable-inline-input:focus {
     outline: none;
-    border-bottom: 2px solid #f0ad4e;
-    background-color: rgba(255, 243, 205, 0.4);
 }
 
 .contract-preview-panel {
@@ -482,54 +470,7 @@
     flex: 1;
 }
 
-.template-preview {
-    font-size: 0.35rem;
-    color: #495057;
-    margin-bottom: 1rem;
-    line-height: 1.1;
-    width: 100%;
-    height: 180px;
-    overflow: hidden;
-    position: relative;
-    background: #fff;
-    padding: 0.4rem;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.template-preview::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 25px;
-    background: linear-gradient(to bottom, transparent, #fff);
-    pointer-events: none;
-}
-
-/* 미리보기 영역 하단 중앙 배지 */
-.template-preview-badge {
-    position: absolute;
-    bottom: 0.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 0.25rem 0.5rem;
-    border-radius: 8px;
-    font-size: 0.65rem;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    gap: 0.2rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.template-preview-badge i {
-    font-size: 0.85rem;
-}
+/* template-preview 스타일은 contract-template-preview.css로 이동 */
 
 .preset-badge {
     background: rgba(25, 118, 210, 0.9);
@@ -543,19 +484,7 @@
     border: none;
 }
 
-/* 새 템플릿 만들기 카드 스타일 */
-.template-card-new .template-preview {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    border: 2px dashed #667eea;
-}
-
-.template-card-new .template-preview::after {
-    display: none;
-}
+/* 새 템플릿 만들기 카드 스타일은 contract-template-preview.css로 이동 */
 
 .new-template-icon {
     width: 80px;
@@ -581,75 +510,9 @@
     line-height: normal !important;
 }
 
-/* 템플릿 미리보기 내부 HTML 스타일 */
-.template-preview * {
-    font-size: inherit !important;
-    line-height: inherit !important;
-}
 
-/* 배지는 원래 크기 유지 */
-.template-preview .template-preview-badge,
-.template-preview .template-preview-badge * {
-    font-size: 0.65rem !important;
-    line-height: normal !important;
-}
 
-.template-preview .template-preview-badge i {
-    font-size: 0.85rem !important;
-}
 
-.template-preview .title,
-.template-preview .contract-title {
-    text-align: center;
-    font-size: 0.5rem !important;
-    font-weight: 700 !important;
-    margin: 0.2rem 0 !important;
-    letter-spacing: 0.5px !important;
-}
-
-.template-preview h1,
-.template-preview h2,
-.template-preview h3,
-.template-preview h4,
-.template-preview h5,
-.template-preview h6 {
-    font-weight: 600 !important;
-    color: #212529 !important;
-    margin: 0.15rem 0 !important;
-    font-size: 0.45rem !important;
-}
-
-.template-preview p {
-    margin: 0.1rem 0 !important;
-    padding: 0 !important;
-}
-
-.template-preview .section,
-.template-preview .section-text,
-.template-preview .section-clause,
-.template-preview .template-clause {
-    margin: 0.1rem 0 !important;
-    padding-left: 0.2rem !important;
-}
-
-.template-preview .section-dotted,
-.template-preview .template-dotted-box {
-    border: 1px dashed #999 !important;
-    padding: 0.2rem !important;
-    margin: 0.2rem 0 !important;
-    border-radius: 2px !important;
-}
-
-.template-preview .signature-section {
-    margin-top: 0.3rem !important;
-}
-
-.template-preview .blank-line,
-.template-preview .contract-variable-underline {
-    border-bottom: 1px solid #666 !important;
-    min-width: 15px !important;
-    display: inline-block !important;
-}
 
 .template-card-new .template-description {
     color: #495057;
@@ -744,36 +607,36 @@
     .template-card {
         margin-bottom: 1rem;
     }
-    
+
     .template-card:hover {
         transform: translateY(-4px) scale(1.01);
     }
-    
+
     .template-card-header {
         padding: 1rem;
     }
-    
+
     .template-card-body {
         padding: 1rem;
     }
-    
+
     .template-title {
         font-size: 1rem;
     }
-    
+
     .template-description {
         font-size: 0.85rem;
     }
-    
+
     .template-icon {
         width: 40px;
         height: 40px;
     }
-    
+
     .template-icon i {
         font-size: 1.25rem;
     }
-    
+
     .template-card-new .template-icon i {
         font-size: 1.5rem;
     }
@@ -1022,39 +885,48 @@
 /* 템플릿 조항 스타일은 template-preview.css에서 관리 */
 
 /* 계약서 변수 입력 스타일 */
-.contract-variable-underline {
-    display: inline-flex;
-    align-items: center;
-    border-bottom: 1px solid #d0d7de;
-    padding: 2px 4px;
+.preset-document .contract-variable-underline {
+    display: inline-block;
+    vertical-align: baseline;
+    border-bottom: none !important;
+    padding: 0;
     margin: 0 2px;
+    line-height: normal;
 }
 
-.contract-input-inline {
+.preset-document .contract-input-inline {
     display: inline-block;
     width: auto;
-    min-width: 120px;
-    padding: 0.375rem 0.75rem;
-    font-size: 14px;
+    min-width: 80px;
+    padding: 0 6px;
+    font-size: inherit;
     font-family: inherit;
-    border: 1px solid #dee2e6;
-    border-radius: 0.25rem;
-    background-color: #fff;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    vertical-align: middle;
-    margin: 0 2px;
+    border: none;
+    border-bottom: none;
+    border-radius: 0;
+    background-color: transparent;
+    transition: all 0.15s ease-in-out;
+    vertical-align: baseline !important;
+    margin: 0;
+    margin-bottom: 0 !important;
+    line-height: 1 !important;
+    height: 1em !important;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
 }
 
-.contract-input-inline:focus {
-    border-color: #667eea;
+.preset-document .contract-input-inline:focus {
     outline: 0;
-    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-    background-color: #fff;
+    box-shadow: none;
+    background-color: rgba(102, 126, 234, 0.05);
 }
 
-.contract-input-inline::placeholder {
+.preset-document .contract-input-inline::placeholder {
     color: #6c757d;
-    opacity: 0.6;
+    opacity: 0.5;
+    font-size: 0.9em;
 }
 
 /* 계약서 상세보기 - 흰색 배경 강제 적용 클래스 */
@@ -1082,3 +954,5 @@
     height: 100%;
     border: none;
 }
+
+

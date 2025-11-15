@@ -6,18 +6,21 @@ import com.signly.common.exception.ValidationException;
 import com.signly.contract.application.dto.CreateContractCommand;
 import com.signly.contract.application.dto.UpdateContractCommand;
 import com.signly.contract.application.support.ContractHtmlSanitizer;
-import com.signly.contract.domain.model.*;
+import com.signly.contract.domain.model.Contract;
+import com.signly.contract.domain.model.ContractContent;
+import com.signly.contract.domain.model.ContractId;
+import com.signly.contract.domain.model.PartyInfo;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.signature.application.FirstPartySignatureService;
-import com.signly.template.application.HtmlRenderer;
-import com.signly.template.domain.model.ContractTemplate;
 import com.signly.template.domain.model.TemplateContent;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.template.domain.repository.TemplateRepository;
+import com.signly.template.domain.service.UnifiedTemplateRenderer;
 import com.signly.user.domain.model.User;
 import com.signly.user.domain.model.UserId;
 import com.signly.user.domain.model.UserType;
 import com.signly.user.domain.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -32,57 +35,45 @@ import java.util.Map;
  */
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ContractCreationService {
 
     private final ContractRepository contractRepository;
     private final UserRepository userRepository;
     private final TemplateRepository templateRepository;
     private final FirstPartySignatureService firstPartySignatureService;
-    private final HtmlRenderer htmlRenderer;
+    private final UnifiedTemplateRenderer unifiedTemplateRenderer;
     private final ContractAuthorizationService authorizationService;
 
-    public ContractCreationService(
-            ContractRepository contractRepository,
-            UserRepository userRepository,
-            TemplateRepository templateRepository,
-            FirstPartySignatureService firstPartySignatureService,
-            HtmlRenderer htmlRenderer,
-            ContractAuthorizationService authorizationService
+    public Contract createContract(
+            String userId,
+            CreateContractCommand command
     ) {
-        this.contractRepository = contractRepository;
-        this.userRepository = userRepository;
-        this.templateRepository = templateRepository;
-        this.firstPartySignatureService = firstPartySignatureService;
-        this.htmlRenderer = htmlRenderer;
-        this.authorizationService = authorizationService;
-    }
-
-    public Contract createContract(String userId, CreateContractCommand command) {
         User user = validateUserAndPermissions(userId);
-        
+
         if (user.getUserType() == UserType.OWNER) {
             firstPartySignatureService.ensureSignatureExists(userId);
         }
 
-        ContractContent content = prepareContent(userId, command);
-        PartyInfo firstParty = createPartyInfo(
+        var content = prepareContent(userId, command);
+        var firstParty = createPartyInfo(
                 command.firstPartyName(),
                 command.firstPartyEmail(),
                 command.firstPartyOrganization()
         );
-        PartyInfo secondParty = createPartyInfo(
+        var secondParty = createPartyInfo(
                 command.secondPartyName(),
                 command.secondPartyEmail(),
                 command.secondPartyOrganization()
         );
 
-        LocalDateTime expiresAt = command.expiresAt() != null ? 
+        var expiresAt = command.expiresAt() != null ?
                 command.expiresAt() : LocalDateTime.now().plusHours(24);
 
-        TemplateId templateId = StringUtils.hasText(command.templateId()) ? 
+        var templateId = StringUtils.hasText(command.templateId()) ?
                 TemplateId.of(command.templateId().trim()) : null;
 
-        Contract contract = Contract.create(
+        var contract = Contract.create(
                 UserId.of(userId),
                 templateId,
                 command.title(),
@@ -96,8 +87,12 @@ public class ContractCreationService {
         return contractRepository.save(contract);
     }
 
-    public Contract updateContract(String userId, String contractId, UpdateContractCommand command) {
-        Contract contract = contractRepository.findById(ContractId.of(contractId))
+    public Contract updateContract(
+            String userId,
+            String contractId,
+            UpdateContractCommand command
+    ) {
+        var contract = contractRepository.findById(ContractId.of(contractId))
                 .orElseThrow(() -> new NotFoundException("계약서를 찾을 수 없습니다"));
 
         authorizationService.validateOwnership(userId, contract);
@@ -114,8 +109,11 @@ public class ContractCreationService {
         return contractRepository.save(contract);
     }
 
-    public void deleteContract(String userId, String contractId) {
-        Contract contract = contractRepository.findById(ContractId.of(contractId))
+    public void deleteContract(
+            String userId,
+            String contractId
+    ) {
+        var contract = contractRepository.findById(ContractId.of(contractId))
                 .orElseThrow(() -> new NotFoundException("계약서를 찾을 수 없습니다"));
 
         authorizationService.validateOwnership(userId, contract);
@@ -128,8 +126,8 @@ public class ContractCreationService {
     }
 
     private User validateUserAndPermissions(String userId) {
-        UserId userIdObj = UserId.of(userId);
-        User user = userRepository.findById(userIdObj)
+        var userIdObj = UserId.of(userId);
+        var user = userRepository.findById(userIdObj)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
 
         if (!user.canCreateContract()) {
@@ -139,30 +137,37 @@ public class ContractCreationService {
         return user;
     }
 
-    private ContractContent prepareContent(String userId, CreateContractCommand command) {
+    private ContractContent prepareContent(
+            String userId,
+            CreateContractCommand command
+    ) {
         if (!StringUtils.hasText(command.templateId())) {
             String sanitizedContent = ContractHtmlSanitizer.sanitize(command.content());
             return ContractContent.of(sanitizedContent);
         }
 
-        TemplateId templateId = TemplateId.of(command.templateId().trim());
-        ContractTemplate template = templateRepository.findById(templateId)
+        var templateId = TemplateId.of(command.templateId().trim());
+        var template = templateRepository.findById(templateId)
                 .orElseThrow(() -> new NotFoundException("템플릿을 찾을 수 없습니다"));
 
         authorizationService.validateTemplateOwnership(userId, template);
 
-        Map<String, String> variableValues = command.variableValues() != null ?
-                command.variableValues() : new HashMap<>();
+        var variableValues = command.variableValues() != null ?
+                command.variableValues() : new HashMap<String, String>();
 
         validateTemplateVariables(template.getContent(), variableValues);
 
-        String renderedHtml = htmlRenderer.render(template.getContent(), variableValues);
+        String renderedHtml = unifiedTemplateRenderer.renderWithVariables(template.getContent(), variableValues);
         String sanitizedContent = ContractHtmlSanitizer.sanitize(renderedHtml);
-        
+
         return ContractContent.of(sanitizedContent);
     }
 
-    private PartyInfo createPartyInfo(String name, String email, String organization) {
+    private PartyInfo createPartyInfo(
+            String name,
+            String email,
+            String organization
+    ) {
         return PartyInfo.of(name, email, organization);
     }
 
@@ -170,18 +175,17 @@ public class ContractCreationService {
             TemplateContent templateContent,
             Map<String, String> variableValues
     ) {
-        Map<String, com.signly.template.domain.model.TemplateVariable> templateVariables =
-                templateContent.getMetadata().getVariables();
+        var templateVariables = templateContent.metadata().variables();
 
-        for (Map.Entry<String, com.signly.template.domain.model.TemplateVariable> entry : templateVariables.entrySet()) {
+        for (var entry : templateVariables.entrySet()) {
             String varName = entry.getKey();
             com.signly.template.domain.model.TemplateVariable varDef = entry.getValue();
 
             String value = variableValues.get(varName);
 
-            if (varDef.isRequired() && (value == null || value.trim().isEmpty())) {
+            if (varDef.required() && (value == null || value.trim().isEmpty())) {
                 throw new ValidationException(
-                        String.format("필수 변수 '%s'의 값이 제공되지 않았습니다.", varDef.getLabel())
+                        String.format("필수 변수 '%s'의 값이 제공되지 않았습니다.", varDef.label())
                 );
             }
 
@@ -190,7 +194,7 @@ public class ContractCreationService {
                     varDef.validateValue(value);
                 } catch (ValidationException e) {
                     throw new ValidationException(
-                            String.format("변수 '%s'의 값이 유효하지 않습니다: %s", varDef.getLabel(), e.getMessage())
+                            String.format("변수 '%s'의 값이 유효하지 않습니다: %s", varDef.label(), e.getMessage())
                     );
                 }
             }

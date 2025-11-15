@@ -6,13 +6,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signly.common.exception.ValidationException;
 import com.signly.common.util.UlidGenerator;
-import com.signly.template.domain.model.TemplateMetadata;
-import com.signly.template.domain.model.TemplateSection;
-import com.signly.template.domain.model.TemplateSectionType;
-import com.signly.template.domain.model.TemplateVariable;
-import com.signly.template.domain.model.TemplateVariableType;
+import com.signly.template.domain.model.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 템플릿 콘텐츠 파싱 서비스

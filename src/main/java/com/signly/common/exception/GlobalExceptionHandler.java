@@ -24,7 +24,10 @@ public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(ValidationException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleValidationException(
+            ValidationException ex,
+            WebRequest request
+    ) {
         logger.warn("Validation error: {}", ex.getMessage());
 
         ErrorResponse errorResponse = new ErrorResponse(
@@ -39,7 +42,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleNotFoundException(
+            NotFoundException ex,
+            WebRequest request
+    ) {
         logger.warn("Resource not found: {}", ex.getMessage());
 
         ErrorResponse errorResponse = new ErrorResponse(
@@ -54,7 +60,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(
+            UnauthorizedException ex,
+            WebRequest request
+    ) {
         logger.warn("Unauthorized access: {}", ex.getMessage());
 
         ErrorResponse errorResponse = new ErrorResponse(
@@ -69,7 +78,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleForbiddenException(
+            ForbiddenException ex,
+            WebRequest request
+    ) {
         logger.warn("Forbidden access: {}", ex.getMessage());
 
         ErrorResponse errorResponse = new ErrorResponse(
@@ -84,7 +96,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleBusinessException(
+            BusinessException ex,
+            WebRequest request
+    ) {
         logger.warn("Business error: {}", ex.getMessage());
 
         ErrorResponse errorResponse = new ErrorResponse(
@@ -100,7 +115,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, WebRequest request) {
+            MethodArgumentNotValidException ex,
+            WebRequest request
+    ) {
         logger.warn("Method argument validation failed");
 
         Map<String, String> errors = new HashMap<>();
@@ -123,7 +140,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(
+            AccessDeniedException ex,
+            WebRequest request
+    ) {
         logger.warn("Access denied: {}", ex.getMessage());
 
         ErrorResponse errorResponse = new ErrorResponse(
@@ -138,7 +158,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleBadCredentialsException(
+            BadCredentialsException ex,
+            WebRequest request
+    ) {
         logger.warn("Bad credentials: {}", ex.getMessage());
 
         ErrorResponse errorResponse = new ErrorResponse(
@@ -153,7 +176,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceeded(
+            MaxUploadSizeExceededException ex,
+            WebRequest request
+    ) {
         logger.warn("File upload size exceeded: {}", ex.getMessage());
 
         ErrorResponse errorResponse = new ErrorResponse(
@@ -168,7 +194,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(
+            NoResourceFoundException ex,
+            WebRequest request
+    ) {
         String resourcePath = ex.getResourcePath();
 
         // favicon.ico 요청은 로그를 남기지 않고 조용히 404 반환
@@ -198,7 +227,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleGenericException(
+            Exception ex,
+            WebRequest request
+    ) {
         logger.error("Unexpected error occurred", ex);
 
         ErrorResponse errorResponse = new ErrorResponse(

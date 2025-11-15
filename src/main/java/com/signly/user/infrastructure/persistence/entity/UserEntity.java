@@ -8,11 +8,11 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users", indexes = {
-    @Index(name = "idx_user_email", columnList = "email"),
-    @Index(name = "idx_user_status", columnList = "status"),
-    @Index(name = "idx_user_type", columnList = "user_type"),
-    @Index(name = "idx_user_status_type", columnList = "status, user_type"),
-    @Index(name = "idx_user_created_at", columnList = "created_at")
+        @Index(name = "idx_user_email", columnList = "email"),
+        @Index(name = "idx_user_status", columnList = "status"),
+        @Index(name = "idx_user_type", columnList = "user_type"),
+        @Index(name = "idx_user_status_type", columnList = "status, user_type"),
+        @Index(name = "idx_user_created_at", columnList = "created_at")
 })
 public class UserEntity {
 
@@ -55,10 +55,19 @@ public class UserEntity {
     protected UserEntity() {
     }
 
-    public UserEntity(String userId, String email, String password, String name,
-                     String companyName, String businessPhone, String businessAddress,
-                     UserType userType, UserStatus status,
-                     LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public UserEntity(
+            String userId,
+            String email,
+            String password,
+            String name,
+            String companyName,
+            String businessPhone,
+            String businessAddress,
+            UserType userType,
+            UserStatus status,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
         this.userId = userId;
         this.email = email;
         this.password = password;

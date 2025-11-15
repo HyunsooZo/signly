@@ -16,7 +16,7 @@ class EmailTest {
 
         Email email = Email.of(validEmail);
 
-        assertThat(email.getValue()).isEqualTo(validEmail);
+        assertThat(email.value()).isEqualTo(validEmail);
     }
 
     @Test
@@ -26,7 +26,7 @@ class EmailTest {
 
         Email email = Email.of(mixedCaseEmail);
 
-        assertThat(email.getValue()).isEqualTo("test@example.com");
+        assertThat(email.value()).isEqualTo("test@example.com");
     }
 
     @Test
@@ -36,7 +36,7 @@ class EmailTest {
 
         Email email = Email.of(emailWithSpaces);
 
-        assertThat(email.getValue()).isEqualTo("test@example.com");
+        assertThat(email.value()).isEqualTo("test@example.com");
     }
 
     @ParameterizedTest

@@ -77,6 +77,32 @@ app:
     allow-credentials: true
     max-age: 3600
 
+  rate-limit:
+    enabled: true
+    distributed: ${RATE_LIMIT_DISTRIBUTED:false}  # 다중 서버 환경에서 true로 설정
+    # 인증 엔드포인트 제한 (IP 기준)
+    auth:
+      login:
+        limit: 5
+        window: 1m
+      register:
+        limit: 3
+        window: 5m
+      forgot-password:
+        limit: 3
+        window: 15m
+    # API 엔드포인트 제한 (사용자 기준)
+    api:
+      default:
+        limit: 100
+        window: 1h
+      upload:
+        limit: 10
+        window: 1h
+      pdf-generation:
+        limit: 20
+        window: 1h
+
 management:
   endpoints:
     web:

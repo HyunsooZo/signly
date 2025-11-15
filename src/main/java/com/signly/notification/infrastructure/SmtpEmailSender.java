@@ -2,7 +2,6 @@ package com.signly.notification.infrastructure;
 
 import com.signly.notification.application.dto.EmailRequest;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +16,6 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import java.util.Map;
 
 @Component
 public class SmtpEmailSender implements EmailSender {
@@ -40,8 +38,8 @@ public class SmtpEmailSender implements EmailSender {
     @Override
     public void sendEmail(EmailRequest request) {
         try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(
+            var mimeMessage = mailSender.createMimeMessage();
+            var helper = new MimeMessageHelper(
                     mimeMessage,
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name());
@@ -55,12 +53,12 @@ public class SmtpEmailSender implements EmailSender {
             if (request.hasAttachments()) {
                 for (var attachment : request.attachments()) {
                     helper.addAttachment(
-                            attachment.getFileName(),
-                            () -> new ByteArrayInputStream(attachment.getContent()),
-                            attachment.getContentType()
+                            attachment.fileName(),
+                            () -> new ByteArrayInputStream(attachment.content()),
+                            attachment.contentType()
                     );
                     logger.debug("첨부파일 추가: fileName={}, size={}bytes",
-                            attachment.getFileName(), attachment.getSizeInBytes());
+                            attachment.fileName(), attachment.sizeInBytes());
                 }
             }
 
@@ -74,7 +72,7 @@ public class SmtpEmailSender implements EmailSender {
     }
 
     private SpringTemplateEngine createTemplateEngine() {
-        ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+        var resolver = new ClassLoaderTemplateResolver();
         resolver.setPrefix("templates/email/");
         resolver.setSuffix("");
         resolver.setTemplateMode(TemplateMode.HTML);
@@ -87,8 +85,8 @@ public class SmtpEmailSender implements EmailSender {
     }
 
     private String renderTemplate(EmailRequest request) {
-        Context context = new Context(Locale.KOREAN);
-        Map<String, Object> variables = request.templateVariables();
+        var context = new Context(Locale.KOREAN);
+        var variables = request.templateVariables();
         if (variables != null) {
             context.setVariables(variables);
         }

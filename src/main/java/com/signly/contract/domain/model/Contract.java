@@ -4,11 +4,13 @@ import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Getter
 public class Contract extends AggregateRoot {
     private final ContractId id;
     private final UserId creatorId;
@@ -21,7 +23,8 @@ public class Contract extends AggregateRoot {
     private final List<Signature> signatures;
     private SignToken signToken;
     private LocalDateTime expiresAt;
-    private PresetType presetType;
+    private final PresetType presetType;
+    private String pdfPath;  // 완료된 계약서 PDF 파일 경로
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -39,13 +42,22 @@ public class Contract extends AggregateRoot {
         this.signToken = null;
         this.expiresAt = null;
         this.presetType = null;
+        this.pdfPath = null;
         this.createdAt = null;
         this.updatedAt = null;
     }
 
-    private Contract(ContractId id, UserId creatorId, TemplateId templateId,
-                     String title, ContractContent content, PartyInfo firstParty,
-                     PartyInfo secondParty, LocalDateTime expiresAt, PresetType presetType) {
+    private Contract(
+            ContractId id,
+            UserId creatorId,
+            TemplateId templateId,
+            String title,
+            ContractContent content,
+            PartyInfo firstParty,
+            PartyInfo secondParty,
+            LocalDateTime expiresAt,
+            PresetType presetType
+    ) {
         this.id = id;
         this.creatorId = creatorId;
         this.templateId = templateId;
@@ -62,15 +74,28 @@ public class Contract extends AggregateRoot {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public static Contract create(UserId creatorId, TemplateId templateId, String title,
-                                  ContractContent content, PartyInfo firstParty,
-                                  PartyInfo secondParty, LocalDateTime expiresAt) {
+    public static Contract create(
+            UserId creatorId,
+            TemplateId templateId,
+            String title,
+            ContractContent content,
+            PartyInfo firstParty,
+            PartyInfo secondParty,
+            LocalDateTime expiresAt
+    ) {
         return create(creatorId, templateId, title, content, firstParty, secondParty, expiresAt, PresetType.NONE);
     }
 
-    public static Contract create(UserId creatorId, TemplateId templateId, String title,
-                                  ContractContent content, PartyInfo firstParty,
-                                  PartyInfo secondParty, LocalDateTime expiresAt, PresetType presetType) {
+    public static Contract create(
+            UserId creatorId,
+            TemplateId templateId,
+            String title,
+            ContractContent content,
+            PartyInfo firstParty,
+            PartyInfo secondParty,
+            LocalDateTime expiresAt,
+            PresetType presetType
+    ) {
         validateTitle(title);
         validateExpirationDate(expiresAt);
         validateParties(firstParty, secondParty);
@@ -79,17 +104,38 @@ public class Contract extends AggregateRoot {
                 title.trim(), content, firstParty, secondParty, expiresAt, presetType);
     }
 
-    public static Contract restore(ContractId id, UserId creatorId, TemplateId templateId,
-                                 String title, ContractContent content, PartyInfo firstParty,
-                                 PartyInfo secondParty, ContractStatus status,
-                                 List<Signature> signatures, SignToken signToken,
-                                 LocalDateTime expiresAt, PresetType presetType,
-                                 LocalDateTime createdAt, LocalDateTime updatedAt) {
-        Contract contract = new Contract(id, creatorId, templateId, title, content,
-                                       firstParty, secondParty, expiresAt, presetType);
+    public static Contract restore(
+            ContractId id,
+            UserId creatorId,
+            TemplateId templateId,
+            String title,
+            ContractContent content,
+            PartyInfo firstParty,
+            PartyInfo secondParty,
+            ContractStatus status,
+            List<Signature> signatures,
+            SignToken signToken,
+            LocalDateTime expiresAt,
+            PresetType presetType,
+            String pdfPath,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
+        Contract contract = new Contract(
+                id,
+                creatorId,
+                templateId,
+                title,
+                content,
+                firstParty,
+                secondParty,
+                expiresAt,
+                presetType
+        );
         contract.status = status;
         contract.signatures.addAll(signatures);
         contract.signToken = signToken;
+        contract.pdfPath = pdfPath;
         contract.createdAt = createdAt;
         contract.updatedAt = updatedAt;
         return contract;
@@ -110,8 +156,11 @@ public class Contract extends AggregateRoot {
         }
     }
 
-    private static void validateParties(PartyInfo firstParty, PartyInfo secondParty) {
-        if (firstParty.getEmail().equals(secondParty.getEmail())) {
+    private static void validateParties(
+            PartyInfo firstParty,
+            PartyInfo secondParty
+    ) {
+        if (firstParty.email().equals(secondParty.email())) {
             throw new ValidationException("당사자들의 이메일은 서로 달라야 합니다");
         }
     }
@@ -208,8 +257,8 @@ public class Contract extends AggregateRoot {
      * 서명자 권한 확인
      */
     private boolean isValidSigner(String email) {
-        return firstParty.getEmail().equals(email.trim().toLowerCase()) ||
-               secondParty.getEmail().equals(email.trim().toLowerCase());
+        return firstParty.email().equals(email.trim().toLowerCase()) ||
+                secondParty.email().equals(email.trim().toLowerCase());
     }
 
     /**
@@ -224,7 +273,7 @@ public class Contract extends AggregateRoot {
      * 모든 당사자가 서명했는지 확인
      */
     public boolean isFullySigned() {
-        return hasSignedBy(firstParty.getEmail()) && hasSignedBy(secondParty.getEmail());
+        return hasSignedBy(firstParty.email()) && hasSignedBy(secondParty.email());
     }
 
     public boolean isExpired() {
@@ -236,9 +285,9 @@ public class Contract extends AggregateRoot {
     }
 
     public List<String> getPendingSigners() {
-        List<String> allSigners = Arrays.asList(firstParty.getEmail(), secondParty.getEmail());
+        List<String> allSigners = Arrays.asList(firstParty.email(), secondParty.email());
         Set<String> signedEmails = signatures.stream()
-                .map(Signature::getSignerEmail)
+                .map(Signature::signerEmail)
                 .collect(Collectors.toSet());
 
         return allSigners.stream()
@@ -246,59 +295,16 @@ public class Contract extends AggregateRoot {
                 .collect(Collectors.toList());
     }
 
-    public ContractId getId() {
-        return id;
-    }
-
-    public UserId getCreatorId() {
-        return creatorId;
-    }
-
-    public TemplateId getTemplateId() {
-        return templateId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public ContractContent getContent() {
-        return content;
-    }
-
-    public PartyInfo getFirstParty() {
-        return firstParty;
-    }
-
-    public PartyInfo getSecondParty() {
-        return secondParty;
-    }
-
-    public ContractStatus getStatus() {
-        return status;
-    }
-
     public List<Signature> getSignatures() {
         return Collections.unmodifiableList(signatures);
     }
 
-    public SignToken getSignToken() {
-        return signToken;
+    public void setPdfPath(String pdfPath) {
+        this.pdfPath = pdfPath;
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public LocalDateTime getExpiresAt() {
-        return expiresAt;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public PresetType getPresetType() {
-        return presetType;
+    public boolean hasPdfPath() {
+        return pdfPath != null && !pdfPath.isEmpty();
     }
 }

@@ -1,9 +1,10 @@
 package com.signly.contract.application;
 
-import com.signly.contract.application.ContractService;
 import com.signly.common.email.EmailService;
 import com.signly.contract.domain.model.Contract;
+import com.signly.contract.domain.model.ContractStatus;
 import com.signly.contract.domain.repository.ContractRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,9 +12,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class ContractExpirationScheduler {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractExpirationScheduler.class);
@@ -21,14 +22,6 @@ public class ContractExpirationScheduler {
     private final ContractService contractService;
     private final ContractRepository contractRepository;
     private final EmailService emailService;
-
-    public ContractExpirationScheduler(ContractService contractService,
-                                     ContractRepository contractRepository,
-                                     EmailService emailService) {
-        this.contractService = contractService;
-        this.contractRepository = contractRepository;
-        this.emailService = emailService;
-    }
 
     @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     @Transactional
@@ -49,21 +42,17 @@ public class ContractExpirationScheduler {
         logger.info("만료 예정 계약서 알림 발송 시작");
 
         try {
-            LocalDateTime tomorrow = LocalDateTime.now().plusDays(1);
-            LocalDateTime dayAfterTomorrow = LocalDateTime.now().plusDays(2);
+            var tomorrow = LocalDateTime.now().plusDays(1);
+            var dayAfterTomorrow = LocalDateTime.now().plusDays(2);
 
             // 1일 후 만료 예정인 계약서들
-            List<Contract> contractsExpiringTomorrow = contractRepository
-                    .findByStatusAndExpiresAtBefore(
-                        com.signly.contract.domain.model.ContractStatus.PENDING,
-                        dayAfterTomorrow
-                    )
+            var contractsExpiringTomorrow = contractRepository
+                    .findByStatusAndExpiresAtBefore(ContractStatus.PENDING, dayAfterTomorrow)
                     .stream()
-                    .filter(contract -> contract.getExpiresAt() != null &&
-                                      contract.getExpiresAt().isAfter(tomorrow))
+                    .filter(contract -> contract.getExpiresAt() != null && contract.getExpiresAt().isAfter(tomorrow))
                     .toList();
 
-            for (Contract contract : contractsExpiringTomorrow) {
+            for (var contract : contractsExpiringTomorrow) {
                 sendExpirationWarning(contract, 1);
             }
 
@@ -88,25 +77,28 @@ public class ContractExpirationScheduler {
         }
     }
 
-    private void sendExpirationWarning(Contract contract, int daysLeft) {
+    private void sendExpirationWarning(
+            Contract contract,
+            int daysLeft
+    ) {
         try {
-            List<String> pendingSigners = contract.getPendingSigners();
+            var pendingSigners = contract.getPendingSigners();
 
-            for (String signerEmail : pendingSigners) {
+            for (var signerEmail : pendingSigners) {
                 emailService.sendSimpleEmail(
-                    signerEmail,
-                    "계약서 만료 예정 알림",
-                    String.format(
-                        "안녕하세요,\n\n" +
-                        "다음 계약서가 %d일 후 만료 예정입니다:\n\n" +
-                        "계약서 제목: %s\n" +
-                        "만료일: %s\n\n" +
-                        "빠른 시일 내에 서명을 완료해 주세요.\n\n" +
-                        "감사합니다.",
-                        daysLeft,
-                        contract.getTitle(),
-                        contract.getExpiresAt()
-                    )
+                        signerEmail,
+                        "계약서 만료 예정 알림",
+                        String.format(
+                                "안녕하세요,\n\n" +
+                                        "다음 계약서가 %d일 후 만료 예정입니다:\n\n" +
+                                        "계약서 제목: %s\n" +
+                                        "만료일: %s\n\n" +
+                                        "빠른 시일 내에 서명을 완료해 주세요.\n\n" +
+                                        "감사합니다.",
+                                daysLeft,
+                                contract.getTitle(),
+                                contract.getExpiresAt()
+                        )
                 );
             }
 
@@ -116,7 +108,7 @@ public class ContractExpirationScheduler {
             logger.info("계약서 '{}' 만료 예정 알림 발송 완료", contract.getTitle());
 
         } catch (Exception e) {
-            logger.error("만료 예정 알림 발송 중 오류 발생: 계약서 ID {}", contract.getId().getValue(), e);
+            logger.error("만료 예정 알림 발송 중 오류 발생: 계약서 ID {}", contract.getId().value(), e);
         }
     }
 }
