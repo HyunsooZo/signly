@@ -18,6 +18,12 @@
     <!-- 메타 태그 -->
     <meta name="description" content="계약서 전자서명 페이지">
     <meta name="robots" content="noindex, nofollow">
+    <c:if test="${not empty _csrf}">
+        <meta name="_csrf" content="${_csrf.token}"/>
+        <meta name="_csrf_header" content="${_csrf.headerName}"/>
+        <meta name="_csrf_parameter" content="${_csrf.parameterName}"/>
+    </c:if>
+    <script src="/js/common/csrf.js" defer></script>
 </head>
 <body class="signature-view">
 <!-- 간단한 헤더 (서명 페이지용) -->

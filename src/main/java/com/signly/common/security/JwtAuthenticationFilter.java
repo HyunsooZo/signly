@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = extractTokenFromRequest(request);
 
-        if (StringUtils.hasText(token)) {
+        if (StringUtils.hasText(token) && !shouldSkipAuthentication(request)) {
             log.debug("토큰 발견: {}", token.substring(0, Math.min(20, token.length())) + "...");
 
             if (!jwtTokenProvider.isTokenValid(token)) {
@@ -114,6 +114,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean shouldSkipAuthentication(HttpServletRequest request) {
+        String path = request.getServletPath();
+        if (!StringUtils.hasText(path)) {
+            return false;
+        }
+        return path.startsWith("/.well-known")
+                || path.equals("/favicon.ico")
+                || path.startsWith("/css/")
+                || path.startsWith("/js/")
+                || path.startsWith("/images/")
+                || path.startsWith("/fonts/");
     }
 
     private String extractTokenFromRequest(HttpServletRequest request) {

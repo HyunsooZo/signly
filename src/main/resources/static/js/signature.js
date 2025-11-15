@@ -6,8 +6,6 @@
 class SignatureManager {
     constructor() {
         this.contractData = {};
-        this.csrfParam = '';
-        this.csrfToken = '';
         this.signaturePad = null;
         this.signatureCanvas = null;
         this.signaturePlaceholder = null;
@@ -34,9 +32,6 @@ class SignatureManager {
             signerName: signingDataset.signerName || '',
             signerEmail: signingDataset.signerEmail || ''
         };
-
-        this.csrfParam = window.csrfParam || '';
-        this.csrfToken = window.csrfToken || '';
     }
 
     setupEventListeners() {
@@ -270,8 +265,8 @@ class SignatureManager {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
             };
 
-            if (this.csrfParam && this.csrfToken) {
-                payload.append(this.csrfParam, this.csrfToken);
+            if (window.csrfManager) {
+                window.csrfManager.appendTokenToParams(payload);
             }
 
             const response = await fetch('/sign/' + this.contractData.token + '/sign', {
@@ -315,9 +310,5 @@ class SignatureManager {
 
 // Initialize the signature manager when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    // Set CSRF data from JSP
-    window.csrfParam = '${_csrf.parameterName}';
-    window.csrfToken = '${_csrf.token}';
-
     window.signatureManager = new SignatureManager();
 });

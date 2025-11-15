@@ -11,7 +11,14 @@
     <jsp:param name="additionalCss4" value="/css/templates.css"/>
     <jsp:param name="additionalCss5" value="/css/modal.css"/>
 </jsp:include>
-<body <c:if test="${not empty currentUserId}">data-current-user-id="${currentUserId}"</c:if>>
+<body
+    <c:if test="${not empty currentUserId}"> data-current-user-id="${currentUserId}"</c:if>
+    <c:if test="${not empty currentUserName}"> data-owner-name="<c:out value='${currentUserName}'/>"</c:if>
+    <c:if test="${not empty currentUserEmail}"> data-owner-email="<c:out value='${currentUserEmail}'/>"</c:if>
+    <c:if test="${not empty currentUserCompany}"> data-owner-company="<c:out value='${currentUserCompany}'/>"</c:if>
+    <c:if test="${not empty currentUserBusinessPhone}"> data-owner-phone="<c:out value='${currentUserBusinessPhone}'/>"</c:if>
+    <c:if test="${not empty currentUserBusinessAddress}"> data-owner-address="<c:out value='${currentUserBusinessAddress}'/>"</c:if>
+>
 <jsp:include page="../common/navbar.jsp">
     <jsp:param name="currentPage" value="contracts"/>
 </jsp:include>
@@ -123,12 +130,12 @@
 
 
                         <!-- Hidden fields -->
-                        <textarea id="templateContentHidden" name="content" hidden required></textarea>
-                        <input type="hidden" id="templateTitleHidden" name="title" required>
-                        <input type="hidden" id="templateFirstPartyName" name="firstPartyName" required>
-                        <input type="hidden" id="templateFirstPartyEmail" name="firstPartyEmail" required>
-                        <input type="hidden" id="templateFirstPartyAddress" name="firstPartyAddress">
-                        <input type="hidden" id="templateSecondPartyName" name="secondPartyName" required>
+                        <textarea id="templateContentHidden" name="content" hidden required><c:out value="${contract.content}"/></textarea>
+                        <input type="hidden" id="templateTitleHidden" name="title" value="<c:out value='${contract.title}'/>" required>
+                        <input type="hidden" id="templateFirstPartyName" name="firstPartyName" value="<c:out value='${contract.firstPartyName}'/>" required>
+                        <input type="hidden" id="templateFirstPartyEmail" name="firstPartyEmail" value="<c:out value='${contract.firstPartyEmail}'/>" required>
+                        <input type="hidden" id="templateFirstPartyAddress" name="firstPartyAddress" value="<c:out value='${contract.firstPartyAddress}'/>">
+                        <input type="hidden" id="templateSecondPartyName" name="secondPartyName" value="<c:out value='${contract.secondPartyName}'/>" required>
                     </div>
                 </div>
 
@@ -181,6 +188,44 @@
     </div>
 </div>
 
+<c:if test="${not empty _csrf}">
+    <script>
+        (function () {
+            const csrfParam = '<c:out value="${_csrf.parameterName}" default="_csrf"/>';
+            const fallbackEnsure = function (form) {
+                if (!form || !csrfParam) {
+                    return;
+                }
+                const token = (function readCsrfFromCookie() {
+                    return document.cookie.split(';')
+                        .map(c => c.trim())
+                        .find(c => c.startsWith('XSRF-TOKEN='))?.substring('XSRF-TOKEN='.length) || '';
+                })();
+                if (!token) {
+                    return;
+                }
+                let input = form.querySelector('input[name="' + csrfParam + '"]');
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = csrfParam;
+                    form.appendChild(input);
+                }
+                input.value = decodeURIComponent(token);
+            };
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const form = document.querySelector('.contract-form');
+                if (!form) {
+                    return;
+                }
+                form.addEventListener('submit', function () {
+                    fallbackEnsure(form);
+                });
+            });
+        })();
+    </script>
+</c:if>
 <script src="/js/contract-form.js"></script>
 <jsp:include page="../common/footer.jsp"/>
 </body>
