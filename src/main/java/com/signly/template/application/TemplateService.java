@@ -20,9 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -154,15 +151,6 @@ public class TemplateService {
         var userIdObj = UserId.of(userId);
         var templates = templateRepository.findByOwnerIdAndStatus(userIdObj, status, pageable);
         return templates.map(templateDtoMapper::toResponse);
-    }
-
-    @Transactional(readOnly = true)
-    public List<TemplateResponse> getActiveTemplates(String userId) {
-        var userIdObj = UserId.of(userId);
-        var activeTemplates = templateRepository.findActiveTemplatesByOwnerId(userIdObj);
-        return activeTemplates.stream()
-                .map(templateDtoMapper::toResponse)
-                .collect(Collectors.toList());
     }
 
     private void validateOwnership(

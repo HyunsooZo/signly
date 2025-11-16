@@ -10,6 +10,7 @@ import com.signly.user.domain.model.Email;
 import com.signly.user.domain.model.Password;
 import com.signly.user.domain.model.User;
 import com.signly.user.domain.repository.UserRepository;
+import lombok.Getter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,7 @@ public class UserService {
     }
 
     private static class PasswordResetToken {
+        @Getter
         private final String email;
         private final LocalDateTime expiryTime;
 
@@ -52,16 +54,12 @@ public class UserService {
             this.expiryTime = expiryTime;
         }
 
-        public String getEmail() {
-            return email;
-        }
-
         public boolean isExpired() {
             return LocalDateTime.now().isAfter(expiryTime);
         }
     }
 
-    public UserResponse registerUser(RegisterUserCommand command) {
+    public void registerUser(RegisterUserCommand command) {
         Email email = Email.of(command.email());
 
         if (userRepository.existsByEmail(email)) {
@@ -85,7 +83,7 @@ public class UserService {
         );
 
         User savedUser = userRepository.save(user);
-        return userDtoMapper.toResponse(savedUser);
+        userDtoMapper.toResponse(savedUser);
     }
 
 
@@ -98,16 +96,9 @@ public class UserService {
         return userDtoMapper.toResponse(user);
     }
 
-    @Transactional(readOnly = true)
-    public boolean existsByEmail(String email) {
-        Email emailObj = Email.of(email);
-        return userRepository.existsByEmail(emailObj);
-    }
-
     public String generatePasswordResetToken(String email) {
         Email emailObj = Email.of(email);
-        User user = userRepository.findByEmail(emailObj)
-                .orElseThrow(() -> new NotFoundException("해당 이메일로 등록된 사용자가 없습니다"));
+        userRepository.findByEmail(emailObj).orElseThrow(() -> new NotFoundException("해당 이메일로 등록된 사용자가 없습니다"));
 
         // 토큰 생성 (24시간 유효)
         String token = UUID.randomUUID().toString();

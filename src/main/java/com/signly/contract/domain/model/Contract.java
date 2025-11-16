@@ -253,13 +253,6 @@ public class Contract extends AggregateRoot {
         }
     }
 
-    /**
-     * 서명자 권한 확인
-     */
-    private boolean isValidSigner(String email) {
-        return firstParty.email().equals(email.trim().toLowerCase()) ||
-                secondParty.email().equals(email.trim().toLowerCase());
-    }
 
     /**
      * 특정 이메일로 서명했는지 확인

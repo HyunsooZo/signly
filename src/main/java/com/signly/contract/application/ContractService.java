@@ -68,14 +68,7 @@ public class ContractService {
         signingCoordinator.resendSigningEmail(userId, contractId);
     }
 
-    public ContractResponse signContract(
-            String signerEmail,
-            String contractId,
-            SignContractCommand command
-    ) {
-        Contract contract = signingCoordinator.signContract(signerEmail, contractId, command);
-        return contractDtoMapper.toResponse(contract);
-    }
+
 
     public ContractResponse processSignature(
             String token,
@@ -141,31 +134,6 @@ public class ContractService {
             Pageable pageable
     ) {
         return queryService.getContractsByCreatorAndStatus(userId, status, pageable);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<ContractResponse> getContractsByParty(
-            String email,
-            Pageable pageable
-    ) {
-        return queryService.getContractsByParty(email, pageable);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<ContractResponse> getContractsByPartyAndStatus(
-            String email,
-            ContractStatus status,
-            Pageable pageable
-    ) {
-        return queryService.getContractsByPartyAndStatus(email, status, pageable);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ContractResponse> getContractsByTemplate(
-            String userId,
-            String templateId
-    ) {
-        return queryService.getContractsByTemplate(templateId);
     }
 
     @Transactional(readOnly = true)
