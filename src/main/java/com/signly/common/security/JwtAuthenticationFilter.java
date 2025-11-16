@@ -193,7 +193,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             newAuthCookie.setMaxAge(60 * 60); // 1시간
             response.addCookie(newAuthCookie);
 
-            // Redis에 새 액세스 토큰 저장
+            // 새로운 리프레시 토큰을 쿠키에 설정 (Token Rotation)
+            Cookie newRefreshCookie = new Cookie("refreshToken", loginResponse.refreshToken());
+            newRefreshCookie.setHttpOnly(true);
+            newRefreshCookie.setPath("/");
+            newRefreshCookie.setMaxAge(30 * 24 * 60 * 60); // 30일
+            response.addCookie(newRefreshCookie);
+
+            // Redis에 새 액세스 토큰 저장 (리프레시 토큰은 AuthService.refreshToken()에서 이미 저장됨)
             tokenRedisService.saveAccessToken(loginResponse.userId(), loginResponse.accessToken());
 
             return loginResponse.accessToken();
