@@ -300,23 +300,39 @@
         window.csrfToken = '${_csrf.token}';
 
         function appendCsrfField(form) {
-            // 전역 변수 사용
-            if (window.csrfParam && window.csrfToken) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = window.csrfParam;
-                input.value = window.csrfToken;
-                form.appendChild(input);
-            } else {
-                // 폴백: 페이지에서 찾기
-                const existingCsrfInput = document.querySelector('input[name="_csrf"]');
-                if (existingCsrfInput) {
-                    const input = document.createElement('input');
+            if (!form) {
+                return;
+            }
+            if (window.csrfManager) {
+                window.csrfManager.ensureFormToken(form);
+                return;
+            }
+
+            const cookieToken = document.cookie.split(';')
+                .map(c => c.trim())
+                .find(c => c.startsWith('XSRF-TOKEN='));
+            if (cookieToken && window.csrfParam) {
+                let input = form.querySelector('input[name="' + window.csrfParam + '"]');
+                if (!input) {
+                    input = document.createElement('input');
                     input.type = 'hidden';
-                    input.name = '_csrf';
-                    input.value = existingCsrfInput.value;
+                    input.name = window.csrfParam;
                     form.appendChild(input);
                 }
+                input.value = decodeURIComponent(cookieToken.substring('XSRF-TOKEN='.length));
+                return;
+            }
+
+            const existingCsrfInput = document.querySelector('input[name="_csrf"]');
+            if (existingCsrfInput) {
+                let input = form.querySelector('input[name="_csrf"]');
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = '_csrf';
+                    form.appendChild(input);
+                }
+                input.value = existingCsrfInput.value;
             }
         }
 
