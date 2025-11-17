@@ -15,6 +15,11 @@ public interface SignatureJpaRepository extends JpaRepository<SignatureEntity, S
             String signerEmail
     );
 
+    Optional<SignatureEntity> findTopByContractIdAndSignerEmailOrderBySignedAtDesc(
+            String contractId,
+            String signerEmail
+    );
+
     boolean existsByContractIdAndSignerEmail(
             String contractId,
             String signerEmail
