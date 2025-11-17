@@ -35,10 +35,19 @@ class SignatureManager {
     }
 
     setupEventListeners() {
-        document.addEventListener('DOMContentLoaded', () => {
+        const initialize = () => {
+            if (this.isInitialized) {
+                return;
+            }
             this.initSignaturePad();
             this.bindEvents();
-        });
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initialize, {once: true});
+        } else {
+            initialize();
+        }
     }
 
     initSignaturePad() {
