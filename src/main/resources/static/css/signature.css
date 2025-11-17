@@ -38,14 +38,12 @@
     position: relative;
     padding: 1rem;
     min-height: 250px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     background-color: #fafafa;
     background-image:
         linear-gradient(90deg, var(--gray-200) 1px, transparent 1px),
         linear-gradient(var(--gray-200) 1px, transparent 1px);
     background-size: 20px 20px;
+    z-index: 1;
 }
 
 /* 서명 캔버스 */
@@ -55,8 +53,13 @@
     background-color: white;
     cursor: crosshair;
     transition: border-color 0.2s ease;
-    max-width: 100%;
-    height: auto;
+    width: 100%;
+    height: 200px;
+    display: block;
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+    touch-action: none;
 }
 
 .signature-canvas:hover {
@@ -82,6 +85,7 @@
     align-items: center;
     gap: 0.5rem;
     text-align: center;
+    z-index: 1;
 }
 
 .signature-placeholder::before {
