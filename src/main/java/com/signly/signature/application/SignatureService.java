@@ -72,7 +72,7 @@ public class SignatureService {
             throw new ValidationException("서명 데이터가 유효하지 않습니다");
         }
 
-        signatureRepository.save(signature);
+        signatureRepository.save(contractId, signature);
 
         logger.info("서명 생성 완료: signerEmail={}", normalizedEmail);
         mapper.toResponse(signature);
