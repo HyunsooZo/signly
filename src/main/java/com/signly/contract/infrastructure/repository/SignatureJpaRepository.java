@@ -10,12 +10,7 @@ public interface SignatureJpaRepository extends JpaRepository<SignatureEntity, S
 
     List<SignatureEntity> findByContractId(String contractId);
 
-    Optional<SignatureEntity> findByContractIdAndSignerEmail(
-            String contractId,
-            String signerEmail
-    );
-
-    Optional<SignatureEntity> findTopByContractIdAndSignerEmailOrderBySignedAtDesc(
+    List<SignatureEntity> findAllByContractIdAndSignerEmailOrderBySignedAtDesc(
             String contractId,
             String signerEmail
     );

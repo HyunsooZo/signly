@@ -60,7 +60,9 @@ public class SignatureRepositoryImpl implements SignatureRepository {
             String signerEmail
     ) {
         return jpaRepository
-                .findTopByContractIdAndSignerEmailOrderBySignedAtDesc(contractId.value(), signerEmail)
+                .findAllByContractIdAndSignerEmailOrderBySignedAtDesc(contractId.value(), signerEmail)
+                .stream()
+                .findFirst()
                 .map(mapper::toDomain);
     }
 
