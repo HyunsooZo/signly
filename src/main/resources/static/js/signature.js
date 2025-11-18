@@ -119,6 +119,22 @@ class SignatureManager {
             });
         }
 
+        // 서명 완료 버튼 이벤트 리스너
+        const completeSigningBtn = document.getElementById('completeSigningBtn');
+        if (completeSigningBtn) {
+            completeSigningBtn.addEventListener('click', () => {
+                if (this.signaturePad.isEmpty()) {
+                    if (window.Signly && window.Signly.showAlert) {
+                        window.Signly.showAlert('서명을 입력해 주세요.', 'warning');
+                    }
+                    return;
+                }
+
+                const signatureData = this.signaturePad.toDataURL('image/png');
+                this.handleSignatureSubmit(signatureData);
+            });
+        }
+
         this.isInitialized = true;
         this.updateSignatureState();
     }
@@ -186,17 +202,31 @@ class SignatureManager {
     }
 
     updateSignatureState() {
-        if (!this.signaturePad || !this.signatureSubmitButton) {
+        if (!this.signaturePad) {
             return;
         }
 
         const hasSignature = !this.signaturePad.isEmpty();
-        this.signatureSubmitButton.disabled = !hasSignature;
 
-        if (hasSignature) {
-            this.signatureSubmitButton.classList.remove('disabled');
-        } else {
-            this.signatureSubmitButton.classList.add('disabled');
+        // 서명 확인 버튼 제어
+        if (this.signatureSubmitButton) {
+            this.signatureSubmitButton.disabled = !hasSignature;
+            if (hasSignature) {
+                this.signatureSubmitButton.classList.remove('disabled');
+            } else {
+                this.signatureSubmitButton.classList.add('disabled');
+            }
+        }
+
+        // 서명 완료 버튼 제어
+        const completeSigningBtn = document.getElementById('completeSigningBtn');
+        if (completeSigningBtn) {
+            completeSigningBtn.disabled = !hasSignature;
+            if (hasSignature) {
+                completeSigningBtn.classList.remove('disabled');
+            } else {
+                completeSigningBtn.classList.add('disabled');
+            }
         }
     }
 
