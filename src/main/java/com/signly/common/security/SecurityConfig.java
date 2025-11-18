@@ -48,6 +48,8 @@ public class SecurityConfig {
                         .ignoringRequestMatchers(
                                 // API endpoints (JWT-based)
                                 "/api/**",
+                                // Signature endpoints (token-based authentication)
+                                "/sign/*/sign", "/sign/*/verify",
                                 // Static resources
                                 "/css/**", "/js/**", "/images/**", "/fonts/**", "/favicon.ico",
                                 // Public endpoints
