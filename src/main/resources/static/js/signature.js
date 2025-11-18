@@ -74,27 +74,21 @@ class SignatureManager {
             maxWidth: 2.5
         });
 
-        this.signaturePad.onBegin = () => {
-            this.hidePlaceholder();
-            this.updateSignatureState();
-        };
-
-        this.signaturePad.onEnd = () => {
-            this.updateSignatureState();
-        };
-
         this.resizeSignatureCanvas();
 
         // 이전 리스너 제거 후 새로 추가
         window.removeEventListener('resize', this.resizeSignatureCanvas);
         window.addEventListener('resize', () => this.resizeSignatureCanvas());
 
-        // 브라우저 환경에서도 서명 시작/완료 감지를 위한 추가 이벤트 리스너
-        // resizeSignatureCanvas 이후에 추가해야 canvas가 준비된 상태
-        this.signatureCanvas.addEventListener('mousedown', () => this.hidePlaceholder());
-        this.signatureCanvas.addEventListener('touchstart', () => this.hidePlaceholder());
-        this.signatureCanvas.addEventListener('mouseup', () => this.updateSignatureState());
-        this.signatureCanvas.addEventListener('touchend', () => this.updateSignatureState());
+        // SignatureCanvas의 커스텀 이벤트 리스닝
+        this.signatureCanvas.addEventListener('signatureStart', () => {
+            this.hidePlaceholder();
+            this.updateSignatureState();
+        });
+
+        this.signatureCanvas.addEventListener('signatureEnd', () => {
+            this.updateSignatureState();
+        });
 
         if (this.signatureClearButton) {
             this.signatureClearButton.addEventListener('click', () => {
