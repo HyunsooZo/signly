@@ -2,6 +2,11 @@ package com.signly.template.infrastructure.entity;
 
 import com.signly.template.domain.model.TemplateStatus;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +19,10 @@ import java.time.LocalDateTime;
         @Index(name = "idx_template_owner_status", columnList = "owner_id, status"),
         @Index(name = "idx_template_created_at", columnList = "created_at")
 })
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class TemplateEntity {
 
     @Id
@@ -47,91 +56,4 @@ public class TemplateEntity {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    protected TemplateEntity() {
-    }
-
-    public TemplateEntity(
-            String templateId,
-            String ownerId,
-            String title,
-            String content,
-            int version,
-            TemplateStatus status,
-            boolean isPreset,
-            String presetId,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt
-    ) {
-        this.templateId = templateId;
-        this.ownerId = ownerId;
-        this.title = title;
-        this.content = content;
-        this.version = version;
-        this.status = status;
-        this.isPreset = isPreset;
-        this.presetId = presetId;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
-    public String getTemplateId() {
-        return templateId;
-    }
-
-    public String getOwnerId() {
-        return ownerId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public TemplateStatus getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
-    }
-
-    public void setStatus(TemplateStatus status) {
-        this.status = status;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public boolean isPreset() {
-        return isPreset;
-    }
-
-    public String getPresetId() {
-        return presetId;
-    }
 }

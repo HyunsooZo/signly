@@ -2,11 +2,16 @@ package com.signly.contract.infrastructure.entity;
 
 import com.signly.common.domain.BaseEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Entity
 @Table(name = "contract_signatures")
 public class SignatureEntity extends BaseEntity {
@@ -41,30 +46,6 @@ public class SignatureEntity extends BaseEntity {
 
     @Column(name = "signature_path", length = 1000)
     private String signaturePath;
-
-    protected SignatureEntity() {}
-
-    public SignatureEntity(
-            String signatureId,
-            ContractJpaEntity contract,
-            String signerEmail,
-            String signerName,
-            String signatureData,
-            LocalDateTime signedAt,
-            String ipAddress,
-            String deviceInfo,
-            String signaturePath
-    ) {
-        this.signatureId = signatureId;
-        this.contract = contract;
-        this.signerEmail = signerEmail;
-        this.signerName = signerName;
-        this.signatureData = signatureData;
-        this.signedAt = signedAt;
-        this.ipAddress = ipAddress;
-        this.deviceInfo = deviceInfo;
-        this.signaturePath = signaturePath;
-    }
 
     public void setContract(ContractJpaEntity contract) {
         this.contract = contract;
