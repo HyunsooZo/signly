@@ -12,13 +12,18 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class EmailService {
 
     private final JavaMailSender mailSender;
-
-    @Value("${app.email.from:noreply@signly.com}")
     private final String fromEmail;
+
+    public EmailService(
+            JavaMailSender mailSender,
+            @Value("${app.email.from:noreply@signly.com}") String fromEmail
+    ) {
+        this.mailSender = mailSender;
+        this.fromEmail = fromEmail;
+    }
 
     public void sendSimpleEmail(
             String to,
@@ -37,7 +42,7 @@ public class EmailService {
     public void sendTemplateEmail(
             String to,
             EmailTemplate template,
-            Map<String, Object> variables
+            Map<String, String> variables
     ) {
         try {
             var mimeMessage = mailSender.createMimeMessage();
@@ -60,7 +65,7 @@ public class EmailService {
 
     private String generateEmailTemplate(
             EmailTemplate template,
-            Map<String, Object> variables
+            Map<String, String> variables
     ) {
         var bodyContent = switch (template) {
             case CONTRACT_SIGNING_REQUEST -> String.format("""

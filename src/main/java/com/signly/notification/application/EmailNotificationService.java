@@ -8,7 +8,6 @@ import com.signly.notification.domain.model.EmailAttachment;
 import com.signly.notification.domain.model.EmailOutbox;
 import com.signly.notification.domain.model.EmailTemplate;
 import com.signly.notification.domain.repository.EmailOutboxRepository;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,26 +19,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class EmailNotificationService {
     private static final Logger logger = LoggerFactory.getLogger(EmailNotificationService.class);
 
     private final EmailOutboxRepository outboxRepository;
-
-    @Value("${app.base-url:http://localhost:8080}")
     private final String baseUrl;
-
-    @Value("${app.name:Signly}")
     private final String companyName;
-
     private final ContractPdfService contractPdfService;
     private final DocumentService documentService;
+
+    public EmailNotificationService(
+            EmailOutboxRepository outboxRepository,
+            @Value("${app.base-url:http://localhost:8080}") String baseUrl,
+            @Value("${app.name:Signly}") String companyName,
+            ContractPdfService contractPdfService,
+            DocumentService documentService
+    ) {
+        this.outboxRepository = outboxRepository;
+        this.baseUrl = baseUrl;
+        this.companyName = companyName;
+        this.contractPdfService = contractPdfService;
+        this.documentService = documentService;
+    }
 
     @Transactional
     public void sendContractSigningRequest(Contract contract) {
         try {
             String signingUrl = baseUrl + "/sign/" + contract.getSignToken().value();
-
             var variables = new HashMap<String, Object>();
             variables.put("contractTitle", contract.getTitle());
             variables.put("firstPartyName", contract.getFirstParty().name());
@@ -58,8 +64,7 @@ public class EmailNotificationService {
             );
 
             outboxRepository.save(outbox);
-            logger.info("계약서 서명 요청 이메일을 Outbox에 저장: contractId={}, outboxId={}",
-                    contract.getId().value(), outbox.getId().value());
+            logger.info("계약서 서명 요청 이메일을 Outbox에 저장: contractId={}, outboxId={}", contract.getId().value(), outbox.getId().value());
 
         } catch (Exception e) {
             logger.error("계약서 서명 요청 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
