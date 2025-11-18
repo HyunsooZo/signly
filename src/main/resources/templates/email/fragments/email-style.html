@@ -1,155 +1,358 @@
 <style th:fragment="emailStyles">
+    /* ========================================
+       Signly 이메일 디자인 시스템
+       JSP 디자인과 100% 일치하도록 설계
+       ======================================== */
+
+    /* 기본 리셋 */
     body,
     .email-body {
-        font-family: 'Noto Sans KR', Arial, sans-serif;
-        line-height: 1.6;
-        color: #333;
-        background-color: #f4f4f4;
         margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Noto Sans', Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #1e293b;
+        background-color: #e8e8e8;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* 전체 래퍼 */
+    .email-wrapper {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
         padding: 20px;
     }
 
-    .email-wrapper {
-        max-width: 600px;
-        margin: 0 auto;
-    }
-
+    /* 메인 카드 - JSP .main-content-card와 동일 */
     .email-card {
-        background-color: #ffffff;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        background-color: #fafafa;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin: 0;
     }
 
+    /* 컴팩트 카드 (옵션) */
     .email-card--compact {
-        padding: 24px;
-        box-shadow: none;
-        border: 1px solid #e0e0e0;
+        padding: 1.5rem;
     }
 
+    /* 헤더 스타일 */
     .email-header {
         text-align: center;
-        border-bottom: 2px solid #2196f3;
-        padding-bottom: 20px;
-        margin-bottom: 30px;
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 3px solid #667eea;
     }
 
     .email-header--success {
-        border-bottom-color: #4caf50;
+        border-bottom-color: #059669;
     }
 
     .email-header--warning {
-        border-bottom-color: #ff9800;
+        border-bottom-color: #d97706;
     }
 
+    .email-header--danger {
+        border-bottom-color: #dc2626;
+    }
+
+    /* 로고 - JSP .navbar-brand와 동일 */
     .email-logo {
-        font-size: 28px;
-        font-weight: bold;
-        color: #2196f3;
+        font-family: 'Lobster', 'Brush Script MT', cursive;
+        font-size: 2.5rem;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        color: #667eea;
+        margin: 0;
+        padding: 0;
     }
 
     .email-logo--success {
-        color: #4caf50;
+        color: #059669;
     }
 
     .email-logo--warning {
-        color: #ff9800;
+        color: #d97706;
     }
 
+    .email-logo--danger {
+        color: #dc2626;
+    }
+
+    /* 컨텐츠 영역 */
     .email-content {
-        margin-bottom: 30px;
+        margin-bottom: 2rem;
+        color: #334155;
     }
 
-    .email-highlight {
-        background-color: #f9f9f9;
-        padding: 15px;
-        border-left: 4px solid #2196f3;
-        margin: 20px 0;
+    .email-content p {
+        margin: 1rem 0;
     }
 
-    .email-highlight--success {
-        border-left-color: #4caf50;
-    }
-
-    .email-highlight--warning {
-        border-left-color: #ff9800;
-    }
-
-    .email-button {
-        display: inline-block;
-        background-color: #4caf50;
-        color: #ffffff !important;
-        padding: 12px 25px;
-        text-decoration: none;
-        border-radius: 5px;
+    .email-content strong {
         font-weight: 600;
+        color: #1e293b;
     }
 
-    .email-button--primary {
-        background-color: #4caf50;
-    }
-
-    .email-footer {
-        text-align: center;
-        font-size: 12px;
-        color: #666666;
-        border-top: 1px solid #eeeeee;
-        padding-top: 20px;
-        margin-top: 30px;
-    }
-
-    .email-success-icon {
-        text-align: center;
-        font-size: 48px;
-        color: #4caf50;
-        margin: 20px 0;
-    }
-
-    .email-center {
-        text-align: center;
-    }
-
-    .email-list {
-        margin: 16px 0;
-        padding-left: 20px;
-    }
-
-    .email-signature-image {
-        max-width: 220px;
-        border: 1px solid #dddddd;
-        padding: 6px;
-        border-radius: 6px;
-    }
-
+    /* 타이틀 */
     .email-title {
-        font-size: 24px;
-        margin-top: 0;
-        margin-bottom: 16px;
-        color: #222222;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0 0 1.5rem 0;
+        line-height: 1.3;
     }
 
     .email-title--success {
-        color: #4caf50;
+        color: #059669;
     }
 
     .email-title--warning {
-        color: #ff9800;
+        color: #d97706;
     }
 
+    .email-title--danger {
+        color: #dc2626;
+    }
+
+    /* 하이라이트 박스 - JSP alert와 유사 */
+    .email-highlight {
+        background-color: #f1f5f9;
+        border-left: 4px solid #667eea;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin: 1.5rem 0;
+    }
+
+    .email-highlight--success {
+        background-color: #f0fdf4;
+        border-left-color: #059669;
+    }
+
+    .email-highlight--warning {
+        background-color: #fffbeb;
+        border-left-color: #d97706;
+    }
+
+    .email-highlight--danger {
+        background-color: #fef2f2;
+        border-left-color: #dc2626;
+    }
+
+    .email-highlight--info {
+        background-color: #f0f9ff;
+        border-left-color: #0891b2;
+    }
+
+    /* 메타 정보 */
     .email-meta {
-        margin: 12px 0;
+        margin: 0.75rem 0;
+        font-size: 0.9375rem;
+        color: #475569;
     }
 
     .email-meta strong {
         display: inline-block;
-        min-width: 90px;
+        min-width: 100px;
+        font-weight: 600;
+        color: #334155;
     }
 
+    /* 버튼 - JSP .btn-primary와 100% 동일 */
+    .email-button {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-align: center;
+        text-decoration: none;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-height: 38px;
+        line-height: 1.5;
+        vertical-align: middle;
+    }
+
+    .email-button--primary {
+        background-color: #667eea;
+        color: #ffffff !important;
+    }
+
+    .email-button--primary:hover {
+        background-color: #764ba2;
+        color: #ffffff !important;
+    }
+
+    .email-button--success {
+        background-color: #059669;
+        color: #ffffff !important;
+    }
+
+    .email-button--secondary {
+        background-color: #e2e8f0;
+        color: #334155 !important;
+    }
+
+    .email-button--outline {
+        background-color: transparent;
+        border-color: #667eea;
+        color: #667eea !important;
+    }
+
+    /* 센터 정렬 */
+    .email-center {
+        text-align: center;
+    }
+
+    /* 리스트 스타일 */
+    .email-list {
+        margin: 1rem 0;
+        padding-left: 1.5rem;
+        color: #475569;
+    }
+
+    .email-list li {
+        margin: 0.5rem 0;
+        line-height: 1.6;
+    }
+
+    /* 서명 이미지 */
+    .email-signature-image {
+        max-width: 220px;
+        height: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px;
+        margin: 1rem 0;
+    }
+
+    /* 성공 아이콘 */
+    .email-success-icon {
+        font-size: 3rem;
+        color: #059669;
+        margin: 1.5rem 0;
+        text-align: center;
+        line-height: 1;
+    }
+
+    .email-warning-icon {
+        font-size: 3rem;
+        color: #d97706;
+        margin: 1.5rem 0;
+        text-align: center;
+        line-height: 1;
+    }
+
+    /* 푸터 */
+    .email-footer {
+        text-align: center;
+        font-size: 0.75rem;
+        color: #64748b;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .email-footer p {
+        margin: 0.5rem 0;
+        line-height: 1.5;
+    }
+
+    /* 서브텍스트 */
     .email-subtext {
-        font-size: 13px;
-        color: #555555;
+        font-size: 0.875rem;
+        color: #64748b;
+        margin: 0.5rem 0;
     }
 
+    /* 구분선 */
+    .email-divider {
+        border: 0;
+        border-top: 1px solid #e2e8f0;
+        margin: 1.5rem 0;
+    }
+
+    /* 테이블 스타일 (정보 표시용) */
+    .email-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+    }
+
+    .email-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .email-table td:first-child {
+        font-weight: 600;
+        color: #334155;
+        width: 30%;
+    }
+
+    /* ========================================
+       반응형 디자인 - 모바일 최적화
+       ======================================== */
+    @media only screen and (max-width: 600px) {
+        .email-wrapper {
+            padding: 10px;
+        }
+
+        .email-card {
+            padding: 1.25rem;
+            border-radius: 8px;
+        }
+
+        .email-logo {
+            font-size: 2rem;
+        }
+
+        .email-title {
+            font-size: 1.25rem;
+        }
+
+        .email-button {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+        }
+
+        .email-highlight {
+            padding: 0.875rem 1rem;
+        }
+
+        .email-meta strong {
+            display: block;
+            min-width: auto;
+            margin-bottom: 0.25rem;
+        }
+
+        .email-success-icon,
+        .email-warning-icon {
+            font-size: 2.5rem;
+        }
+    }
+
+    /* 태블릿 크기 */
+    @media only screen and (min-width: 601px) and (max-width: 768px) {
+        .email-card {
+            padding: 1.75rem;
+        }
+
+        .email-logo {
+            font-size: 2.25rem;
+        }
+    }
+
+    /* ========================================
+       다크모드 지원
+       ======================================== */
     @media (prefers-color-scheme: dark) {
         body,
         .email-body {
@@ -157,20 +360,96 @@
             color: #e0e0e0;
         }
 
-        .email-card,
-        .email-card--compact {
+        .email-card {
             background-color: #2a2a2a;
-            border-color: #3a3a3a;
-            box-shadow: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
-        .email-footer {
-            color: #aaaaaa;
-            border-top-color: #3a3a3a;
+        .email-content {
+            color: #cbd5e1;
+        }
+
+        .email-content strong {
+            color: #e0e0e0;
+        }
+
+        .email-title {
+            color: #f1f5f9;
         }
 
         .email-highlight {
-            background-color: #252525;
+            background-color: #1e293b;
+            border-left-color: #667eea;
+        }
+
+        .email-highlight--success {
+            background-color: #064e3b;
+            border-left-color: #059669;
+        }
+
+        .email-highlight--warning {
+            background-color: #78350f;
+            border-left-color: #d97706;
+        }
+
+        .email-highlight--danger {
+            background-color: #7f1d1d;
+            border-left-color: #dc2626;
+        }
+
+        .email-highlight--info {
+            background-color: #164e63;
+            border-left-color: #0891b2;
+        }
+
+        .email-footer {
+            color: #94a3b8;
+            border-top-color: #334155;
+        }
+
+        .email-meta {
+            color: #94a3b8;
+        }
+
+        .email-meta strong {
+            color: #cbd5e1;
+        }
+
+        .email-subtext {
+            color: #94a3b8;
+        }
+
+        .email-table td {
+            border-bottom-color: #334155;
+        }
+
+        .email-divider {
+            border-top-color: #334155;
+        }
+
+        /* 버튼은 다크모드에서도 동일한 색상 유지 (가독성) */
+        .email-button--secondary {
+            background-color: #334155;
+            color: #f1f5f9 !important;
+        }
+    }
+
+    /* ========================================
+       인쇄 스타일
+       ======================================== */
+    @media print {
+        body,
+        .email-body {
+            background-color: white;
+        }
+
+        .email-card {
+            box-shadow: none;
+            border: 1px solid #e2e8f0;
+        }
+
+        .email-button {
+            border: 1px solid #667eea;
         }
     }
 </style>
