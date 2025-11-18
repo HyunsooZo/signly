@@ -2,6 +2,7 @@ package com.signly.common.email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -11,25 +12,20 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
     private final JavaMailSender mailSender;
-    private final String fromEmail;
 
-    public EmailService(
-            JavaMailSender mailSender,
-            @Value("${app.email.from:noreply@signly.com}") String fromEmail
-    ) {
-        this.mailSender = mailSender;
-        this.fromEmail = fromEmail;
-    }
+    @Value("${app.email.from:noreply@signly.com}")
+    private final String fromEmail;
 
     public void sendSimpleEmail(
             String to,
             String subject,
             String text
     ) {
-        SimpleMailMessage message = new SimpleMailMessage();
+        var message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(to);
         message.setSubject(subject);
@@ -44,11 +40,11 @@ public class EmailService {
             Map<String, Object> variables
     ) {
         try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            var mimeMessage = mailSender.createMimeMessage();
+            var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             // 간단한 HTML 템플릿 생성 (실제로는 파일에서 읽어오거나 별도 템플릿 엔진 사용)
-            String htmlContent = generateEmailTemplate(template, variables);
+            var htmlContent = generateEmailTemplate(template, variables);
 
             helper.setFrom(fromEmail);
             helper.setTo(to);
@@ -67,7 +63,7 @@ public class EmailService {
             Map<String, Object> variables
     ) {
         // 간단한 템플릿 생성 (추후 개선 필요)
-        StringBuilder html = new StringBuilder();
+        var html = new StringBuilder();
         html.append("<!DOCTYPE html>");
         html.append("<html><head><meta charset='UTF-8'></head><body>");
         html.append("<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>");
@@ -107,7 +103,7 @@ public class EmailService {
             String signerName,
             String contractUrl
     ) {
-        Map<String, Object> variables = Map.of(
+        var variables = Map.of(
                 "signerName", signerName,
                 "contractTitle", contractTitle,
                 "contractUrl", contractUrl,
@@ -122,7 +118,7 @@ public class EmailService {
             String contractTitle,
             String signerName
     ) {
-        Map<String, Object> variables = Map.of(
+        var variables = Map.of(
                 "contractTitle", contractTitle,
                 "signerName", signerName,
                 "companyName", "Signly"
@@ -135,7 +131,7 @@ public class EmailService {
             String to,
             String contractTitle
     ) {
-        Map<String, Object> variables = Map.of(
+        var variables = Map.of(
                 "contractTitle", contractTitle,
                 "companyName", "Signly"
         );
@@ -148,7 +144,7 @@ public class EmailService {
             String contractTitle,
             String reason
     ) {
-        Map<String, Object> variables = Map.of(
+        var variables = Map.of(
                 "contractTitle", contractTitle,
                 "reason", reason,
                 "companyName", "Signly"
@@ -161,7 +157,7 @@ public class EmailService {
             String to,
             String contractTitle
     ) {
-        Map<String, Object> variables = Map.of(
+        var variables = Map.of(
                 "contractTitle", contractTitle,
                 "companyName", "Signly"
         );
@@ -173,7 +169,7 @@ public class EmailService {
             String to,
             String userName
     ) {
-        Map<String, Object> variables = Map.of(
+        var variables = Map.of(
                 "userName", userName,
                 "companyName", "Signly"
         );
@@ -187,8 +183,8 @@ public class EmailService {
             String resetToken,
             String baseUrl
     ) {
-        String resetUrl = baseUrl + "/reset-password?token=" + resetToken;
-        Map<String, Object> variables = Map.of(
+        var resetUrl = baseUrl + "/reset-password?token=" + resetToken;
+        var variables = Map.of(
                 "userName", userName,
                 "resetUrl", resetUrl,
                 "expiryHours", "24",
