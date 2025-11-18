@@ -464,3 +464,40 @@ body,
         margin: 0 auto !important;
     }
 }
+
+/* 모바일 반응형 - 비율 유지하며 축소 */
+@media (max-width: 768px) {
+    /* body는 그대로 */
+    body:not(:has(.navbar)) {
+        max-width: 100%;
+        padding: 5mm;
+    }
+
+    /* 계약서 wrapper를 flex로 중앙 정렬 */
+    .contract-content-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        overflow: hidden;
+        transform: scale(1);
+        transform-origin: top center;
+    }
+
+    /* 계약서 컨테이너 전체를 축소 - 210mm를 화면 너비에 맞게 */
+    .contract-content {
+        width: 210mm;
+        transform-origin: top center;
+        transform: scale(calc((100vw - 80px) / 210mm));
+        flex-shrink: 0;
+        margin-bottom: calc((1 - (100vw - 80px) / 210mm) * -100%);
+    }
+
+    .preset-document,
+    .template-document {
+        width: 210mm;
+        transform-origin: top center;
+        transform: scale(calc((100vw - 80px) / 210mm));
+        flex-shrink: 0;
+    }
+}
