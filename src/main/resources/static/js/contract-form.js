@@ -71,6 +71,7 @@ class ContractForm {
     init() {
         // 먼저 JSON 데이터 파싱
         this.parseJsonData();
+        this.loadOwnerData();
 
         console.log('[DEBUG] init - selectedTemplateData:', this.selectedTemplateData);
         console.log('[DEBUG] init - existingContractData:', this.existingContractData);
@@ -180,26 +181,47 @@ class ContractForm {
     // ========================================
 
     readOwnerInfo() {
+        const datasetInfo = (() => {
+            const dataset = document.body?.dataset || {};
+            if (
+                dataset.ownerName ||
+                dataset.ownerEmail ||
+                dataset.ownerCompany ||
+                dataset.ownerPhone ||
+                dataset.ownerAddress
+            ) {
+                return {
+                    name: dataset.ownerName || '',
+                    email: dataset.ownerEmail || '',
+                    userId: dataset.currentUserId || '',
+                    companyName: dataset.ownerCompany || '',
+                    businessPhone: dataset.ownerPhone || '',
+                    businessAddress: dataset.ownerAddress || ''
+                };
+            }
+            return null;
+        })();
+
         try {
             const raw = localStorage.getItem('signly_user_info');
             if (!raw) {
-                return null;
+                return datasetInfo;
             }
             const parsed = JSON.parse(raw);
             if (!parsed || typeof parsed !== 'object') {
-                return null;
+                return datasetInfo;
             }
             return {
-                name: parsed.name || '',
-                email: parsed.email || '',
-                userId: parsed.userId || '',
-                companyName: parsed.companyName || '',
-                businessPhone: parsed.businessPhone || '',
-                businessAddress: parsed.businessAddress || ''
+                name: parsed.name || datasetInfo?.name || '',
+                email: parsed.email || datasetInfo?.email || '',
+                userId: parsed.userId || datasetInfo?.userId || '',
+                companyName: parsed.companyName || datasetInfo?.companyName || '',
+                businessPhone: parsed.businessPhone || datasetInfo?.businessPhone || '',
+                businessAddress: parsed.businessAddress || datasetInfo?.businessAddress || ''
             };
         } catch (error) {
             console.warn('[WARN] 사용자 정보를 불러올 수 없습니다:', error);
-            return null;
+            return datasetInfo;
         }
     }
 
@@ -1827,6 +1849,10 @@ class ContractForm {
             event.stopPropagation();
             showAlertModal('갑과 을의 이메일 주소는 달라야 합니다.');
             return false;
+        }
+
+        if (window.ensureCsrfToken) {
+            window.ensureCsrfToken(form);
         }
 
         return true;

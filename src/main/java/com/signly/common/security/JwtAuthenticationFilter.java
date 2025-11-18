@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = extractTokenFromRequest(request);
 
-        if (StringUtils.hasText(token)) {
+        if (StringUtils.hasText(token) && !shouldSkipAuthentication(request)) {
             log.debug("토큰 발견: {}", token.substring(0, Math.min(20, token.length())) + "...");
 
             if (!jwtTokenProvider.isTokenValid(token)) {
@@ -116,6 +116,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    private boolean shouldSkipAuthentication(HttpServletRequest request) {
+        String path = request.getServletPath();
+        if (!StringUtils.hasText(path)) {
+            return false;
+        }
+        return path.startsWith("/.well-known")
+                || path.equals("/favicon.ico")
+                || path.startsWith("/css/")
+                || path.startsWith("/js/")
+                || path.startsWith("/images/")
+                || path.startsWith("/fonts/");
+    }
+
     private String extractTokenFromRequest(HttpServletRequest request) {
         // Authorization 헤더에서 토큰 추출
         String bearerToken = request.getHeader("Authorization");
@@ -180,7 +193,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             newAuthCookie.setMaxAge(60 * 60); // 1시간
             response.addCookie(newAuthCookie);
 
-            // Redis에 새 액세스 토큰 저장
+            // 새로운 리프레시 토큰을 쿠키에 설정 (Token Rotation)
+            Cookie newRefreshCookie = new Cookie("refreshToken", loginResponse.refreshToken());
+            newRefreshCookie.setHttpOnly(true);
+            newRefreshCookie.setPath("/");
+            newRefreshCookie.setMaxAge(30 * 24 * 60 * 60); // 30일
+            response.addCookie(newRefreshCookie);
+
+            // Redis에 새 액세스 토큰 저장 (리프레시 토큰은 AuthService.refreshToken()에서 이미 저장됨)
             tokenRedisService.saveAccessToken(loginResponse.userId(), loginResponse.accessToken());
 
             return loginResponse.accessToken();

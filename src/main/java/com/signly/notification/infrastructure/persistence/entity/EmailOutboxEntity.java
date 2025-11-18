@@ -3,13 +3,18 @@ package com.signly.notification.infrastructure.persistence.entity;
 import com.signly.notification.domain.model.EmailOutboxStatus;
 import com.signly.notification.domain.model.EmailTemplate;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Setter
 @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "email_outbox",
         indexes = {
@@ -17,7 +22,7 @@ import java.time.LocalDateTime;
                 @Index(name = "idx_created_at", columnList = "created_at")
         })
 public class EmailOutboxEntity {
-    // Getters and Setters
+
     @Id
     @Column(name = "id", length = 26)
     private String id;
@@ -34,11 +39,11 @@ public class EmailOutboxEntity {
 
     @Lob
     @Column(name = "template_variables", nullable = false, columnDefinition = "LONGTEXT")
-    private String templateVariables; // JSON string
+    private String templateVariables;
 
     @Lob
     @Column(name = "attachments", columnDefinition = "LONGTEXT")
-    private String attachments; // JSON string for EmailAttachment list
+    private String attachments;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
@@ -67,7 +72,7 @@ public class EmailOutboxEntity {
 
     @PrePersist
     public void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
+        var now = LocalDateTime.now();
         if (createdAt == null) {
             createdAt = now;
         }

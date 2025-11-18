@@ -3,6 +3,8 @@
  * Handles digital signature functionality
  */
 
+console.log('[SignatureManager] Script loaded');
+
 class SignatureManager {
     constructor() {
         this.contractData = {};
@@ -11,8 +13,8 @@ class SignatureManager {
         this.signaturePad = null;
         this.signatureCanvas = null;
         this.signaturePlaceholder = null;
-        this.signatureSubmitButton = null;
         this.signatureClearButton = null;
+        this.completeSigningBtn = null;
         this.isInitialized = false;
 
         this.init();
@@ -40,32 +42,61 @@ class SignatureManager {
     }
 
     setupEventListeners() {
-        document.addEventListener('DOMContentLoaded', () => {
+        // DOM이 이미 로드되었는지 확인
+        if (document.readyState === 'loading') {
+            // 아직 로딩 중이면 DOMContentLoaded 이벤트 대기
+            console.log('[SignatureManager] DOM is still loading, waiting for DOMContentLoaded');
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('[SignatureManager] DOMContentLoaded event fired');
+                this.initSignaturePad();
+                this.bindEvents();
+            });
+        } else {
+            // 이미 로드되었으면 바로 실행
+            console.log('[SignatureManager] DOM already loaded, initializing immediately');
             this.initSignaturePad();
             this.bindEvents();
-        });
+        }
     }
 
     initSignaturePad() {
+        console.log('[SignatureManager] initSignaturePad called');
+
         // 이미 초기화되었으면 무시
         if (this.isInitialized) {
+            console.log('[SignatureManager] Already initialized, skipping');
             return;
         }
 
         const container = document.getElementById('signaturePadContainer');
         if (!container) {
+            console.error('[SignatureManager] signaturePadContainer not found');
             return;
         }
+        console.log('[SignatureManager] Container found');
 
         this.signatureCanvas = container.querySelector('.signature-canvas');
         this.signaturePlaceholder = container.querySelector('.signature-placeholder');
-        this.signatureSubmitButton = container.querySelector('.signature-submit');
         this.signatureClearButton = container.querySelector('.signature-clear');
+        this.completeSigningBtn = document.getElementById('completeSigningBtn');
+
+        console.log('[SignatureManager] Canvas:', this.signatureCanvas);
+        console.log('[SignatureManager] Complete button:', this.completeSigningBtn);
 
         if (!this.signatureCanvas) {
-            console.error('Signature canvas not found');
+            console.error('[SignatureManager] Signature canvas not found');
             return;
         }
+
+        if (!window.SignaturePad) {
+            console.error('[SignatureManager] SignaturePad library not loaded');
+            return;
+        }
+
+        // canvas 크기를 먼저 설정 (SignaturePad 생성 전에 필요)
+        console.log('[SignatureManager] Resizing canvas BEFORE SignaturePad creation');
+        this.resizeSignatureCanvas();
+        console.log('[SignatureManager] Canvas size after resize:', this.signatureCanvas.width, 'x', this.signatureCanvas.height);
 
         this.signaturePad = new window.SignaturePad(this.signatureCanvas, {
             backgroundColor: 'rgba(0, 0, 0, 0)',
@@ -73,28 +104,50 @@ class SignatureManager {
             minWidth: 0.8,
             maxWidth: 2.5
         });
+        console.log('[SignatureManager] SignaturePad created');
 
         this.signaturePad.onBegin = () => {
+            console.log('[SignatureManager] SignaturePad onBegin triggered');
             this.hidePlaceholder();
             this.updateSignatureState();
         };
 
         this.signaturePad.onEnd = () => {
+            console.log('[SignatureManager] SignaturePad onEnd triggered');
             this.updateSignatureState();
         };
 
-        this.resizeSignatureCanvas();
-
-        // 이전 리스너 제거 후 새로 추가
-        window.removeEventListener('resize', this.resizeSignatureCanvas);
+        // resize 이벤트 리스너 추가
         window.addEventListener('resize', () => this.resizeSignatureCanvas());
 
-        // 브라우저 환경에서도 서명 시작/완료 감지를 위한 추가 이벤트 리스너
-        // resizeSignatureCanvas 이후에 추가해야 canvas가 준비된 상태
-        this.signatureCanvas.addEventListener('mousedown', () => this.hidePlaceholder());
-        this.signatureCanvas.addEventListener('touchstart', () => this.hidePlaceholder());
-        this.signatureCanvas.addEventListener('mouseup', () => this.updateSignatureState());
-        this.signatureCanvas.addEventListener('touchend', () => this.updateSignatureState());
+        // 브라우저(마우스) 환경에서도 서명 시작/완료 감지를 위한 추가 이벤트 리스너
+        // SignaturePad의 onBegin/onEnd는 터치에서만 작동하므로 마우스 이벤트 추가
+        this.signatureCanvas.addEventListener('mousedown', (e) => {
+            console.log('[SignatureManager] mousedown event', e);
+            this.hidePlaceholder();
+        });
+
+        this.signatureCanvas.addEventListener('touchstart', (e) => {
+            console.log('[SignatureManager] touchstart event', e);
+            this.hidePlaceholder();
+        });
+
+        // mouseup 이벤트를 document 레벨에서 리스닝 (캔버스 밖에서 놓아도 감지)
+        document.addEventListener('mouseup', () => {
+            // 서명 중이었는지 확인 (signaturePad가 drawing 상태였는지)
+            if (this.signaturePad && !this.signaturePad.isEmpty()) {
+                console.log('[SignatureManager] mouseup event (document level)');
+                this.updateSignatureState();
+            }
+        });
+
+        document.addEventListener('touchend', () => {
+            // 터치 종료 시에도 상태 업데이트
+            if (this.signaturePad && !this.signaturePad.isEmpty()) {
+                console.log('[SignatureManager] touchend event (document level)');
+                this.updateSignatureState();
+            }
+        });
 
         if (this.signatureClearButton) {
             this.signatureClearButton.addEventListener('click', () => {
@@ -105,8 +158,9 @@ class SignatureManager {
             });
         }
 
-        if (this.signatureSubmitButton) {
-            this.signatureSubmitButton.addEventListener('click', () => {
+        // 서명 완료 버튼 이벤트 리스너
+        if (this.completeSigningBtn) {
+            this.completeSigningBtn.addEventListener('click', () => {
                 if (this.signaturePad.isEmpty()) {
                     if (window.Signly && window.Signly.showAlert) {
                         window.Signly.showAlert('서명을 입력해 주세요.', 'warning');
@@ -115,29 +169,55 @@ class SignatureManager {
                 }
 
                 const signatureData = this.signaturePad.toDataURL('image/png');
-                this.handleSignatureSubmit(signatureData);
+                this.showSignatureConfirmModal(signatureData);
             });
         }
 
         this.isInitialized = true;
         this.updateSignatureState();
+        console.log('[SignatureManager] Initialization complete');
     }
 
     resizeSignatureCanvas() {
         if (!this.signatureCanvas) {
+            console.error('[SignatureManager] Canvas element not found in resizeSignatureCanvas');
             return;
         }
 
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
         const rect = this.signatureCanvas.getBoundingClientRect();
 
+        console.log('[SignatureManager] Canvas rect:', rect);
+        console.log('[SignatureManager] Device pixel ratio:', ratio);
+
+        // canvas의 실제 크기가 0이면 기본값 사용
+        const width = rect.width || 600;
+        const height = rect.height || 200;
+
+        console.log('[SignatureManager] Calculated width:', width, 'height:', height);
+
         // 현재 서명 데이터 저장
         const currentData = this.signaturePad ? this.signaturePad.toData() : [];
 
         // 캔버스 크기 조정
-        this.signatureCanvas.width = rect.width * ratio;
-        this.signatureCanvas.height = rect.height * ratio;
-        this.signatureCanvas.getContext('2d').scale(ratio, ratio);
+        this.signatureCanvas.width = width * ratio;
+        this.signatureCanvas.height = height * ratio;
+
+        console.log('[SignatureManager] Canvas width set to:', this.signatureCanvas.width);
+        console.log('[SignatureManager] Canvas height set to:', this.signatureCanvas.height);
+
+        const ctx = this.signatureCanvas.getContext('2d');
+        if (!ctx) {
+            console.error('[SignatureManager] Failed to get canvas context');
+            return;
+        }
+
+        ctx.scale(ratio, ratio);
+
+        // CSS 크기 설정 확인
+        this.signatureCanvas.style.width = width + 'px';
+        this.signatureCanvas.style.height = height + 'px';
+        console.log('[SignatureManager] Canvas style width:', this.signatureCanvas.style.width, 'height:', this.signatureCanvas.style.height);
 
         // 서명 데이터 복원
         if (this.signaturePad && currentData.length > 0) {
@@ -145,6 +225,10 @@ class SignatureManager {
         }
 
         this.updateSignatureState();
+
+        // 최종 확인
+        console.log('[SignatureManager] Final canvas dimensions - width:', this.signatureCanvas.width, 'height:', this.signatureCanvas.height);
+        console.log('[SignatureManager] Canvas is ready for drawing');
     }
 
     bindEvents() {
@@ -186,28 +270,33 @@ class SignatureManager {
     }
 
     updateSignatureState() {
-        if (!this.signaturePad || !this.signatureSubmitButton) {
+        if (!this.signaturePad) {
+            console.warn('[SignatureManager] updateSignatureState: signaturePad not initialized');
             return;
         }
 
         const hasSignature = !this.signaturePad.isEmpty();
-        this.signatureSubmitButton.disabled = !hasSignature;
+        console.log('[SignatureManager] updateSignatureState - hasSignature:', hasSignature);
 
-        if (hasSignature) {
-            this.signatureSubmitButton.classList.remove('disabled');
+        // 서명 완료 버튼 제어
+        if (this.completeSigningBtn) {
+            console.log('[SignatureManager] Updating button state - disabled:', !hasSignature);
+            this.completeSigningBtn.disabled = !hasSignature;
+            if (hasSignature) {
+                this.completeSigningBtn.classList.remove('disabled');
+                console.log('[SignatureManager] Button enabled');
+            } else {
+                this.completeSigningBtn.classList.add('disabled');
+                console.log('[SignatureManager] Button disabled');
+            }
         } else {
-            this.signatureSubmitButton.classList.add('disabled');
+            console.warn('[SignatureManager] completeSigningBtn not found');
         }
     }
 
     handleSignatureClear() {
         // 서명 지우기 후 처리 로직
         console.log('Signature cleared');
-    }
-
-    handleSignatureSubmit(signatureData) {
-        // 확인 모달 표시
-        this.showSignatureConfirmModal(signatureData);
     }
 
     showSignatureConfirmModal(signatureData) {
@@ -224,17 +313,25 @@ class SignatureManager {
             signatureImage.src = signatureData;
         }
 
-        // 확인 버튼 이벤트 설정
-        const confirmBtn = modal.querySelector('.confirm-signature-btn');
-        if (confirmBtn) {
-            // 기존 이벤트 리스너 제거
-            const newConfirmBtn = confirmBtn.cloneNode(true);
-            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        // 취소 버튼 이벤트 설정
+        const cancelBtn = modal.querySelector('#cancelSignBtn');
+        if (cancelBtn) {
+            const newCancelBtn = cancelBtn.cloneNode(true);
+            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
 
-            // 새 이벤트 리스너 추가
-            newConfirmBtn.addEventListener('click', () => {
-                this.submitSignature(signatureData);
+            newCancelBtn.addEventListener('click', () => {
                 this.closeModal();
+            });
+        }
+
+        // 확인 및 제출 버튼 이벤트 설정
+        const finalSignBtn = modal.querySelector('#finalSignBtn');
+        if (finalSignBtn) {
+            const newFinalSignBtn = finalSignBtn.cloneNode(true);
+            finalSignBtn.parentNode.replaceChild(newFinalSignBtn, finalSignBtn);
+
+            newFinalSignBtn.addEventListener('click', () => {
+                this.submitSignature(signatureData);
             });
         }
 
@@ -266,13 +363,23 @@ class SignatureManager {
             payload.append('signerName', this.contractData.signerName);
             payload.append('signerEmail', this.contractData.signerEmail);
 
+            // CSRF 토큰을 실시간으로 가져오기 (window.csrfParam/csrfToken 우선, 없으면 meta 태그에서)
+            const csrfParam = window.csrfParam || document.querySelector('meta[name="_csrf_parameter"]')?.content || '_csrf';
+            const csrfToken = window.csrfToken || document.querySelector('meta[name="_csrf"]')?.content || '';
+
+            console.log('[SignatureManager] CSRF Param:', csrfParam);
+            console.log('[SignatureManager] CSRF Token:', csrfToken ? csrfToken.substring(0, 10) + '...' : 'EMPTY');
+
+            if (csrfParam && csrfToken) {
+                payload.append(csrfParam, csrfToken);
+                console.log('[SignatureManager] CSRF token added to payload');
+            } else {
+                console.error('[SignatureManager] CSRF token not found!');
+            }
+
             const headers = {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
             };
-
-            if (this.csrfParam && this.csrfToken) {
-                payload.append(this.csrfParam, this.csrfToken);
-            }
 
             const response = await fetch('/sign/' + this.contractData.token + '/sign', {
                 method: 'POST',
@@ -312,12 +419,3 @@ class SignatureManager {
         }
     }
 }
-
-// Initialize the signature manager when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Set CSRF data from JSP
-    window.csrfParam = '${_csrf.parameterName}';
-    window.csrfToken = '${_csrf.token}';
-
-    window.signatureManager = new SignatureManager();
-});

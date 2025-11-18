@@ -240,6 +240,14 @@ public class ContractSigningCoordinator {
     }
 
     private void saveFirstPartySignature(Contract contract) {
+        if (signatureRepository.existsByContractIdAndSignerEmail(
+                contract.getId(),
+                contract.getFirstParty().email())) {
+            logger.info("제1 당사자 서명이 이미 존재합니다. 저장 생략: contractId={}, email={}",
+                    contract.getId().value(), contract.getFirstParty().email());
+            return;
+        }
+
         String firstPartySignatureData = firstPartySignatureService.getSignatureDataUrl(
                 contract.getCreatorId().value());
 

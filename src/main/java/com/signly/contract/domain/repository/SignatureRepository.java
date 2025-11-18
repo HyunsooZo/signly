@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SignatureRepository {
-    void save(Signature signature);
+    void save(ContractId contractId, Signature signature);
 
     Optional<Signature> findById(String signatureId);
 

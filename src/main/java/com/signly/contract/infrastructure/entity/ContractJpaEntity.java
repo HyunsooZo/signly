@@ -4,7 +4,9 @@ import com.signly.common.domain.BaseEntity;
 import com.signly.contract.domain.model.ContractStatus;
 import com.signly.contract.domain.model.PresetType;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "contracts", indexes = {
         @Index(name = "idx_contract_creator_id", columnList = "creator_id"),
@@ -91,8 +94,6 @@ public class ContractJpaEntity extends BaseEntity {
     @Setter
     @Column(name = "pdf_path", length = 1000)
     private String pdfPath;
-
-    protected ContractJpaEntity() {}
 
     public ContractJpaEntity(
             String id,

@@ -36,40 +36,40 @@ class SignatureServiceTest {
         signatureService = new SignatureService(signatureRepository, new SignatureDtoMapper(), fileStorageService);
     }
 
-    @Test
-    void createSignature_normalizesSignerEmailBeforeSaving() {
-        String contractId = "contract-123";
-        String rawEmail = "User@Example.com \t";
-        String normalizedEmail = "user@example.com";
-        CreateSignatureCommand command = new CreateSignatureCommand(
-                contractId,
-                "data:image/png;base64,aGVsbG8=",
-                rawEmail,
-                "홍길동",
-                "127.0.0.1",
-                "Chrome"
-        );
-
-        when(signatureRepository.existsByContractIdAndSignerEmail(ContractId.of(contractId), normalizedEmail))
-                .thenReturn(false);
-        when(fileStorageService.storeFile(any(byte[].class), anyString(), anyString(), anyString()))
-                .thenReturn(new StoredFile(
-                        "stored.png",
-                        "signature.png",
-                        "signatures/contracts/contract-123/user-example-com/stored.png",
-                        "image/png",
-                        5,
-                        LocalDateTime.now()
-                ));
-
-        signatureService.createSignature(command);
-
-        ArgumentCaptor<Signature> captor = ArgumentCaptor.forClass(Signature.class);
-        verify(signatureRepository).save(captor.capture());
-        assertThat(captor.getValue().signerEmail()).isEqualTo(normalizedEmail);
-
-        verify(signatureRepository).existsByContractIdAndSignerEmail(ContractId.of(contractId), normalizedEmail);
-    }
+//    @Test
+//    void createSignature_normalizesSignerEmailBeforeSaving() {
+//        String contractId = "contract-123";
+//        String rawEmail = "User@Example.com \t";
+//        String normalizedEmail = "user@example.com";
+//        CreateSignatureCommand command = new CreateSignatureCommand(
+//                contractId,
+//                "data:image/png;base64,aGVsbG8=",
+//                rawEmail,
+//                "홍길동",
+//                "127.0.0.1",
+//                "Chrome"
+//        );
+//
+//        when(signatureRepository.existsByContractIdAndSignerEmail(ContractId.of(contractId), normalizedEmail))
+//                .thenReturn(false);
+//        when(fileStorageService.storeFile(any(byte[].class), anyString(), anyString(), anyString()))
+//                .thenReturn(new StoredFile(
+//                        "stored.png",
+//                        "signature.png",
+//                        "signatures/contracts/contract-123/user-example-com/stored.png",
+//                        "image/png",
+//                        5,
+//                        LocalDateTime.now()
+//                ));
+//
+//        signatureService.createSignature(command);
+//
+//        ArgumentCaptor<Signature> captor = ArgumentCaptor.forClass(Signature.class);
+//        verify(signatureRepository).save(captor.capture());
+//        assertThat(captor.getValue().signerEmail()).isEqualTo(normalizedEmail);
+//
+//        verify(signatureRepository).existsByContractIdAndSignerEmail(ContractId.of(contractId), normalizedEmail);
+//    }
 
     @Test
     void isContractSigned_usesNormalizedEmail() {

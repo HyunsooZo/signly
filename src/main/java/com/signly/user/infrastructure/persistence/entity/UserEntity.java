@@ -3,6 +3,11 @@ package com.signly.user.infrastructure.persistence.entity;
 import com.signly.user.domain.model.UserStatus;
 import com.signly.user.domain.model.UserType;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +19,10 @@ import java.time.LocalDateTime;
         @Index(name = "idx_user_status_type", columnList = "status, user_type"),
         @Index(name = "idx_user_created_at", columnList = "created_at")
 })
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class UserEntity {
 
     @Id
@@ -51,105 +60,4 @@ public class UserEntity {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    protected UserEntity() {
-    }
-
-    public UserEntity(
-            String userId,
-            String email,
-            String password,
-            String name,
-            String companyName,
-            String businessPhone,
-            String businessAddress,
-            UserType userType,
-            UserStatus status,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt
-    ) {
-        this.userId = userId;
-        this.email = email;
-        this.password = password;
-        this.name = name;
-        this.companyName = companyName;
-        this.businessPhone = businessPhone;
-        this.businessAddress = businessAddress;
-        this.userType = userType;
-        this.status = status;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public UserType getUserType() {
-        return userType;
-    }
-
-    public UserStatus getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
-
-    public void setStatus(UserStatus status) {
-        this.status = status;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public void setBusinessPhone(String businessPhone) {
-        this.businessPhone = businessPhone;
-    }
-
-    public void setBusinessAddress(String businessAddress) {
-        this.businessAddress = businessAddress;
-    }
-
-    public String getBusinessPhone() {
-        return businessPhone;
-    }
-
-    public String getBusinessAddress() {
-        return businessAddress;
-    }
 }

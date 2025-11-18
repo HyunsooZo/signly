@@ -69,7 +69,7 @@ public class DocumentRepositoryImpl implements DocumentRepository {
     ) {
         return jpaRepository.findByContractIdAndTypeOrderByCreatedAtDesc(
                         contractId.value(),
-                        type.name()
+                        type
                 )
                 .stream()
                 .map(mapper::toDomain)
@@ -83,7 +83,7 @@ public class DocumentRepositoryImpl implements DocumentRepository {
     ) {
         return jpaRepository.existsByContractIdAndType(
                 contractId.value(),
-                type.name()
+                type
         );
     }
 

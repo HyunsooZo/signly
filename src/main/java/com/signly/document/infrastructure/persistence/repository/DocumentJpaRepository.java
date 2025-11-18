@@ -1,5 +1,6 @@
 package com.signly.document.infrastructure.persistence.repository;
 
+import com.signly.document.domain.model.DocumentType;
 import com.signly.document.infrastructure.persistence.entity.DocumentJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,7 +26,7 @@ public interface DocumentJpaRepository extends JpaRepository<DocumentJpaEntity, 
     @Query("SELECT d FROM DocumentJpaEntity d WHERE d.contractId = :contractId AND d.type = :type ORDER BY d.createdAt DESC")
     List<DocumentJpaEntity> findByContractIdAndTypeOrderByCreatedAtDesc(
             @Param("contractId") String contractId,
-            @Param("type") String type
+            @Param("type") DocumentType type
     );
 
     @Query("SELECT COUNT(d) FROM DocumentJpaEntity d WHERE d.contractId = :contractId")
@@ -34,7 +35,7 @@ public interface DocumentJpaRepository extends JpaRepository<DocumentJpaEntity, 
     @Query("SELECT CASE WHEN COUNT(d) > 0 THEN true ELSE false END FROM DocumentJpaEntity d WHERE d.contractId = :contractId AND d.type = :type")
     boolean existsByContractIdAndType(
             @Param("contractId") String contractId,
-            @Param("type") String type
+            @Param("type") DocumentType type
     );
 
     @Query("SELECT d FROM DocumentJpaEntity d WHERE d.contractId = :contractId ORDER BY d.createdAt DESC")

@@ -11,33 +11,45 @@
     <title>계약서 서명 - Signly</title>
 
     <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="<c:url value='/css/common.css' />" rel="stylesheet">
     <link href="<c:url value='/css/contract-common.css' />" rel="stylesheet">
     <link href="<c:url value='/css/signature.css' />" rel="stylesheet">
 
+    <!-- 서명 페이지 전용 스타일 - navbar 메뉴만 숨김 -->
+    <style>
+        .navbar-nav {
+            display: none !important;
+        }
+        .navbar-toggler {
+            display: none !important;
+        }
+    </style>
+
     <!-- 메타 태그 -->
     <meta name="description" content="계약서 전자서명 페이지">
     <meta name="robots" content="noindex, nofollow">
+    <c:if test="${not empty _csrf}">
+        <meta name="_csrf" content="${_csrf.token}"/>
+        <meta name="_csrf_header" content="${_csrf.headerName}"/>
+        <meta name="_csrf_parameter" content="${_csrf.parameterName}"/>
+    </c:if>
+    <script src="/js/common/csrf.js" defer></script>
 </head>
-<body class="signature-view">
-<!-- 간단한 헤더 (서명 페이지용) -->
-<header class="header">
-    <div class="header-container">
-        <div class="header-logo">
-            <a href="<c:url value='/' />" class="logo-link">
-                <span class="logo-text">Signly</span>
-            </a>
-        </div>
-        <div class="header-info">
-            <span class="text-muted">안전한 전자서명</span>
-        </div>
-    </div>
-</header>
+<body>
+<jsp:include page="../common/navbar.jsp">
+    <jsp:param name="currentPage" value=""/>
+</jsp:include>
 
 <!-- 메인 컨텐츠 -->
-<main class="signature-page">
-    <!-- 서명 단계 표시 -->
-    <div class="signature-steps">
+<div class="container mt-4">
+    <div class="main-content-card">
+        <!-- 서명 단계 표시 -->
+        <div class="signature-steps">
         <div class="signature-step completed">
             <div class="signature-step-icon">✓</div>
             <span>계약서 확인</span>
@@ -138,13 +150,15 @@
     </div>
 
     <!-- 계약서 내용 -->
-    <div class="contract-content">
-        <h2 class="contract-title">
-            <c:out value="${contract.title}"/>
-        </h2>
-        <div class="contract-body contract-content--html" id="contractContentContainer"
-             style="background-color: white; color: black; padding: 2rem;">
-            ${contract.content}
+    <div class="contract-content-wrapper">
+        <div class="contract-content">
+            <h2 class="contract-title">
+                <c:out value="${contract.title}"/>
+            </h2>
+            <div class="contract-body contract-content--html" id="contractContentContainer"
+                 style="background-color: white; color: black; padding: 2rem;">
+                ${contract.content}
+            </div>
         </div>
     </div>
 
@@ -162,9 +176,6 @@
             <div class="signature-controls">
                 <button type="button" class="btn btn-secondary signature-clear">
                     다시 서명
-                </button>
-                <button type="button" class="btn btn-primary signature-submit" disabled>
-                    서명 확인
                 </button>
             </div>
             <div class="signature-error" style="display: none;"></div>
@@ -205,26 +216,27 @@
             </li>
         </ul>
     </div>
-</main>
+    </div>
+</div>
 
-<!-- 서명 확인 모달 -->
+<!-- 서명 최종 확인 모달 -->
 <div class="modal fade" id="signatureConfirmModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">서명 확인</h5>
+                <h5 class="modal-title">서명 최종 확인</h5>
             </div>
             <div class="modal-body">
-                <p class="mb-3">다음 내용으로 계약서에 서명하시겠습니까?</p>
+                <p class="mb-3">작성하신 서명을 확인해 주세요.</p>
 
                 <div class="signature-preview-container">
                     <img id="signaturePreviewImage" class="signature-preview-image" alt="서명 미리보기">
                 </div>
 
-                <div class="alert alert-info">
-                    <strong>📝 주의사항</strong><br>
-                    서명 완료 후에는 계약서를 수정하거나 취소할 수 없습니다.<br>
-                    계약 내용을 다시 한 번 확인해 주세요.
+                <div class="alert alert-warning">
+                    <strong>⚠️ 주의사항</strong><br>
+                    서명을 제출하면 계약서를 수정하거나 취소할 수 없습니다.<br>
+                    서명 내용과 계약서를 다시 한 번 확인해 주세요.
                 </div>
             </div>
             <div class="modal-footer">
@@ -233,7 +245,7 @@
                 </button>
                 <button type="button" class="btn btn-primary" id="finalSignBtn">
                     <span class="spinner d-none"></span>
-                    서명 완료
+                    확인 및 제출
                 </button>
             </div>
         </div>
@@ -249,9 +261,24 @@
 </div>
 
 <!-- JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<c:url value='/js/common.js' />"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
 <script src="/js/signature.js"></script>
+<script>
+    // Initialize CSRF tokens and SignatureManager
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('[JSP] DOMContentLoaded - Setting CSRF tokens');
+        window.csrfParam = '${_csrf.parameterName}';
+        window.csrfToken = '${_csrf.token}';
+
+        console.log('[JSP] CSRF Param:', window.csrfParam);
+        console.log('[JSP] CSRF Token:', window.csrfToken);
+
+        console.log('[JSP] Creating SignatureManager');
+        window.signatureManager = new SignatureManager();
+    });
+</script>
 
 </body>
 </html>

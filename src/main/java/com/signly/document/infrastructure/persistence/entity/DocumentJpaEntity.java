@@ -2,13 +2,17 @@ package com.signly.document.infrastructure.persistence.entity;
 
 import com.signly.document.domain.model.DocumentType;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "documents", indexes = {
         @Index(name = "idx_contract_id", columnList = "contract_id"),
@@ -58,8 +62,7 @@ public class DocumentJpaEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    protected DocumentJpaEntity() {}
-
+    @Builder
     public DocumentJpaEntity(
             String id,
             String contractId,

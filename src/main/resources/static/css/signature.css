@@ -38,14 +38,12 @@
     position: relative;
     padding: 1rem;
     min-height: 250px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     background-color: #fafafa;
     background-image:
         linear-gradient(90deg, var(--gray-200) 1px, transparent 1px),
         linear-gradient(var(--gray-200) 1px, transparent 1px);
     background-size: 20px 20px;
+    z-index: 1;
 }
 
 /* 서명 캔버스 */
@@ -55,8 +53,13 @@
     background-color: white;
     cursor: crosshair;
     transition: border-color 0.2s ease;
-    max-width: 100%;
-    height: auto;
+    width: 100%;
+    height: 200px;
+    display: block;
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+    touch-action: none;
 }
 
 .signature-canvas:hover {
@@ -82,6 +85,7 @@
     align-items: center;
     gap: 0.5rem;
     text-align: center;
+    z-index: 1;
 }
 
 .signature-placeholder::before {
@@ -115,9 +119,9 @@
 
 /* 서명 페이지 레이아웃 */
 .signature-page {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
+    margin: 0;
+    padding: 0;
+    width: 100%;
 }
 
 .signature-page-header {
@@ -256,94 +260,21 @@
     height: 100%;
 }
 
-/* 서명 페이지 모달 & 레이아웃 */
-.signature-view .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1050;
-    display: none;
-    padding: 1rem;
-}
-
-.signature-view .modal.show {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.signature-view .modal-dialog {
-    max-width: 500px;
-    width: 100%;
-    margin: auto;
-}
-
-.signature-view .modal-content {
-    background-color: white;
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--box-shadow-lg);
-    overflow: hidden;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.signature-view .modal-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--gray-200);
-}
-
-.signature-view .modal-title {
-    font-size: var(--font-size-lg);
-    font-weight: 600;
-    margin: 0;
-}
-
-.signature-view .modal-body {
-    padding: 1.5rem;
-}
-
-.signature-view .modal-footer {
-    padding: 1rem 1.5rem;
-    border-top: 1px solid var(--gray-200);
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-}
-
-.signature-view .info-item {
+/* 서명 정보 항목 */
+.info-item {
     margin-bottom: 1rem;
 }
 
-.signature-view .info-label {
+.info-label {
     display: block;
     font-size: var(--font-size-sm);
     color: var(--gray-600);
     margin-bottom: 0.25rem;
 }
 
-.signature-view .info-value {
+.info-value {
     font-weight: 500;
     color: var(--gray-800);
-}
-
-.signature-view .row {
-    display: flex;
-    flex-wrap: wrap;
-    margin: -0.5rem;
-}
-
-.signature-view .col-md-6 {
-    flex: 0 0 50%;
-    padding: 0.5rem;
-}
-
-@media (max-width: 768px) {
-    .signature-view .col-md-6 {
-        flex: 0 0 100%;
-    }
 }
 
 .signer-details {
@@ -538,7 +469,7 @@
     }
 
     .signature-page {
-        padding: 1rem 0.5rem;
+        padding: 0;
     }
 
     .contract-content {
@@ -568,26 +499,6 @@
     .signature-tools {
         flex-wrap: wrap;
         gap: 0.5rem;
-    }
-
-    /* 모바일 모달 대응 */
-    .signature-view .modal {
-        padding: 0.5rem;
-    }
-
-    .signature-view .modal-dialog {
-        width: calc(100% - 1rem);
-        max-width: 100%;
-    }
-
-    .signature-view .modal-header,
-    .signature-view .modal-body,
-    .signature-view .modal-footer {
-        padding: 1rem;
-    }
-
-    .signature-view .modal-content {
-        max-height: 95vh;
     }
 
     /* 모바일 서명 미리보기 */

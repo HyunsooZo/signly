@@ -127,6 +127,7 @@ public class ContractWebController extends BaseWebController {
             // 폼 화면으로 진행
             ContractForm form = new ContractForm();
             form.setExpiresAt(LocalDateTime.now().plusHours(24));
+            applyOwnerDefaults(securityUser, form, model);
 
             // 템플릿 정보 로드 (preset 또는 user template)
             String templateTitle;
@@ -154,7 +155,13 @@ public class ContractWebController extends BaseWebController {
                         templateId, renderedHtml != null ? renderedHtml.length() : 0);
             }
 
-            form.setTemplateId(templateId);
+            if (presetOpt.isPresent()) {
+                form.setTemplateId(null);
+                form.setSelectedPreset(templateId);
+                model.addAttribute("selectedPreset", templateId);
+            } else {
+                form.setTemplateId(templateId);
+            }
             form.setTitle(templateTitle);
             form.setContent(templateContent);
 
@@ -686,6 +693,38 @@ public class ContractWebController extends BaseWebController {
             logger.error("PDF 인라인 뷰 중 오류 발생: contractId={}", contractId, e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "PDF 조회 중 오류가 발생했습니다.");
         }
+    }
+
+    private void applyOwnerDefaults(
+            SecurityUser securityUser,
+            ContractForm form,
+            Model model
+    ) {
+        if (securityUser == null || form == null) {
+            return;
+        }
+
+        if (form.getFirstPartyName() == null || form.getFirstPartyName().isBlank()) {
+            form.setFirstPartyName(securityUser.getName());
+        }
+        if (form.getFirstPartyEmail() == null || form.getFirstPartyEmail().isBlank()) {
+            form.setFirstPartyEmail(securityUser.getEmail());
+        }
+        if (form.getFirstPartyAddress() == null || form.getFirstPartyAddress().isBlank()) {
+            String addressFallback = securityUser.getBusinessAddress();
+            if (addressFallback == null || addressFallback.isBlank()) {
+                addressFallback = securityUser.getCompanyName();
+            }
+            if (addressFallback != null) {
+                form.setFirstPartyAddress(addressFallback);
+            }
+        }
+
+        model.addAttribute("currentUserName", securityUser.getName());
+        model.addAttribute("currentUserEmail", securityUser.getEmail());
+        model.addAttribute("currentUserCompany", securityUser.getCompanyName());
+        model.addAttribute("currentUserBusinessPhone", securityUser.getBusinessPhone());
+        model.addAttribute("currentUserBusinessAddress", securityUser.getBusinessAddress());
     }
 
     @Setter

@@ -9,8 +9,6 @@ class ContractDetail {
         this.contractRawContent = '';
         this.presetTypeValue = '';
         this.isHtmlPreset = false;
-        this.csrfParam = '';
-        this.csrfToken = '';
 
         this.init();
     }
@@ -29,8 +27,6 @@ class ContractDetail {
         this.contractRawContent = contractContentTextarea ? contractContentTextarea.value : '';
 
         this.presetTypeValue = (this.previewData.presetType || '').toUpperCase();
-        this.csrfParam = window.csrfParam || '';
-        this.csrfToken = window.csrfToken || '';
     }
 
     determineContentType() {
@@ -195,12 +191,23 @@ class ContractDetail {
     }
 
     appendCsrfField(form) {
-        if (this.csrfParam && this.csrfToken) {
-            const csrfField = document.createElement('input');
-            csrfField.type = 'hidden';
-            csrfField.name = this.csrfParam;
-            csrfField.value = this.csrfToken;
-            form.appendChild(csrfField);
+        if (!form) {
+            return;
+        }
+        if (window.csrfManager) {
+            window.csrfManager.ensureFormToken(form);
+            return;
+        }
+        const existing = document.querySelector('input[name="_csrf"]');
+        if (existing) {
+            let input = form.querySelector('input[name="_csrf"]');
+            if (!input) {
+                input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = '_csrf';
+                form.appendChild(input);
+            }
+            input.value = existing.value;
         }
     }
 
@@ -328,9 +335,5 @@ window.deleteContract = function() {
 
 // Initialize the contract detail when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    // Set CSRF data from JSP
-    window.csrfParam = '<c:out value="${_csrf.parameterName}"/>';
-    window.csrfToken = '<c:out value="${_csrf.token}"/>';
-
     window.contractDetail = new ContractDetail();
 });

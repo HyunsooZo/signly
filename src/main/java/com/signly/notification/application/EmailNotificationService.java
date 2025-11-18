@@ -46,7 +46,6 @@ public class EmailNotificationService {
     public void sendContractSigningRequest(Contract contract) {
         try {
             String signingUrl = baseUrl + "/sign/" + contract.getSignToken().value();
-
             var variables = new HashMap<String, Object>();
             variables.put("contractTitle", contract.getTitle());
             variables.put("firstPartyName", contract.getFirstParty().name());
@@ -65,8 +64,7 @@ public class EmailNotificationService {
             );
 
             outboxRepository.save(outbox);
-            logger.info("계약서 서명 요청 이메일을 Outbox에 저장: contractId={}, outboxId={}",
-                    contract.getId().value(), outbox.getId().value());
+            logger.info("계약서 서명 요청 이메일을 Outbox에 저장: contractId={}, outboxId={}", contract.getId().value(), outbox.getId().value());
 
         } catch (Exception e) {
             logger.error("계약서 서명 요청 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);

@@ -2,9 +2,11 @@ package com.signly.common.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Getter
 @MappedSuperclass
 public abstract class BaseEntity {
 
@@ -29,14 +31,6 @@ public abstract class BaseEntity {
 
     public void updateTimestamp() {
         this.updatedAt = LocalDateTime.now();
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 
     // equals/hashCode는 서브클래스에서 ID 기반으로 구현해야 함

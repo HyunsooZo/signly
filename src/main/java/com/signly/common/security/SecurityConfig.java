@@ -48,6 +48,8 @@ public class SecurityConfig {
                         .ignoringRequestMatchers(
                                 // API endpoints (JWT-based)
                                 "/api/**",
+                                // Signature endpoints (token-based authentication)
+                                "/sign/*/sign", "/sign/*/verify",
                                 // Static resources
                                 "/css/**", "/js/**", "/images/**", "/fonts/**", "/favicon.ico",
                                 // Public endpoints
@@ -59,7 +61,10 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .frameOptions(frameOptions -> frameOptions.sameOrigin())
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionFixation(sessionFixation -> sessionFixation.none())
+                )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
