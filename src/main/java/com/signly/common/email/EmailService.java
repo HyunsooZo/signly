@@ -62,39 +62,55 @@ public class EmailService {
             EmailTemplate template,
             Map<String, Object> variables
     ) {
-        // 간단한 템플릿 생성 (추후 개선 필요)
-        var html = new StringBuilder();
-        html.append("<!DOCTYPE html>");
-        html.append("<html><head><meta charset='UTF-8'></head><body>");
-        html.append("<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>");
-        html.append("<h2>").append(template.getSubject()).append("</h2>");
+        var bodyContent = switch (template) {
+            case CONTRACT_SIGNING_REQUEST -> String.format("""
+                <p>안녕하세요, %s님</p>
+                <p>%s 계약서에 서명을 요청드립니다.</p>
+                <p><a href='%s'>여기를 클릭하여 서명하기</a></p>
+                """,
+                variables.get("signerName"),
+                variables.get("contractTitle"),
+                variables.get("contractUrl")
+            );
+            case CONTRACT_SIGNED -> String.format("""
+                <p>%s님이 계약서에 서명하였습니다.</p>
+                <p>계약서: %s</p>
+                """,
+                variables.get("signerName"),
+                variables.get("contractTitle")
+            );
+            case PASSWORD_RESET -> String.format("""
+                <p>안녕하세요, %s님</p>
+                <p>비밀번호 재설정을 요청하셨습니다.</p>
+                <p>아래 링크를 클릭하여 비밀번호를 재설정해주세요:</p>
+                <p><a href='%s' style='display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;'>비밀번호 재설정하기</a></p>
+                <p>이 링크는 %s시간 동안 유효합니다.</p>
+                <p style='color: #666; font-size: 12px;'>본인이 요청하지 않은 경우 이 메일을 무시하셔도 됩니다.</p>
+                """,
+                variables.get("userName"),
+                variables.get("resetUrl"),
+                variables.get("expiryHours")
+            );
+            default -> "<p>Signly에서 알림 메일을 보내드립니다.</p>";
+        };
 
-        switch (template) {
-            case CONTRACT_SIGNING_REQUEST:
-                html.append("<p>안녕하세요, ").append(variables.get("signerName")).append("님</p>");
-                html.append("<p>").append(variables.get("contractTitle")).append(" 계약서에 서명을 요청드립니다.</p>");
-                html.append("<p><a href='").append(variables.get("contractUrl")).append("'>여기를 클릭하여 서명하기</a></p>");
-                break;
-            case CONTRACT_SIGNED:
-                html.append("<p>").append(variables.get("signerName")).append("님이 계약서에 서명하였습니다.</p>");
-                html.append("<p>계약서: ").append(variables.get("contractTitle")).append("</p>");
-                break;
-            case PASSWORD_RESET:
-                html.append("<p>안녕하세요, ").append(variables.get("userName")).append("님</p>");
-                html.append("<p>비밀번호 재설정을 요청하셨습니다.</p>");
-                html.append("<p>아래 링크를 클릭하여 비밀번호를 재설정해주세요:</p>");
-                html.append("<p><a href='").append(variables.get("resetUrl")).append("' style='display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;'>비밀번호 재설정하기</a></p>");
-                html.append("<p>이 링크는 ").append(variables.get("expiryHours")).append("시간 동안 유효합니다.</p>");
-                html.append("<p style='color: #666; font-size: 12px;'>본인이 요청하지 않은 경우 이 메일을 무시하셔도 됩니다.</p>");
-                break;
-            default:
-                html.append("<p>Signly에서 알림 메일을 보내드립니다.</p>");
-        }
-
-        html.append("<br><p>감사합니다.<br>").append(variables.get("companyName")).append("</p>");
-        html.append("</div></body></html>");
-
-        return html.toString();
+        return String.format("""
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset='UTF-8'></head>
+            <body>
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <h2>%s</h2>
+                    %s
+                    <br><p>감사합니다.<br>%s</p>
+                </div>
+            </body>
+            </html>
+            """,
+            template.getSubject(),
+            bodyContent,
+            variables.get("companyName")
+        );
     }
 
     public void sendContractSigningRequest(
