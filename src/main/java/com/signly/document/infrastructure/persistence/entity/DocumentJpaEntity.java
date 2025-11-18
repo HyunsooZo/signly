@@ -3,7 +3,7 @@ package com.signly.document.infrastructure.persistence.entity;
 import com.signly.document.domain.model.DocumentType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Entity
 @Table(name = "documents", indexes = {
         @Index(name = "idx_contract_id", columnList = "contract_id"),
@@ -62,5 +61,30 @@ public class DocumentJpaEntity {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Builder
+    public DocumentJpaEntity(
+            String id,
+            String contractId,
+            String uploadedBy,
+            DocumentType type,
+            String filename,
+            String originalFilename,
+            String contentType,
+            Long fileSize,
+            String checksum,
+            String storagePath
+    ) {
+        this.id = id;
+        this.contractId = contractId;
+        this.uploadedBy = uploadedBy;
+        this.type = type;
+        this.filename = filename;
+        this.originalFilename = originalFilename;
+        this.contentType = contentType;
+        this.fileSize = fileSize;
+        this.checksum = checksum;
+        this.storagePath = storagePath;
+    }
 
 }
