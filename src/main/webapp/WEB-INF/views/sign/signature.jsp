@@ -169,9 +169,6 @@
                 <button type="button" class="btn btn-secondary signature-clear">
                     다시 서명
                 </button>
-                <button type="button" class="btn btn-primary signature-submit" disabled>
-                    서명 확인
-                </button>
             </div>
             <div class="signature-error" style="display: none;"></div>
         </div>
@@ -213,24 +210,24 @@
     </div>
 </main>
 
-<!-- 서명 확인 모달 -->
+<!-- 서명 최종 확인 모달 -->
 <div class="modal fade" id="signatureConfirmModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">서명 확인</h5>
+                <h5 class="modal-title">서명 최종 확인</h5>
             </div>
             <div class="modal-body">
-                <p class="mb-3">다음 내용으로 계약서에 서명하시겠습니까?</p>
+                <p class="mb-3">작성하신 서명을 확인해 주세요.</p>
 
                 <div class="signature-preview-container">
                     <img id="signaturePreviewImage" class="signature-preview-image" alt="서명 미리보기">
                 </div>
 
-                <div class="alert alert-info">
-                    <strong>📝 주의사항</strong><br>
-                    서명 완료 후에는 계약서를 수정하거나 취소할 수 없습니다.<br>
-                    계약 내용을 다시 한 번 확인해 주세요.
+                <div class="alert alert-warning">
+                    <strong>⚠️ 주의사항</strong><br>
+                    서명을 제출하면 계약서를 수정하거나 취소할 수 없습니다.<br>
+                    서명 내용과 계약서를 다시 한 번 확인해 주세요.
                 </div>
             </div>
             <div class="modal-footer">
@@ -239,7 +236,7 @@
                 </button>
                 <button type="button" class="btn btn-primary" id="finalSignBtn">
                     <span class="spinner d-none"></span>
-                    서명 완료
+                    확인 및 제출
                 </button>
             </div>
         </div>
@@ -258,6 +255,20 @@
 <script src="<c:url value='/js/common.js' />"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
 <script src="/js/signature.js"></script>
+<script>
+    // Initialize CSRF tokens and SignatureManager
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('[JSP] DOMContentLoaded - Setting CSRF tokens');
+        window.csrfParam = '${_csrf.parameterName}';
+        window.csrfToken = '${_csrf.token}';
+
+        console.log('[JSP] CSRF Param:', window.csrfParam);
+        console.log('[JSP] CSRF Token:', window.csrfToken);
+
+        console.log('[JSP] Creating SignatureManager');
+        window.signatureManager = new SignatureManager();
+    });
+</script>
 
 </body>
 </html>
