@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -43,45 +44,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+        if (shouldSkipAuthentication(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = extractTokenFromRequest(request);
+        String refreshToken = extractRefreshTokenFromRequest(request);
 
-        if (StringUtils.hasText(token) && !shouldSkipAuthentication(request)) {
-            log.debug("토큰 발견: {}", token.substring(0, Math.min(20, token.length())) + "...");
+        // 액세스 토큰이 없거나 만료된 경우, 리프레시 토큰으로 갱신 시도
+        if (!StringUtils.hasText(token) || !jwtTokenProvider.isTokenValid(token)) {
+            if (StringUtils.hasText(refreshToken) && jwtTokenProvider.isRefreshToken(refreshToken) && jwtTokenProvider.isTokenValid(refreshToken)) {
+                log.info("액세스 토큰이 {}. 리프레시 토큰으로 자동 갱신 시도...",
+                        !StringUtils.hasText(token) ? "없음" : "만료됨");
 
-            if (!jwtTokenProvider.isTokenValid(token)) {
-                log.warn("액세스 토큰이 만료되었거나 유효하지 않습니다. 자동 갱신 시도...");
-
-                // 액세스 토큰 만료 시 리프레시 토큰으로 자동 갱신 시도
-                String refreshToken = extractRefreshTokenFromRequest(request);
-                if (refreshToken != null && jwtTokenProvider.isRefreshToken(refreshToken)) {
-                    try {
-                        String newAccessToken = attemptTokenRefresh(refreshToken, request, response);
-                        if (newAccessToken != null) {
-                            token = newAccessToken; // 갱신된 토큰으로 교체
-                            log.info("액세스 토큰 자동 갱신 성공");
-                        }
-                    } catch (Exception refreshError) {
-                        log.warn("액세스 토큰 자동 갱신 실패: {}", refreshError.getMessage());
-                        SecurityContextHolder.clearContext();
-                        sendUnauthorizedResponse(response, "TOKEN_REFRESH_FAILED");
-                        return;
+                try {
+                    String newAccessToken = attemptTokenRefresh(refreshToken, request, response);
+                    if (newAccessToken != null) {
+                        token = newAccessToken; // 갱신된 토큰으로 교체
+                        log.info("액세스 토큰 자동 갱신 성공");
                     }
-                } else {
-                    log.warn("리프레시 토큰이 없거나 유효하지 않습니다");
+                } catch (Exception refreshError) {
+                    log.warn("액세스 토큰 자동 갱신 실패: {}", refreshError.getMessage());
                     SecurityContextHolder.clearContext();
-                    sendUnauthorizedResponse(response, "NO_REFRESH_TOKEN");
+                    filterChain.doFilter(request, response);
                     return;
                 }
-            }
-
-            if (!jwtTokenProvider.isAccessToken(token)) {
-                log.warn("Access 토큰이 아닙니다 (Refresh 토큰일 수 있음)");
-                SecurityContextHolder.clearContext();
+            } else {
+                // 리프레시 토큰도 없거나 유효하지 않으면 인증 없이 진행 (필요시 AuthenticationEntryPoint 처리)
+                log.debug("유효한 토큰이 없습니다. 요청 URI: {}", request.getRequestURI());
                 filterChain.doFilter(request, response);
                 return;
             }
+        }
 
-            // 유효한 액세스 토큰 처리
+        // 유효한 액세스 토큰 처리
+        if (StringUtils.hasText(token) && jwtTokenProvider.isAccessToken(token)) {
             try {
                 String userId = jwtTokenProvider.getUserIdFromToken(token);
                 String email = jwtTokenProvider.getEmailFromToken(token);
@@ -109,8 +107,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 log.warn("JWT 토큰 처리 중 오류 발생", e);
                 SecurityContextHolder.clearContext();
             }
-        } else {
-            log.debug("토큰이 없습니다. 요청 URI: {}", request.getRequestURI());
         }
 
         filterChain.doFilter(request, response);
@@ -175,20 +171,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) {
         try {
             // AuthService를 통해 토큰 갱신
-            com.signly.core.auth.dto.RefreshTokenRequest refreshRequest =
-                    new com.signly.core.auth.dto.RefreshTokenRequest(refreshToken);
+            var refreshRequest = new com.signly.core.auth.dto.RefreshTokenRequest(refreshToken);
 
-            // AuthService 주입받기 위해 ApplicationContext 사용
-            com.signly.core.auth.AuthService authService =
-                    org.springframework.web.context.support.WebApplicationContextUtils
-                            .getRequiredWebApplicationContext(request.getServletContext())
-                            .getBean(com.signly.core.auth.AuthService.class);
+            var context = WebApplicationContextUtils.getRequiredWebApplicationContext(request.getServletContext());
 
-            com.signly.core.auth.dto.LoginResponse loginResponse = authService.refreshToken(refreshRequest);
+            var authService = context.getBean(com.signly.core.auth.AuthService.class);
+            var environment = context.getBean(org.springframework.core.env.Environment.class);
+
+            var loginResponse = authService.refreshToken(refreshRequest);
+
+            // 환경별 보안 설정
+            boolean isProduction = java.util.Arrays.asList(environment.getActiveProfiles()).contains("prod");
 
             // 새로운 액세스 토큰을 쿠키에 설정
             Cookie newAuthCookie = new Cookie("authToken", loginResponse.accessToken());
             newAuthCookie.setHttpOnly(true);
+            newAuthCookie.setSecure(isProduction);
             newAuthCookie.setPath("/");
             newAuthCookie.setMaxAge(60 * 60); // 1시간
             response.addCookie(newAuthCookie);
@@ -196,12 +194,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 새로운 리프레시 토큰을 쿠키에 설정 (Token Rotation)
             Cookie newRefreshCookie = new Cookie("refreshToken", loginResponse.refreshToken());
             newRefreshCookie.setHttpOnly(true);
+            newRefreshCookie.setSecure(isProduction);
             newRefreshCookie.setPath("/");
             newRefreshCookie.setMaxAge(30 * 24 * 60 * 60); // 30일
             response.addCookie(newRefreshCookie);
 
             // Redis에 새 액세스 토큰 저장 (리프레시 토큰은 AuthService.refreshToken()에서 이미 저장됨)
             tokenRedisService.saveAccessToken(loginResponse.userId(), loginResponse.accessToken());
+
+            log.info("토큰 자동 갱신 완료: userId={}", loginResponse.userId());
 
             return loginResponse.accessToken();
 
