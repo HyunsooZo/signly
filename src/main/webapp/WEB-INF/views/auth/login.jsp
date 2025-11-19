@@ -2,18 +2,11 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인 - Signly</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
-    <link href="/css/common.css" rel="stylesheet">
-    <link href="/css/auth.css" rel="stylesheet">
-</head>
-<body>
+<jsp:include page="../common/header.jsp">
+    <jsp:param name="pageTitle" value="로그인"/>
+    <jsp:param name="additionalCss" value="/css/auth.css"/>
+</jsp:include>
+<body class="auth-page">
 <div class="auth-container">
     <div class="auth-card">
         <div class="auth-header">
@@ -104,10 +97,7 @@
     </div>
 </div>
 
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/common.js"></script>
-<script src="/js/alerts.js"></script>
+<jsp:include page="../common/footer.jsp"/>
 <script src="/js/auth-pages.js"></script>
 </body>
 </html>

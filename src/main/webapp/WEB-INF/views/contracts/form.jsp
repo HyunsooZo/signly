@@ -10,6 +10,7 @@
     <jsp:param name="additionalCss3" value="/css/contracts.css"/>
     <jsp:param name="additionalCss4" value="/css/templates.css"/>
     <jsp:param name="additionalCss5" value="/css/modal.css"/>
+    <jsp:param name="additionalCss6" value="/css/contract-common.css"/>
 </jsp:include>
 <body
     <c:if test="${not empty currentUserId}"> data-current-user-id="${currentUserId}"</c:if>

@@ -26,6 +26,9 @@
     <c:if test="${not empty param.additionalCss5}">
         <link href="<c:out value='${param.additionalCss5}'/>" rel="stylesheet">
     </c:if>
+    <c:if test="${not empty param.additionalCss6}">
+        <link href="<c:out value='${param.additionalCss6}'/>" rel="stylesheet">
+    </c:if>
 
     <c:if test="${not empty _csrf}">
         <meta name="_csrf" content="${_csrf.token}"/>
