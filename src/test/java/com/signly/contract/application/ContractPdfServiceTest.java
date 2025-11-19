@@ -1,5 +1,6 @@
 package com.signly.contract.application;
 
+import com.signly.common.image.ImageResizer;
 import com.signly.common.storage.FileStorageService;
 import com.signly.contract.domain.model.*;
 import com.signly.contract.domain.repository.ContractRepository;
@@ -38,11 +39,14 @@ class ContractPdfServiceTest {
     @Mock
     private FileStorageService fileStorageService;
 
+    @Mock
+    private ImageResizer imageResizer;
+
     private ContractPdfService contractPdfService;
 
     @BeforeEach
     void setUp() {
-        contractPdfService = new ContractPdfService(contractRepository, signatureRepository, pdfGenerator, fileStorageService);
+        contractPdfService = new ContractPdfService(contractRepository, signatureRepository, pdfGenerator, fileStorageService, imageResizer);
     }
 
     @Test
@@ -83,6 +87,10 @@ class ContractPdfServiceTest {
                 .thenReturn(Optional.empty());
         when(signatureRepository.findByContractIdAndSignerEmail(contractId, secondParty.email()))
                 .thenReturn(Optional.of(signature));
+
+        // ImageResizer mock: 입력 그대로 반환
+        when(imageResizer.resizeSignatureImage(anyString()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.forClass(String.class);
         when(pdfGenerator.generateFromHtml(htmlCaptor.capture(), anyString()))
@@ -144,6 +152,10 @@ class ContractPdfServiceTest {
                 .thenReturn(Optional.of(firstSignature));
         when(signatureRepository.findByContractIdAndSignerEmail(contractId, secondParty.email()))
                 .thenReturn(Optional.of(secondSignature));
+
+        // ImageResizer mock: 입력 그대로 반환
+        when(imageResizer.resizeSignatureImage(anyString()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         ArgumentCaptor<String> htmlCaptor = ArgumentCaptor.forClass(String.class);
         when(pdfGenerator.generateFromHtml(htmlCaptor.capture(), anyString()))
