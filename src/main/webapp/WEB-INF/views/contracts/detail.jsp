@@ -177,7 +177,7 @@
 
                                         <c:if test="${contract.status == 'PENDING'}">
                                             <button type="button" class="btn btn-outline-info"
-                                                    onclick="resendSigningEmail()">
+                                                    onclick="resendEmail()">
                                                 <i class="bi bi-arrow-repeat me-2"></i>서명 요청 재전송
                                             </button>
                                         </c:if>
