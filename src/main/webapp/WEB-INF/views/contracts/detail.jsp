@@ -400,6 +400,7 @@
 <textarea id="contractContentHtml" hidden>${fn:escapeXml(contract.content)}</textarea>
 
 <!-- External JavaScript -->
+<script src="/js/common.js"></script>
 <script src="/js/contract-detail.js"></script>
 <jsp:include page="../common/footer.jsp"/>
 </body>
