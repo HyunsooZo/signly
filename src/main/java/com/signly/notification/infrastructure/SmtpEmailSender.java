@@ -74,7 +74,7 @@ public class SmtpEmailSender implements EmailSender {
     private SpringTemplateEngine createTemplateEngine() {
         var resolver = new ClassLoaderTemplateResolver();
         resolver.setPrefix("templates/email/");
-        resolver.setSuffix("");
+        resolver.setSuffix(".html");
         resolver.setTemplateMode(TemplateMode.HTML);
         resolver.setCharacterEncoding(StandardCharsets.UTF_8.name());
         resolver.setCacheable(false);
