@@ -941,7 +941,7 @@ const TemplateBuilder = {
                 return;
             }
 
-            const previewHtml = this.generate();
+            const previewHtml = TemplateBuilder.preview.generate();
             const previewTitle = document.getElementById('templateTitle').value || '제목 없음';
             const previewFrame = document.getElementById('previewFrame');
 
