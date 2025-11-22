@@ -206,8 +206,12 @@
                 <h5 class="modal-title" id="previewModalLabel">템플릿 미리보기</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
             </div>
-            <div class="modal-body p-0">
-                <iframe id="previewFrame" title="템플릿 미리보기" class="preview-iframe"></iframe>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    현재 템플릿에 입력된 내용을 기준으로 미리보기를 제공합니다.
+                </div>
+                <div id="previewContent" class="border rounded p-4 template-preview-content"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
