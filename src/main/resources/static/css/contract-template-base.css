@@ -5,6 +5,7 @@
 .contract-content,
 .template-document,
 .template-content,
+.template-preview-content,
 body:not(:has(.navbar)) {
     font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Helvetica Neue', sans-serif;
     line-height: 1.6;
