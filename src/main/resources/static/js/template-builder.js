@@ -864,8 +864,9 @@ const TemplateBuilder = {
 
     // 미리보기 기능
     preview: {
-        generateBody(previewSections) {
+        generate(previewSections) {
             previewSections = previewSections || TemplateBuilder.state.sections;
+            const title = document.getElementById('templateTitle').value || '제목 없음';
 
             let bodyContent = '';
             let clauseIndex = 0;
@@ -917,7 +918,19 @@ const TemplateBuilder = {
 
             console.debug('[TemplateEditor] body content snippet:', bodyContent.substring(0, 500));
 
-            return bodyContent;
+            return '<!DOCTYPE html>' +
+            '<html lang="ko">' +
+            '<head>' +
+                '<meta charset="UTF-8">' +
+                '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+                '<title>' + title + '</title>' +
+                '<link rel="stylesheet" href="/css/contract-template-base.css">' +
+                '<link rel="stylesheet" href="/css/contract-common.css">' +
+            '</head>' +
+            '<body>' +
+                bodyContent +
+            '</body>' +
+            '</html>';
         },
 
         show() {
@@ -928,12 +941,12 @@ const TemplateBuilder = {
                 return;
             }
 
-            const previewHtml = TemplateBuilder.preview.generateBody();
+            const previewHtml = TemplateBuilder.preview.generate();
             const previewTitle = document.getElementById('templateTitle').value || '제목 없음';
-            const previewContent = document.getElementById('previewContent');
+            const previewFrame = document.getElementById('previewFrame');
 
-            if (previewContent) {
-                previewContent.innerHTML = previewHtml || '<p class="text-muted">템플릿 내용이 비어있습니다.</p>';
+            if (previewFrame) {
+                previewFrame.srcdoc = previewHtml;
 
                 const modalElement = document.getElementById('previewModal');
                 const modalTitle = document.getElementById('previewModalLabel');
