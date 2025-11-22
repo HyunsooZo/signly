@@ -5,7 +5,8 @@
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
     <jsp:param name="additionalCss" value="/css/templates.css"/>
-    <jsp:param name="additionalCss2" value="/css/modal.css"/>
+    <jsp:param name="additionalCss2" value="/css/contract-template-base.css"/>
+    <jsp:param name="additionalCss3" value="/css/modal.css"/>
 </jsp:include>
 <body>
 <jsp:include page="../common/navbar.jsp">
@@ -76,7 +77,7 @@
                     </h5>
                 </div>
                 <div class="card-body p-0">
-                    <div class="template-content" id="templateContent">
+                    <div class="template-content" id="templateContent" data-rendered-html="<c:out value='${template.renderedHtml}' escapeXml='true' />">
                     </div>
                 </div>
             </div>
@@ -266,17 +267,25 @@
     // 페이지 로드 시 템플릿 내용 디코딩 및 표시
     document.addEventListener('DOMContentLoaded', function () {
         const templateContent = document.getElementById('templateContent');
-        const rawHtml = `<c:out value="${template.renderedHtml}" escapeXml="true" />`;
+
+        // 백틱 사용 시 내부 콘텐츠가 JavaScript를 깨뜨릴 수 있으므로 data attribute 사용
+        const rawHtml = templateContent.getAttribute('data-rendered-html') || '';
+
+        console.log('Raw HTML:', rawHtml);
+        console.log('Raw HTML length:', rawHtml.length);
 
         // 이중 인코딩 디코딩
         const temp = document.createElement('textarea');
         temp.innerHTML = rawHtml;
         let decoded = temp.value;
 
+        console.log('First decode:', decoded);
+
         // HTML 엔티티가 남아있으면 한번 더 디코딩
         if (decoded.includes('&lt;') || decoded.includes('&gt;')) {
             temp.innerHTML = decoded;
             decoded = temp.value;
+            console.log('Second decode:', decoded);
         }
 
         // 변수를 밑줄로 변환
@@ -284,7 +293,13 @@
         // [VARIABLE_NAME] 형식도 밑줄로 변환
         decoded = decoded.replace(/\[[\w_]+\]/g, '<span class="blank-line"></span>');
 
-        templateContent.innerHTML = decoded;
+        console.log('Final decoded HTML:', decoded);
+
+        if (!decoded || decoded.trim() === '') {
+            templateContent.innerHTML = '<p class="text-muted">템플릿 내용이 비어있습니다.</p>';
+        } else {
+            templateContent.innerHTML = decoded;
+        }
 
         const deleteForm = document.getElementById('deleteForm');
         if (deleteForm) {
@@ -339,7 +354,9 @@
     }
 
     function previewTemplate() {
-        let html = decodeHtml('<c:out value="${template.renderedHtml}" escapeXml="true" />');
+        const templateContent = document.getElementById('templateContent');
+        const rawHtml = templateContent.getAttribute('data-rendered-html') || '';
+        let html = decodeHtml(rawHtml);
 
         // 변수를 밑줄로 변환
         html = html.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, '<span class="blank-line"></span>');
