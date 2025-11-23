@@ -194,20 +194,26 @@ class ContractDetail {
         if (!form) {
             return;
         }
+
+        // 먼저 csrfManager 사용 시도
         if (window.csrfManager) {
             window.csrfManager.ensureFormToken(form);
             return;
         }
-        const existing = document.querySelector('input[name="_csrf"]');
-        if (existing) {
-            let input = form.querySelector('input[name="_csrf"]');
+
+        // csrfManager가 없으면 meta 태그에서 직접 가져오기
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        const csrfParam = document.querySelector('meta[name="_csrf_parameter"]')?.getAttribute('content') || '_csrf';
+
+        if (csrfToken) {
+            let input = form.querySelector(`input[name="${csrfParam}"]`);
             if (!input) {
                 input = document.createElement('input');
                 input.type = 'hidden';
-                input.name = '_csrf';
+                input.name = csrfParam;
                 form.appendChild(input);
             }
-            input.value = existing.value;
+            input.value = csrfToken;
         }
     }
 
