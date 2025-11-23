@@ -1,9 +1,8 @@
 /* 인증 페이지 전용 스타일 */
 
-body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+body.auth-page {
+    background: var(--gray-100, #e8e8e8);
     min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .auth-container {
@@ -49,10 +48,7 @@ body {
     font-size: 2.5rem;
     font-weight: 400;
     letter-spacing: 0.5px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #4b5563;
     margin-bottom: 8px;
 }
 

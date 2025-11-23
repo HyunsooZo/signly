@@ -194,20 +194,26 @@ class ContractDetail {
         if (!form) {
             return;
         }
+
+        // 먼저 csrfManager 사용 시도
         if (window.csrfManager) {
             window.csrfManager.ensureFormToken(form);
             return;
         }
-        const existing = document.querySelector('input[name="_csrf"]');
-        if (existing) {
-            let input = form.querySelector('input[name="_csrf"]');
+
+        // csrfManager가 없으면 meta 태그에서 직접 가져오기
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        const csrfParam = document.querySelector('meta[name="_csrf_parameter"]')?.getAttribute('content') || '_csrf';
+
+        if (csrfToken) {
+            let input = form.querySelector(`input[name="${csrfParam}"]`);
             if (!input) {
                 input = document.createElement('input');
                 input.type = 'hidden';
-                input.name = '_csrf';
+                input.name = csrfParam;
                 form.appendChild(input);
             }
-            input.value = existing.value;
+            input.value = csrfToken;
         }
     }
 
@@ -258,25 +264,6 @@ class ContractDetail {
         }
     }
 
-    completeContract() {
-        if (window.showConfirmModal) {
-            window.showConfirmModal(
-                '계약을 완료하시겠습니까?',
-                () => {
-                    const form = document.createElement('form');
-                    form.method = 'post';
-                    form.action = `/contracts/${this.getContractId()}/complete`;
-                    this.appendCsrfField(form);
-                    document.body.appendChild(form);
-                    form.submit();
-                },
-                '완료',
-                '취소',
-                'btn-success'
-            );
-        }
-    }
-
     deleteContract() {
         const deleteModal = document.getElementById('deleteModal');
         if (deleteModal) {
@@ -300,6 +287,29 @@ class ContractDetail {
 
         return '';
     }
+
+    previewContract() {
+        const previewContent = document.getElementById('previewContent');
+        const previewModal = document.getElementById('previewModal');
+
+        if (!previewContent || !previewModal) {
+            console.error('Preview modal or content element not found');
+            return;
+        }
+
+        // 현재 계약서 컨테이너에서 HTML 가져오기
+        const container = document.getElementById('contractContentHtmlContainer');
+        if (!container) {
+            previewContent.innerHTML = '<p class="text-muted">계약서 내용이 없습니다.</p>';
+        } else {
+            // 컨테이너 내용을 복제하여 미리보기에 표시
+            previewContent.innerHTML = container.innerHTML;
+        }
+
+        // Bootstrap 모달 표시
+        const modalInstance = new bootstrap.Modal(previewModal);
+        modalInstance.show();
+    }
 }
 
 // Global functions for onclick handlers
@@ -321,15 +331,15 @@ window.cancelContract = function() {
     }
 };
 
-window.completeContract = function() {
-    if (window.contractDetail) {
-        window.contractDetail.completeContract();
-    }
-};
-
 window.deleteContract = function() {
     if (window.contractDetail) {
         window.contractDetail.deleteContract();
+    }
+};
+
+window.previewContract = function() {
+    if (window.contractDetail) {
+        window.contractDetail.previewContract();
     }
 };
 

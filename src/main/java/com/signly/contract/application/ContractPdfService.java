@@ -1,6 +1,8 @@
 package com.signly.contract.application;
 
 import com.signly.common.exception.NotFoundException;
+import com.signly.common.html.HtmlEntityNormalizer;
+import com.signly.common.image.ImageResizer;
 import com.signly.common.storage.FileStorageService;
 import com.signly.contract.application.support.ContractHtmlSanitizer;
 import com.signly.contract.domain.model.ContractId;
@@ -36,6 +38,7 @@ public class ContractPdfService {
     private final SignatureRepository signatureRepository;
     private final PdfGenerator pdfGenerator;
     private final FileStorageService fileStorageService;
+    private final ImageResizer imageResizer;
 
     /**
      * 계약서 ID로 PDF 생성
@@ -86,7 +89,7 @@ public class ContractPdfService {
     }
 
     /**
-     * 서명 이미지 조회 (없으면 null 반환)
+     * 서명 이미지 조회 및 리사이징 (없으면 null 반환)
      */
     private String getSignatureImage(
             ContractId contractId,
@@ -95,7 +98,10 @@ public class ContractPdfService {
         String normalizedEmail = normalizeEmail(signerEmail);
         var signature = signatureRepository.findByContractIdAndSignerEmail(contractId, normalizedEmail);
 
-        return signature.flatMap(this::buildSignatureDataUrl).orElse(null);
+        return signature
+                .flatMap(this::buildSignatureDataUrl)
+                .map(imageResizer::resizeSignatureImage) // 리사이징 적용
+                .orElse(null);
     }
 
     /**
@@ -132,13 +138,8 @@ public class ContractPdfService {
             return sanitized;
         }
 
-        return sanitized
-                .replace("&#91;EMPLOYER_SIGNATURE_IMAGE&#93;", "[EMPLOYER_SIGNATURE_IMAGE]")
-                .replace("&#91;EMPLOYEE_SIGNATURE_IMAGE&#93;", "[EMPLOYEE_SIGNATURE_IMAGE]")
-                .replace("&amp;#91;EMPLOYER_SIGNATURE_IMAGE&amp;#93;", "[EMPLOYER_SIGNATURE_IMAGE]")
-                .replace("&amp;#91;EMPLOYEE_SIGNATURE_IMAGE&amp;#93;", "[EMPLOYEE_SIGNATURE_IMAGE]")
-                .replace("&lbrack;EMPLOYER_SIGNATURE_IMAGE&rbrack;", "[EMPLOYER_SIGNATURE_IMAGE]")
-                .replace("&lbrack;EMPLOYEE_SIGNATURE_IMAGE&rbrack;", "[EMPLOYEE_SIGNATURE_IMAGE]");
+        // HtmlEntityNormalizer를 사용하여 플레이스홀더 정규화
+        return HtmlEntityNormalizer.normalizePlaceholders(sanitized);
     }
 
     private String injectSignatureImage(

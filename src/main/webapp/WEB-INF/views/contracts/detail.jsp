@@ -35,9 +35,6 @@
                                 <c:when test="${contract.status == 'SIGNED'}">
                                     <span class="badge bg-success fs-6">서명 완료</span>
                                 </c:when>
-                                <c:when test="${contract.status == 'COMPLETED'}">
-                                    <span class="badge bg-primary fs-6">완료</span>
-                                </c:when>
                                 <c:when test="${contract.status == 'CANCELLED'}">
                                     <span class="badge bg-danger fs-6">취소</span>
                                 </c:when>
@@ -139,7 +136,7 @@
                         <div class="card-body">
                             <div class="d-grid gap-2">
                                 <c:choose>
-                                    <c:when test="${contract.status == 'SIGNED' or contract.status == 'COMPLETED'}">
+                                    <c:when test="${contract.status == 'SIGNED'}">
                                         <!-- 서명 완료된 계약서 -->
                                         <a href="/contracts/<c:out value='${contract.id}'/>/pdf-view"
                                            class="btn btn-success">
@@ -149,14 +146,6 @@
                                            class="btn btn-outline-primary" download>
                                             <i class="bi bi-download me-2"></i>PDF 다운로드
                                         </a>
-
-                                        <c:if test="${contract.status == 'SIGNED'}">
-                                            <hr>
-                                            <button type="button" class="btn btn-outline-primary"
-                                                    onclick="completeContract()">
-                                                <i class="bi bi-check-circle me-2"></i>계약 완료 처리
-                                            </button>
-                                        </c:if>
                                     </c:when>
                                     <c:otherwise>
                                         <!-- 진행 중인 계약서 -->
@@ -177,7 +166,7 @@
 
                                         <c:if test="${contract.status == 'PENDING'}">
                                             <button type="button" class="btn btn-outline-info"
-                                                    onclick="resendSigningEmail()">
+                                                    onclick="resendEmail()">
                                                 <i class="bi bi-arrow-repeat me-2"></i>서명 요청 재전송
                                             </button>
                                         </c:if>
@@ -189,7 +178,7 @@
                                             </button>
                                         </c:if>
 
-                                        <c:if test="${contract.status != 'SIGNED' and contract.status != 'COMPLETED'}">
+                                        <c:if test="${contract.status != 'SIGNED'}">
                                             <button type="button" class="btn btn-outline-primary"
                                                     onclick="previewContract()">
                                                 <i class="bi bi-eye me-2"></i>미리보기
@@ -236,9 +225,6 @@
                                         </c:when>
                                         <c:when test="${contract.status == 'SIGNED'}">
                                             <span class="badge bg-success">서명 완료</span>
-                                        </c:when>
-                                        <c:when test="${contract.status == 'COMPLETED'}">
-                                            <span class="badge bg-primary">완료</span>
                                         </c:when>
                                         <c:when test="${contract.status == 'CANCELLED'}">
                                             <span class="badge bg-danger">취소</span>
@@ -401,6 +387,6 @@
 
 <!-- External JavaScript -->
 <script src="/js/contract-detail.js"></script>
-<jsp:include page="../common/footer.jsp"/>
 </body>
+<jsp:include page="../common/footer.jsp"/>
 </html>

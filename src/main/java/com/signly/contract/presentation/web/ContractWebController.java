@@ -506,19 +506,6 @@ public class ContractWebController extends BaseWebController {
         }, "계약서 취소", "/contracts/" + contractId, redirectAttributes, "계약서 취소 중 오류가 발생했습니다.");
     }
 
-    @PostMapping("/{contractId}/complete")
-    public String completeContract(
-            @PathVariable String contractId,
-            @RequestHeader(value = "X-User-Id", defaultValue = "01ARZ3NDEKTSV4RRFFQ69G5FAV") String userId,
-            RedirectAttributes redirectAttributes
-    ) {
-        return handleOperationWithRedirect(() -> {
-            contractService.completeContract(userId, contractId);
-            logger.info("계약서 완료 처리 성공: contractId={}", contractId);
-            addSuccessMessage(redirectAttributes, "계약서가 완료되었습니다.");
-        }, "계약서 완료 처리", "/contracts/" + contractId, redirectAttributes, "계약서 완료 처리 중 오류가 발생했습니다.");
-    }
-
     @PostMapping("/{contractId}/delete")
     public String deleteContract(
             @PathVariable String contractId,
@@ -547,9 +534,8 @@ public class ContractWebController extends BaseWebController {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
 
-            // SIGNED 또는 COMPLETED 상태가 아니면 접근 불가
-            if (contract.getStatus() != ContractStatus.SIGNED &&
-                    contract.getStatus() != ContractStatus.COMPLETED) {
+            // SIGNED 상태가 아니면 접근 불가
+            if (contract.getStatus() != ContractStatus.SIGNED) {
                 logger.warn("서명 완료되지 않은 계약서 PDF 뷰어 접근 시도: contractId={}, status={}",
                         contractId, contract.getStatus());
                 model.addAttribute("errorMessage", "서명이 완료된 계약서만 PDF로 볼 수 있습니다.");
@@ -579,9 +565,8 @@ public class ContractWebController extends BaseWebController {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
 
-            // SIGNED 또는 COMPLETED 상태가 아니면 다운로드 불가
-            if (contract.getStatus() != ContractStatus.SIGNED &&
-                    contract.getStatus() != ContractStatus.COMPLETED) {
+            // SIGNED 상태가 아니면 다운로드 불가
+            if (contract.getStatus() != ContractStatus.SIGNED) {
                 logger.warn("서명 완료되지 않은 계약서 PDF 다운로드 시도: contractId={}, status={}",
                         contractId, contract.getStatus());
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "서명이 완료된 계약서만 다운로드할 수 있습니다.");
@@ -643,9 +628,8 @@ public class ContractWebController extends BaseWebController {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             ContractResponse contract = contractService.getContract(resolvedUserId, contractId);
 
-            // SIGNED 또는 COMPLETED 상태가 아니면 조회 불가
-            if (contract.getStatus() != ContractStatus.SIGNED &&
-                    contract.getStatus() != ContractStatus.COMPLETED) {
+            // SIGNED 상태가 아니면 조회 불가
+            if (contract.getStatus() != ContractStatus.SIGNED) {
                 logger.warn("서명 완료되지 않은 계약서 PDF 조회 시도: contractId={}, status={}",
                         contractId, contract.getStatus());
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "서명이 완료된 계약서만 조회할 수 있습니다.");

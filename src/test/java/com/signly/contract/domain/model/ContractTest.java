@@ -178,25 +178,6 @@ class ContractTest {
     }
 
     @Test
-    void 서명완료_상태에서_완료할_수_있다() {
-        Contract contract = Contract.create(creatorId, templateId, title, content, firstParty, secondParty, expiresAt);
-        contract.sendForSigning();
-        
-        ContractSigningService signingService = new ContractSigningService();
-        ContractSigningService.SigningRequest request1 = new ContractSigningService.SigningRequest(
-                "first@example.com", "홍길동", "서명데이터1", "192.168.1.1");
-        ContractSigningService.SigningRequest request2 = new ContractSigningService.SigningRequest(
-                "second@example.com", "김철수", "서명데이터2", "192.168.1.2");
-        
-        signingService.processSigning(contract, request1);
-        signingService.processSigning(contract, request2);
-
-        contract.complete();
-
-        assertThat(contract.getStatus()).isEqualTo(ContractStatus.COMPLETED);
-    }
-
-    @Test
     void 초안_상태에서_취소할_수_있다() {
         Contract contract = Contract.create(creatorId, templateId, title, content, firstParty, secondParty, expiresAt);
 

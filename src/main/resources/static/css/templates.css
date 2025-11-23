@@ -136,11 +136,11 @@
     border: 1px solid #dee2e6;
     border-radius: 12px;
     padding: 2rem;
-    font-family: 'Times New Roman', serif;
-    line-height: 1.8;
-    white-space: pre-wrap;
     min-height: 500px;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    /* line-height: 1.8; - contract-template-base.css의 1.6 사용 */
+    /* white-space: pre-wrap; - 불필요한 공백 제거 */
+    /* font-family: 'Times New Roman', serif; - contract-template-base.css의 한글 폰트 사용 */
 }
 
 .template-info {
@@ -347,8 +347,8 @@
 .template-preview-content {
     background-color: #f8f9fa;
     min-height: 400px;
-    white-space: pre-wrap;
-    font-family: 'Times New Roman', serif;
+    /* white-space: pre-wrap; - 불필요한 공백 제거 */
+    /* font-family: 'Times New Roman', serif; - contract-template-base.css의 한글 폰트 사용 */
 }
 
 .template-variable-tag {

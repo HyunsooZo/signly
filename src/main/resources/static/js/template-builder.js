@@ -924,6 +924,7 @@ const TemplateBuilder = {
                 '<meta charset="UTF-8">' +
                 '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
                 '<title>' + title + '</title>' +
+                '<link rel="stylesheet" href="/css/contract-template-base.css">' +
                 '<link rel="stylesheet" href="/css/contract-common.css">' +
             '</head>' +
             '<body>' +
@@ -940,7 +941,7 @@ const TemplateBuilder = {
                 return;
             }
 
-            const previewHtml = this.generate();
+            const previewHtml = TemplateBuilder.preview.generate();
             const previewTitle = document.getElementById('templateTitle').value || '제목 없음';
             const previewFrame = document.getElementById('previewFrame');
 

@@ -108,9 +108,6 @@
                                                         <c:when test="${contract.status == 'SIGNED'}">
                                                             <span class="badge bg-success">서명 완료</span>
                                                         </c:when>
-                                                        <c:when test="${contract.status == 'COMPLETED'}">
-                                                            <span class="badge bg-primary">완료</span>
-                                                        </c:when>
                                                         <c:when test="${contract.status == 'CANCELLED'}">
                                                             <span class="badge bg-danger">취소</span>
                                                         </c:when>
@@ -141,7 +138,7 @@
                                                 <td class="text-center">
                                                     <div class="btn-group btn-group-sm" role="group">
                                                         <c:choose>
-                                                            <c:when test="${contract.status == 'SIGNED' or contract.status == 'COMPLETED'}">
+                                                            <c:when test="${contract.status == 'SIGNED'}">
                                                                 <!-- 서명 완료된 계약서: PDF 보기 버튼만 표시 -->
                                                                 <a href="/contracts/<c:out value='${contract.id}'/>/pdf-view"
                                                                    class="btn btn-outline-success"
@@ -364,6 +361,6 @@
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
     </script>
-    <jsp:include page="../common/footer.jsp"/>
 </body>
+<jsp:include page="../common/footer.jsp"/>
 </html>

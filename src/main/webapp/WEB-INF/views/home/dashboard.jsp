@@ -292,9 +292,6 @@
                                                 <c:when test="${contract.status == 'SIGNED'}">
                                                     <span class="badge bg-success">서명 완료</span>
                                                 </c:when>
-                                                <c:when test="${contract.status == 'COMPLETED'}">
-                                                    <span class="badge bg-primary">완료</span>
-                                                </c:when>
                                                 <c:when test="${contract.status == 'CANCELLED'}">
                                                     <span class="badge bg-danger">취소</span>
                                                 </c:when>
