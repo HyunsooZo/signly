@@ -365,5 +365,6 @@
         }
     </script>
     <jsp:include page="../common/footer.jsp"/>
+    <script src="/js/common.js"></script>
 </body>
 </html>
