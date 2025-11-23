@@ -65,11 +65,6 @@
                                 <img src="<c:out value='${signatureDataUrl}'/>" alt="등록된 서명"
                                      class="img-fluid border rounded signature-image-display">
                                 <div class="mt-3 text-muted small">
-                                    <div><strong>파일명:</strong> <c:out value="${signature.originalFilename()}"/></div>
-                                    <div><strong>형식:</strong> <c:out value="${signature.mimeType()}"/></div>
-                                    <div><strong>파일 크기:</strong> <fmt:formatNumber
-                                            value="${signature.fileSize() / 1024}" maxFractionDigits="0"/> KB
-                                    </div>
                                     <div><strong>업로드일:</strong> <fmt:formatDate value="${signature.updatedAtDate}"
                                                                                 pattern="yyyy-MM-dd HH:mm"/></div>
                                 </div>
@@ -113,9 +108,10 @@
                                 <button type="button" class="btn btn-outline-secondary" id="clearSignature">
                                     <i class="bi bi-eraser me-2"></i>지우기
                                 </button>
-                                <button type="submit" class="btn btn-primary ms-auto" id="saveSignature">
+                                <button type="button" class="btn btn-primary ms-auto" id="saveSignature">
                                     <i class="bi bi-cloud-upload me-2"></i>서명 저장
                                 </button>
+                                <button type="submit" id="realSubmitButton" style="display: none;"></button>
                             </div>
                         </form>
                     </div>
@@ -156,8 +152,6 @@
     </div>
 </c:if>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/alerts.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
 
 <c:if test="${showSignatureAlert}">
@@ -211,14 +205,76 @@
     });
 
     const form = document.getElementById('signatureForm');
+    const saveButton = document.getElementById('saveSignature');
+    const realSubmitButton = document.getElementById('realSubmitButton');
+    let isConfirmed = false;
+    let shouldSubmit = false;
+
+    // 실제 submit 이벤트 (hidden 버튼 클릭 시)
     form.addEventListener('submit', function (event) {
-        if (signaturePad.isEmpty()) {
+        if (!shouldSubmit) {
             event.preventDefault();
-            showAlertModal('서명을 입력한 후 저장해 주세요.');
             return;
         }
-        const dataUrl = signaturePad.toDataURL('image/png');
-        document.getElementById('signatureData').value = dataUrl;
+        // shouldSubmit이 true면 정상 제출
+    });
+
+    // 저장 버튼 클릭 이벤트
+    saveButton.addEventListener('click', function() {
+        const originalHtml = saveButton.innerHTML;
+
+        if (signaturePad.isEmpty()) {
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>확인 중...';
+
+            showAlertModal('서명을 입력한 후 저장해 주세요.');
+
+            // 알럿 모달 닫힐 때 버튼 복원
+            setTimeout(function checkAlertModal() {
+                const alertModal = document.querySelector('[id^="alertModal-"]');
+                if (!alertModal) {
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = originalHtml;
+                } else {
+                    setTimeout(checkAlertModal, 100);
+                }
+            }, 100);
+            return;
+        }
+
+        // 버튼 비활성화
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>확인 중...';
+        isConfirmed = false;
+
+        showConfirmModal(
+            '서명을 저장하시겠습니까?',
+            function () {
+                // 확인 시: 저장 진행
+                isConfirmed = true;
+                shouldSubmit = true;
+                saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>저장 중...';
+                const dataUrl = signaturePad.toDataURL('image/png');
+                document.getElementById('signatureData').value = dataUrl;
+                realSubmitButton.click();
+            },
+            '저장',
+            '취소',
+            'btn-primary'
+        );
+
+        // 확인 모달 닫힐 때 체크
+        setTimeout(function checkConfirmModal() {
+            const confirmModal = document.querySelector('[id^="confirmModal-"]');
+            if (!confirmModal && !isConfirmed) {
+                // 취소한 경우
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalHtml;
+            } else if (confirmModal) {
+                // 아직 모달이 열려있으면 다시 체크
+                setTimeout(checkConfirmModal, 100);
+            }
+        }, 100);
     });
 
     (function syncOwnerSignatureToStorage() {
