@@ -300,6 +300,29 @@ class ContractDetail {
 
         return '';
     }
+
+    previewContract() {
+        const previewContent = document.getElementById('previewContent');
+        const previewModal = document.getElementById('previewModal');
+
+        if (!previewContent || !previewModal) {
+            console.error('Preview modal or content element not found');
+            return;
+        }
+
+        // 현재 계약서 컨테이너에서 HTML 가져오기
+        const container = document.getElementById('contractContentHtmlContainer');
+        if (!container) {
+            previewContent.innerHTML = '<p class="text-muted">계약서 내용이 없습니다.</p>';
+        } else {
+            // 컨테이너 내용을 복제하여 미리보기에 표시
+            previewContent.innerHTML = container.innerHTML;
+        }
+
+        // Bootstrap 모달 표시
+        const modalInstance = new bootstrap.Modal(previewModal);
+        modalInstance.show();
+    }
 }
 
 // Global functions for onclick handlers
@@ -330,6 +353,12 @@ window.completeContract = function() {
 window.deleteContract = function() {
     if (window.contractDetail) {
         window.contractDetail.deleteContract();
+    }
+};
+
+window.previewContract = function() {
+    if (window.contractDetail) {
+        window.contractDetail.previewContract();
     }
 };
 
