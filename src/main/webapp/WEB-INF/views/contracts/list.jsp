@@ -361,7 +361,6 @@
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
     </script>
-    <jsp:include page="../common/footer.jsp"/>
-    <script src="/js/common.js"></script>
 </body>
+<jsp:include page="../common/footer.jsp"/>
 </html>
