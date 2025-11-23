@@ -101,7 +101,7 @@ public class DashboardService {
         stats.put("draft", getContractCount(userId, ContractStatus.DRAFT));
         stats.put("pending", getContractCount(userId, ContractStatus.PENDING));
         stats.put("signed", getContractCount(userId, ContractStatus.SIGNED));
-        stats.put("completed", getContractCount(userId, ContractStatus.COMPLETED));
+        stats.put("completed", getContractCount(userId, ContractStatus.SIGNED));
         return stats;
     }
 

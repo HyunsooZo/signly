@@ -54,12 +54,6 @@
                 </a>
             </li>
             <li class="nav-item" role="presentation">
-                <a class="nav-link ${currentStatus == 'COMPLETED' ? 'active' : ''}"
-                   href="?status=COMPLETED">
-                    완료
-                </a>
-            </li>
-            <li class="nav-item" role="presentation">
                 <a class="nav-link ${currentStatus == 'CANCELLED' ? 'active' : ''}"
                    href="?status=CANCELLED">
                     취소

@@ -81,13 +81,6 @@ public class ContractService {
         return contractDtoMapper.toResponse(contract);
     }
 
-    public void completeContract(
-            String userId,
-            String contractId
-    ) {
-        signingCoordinator.completeContract(userId, contractId);
-    }
-
     public void cancelContract(
             String userId,
             String contractId

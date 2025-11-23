@@ -220,14 +220,6 @@ public class Contract extends AggregateRoot {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void complete() {
-        if (!status.canComplete()) {
-            throw new ValidationException("서명 완료 상태에서만 완료할 수 있습니다");
-        }
-        this.status = ContractStatus.COMPLETED;
-        this.updatedAt = LocalDateTime.now();
-    }
-
     public void cancel() {
         if (!status.canCancel()) {
             throw new ValidationException("초안 또는 서명 대기 상태에서만 취소할 수 있습니다");

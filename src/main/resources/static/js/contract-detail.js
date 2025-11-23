@@ -264,25 +264,6 @@ class ContractDetail {
         }
     }
 
-    completeContract() {
-        if (window.showConfirmModal) {
-            window.showConfirmModal(
-                '계약을 완료하시겠습니까?',
-                () => {
-                    const form = document.createElement('form');
-                    form.method = 'post';
-                    form.action = `/contracts/${this.getContractId()}/complete`;
-                    this.appendCsrfField(form);
-                    document.body.appendChild(form);
-                    form.submit();
-                },
-                '완료',
-                '취소',
-                'btn-success'
-            );
-        }
-    }
-
     deleteContract() {
         const deleteModal = document.getElementById('deleteModal');
         if (deleteModal) {
@@ -347,12 +328,6 @@ window.resendEmail = function() {
 window.cancelContract = function() {
     if (window.contractDetail) {
         window.contractDetail.cancelContract();
-    }
-};
-
-window.completeContract = function() {
-    if (window.contractDetail) {
-        window.contractDetail.completeContract();
     }
 };
 

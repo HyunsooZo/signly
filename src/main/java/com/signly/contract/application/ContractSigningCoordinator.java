@@ -193,22 +193,6 @@ public class ContractSigningCoordinator {
         }
     }
 
-    public Contract completeContract(
-            String userId,
-            String contractId
-    ) {
-        var contract = findContract(contractId);
-        authorizationService.validateOwnership(userId, contract);
-
-        firstPartySignatureService.ensureSignatureExists(contract.getCreatorId().value());
-        contract.complete();
-        var savedContract = contractRepository.save(contract);
-
-        emailNotificationService.sendContractCompleted(savedContract);
-
-        return savedContract;
-    }
-
     public void cancelContract(
             String userId,
             String contractId
