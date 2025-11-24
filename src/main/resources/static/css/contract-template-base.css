@@ -10,7 +10,7 @@ body:not(:has(.navbar)) {
     font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Helvetica Neue', sans-serif;
     line-height: 1.6;
     font-size: 13px;
-    color: #222;
+    color: #1a2e27;
 }
 
 /* 템플릿 섹션 기본 스타일 */

@@ -27,13 +27,13 @@
 .modal-title {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #212529;
+    color: #1a2e27;
 }
 
 .modal-body {
     padding: 1.5rem;
     line-height: 1.5;
-    color: #495057;
+    color: #2d4a3f;
 }
 
 .modal-footer {
@@ -48,7 +48,7 @@
 }
 
 #commonAlertModal .modal-title {
-    color: #495057;
+    color: #2d4a3f;
 }
 
 #commonAlertModal .modal-footer .btn-primary {
@@ -62,7 +62,7 @@
 }
 
 #commonConfirmModal .modal-title {
-    color: #495057;
+    color: #2d4a3f;
 }
 
 #commonConfirmModal .modal-body {
@@ -79,13 +79,13 @@
 }
 
 #commonConfirmModal .modal-footer .btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
+    background-color: #3d5a4f;
+    border-color: #3d5a4f;
 }
 
 #commonConfirmModal .modal-footer .btn-secondary:hover {
-    background-color: #5a6268;
-    border-color: #545b62;
+    background-color: #2f4840;
+    border-color: #2d4a3f;
 }
 
 #commonConfirmModal .modal-footer .btn-primary {

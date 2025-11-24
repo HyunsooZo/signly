@@ -3,30 +3,30 @@
 /* CSS 변수 정의 */
 :root {
     /* 컬러 팔레트 */
-    --primary-color: #667eea;
-    --primary-hover: #764ba2;
+    --primary-color: #2d4a3f;
+    --primary-hover: #1a2e27;
 
     /* Bootstrap 변수 오버라이드 */
-    --bs-primary: #667eea !important;
-    --bs-primary-rgb: 102, 126, 234 !important;
-    --bs-primary-hover: #764ba2 !important;
+    --bs-primary: #2d4a3f !important;
+    --bs-primary-rgb: 45, 74, 63 !important;
+    --bs-primary-hover: #1a2e27 !important;
     --secondary-color: #64748b;
     --success-color: #059669;
     --warning-color: #d97706;
     --danger-color: #dc2626;
     --info-color: #0891b2;
 
-    /* 그레이 스케일 */
-    --gray-50: #f8fafc;
-    --gray-100: #f1f5f9;
-    --gray-200: #e2e8f0;
-    --gray-300: #cbd5e1;
-    --gray-400: #94a3b8;
-    --gray-500: #64748b;
-    --gray-600: #475569;
-    --gray-700: #334155;
-    --gray-800: #1e293b;
-    --gray-900: #0f172a;
+    /* 그레이 스케일 - 포레스트 그린 테마 */
+    --gray-50: #f4f6f5;
+    --gray-100: #e8ebe9;
+    --gray-200: #d1d7d3;
+    --gray-300: #a8b5ad;
+    --gray-400: #7a9287;
+    --gray-500: #5a7368;
+    --gray-600: #3d5a4f;
+    --gray-700: #2f4840;
+    --gray-800: #2d4a3f;
+    --gray-900: #1a2e27;
 
     /* 레이아웃 */
     --header-height: 64px;
@@ -96,7 +96,10 @@ body {
     box-shadow: none;
 }
 
-.navbar .navbar-brand,
+.navbar .navbar-brand {
+    color: #2d4a3f !important;
+}
+
 .navbar .nav-link {
     color: #4b5563 !important;
 }
@@ -110,16 +113,16 @@ body {
 }
 
 .navbar .nav-link:hover {
-    color: #374151 !important;
-    border-color: #4b5563;
-    background: rgba(75, 85, 99, 0.1);
+    color: #1a2e27 !important;
+    border-color: #3d5a4f;
+    background: rgba(61, 90, 79, 0.1);
 }
 
 .navbar .nav-link.active {
-    color: #374151 !important;
+    color: #1a2e27 !important;
     font-weight: 600;
-    border-color: #4b5563;
-    background: rgba(75, 85, 99, 0.15);
+    border-color: #3d5a4f;
+    background: rgba(61, 90, 79, 0.15);
 }
 
 /* 메인 컨테이너 카드 스타일 */
@@ -169,7 +172,7 @@ a:hover {
 .nav-pills .nav-link {
     color: #64748b;
     transition: all 0.2s ease;
-    border: 2px solid transparent;
+    border: 1px solid transparent;
 }
 
 .nav-pills .nav-link:hover {
@@ -179,7 +182,7 @@ a:hover {
 
 .nav-pills .nav-link.active {
     background: transparent;
-    border: 2px solid var(--primary-color);
+    border: 1px solid var(--primary-color);
     color: var(--primary-color);
     font-weight: 500;
 }
@@ -879,17 +882,17 @@ a:hover {
 }
 
 .badge-success {
-    background-color: var(--success-color);
+    background-color: #3a5f8f;
     color: white;
 }
 
 .badge-warning {
-    background-color: var(--warning-color);
+    background-color: #d4b800;
     color: white;
 }
 
 .badge-danger {
-    background-color: var(--danger-color);
+    background-color: #6f4a8f;
     color: white;
 }
 

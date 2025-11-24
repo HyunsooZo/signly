@@ -7,7 +7,7 @@
    ======================================== */
 .template-preview {
     font-size: 0.35rem;
-    color: #495057;
+    color: #2d4a3f;
     margin-bottom: 1rem;
     line-height: 1.1;
     width: 100%;
@@ -17,7 +17,7 @@
     background: #fff;
     padding: 0.4rem;
     border-radius: 8px;
-    border: 1px solid #e9ecef;
+    border: 1px solid #d1d7d3;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
@@ -41,7 +41,7 @@
     background-color: #fff;
     padding: 3rem;
     border-radius: 8px;
-    border: 1px solid #e9ecef;
+    border: 1px solid #d1d7d3;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
@@ -75,7 +75,7 @@
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    border: 2px dashed #667eea;
+    border: 2px dashed #2d4a3f;
 }
 
 .template-card-new .template-preview::after {
@@ -100,7 +100,7 @@
 .template-preview h5,
 .template-preview h6 {
     font-weight: 600 !important;
-    color: #212529 !important;
+    color: #1a2e27 !important;
     margin: 0.15rem 0 !important;
     font-size: 0.45rem !important;
 }
@@ -123,7 +123,7 @@
 /* 템플릿 미리보기 점선 박스 */
 .template-preview .section-dotted,
 .template-preview .template-dotted-box {
-    border: 1px dashed #999 !important;
+    border: 1px dashed #3d5a4f !important;
     padding: 0.2rem !important;
     margin: 0.2rem 0 !important;
     border-radius: 2px !important;
@@ -208,11 +208,11 @@
     display: inline-block;
     width: 40px;
     height: 40px;
-    border: 1px solid #ccc;
+    border: 1px solid #a8b5ad;
     text-align: center;
     line-height: 40px;
     font-size: 12px;
-    color: #666;
+    color: #3d5a4f;
 }
 
 /* 모달 미리보기 */
@@ -253,19 +253,19 @@
 }
 
 .preview-surface .template-dotted {
-    border: 2px dashed #adb5bd;
+    border: 2px dashed #7a9287;
     border-radius: 12px;
     padding: 1rem 1.25rem;
     margin-bottom: 1.25rem;
-    background-color: #f8f9fa;
+    background-color: #e8ebe9;
 }
 
 .preview-surface .template-footer {
-    border-top: 1px solid #dee2e6;
+    border-top: 1px solid #d1d7d3;
     margin-top: 2rem;
     padding-top: 1rem;
     text-align: right;
-    color: #495057;
+    color: #2d4a3f;
 }
 
 /* ========================================
@@ -276,7 +276,7 @@
 .template-card-clickable:hover {
     transform: translateY(-12px) scale(1.03);
     box-shadow: 0 16px 32px rgba(102, 126, 234, 0.3);
-    border-color: #667eea;
+    border-color: #2d4a3f;
     cursor: pointer;
 }
 
