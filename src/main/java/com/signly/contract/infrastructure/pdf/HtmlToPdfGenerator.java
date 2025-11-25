@@ -97,13 +97,24 @@ public class HtmlToPdfGenerator implements PdfGenerator {
         xhtml = xhtml.replaceAll("<img([^>]*?)(?<!/)>", "<img$1/>");
 
         // HTML이 완전한 문서가 아니면 XHTML 문서로 감싸기
-        if (!xhtml.trim().toLowerCase().startsWith("<!doctype") &&
-                !xhtml.trim().toLowerCase().startsWith("<html")) {
+        if (isAlreadyCompleteDocument(xhtml)) {
+            logger.debug("이미 완전한 HTML 문서, 감싸지 않음");
+        } else {
             xhtml = wrapInXhtmlDocument(xhtml);
         }
 
         logger.debug("HTML을 XHTML로 정리 완료");
         return xhtml;
+    }
+
+    /**
+     * 이미 완전한 HTML 문서인지 확인
+     */
+    private boolean isAlreadyCompleteDocument(String html) {
+        String trimmed = html.trim().toLowerCase();
+        return trimmed.startsWith("<!doctype") || 
+               trimmed.startsWith("<html") ||
+               (trimmed.contains("<html") && trimmed.contains("</html>"));
     }
 
     /**
@@ -265,6 +276,10 @@ public class HtmlToPdfGenerator implements PdfGenerator {
         // background 관련 복잡한 속성 단순화
         css = css.replaceAll("background:[^;]*gradient[^;]*;", "background: #fff;");
         css = css.replaceAll("background:[^;]*rgba[^;]*;", "background: #fff;");
+
+        // PDF에서 문제가 되는 page-break 속성 정교화
+        css = css.replaceAll("page-break-after:\\s*auto;", "page-break-after: avoid;");
+        css = css.replaceAll("page-break-before:\\s*auto;", "page-break-before: avoid;");
 
         return css;
     }
