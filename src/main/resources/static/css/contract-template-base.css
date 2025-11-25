@@ -124,14 +124,17 @@ body:not(:has(.navbar)) {
     height: 100%;
 }
 
-/* 밑줄 변수 스타일 - PDF와 웹 공통 */
+/* 밑줄 변수 스타일 - PDF와 웹 공통 (통합 버전) */
 .blank-line {
     display: inline-block;
     border-bottom: 1px solid #000;
     min-width: 60px;
-    height: 1em;
+    height: 1.4em;
     margin: 0 4px;
-    vertical-align: baseline;
+    padding: 0 4px 2px 4px;
+    vertical-align: bottom;
+    line-height: 1.4;
+    text-align: center;
 }
 
 /* 템플릿 섹션 타입별 스타일 */

@@ -5,9 +5,12 @@
 <!DOCTYPE html>
 <html lang="ko">
 <jsp:include page="../common/header.jsp">
-    <jsp:param name="additionalCss" value="/css/contracts.css"/>
-    <jsp:param name="additionalCss2" value="/css/contract-common.css"/>
-    <jsp:param name="additionalCss3" value="/css/modal.css"/>
+    <jsp:param name="additionalCss" value="/css/contract-template-base.css"/>
+    <jsp:param name="additionalCss2" value="/css/contract-template-preview.css"/>
+    <jsp:param name="additionalCss3" value="/css/contracts.css"/>
+    <jsp:param name="additionalCss4" value="/css/templates.css"/>
+    <jsp:param name="additionalCss5" value="/css/modal.css"/>
+    <jsp:param name="additionalCss6" value="/css/contract-common.css"/>
 </jsp:include>
 <body>
 <jsp:include page="../common/navbar.jsp">
@@ -85,10 +88,9 @@
                             <i class="bi bi-file-earmark-text me-2"></i>계약서 내용
                         </h5>
                     </div>
-                    <div class="card-body p-0 contract-detail-card-body">
+                    <div class="card-body preset-preview-body">
                         <!-- HTML 자동 감지를 위해 항상 동일한 컨테이너 사용 -->
-                        <div class="contract-content contract-content--html contract-detail-content-white"
-                             id="contractContentHtmlContainer"></div>
+                        <div id="templateHtmlContainer"></div>
                     </div>
                 </div>
 
@@ -317,21 +319,21 @@
 </div>
 
 <!-- 미리보기 모달 -->
-<div class="modal fade contract-preview-modal" id="previewModal" tabindex="-1">
-    <div class="modal-dialog modal-fullscreen-lg-down">
-        <div class="modal-content contract-detail-modal-white">
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="bi bi-eye me-2"></i>계약서 미리보기
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4 contract-detail-modal-body-white">
+            <div class="modal-body">
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle me-2"></i>
                     아래는 현재 계약서 내용의 미리보기입니다.
                 </div>
-                <div class="border rounded p-4 contract-preview-modal-content contract-detail-modal-body-white"
+                <div class="border rounded p-4 contract-preview-panel"
                      id="previewContent">
                 </div>
             </div>

@@ -132,48 +132,6 @@
 
 /* preset-preview-body 스타일은 contract-template-preview.css로 이동 */
 
-
-.custom-content-preview {
-    min-height: 200px;
-    background-color: #f8f9fa;
-    overflow-x: auto;
-}
-
-.custom-variable-inline {
-    position: relative;
-    display: inline-block;
-    min-width: 90px;
-    margin: 0 4px;
-    padding-top: 14px;
-    border-bottom: 2px solid #222;
-    vertical-align: bottom;
-}
-
-.custom-variable-inline-label {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translate(-50%, -80%);
-    font-size: 0.7rem;
-    color: #6c757d;
-    font-weight: 600;
-    white-space: nowrap;
-    pointer-events: none;
-}
-
-.custom-variable-inline-input {
-    width: 100%;
-    border: none;
-    background: transparent;
-    text-align: center;
-    font-size: 0.92rem;
-    padding: 0 2px 2px;
-}
-
-.custom-variable-inline-input:focus {
-    outline: none;
-}
-
 .contract-preview-panel {
     background-color: #f8f9fa;
     min-height: 400px;
@@ -885,15 +843,16 @@
 /* 템플릿 조항 스타일은 template-preview.css에서 관리 */
 
 /* 계약서 변수 입력 스타일 */
-/* 계약서 변수 입력 스타일 */
+/* 계약서 변수 입력 스타일 (편집 모드: wrapper는 밑줄 없음) */
 .preset-document .contract-variable-underline {
     display: inline-block;
-    vertical-align: bottom;
+    vertical-align: bottom !important;
     border-bottom: none !important;
-    /* Wrapper 밑줄 제거 */
+    /* Wrapper 밑줄 제거 - input에만 밑줄 표시 */
     padding: 0 2px;
     margin: 0 2px;
-    line-height: normal;
+    line-height: 1.4;
+    height: 1.4em;
     min-width: 60px;
 }
 
@@ -941,6 +900,12 @@
     border-bottom: none !important;
 }
 
+/* 계약서 상세 페이지: 완성된 값에는 밑줄 없음, 문장 중앙 정렬 */
+#templateHtmlContainer .blank-line {
+    border-bottom: none !important;
+    vertical-align: baseline !important;
+}
+
 /* 서명란 스타일 오버라이드 (박스 및 밑줄 제거) */
 .preset-document .signature-stamp-label {
     border: none !important;
@@ -962,23 +927,7 @@
     top: 45% !important;
 }
 
-/* 계약서 상세보기 - 흰색 배경 강제 적용 클래스 */
-.contract-detail-card-body {
-    background-color: white !important;
-}
-
-.contract-detail-content-white {
-    background-color: white !important;
-    color: black !important;
-}
-
-.contract-detail-modal-white {
-    background-color: white;
-}
-
-.contract-detail-modal-body-white {
-    background-color: white;
-}
+/* 계약서 상세보기 - 더 이상 사용하지 않는 클래스 제거됨 (preset-preview-body로 통일) */
 
 /* PDF 뷰어 iframe 스타일 */
 .pdf-viewer-iframe {

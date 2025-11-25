@@ -172,15 +172,7 @@
 
 /* #presetHtmlContainer 스타일 제거 - contract-template-base.css의 .preset-document 스타일로 대체 */
 
-/* 프리셋 문서 내 변수 스타일 */
-.preset-document .blank-line {
-    display: inline-block;
-    border-bottom: 1px solid #000;
-    min-width: 60px;
-    height: 1em;
-    margin: 0 4px;
-    vertical-align: baseline;
-}
+/* 프리셋 문서 내 변수 스타일 - contract-template-base.css로 통합되어 제거됨 */
 
 /* 프리셋 문서 내 서명 섹션 */
 .preset-document .signature-section {

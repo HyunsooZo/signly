@@ -159,27 +159,20 @@ body:not(:has(.navbar)) {
     text-align: center;
 }
 
-/* 밑줄 표시 (변수 미리보기) */
-.blank-line {
-    display: inline-block;
-    border-bottom: 1px solid #000;
-    min-width: 80px;
-    height: 1.2em;
-    margin: 0 4px;
-    vertical-align: bottom;
-}
+/* 밑줄 표시 (변수 미리보기) - contract-template-base.css로 통합되어 제거됨 */
 
 
 
-/* 계약서 변수 밑줄 (상세 페이지용) */
+/* 계약서 변수 (상세 페이지용 - 밑줄 없음) */
 .contract-variable-underline {
     display: inline-block;
-    min-width: 50px;
+    min-width: 60px;
+    padding: 0 4px 2px 4px;
     border-bottom: none;
-    padding: 0;
     text-align: center;
-    vertical-align: baseline;
-    line-height: 1;
+    vertical-align: bottom;
+    line-height: 1.4;
+    height: 1.4em;
 }
 
 /* 템플릿 변수 제거 버튼 숨김 */
