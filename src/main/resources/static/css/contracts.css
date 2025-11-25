@@ -885,48 +885,81 @@
 /* 템플릿 조항 스타일은 template-preview.css에서 관리 */
 
 /* 계약서 변수 입력 스타일 */
+/* 계약서 변수 입력 스타일 */
 .preset-document .contract-variable-underline {
     display: inline-block;
-    vertical-align: baseline;
+    vertical-align: bottom;
     border-bottom: none !important;
-    padding: 0;
+    /* Wrapper 밑줄 제거 */
+    padding: 0 2px;
     margin: 0 2px;
     line-height: normal;
+    min-width: 60px;
 }
 
 .preset-document .contract-input-inline {
     display: inline-block;
-    width: auto;
-    min-width: 80px;
-    padding: 0 6px;
+    width: 100%;
+    min-width: 60px;
+    padding: 0 4px 2px 4px;
+    /* 하단 패딩 추가하여 텍스트와 밑줄 간격 확보 */
     font-size: inherit;
     font-family: inherit;
     border: none;
-    border-bottom: none;
+    border-bottom: 1px solid #000 !important;
+    /* Input에 밑줄 직접 적용 */
     border-radius: 0;
     background-color: transparent;
     transition: all 0.15s ease-in-out;
-    vertical-align: baseline !important;
+    vertical-align: bottom !important;
     margin: 0;
     margin-bottom: 0 !important;
-    line-height: 1 !important;
-    height: 1em !important;
+    line-height: 1.4 !important;
+    height: 1.4em !important;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     box-sizing: border-box;
+    text-align: center;
 }
 
 .preset-document .contract-input-inline:focus {
     outline: 0;
     box-shadow: none;
-    background-color: rgba(102, 126, 234, 0.05);
+    background-color: rgba(102, 126, 234, 0.1);
 }
 
 .preset-document .contract-input-inline::placeholder {
-    color: #6c757d;
-    opacity: 0.5;
-    font-size: 0.9em;
+    color: #999;
+    opacity: 0.7;
+    font-size: 0.85em;
+    font-style: italic;
+}
+
+/* 중복 밑줄(취소선 효과) 제거 - 입력창이 있을 때만 제거 */
+.preset-document .blank-line:has(.contract-input-inline) {
+    border-bottom: none !important;
+}
+
+/* 서명란 스타일 오버라이드 (박스 및 밑줄 제거) */
+.preset-document .signature-stamp-label {
+    border: none !important;
+}
+
+.preset-document .signature-stamp-label .contract-input-inline,
+.preset-document .signature-stamp-wrapper .contract-input-inline {
+    border-bottom: none !important;
+}
+
+/* 서명란 (인) 텍스트 밑줄 제거 */
+.preset-document .signature-stamp-label .contract-variable-underline {
+    border-bottom: none !important;
+    text-decoration: none !important;
+}
+
+/* 서명 이미지 위치 중앙 정렬 보정 (살짝 위로) */
+.preset-document .signature-stamp-wrapper {
+    top: 45% !important;
 }
 
 /* 계약서 상세보기 - 흰색 배경 강제 적용 클래스 */
@@ -954,5 +987,3 @@
     height: 100%;
     border: none;
 }
-
-
