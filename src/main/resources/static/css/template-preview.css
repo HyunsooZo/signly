@@ -47,7 +47,7 @@ body:not(:has(.navbar)) {
 
 /* 점선 박스 */
 .section-dotted {
-    border: 0.5px dashed #666;
+    border: 0.5px dashed #3d5a4f;
     padding: 15px;
     margin: 20px 0;
     border-radius: 4px;
@@ -65,10 +65,10 @@ body:not(:has(.navbar)) {
 .section-footer {
     margin-top: 40px;
     padding-top: 20px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #d1d7d3;
     text-align: center;
     font-size: 13px;
-    color: #666;
+    color: #3d5a4f;
 }
 
 /* 서명란 */
@@ -129,7 +129,7 @@ body,
 }
 
 .template-dotted {
-    border: 0.5px dashed #666;
+    border: 0.5px dashed #3d5a4f;
     padding: 15px;
     margin: 20px 0;
     border-radius: 4px;
@@ -138,10 +138,10 @@ body,
 .template-footer {
     margin-top: 40px;
     padding-top: 20px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #d1d7d3;
     text-align: center;
     font-size: 13px;
-    color: #666;
+    color: #3d5a4f;
 }
 
 .template-paragraph {

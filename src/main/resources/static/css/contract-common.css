@@ -8,7 +8,7 @@ body:not(:has(.navbar)) {
     font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Helvetica Neue', sans-serif;
     line-height: 1.6;
     font-size: 13px;
-    color: #222;
+    color: #1a2e27;
 }
 
 /* iframe 내부(미리보기)에만 적용 */
@@ -75,7 +75,7 @@ body:not(:has(.navbar)) {
 
 /* 점선 박스 */
 .section-dotted {
-    border: 1px dashed #666;
+    border: 1px dashed #3d5a4f;
     padding: 16px;
     margin: 20px 0;
     border-radius: 4px;
@@ -85,10 +85,10 @@ body:not(:has(.navbar)) {
 .section-footer {
     margin-top: 40px;
     padding-top: 20px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #3d5a4f;
     text-align: center;
     font-size: 12px;
-    color: #666;
+    color: #3d5a4f;
     font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
 }
 
@@ -159,27 +159,20 @@ body:not(:has(.navbar)) {
     text-align: center;
 }
 
-/* 밑줄 표시 (변수 미리보기) */
-.blank-line {
-    display: inline-block;
-    border-bottom: 1px solid #000;
-    min-width: 80px;
-    height: 1.2em;
-    margin: 0 4px;
-    vertical-align: bottom;
-}
+/* 밑줄 표시 (변수 미리보기) - contract-template-base.css로 통합되어 제거됨 */
 
 
 
-/* 계약서 변수 밑줄 (상세 페이지용) */
+/* 계약서 변수 (상세 페이지용 - 밑줄 없음) */
 .contract-variable-underline {
     display: inline-block;
-    min-width: 50px;
+    min-width: 60px;
+    padding: 0 4px 2px 4px;
     border-bottom: none;
-    padding: 0;
     text-align: center;
-    vertical-align: baseline;
-    line-height: 1;
+    vertical-align: bottom;
+    line-height: 1.4;
+    height: 1.4em;
 }
 
 /* 템플릿 변수 제거 버튼 숨김 */
@@ -285,7 +278,7 @@ body,
 }
 
 .template-dotted-box {
-    border: 1px dashed #666;
+    border: 1px dashed #3d5a4f;
     padding: 16px;
     margin: 20px 0;
     border-radius: 4px;
@@ -294,9 +287,9 @@ body,
 .template-footer {
     margin-top: 40px;
     padding-top: 20px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #3d5a4f;
     font-size: 12px;
-    color: #666;
+    color: #3d5a4f;
 }
 
 .template-custom {

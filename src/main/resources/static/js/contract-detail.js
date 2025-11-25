@@ -62,7 +62,7 @@ class ContractDetail {
     }
 
     renderPlainTextContract(content) {
-        const container = document.getElementById('contractContentHtmlContainer');
+        const container = document.getElementById('templateHtmlContainer');
         if (!container) {
             return;
         }
@@ -146,10 +146,13 @@ class ContractDetail {
     }
 
     renderHtmlContract(htmlContent) {
-        const container = document.getElementById('contractContentHtmlContainer');
+        const container = document.getElementById('templateHtmlContainer');
         if (!container) {
             return;
         }
+
+        // preset-document 클래스 추가 (form.js와 동일하게)
+        container.className = 'preset-document';
 
         const tempWrapper = document.createElement('div');
         tempWrapper.innerHTML = htmlContent;
@@ -158,7 +161,7 @@ class ContractDetail {
         const styleElements = tempWrapper.querySelectorAll('style');
         styleElements.forEach(styleEl => {
             if (styleEl.textContent) {
-                styles.push(this.scopeCssText(styleEl.textContent, '#contractContentHtmlContainer'));
+                styles.push(this.scopeCssText(styleEl.textContent, '#templateHtmlContainer'));
             }
             styleEl.parentNode.removeChild(styleEl);
         });
@@ -298,7 +301,7 @@ class ContractDetail {
         }
 
         // 현재 계약서 컨테이너에서 HTML 가져오기
-        const container = document.getElementById('contractContentHtmlContainer');
+        const container = document.getElementById('templateHtmlContainer');
         if (!container) {
             previewContent.innerHTML = '<p class="text-muted">계약서 내용이 없습니다.</p>';
         } else {

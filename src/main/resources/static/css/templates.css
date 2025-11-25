@@ -29,7 +29,7 @@
 .table th {
     border-top: none;
     font-weight: 600;
-    color: #495057;
+    color: #2d4a3f;
     text-transform: uppercase;
     font-size: 0.875rem;
     letter-spacing: 0.5px;
@@ -52,8 +52,8 @@
 }
 
 .badge.bg-warning {
-    background-color: #ffc107 !important;
-    color: #212529 !important;
+    background-color: #d4b800 !important;
+    color: white !important;
 }
 
 /* 버튼 그룹 스타일 */
@@ -208,7 +208,7 @@
 }
 
 .section-card.dotted {
-    border-left-color: #6c757d;
+    border-left-color: #3d5a4f;
 }
 
 .section-card.footer {
@@ -277,7 +277,7 @@
     margin-top: 2rem;
     padding-top: 1rem;
     text-align: right;
-    color: #495057;
+    color: #2d4a3f;
 }
 
 .preview-modal {
@@ -313,7 +313,7 @@
     position: absolute;
     top: 15px;
     right: 20px;
-    color: #666;
+    color: #3d5a4f;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
@@ -394,7 +394,7 @@
     border-bottom: 1px solid #f0f0f0;
     border-radius: 15px 15px 0 0;
     background: white;
-    color: #333;
+    color: #2d4a3f;
 }
 
 .modal-header .btn-close {
@@ -430,17 +430,17 @@
 }
 
 .empty-state i {
-    color: #6c757d;
+    color: #3d5a4f;
     margin-bottom: 1rem;
 }
 
 .empty-state h4 {
-    color: #495057;
+    color: #2d4a3f;
     margin-bottom: 1rem;
 }
 
 .empty-state p {
-    color: #6c757d;
+    color: #3d5a4f;
     margin-bottom: 2rem;
 }
 

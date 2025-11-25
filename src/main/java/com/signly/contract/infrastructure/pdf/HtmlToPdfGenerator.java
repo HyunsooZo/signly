@@ -30,7 +30,7 @@ import java.util.Optional;
 public class HtmlToPdfGenerator implements PdfGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(HtmlToPdfGenerator.class);
-    private static final List<String> PDF_CSS_RESOURCES = List.of("static/css/contract-template-base.css");
+    private static final List<String> PDF_CSS_RESOURCES = List.of("static/css/contract-common.css");
     private static final List<String> FONT_RESOURCES = List.of("fonts/NanumGothic-Regular.ttf", "fonts/NanumGothic-Bold.ttf");
 
     @Override
@@ -190,15 +190,44 @@ public class HtmlToPdfGenerator implements PdfGenerator {
     }
 
     private String adaptCssForPdf(String css) {
-        // 웹 전용 스타일 필터링
+        // 1. @media print 콘텐츠 추출 (밑줄 제거 등 PDF 전용 스타일)
+        String printStyles = extractMediaPrintStyles(css);
+
+        // 2. 웹 전용 스타일 필터링 (모든 @media 쿼리 제거 포함)
         String adapted = filterWebOnlyStyles(css);
 
-        // 기존 폰트 변환 로직
+        // 3. 기존 폰트 변환 로직
         adapted = adapted.replace("body:not(:has(.navbar))", "body");
         adapted = adapted.replace("'Malgun Gothic'", "'NanumGothic', 'Nanum Gothic', 'Malgun Gothic'");
         adapted = adapted.replace("\"Malgun Gothic\"", "'NanumGothic', 'Nanum Gothic', 'Malgun Gothic'");
         adapted = adapted.replace("font-family: Malgun Gothic", "font-family: NanumGothic, Nanum Gothic, Malgun Gothic");
-        return adapted;
+
+        // 4. PDF 전용 스타일을 일반 CSS로 추가
+        return adapted + "\n\n/* PDF 전용 스타일 (추출됨) */\n" + printStyles;
+    }
+
+    /**
+     * @media print {...} 내부 콘텐츠만 추출
+     * PDF에서는 @media 쿼리가 필요 없으므로 내부 스타일만 가져옴
+     */
+    private String extractMediaPrintStyles(String css) {
+        StringBuilder printStyles = new StringBuilder();
+
+        // @media print { ... } 패턴 찾기
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
+            "@media\\s+print\\s*\\{([^}]*(?:\\{[^}]*\\}[^}]*)*)\\}",
+            java.util.regex.Pattern.DOTALL
+        );
+
+        java.util.regex.Matcher matcher = pattern.matcher(css);
+        while (matcher.find()) {
+            String innerStyles = matcher.group(1);
+            if (innerStyles != null && !innerStyles.trim().isEmpty()) {
+                printStyles.append(innerStyles.trim()).append("\n");
+            }
+        }
+
+        return printStyles.toString();
     }
 
     /**
