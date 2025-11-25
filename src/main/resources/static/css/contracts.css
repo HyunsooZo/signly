@@ -898,17 +898,35 @@
 /* 중복 밑줄(취소선 효과) 제거 - 입력창이 있을 때만 제거 */
 .preset-document .blank-line:has(.contract-input-inline) {
     border-bottom: none !important;
+    margin: 0 2px !important;
+    padding: 0 2px !important;
+    min-width: 50px !important;
+}
+
+/* 입력 필드 자체 너비 설정 */
+.contract-input-inline {
+    min-width: 50px;
 }
 
 /* 계약서 상세 페이지: 완성된 값에는 밑줄 없음, 문장 중앙 정렬 */
 #templateHtmlContainer .blank-line {
     border-bottom: none !important;
     vertical-align: baseline !important;
+    margin: 0 1px !important;
+    padding: 0 1px !important;
+    min-width: 20px !important;
 }
 
 /* 서명란 스타일 오버라이드 (박스 및 밑줄 제거) */
 .preset-document .signature-stamp-label {
     border: none !important;
+}
+
+/* 서명란 내부 blank-line 최적화 */
+.signature-stamp-label .blank-line {
+    margin: 0 1px;
+    padding: 0;
+}
 }
 
 .preset-document .signature-stamp-label .contract-input-inline,
