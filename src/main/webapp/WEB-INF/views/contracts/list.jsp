@@ -251,10 +251,6 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                     <form id="deleteForm" method="post" class="d-inline">
-                        <c:if test="${not empty _csrf}">
-                            <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>"
-                                   value="<c:out value='${_csrf.token}'/>"/>
-                        </c:if>
                         <button type="submit" class="btn btn-danger">삭제</button>
                     </form>
                 </div>
@@ -280,10 +276,6 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">돌아가기</button>
                     <form id="cancelForm" method="post" class="d-inline">
-                        <c:if test="${not empty _csrf}">
-                            <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>"
-                                   value="<c:out value='${_csrf.token}'/>"/>
-                        </c:if>
                         <button type="submit" class="btn btn-warning">취소</button>
                     </form>
                 </div>
@@ -292,46 +284,9 @@
     </div>
 
     <script>
-        // 전역 변수로 선언
-        window.csrfParam = '${_csrf.parameterName}';
-        window.csrfToken = '${_csrf.token}';
 
-        function appendCsrfField(form) {
-            if (!form) {
-                return;
-            }
-            if (window.csrfManager) {
-                window.csrfManager.ensureFormToken(form);
-                return;
-            }
 
-            const cookieToken = document.cookie.split(';')
-                .map(c => c.trim())
-                .find(c => c.startsWith('XSRF-TOKEN='));
-            if (cookieToken && window.csrfParam) {
-                let input = form.querySelector('input[name="' + window.csrfParam + '"]');
-                if (!input) {
-                    input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = window.csrfParam;
-                    form.appendChild(input);
-                }
-                input.value = decodeURIComponent(cookieToken.substring('XSRF-TOKEN='.length));
-                return;
-            }
 
-            const existingCsrfInput = document.querySelector('input[name="_csrf"]');
-            if (existingCsrfInput) {
-                let input = form.querySelector('input[name="_csrf"]');
-                if (!input) {
-                    input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = '_csrf';
-                    form.appendChild(input);
-                }
-                input.value = existingCsrfInput.value;
-            }
-        }
 
         function sendForSigning(contractId) {
             showConfirmModal(
@@ -340,7 +295,6 @@
                     const form = document.createElement('form');
                     form.method = 'post';
                     form.action = '/contracts/' + contractId + '/send';
-                    appendCsrfField(form);
                     document.body.appendChild(form);
                     form.submit();
                 },

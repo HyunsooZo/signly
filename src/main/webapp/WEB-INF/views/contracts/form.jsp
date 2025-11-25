@@ -60,9 +60,6 @@
 
         <form method="post" action="${not empty contractId ? '/contracts/'.concat(contractId) : '/contracts'}"
               class="contract-form">
-            <c:if test="${not empty _csrf}">
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-            </c:if>
             <c:if test="${not empty selectedPreset}">
                 <input type="hidden" name="selectedPreset" value="<c:out value='${selectedPreset}'/>"/>
             </c:if>
@@ -189,44 +186,7 @@
     </div>
 </div>
 
-<c:if test="${not empty _csrf}">
-    <script>
-        (function () {
-            const csrfParam = '<c:out value="${_csrf.parameterName}" default="_csrf"/>';
-            const fallbackEnsure = function (form) {
-                if (!form || !csrfParam) {
-                    return;
-                }
-                const token = (function readCsrfFromCookie() {
-                    return document.cookie.split(';')
-                        .map(c => c.trim())
-                        .find(c => c.startsWith('XSRF-TOKEN='))?.substring('XSRF-TOKEN='.length) || '';
-                })();
-                if (!token) {
-                    return;
-                }
-                let input = form.querySelector('input[name="' + csrfParam + '"]');
-                if (!input) {
-                    input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = csrfParam;
-                    form.appendChild(input);
-                }
-                input.value = decodeURIComponent(token);
-            };
 
-            document.addEventListener('DOMContentLoaded', function () {
-                const form = document.querySelector('.contract-form');
-                if (!form) {
-                    return;
-                }
-                form.addEventListener('submit', function () {
-                    fallbackEnsure(form);
-                });
-            });
-        })();
-    </script>
-</c:if>
 <script src="/js/contract-form.js"></script>
 <jsp:include page="../common/footer.jsp"/>
 </body>

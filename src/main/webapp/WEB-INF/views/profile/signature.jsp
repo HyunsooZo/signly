@@ -90,9 +90,6 @@
                     </div>
                     <div class="card-body">
                         <form method="post" id="signatureForm" class="d-flex flex-column h-100">
-                            <c:if test="${not empty _csrf}">
-                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-                            </c:if>
                             <input type="hidden" name="signatureData" id="signatureData">
 
                             <div class="canvas-wrapper mb-3">

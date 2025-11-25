@@ -270,7 +270,6 @@ public class TemplateWebController extends BaseWebController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            logCsrfDebug("activate", request);
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             templateService.activateTemplate(resolvedUserId, templateId);
             logger.info("템플릿 활성화 성공: templateId={}", templateId);
@@ -291,7 +290,6 @@ public class TemplateWebController extends BaseWebController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            logCsrfDebug("archive", request);
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             templateService.archiveTemplate(resolvedUserId, templateId);
             logger.info("템플릿 보관 성공: templateId={}", templateId);
@@ -312,7 +310,6 @@ public class TemplateWebController extends BaseWebController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            logCsrfDebug("delete", request);
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             templateService.deleteTemplate(resolvedUserId, templateId);
             logger.info("템플릿 삭제 성공: templateId={}", templateId);
@@ -324,31 +321,7 @@ public class TemplateWebController extends BaseWebController {
         return "redirect:/templates";
     }
 
-    private void logCsrfDebug(
-            String action,
-            HttpServletRequest request
-    ) {
-        try {
-            String paramValue = request.getParameter("_csrf");
-            String headerValue = request.getHeader("X-CSRF-TOKEN");
-            String cookieValue = null;
-            if (request.getCookies() != null) {
-                for (var cookie : request.getCookies()) {
-                    if ("XSRF-TOKEN".equals(cookie.getName())) {
-                        cookieValue = cookie.getValue();
-                        break;
-                    }
-                }
-            }
-            logger.debug("[CSRF-DEBUG] action={}, param={}, header={}, cookie={}",
-                    action,
-                    paramValue,
-                    headerValue,
-                    cookieValue);
-        } catch (Exception e) {
-            logger.debug("[CSRF-DEBUG] failed to log CSRF info: {}", e.getMessage());
-        }
-    }
+
 
     @Getter
     public static class TemplateForm {

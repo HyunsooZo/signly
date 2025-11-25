@@ -42,8 +42,6 @@
                        value="<c:out value="${param.email}"/>" required placeholder="가입하신 이메일을 입력해주세요">
             </div>
 
-            <input type="hidden" name="<c:out value="${_csrf.parameterName}"/>"
-                   value="<c:out value="${_csrf.token}"/>"/>
 
             <button type="submit" class="btn btn-primary btn-auth">비밀번호 재설정 링크 발송</button>
         </form>

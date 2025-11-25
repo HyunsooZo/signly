@@ -180,7 +180,6 @@
                 </label>
             </div>
 
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
             <button type="submit" class="btn btn-primary btn-auth">회원가입</button>
         </form>

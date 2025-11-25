@@ -30,15 +30,9 @@
         <link href="<c:out value='${param.additionalCss6}'/>" rel="stylesheet">
     </c:if>
 
-    <c:if test="${not empty _csrf}">
-        <meta name="_csrf" content="${_csrf.token}"/>
-        <meta name="_csrf_header" content="${_csrf.headerName}"/>
-        <meta name="_csrf_parameter" content="${_csrf.parameterName}"/>
-    </c:if>
-
     <!-- NProgress 로딩 바 -->
     <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
     <link href="/css/page-loader.css" rel="stylesheet">
     <script src="/js/page-loader.js"></script>
-    <script src="/js/common/csrf.js" defer></script>
+    <script src="/js/common/jwt-client.js" defer></script>
 </head>

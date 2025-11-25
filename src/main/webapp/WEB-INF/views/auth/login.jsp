@@ -79,7 +79,7 @@
                 </label>
             </div>
 
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
             <c:if test="${not empty returnUrl}">
                 <input type="hidden" name="returnUrl" value="<c:out value="${returnUrl}"/>"/>
             </c:if>

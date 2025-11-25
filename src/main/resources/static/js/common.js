@@ -267,30 +267,41 @@ async function sendRequest(url, options = {}) {
         headers: {
             'Content-Type': 'application/json',
         },
-        credentials: 'same-origin'
+        credentials: 'include'
     };
 
     const mergedOptions = {...defaultOptions, ...options};
 
     try {
-        // AuthManager가 로드되어 있고 인증 필요한 요청이면 authenticatedFetch 사용
-        if (window.AuthManager && window.AuthManager.isAuthenticated()) {
-            const response = await window.AuthManager.authenticatedFetch(url, mergedOptions);
+        // JWT 클라이언트가 로드되어 있으면 JWT 인증 사용
+        if (window.jwtClient) {
+            const response = await window.jwtClient.fetchWithAuth(url, mergedOptions);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            return await response.json();
+            // JSON 응답이 아닐 수도 있으므로 확인 후 파싱
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return await response.json();
+            } else {
+                return response;
+            }
         } else {
-            // 인증 불필요한 요청은 일반 fetch 사용
+            // JWT 클라이언트가 없으면 일반 fetch 사용
             const response = await fetch(url, mergedOptions);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            return await response.json();
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return await response.json();
+            } else {
+                return response;
+            }
         }
     } catch (error) {
         console.error('Request failed:', error);

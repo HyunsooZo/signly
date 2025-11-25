@@ -15,12 +15,7 @@
     <link href="/css/common.css" rel="stylesheet">
     <link href="/css/signature.css" rel="stylesheet">
 
-    <c:if test="${not empty _csrf}">
-        <meta name="_csrf" content="${_csrf.token}"/>
-        <meta name="_csrf_header" content="${_csrf.headerName}"/>
-        <meta name="_csrf_parameter" content="${_csrf.parameterName}"/>
-    </c:if>
-    <script src="/js/common/csrf.js" defer></script>
+
 </head>
 <body class="error-page">
 

@@ -30,8 +30,6 @@
 
         <form action="/reset-password" method="post" class="auth-form" onsubmit="return validateForm()">
             <input type="hidden" name="token" value="<c:out value="${token}"/>">
-            <input type="hidden" name="<c:out value="${_csrf.parameterName}"/>"
-                   value="<c:out value="${_csrf.token}"/>"/>
 
             <div class="form-group">
                 <label for="newPassword" class="form-label">

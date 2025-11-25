@@ -16,12 +16,7 @@
     <link href="/css/common.css" rel="stylesheet">
     <link href="/css/signature.css" rel="stylesheet">
 
-    <c:if test="${not empty _csrf}">
-        <meta name="_csrf" content="${_csrf.token}"/>
-        <meta name="_csrf_header" content="${_csrf.headerName}"/>
-        <meta name="_csrf_parameter" content="${_csrf.parameterName}"/>
-    </c:if>
-    <script src="/js/common/csrf.js" defer></script>
+
 </head>
 <body class="verify-page">
 
@@ -78,9 +73,7 @@
                     </div>
                     <div class="card-body">
                         <form method="post" action="/sign/<c:out value='${token}'/>/verify">
-                            <c:if test="${not empty _csrf}">
-                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                            </c:if>
+
                             <div class="mb-3">
                                 <label for="signerEmail" class="form-label">
                                     <i class="bi bi-envelope me-2"></i>이메일 주소 <span class="text-danger">*</span>

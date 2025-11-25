@@ -25,12 +25,7 @@
     <!-- 파비콘 -->
     <link rel="icon" type="image/png" href="<c:url value='/images/favicon.png' />">
 
-    <!-- CSRF Protection -->
-    <c:if test="${not empty _csrf}">
-        <meta name="_csrf" content="${_csrf.token}"/>
-        <meta name="_csrf_header" content="${_csrf.headerName}"/>
-        <meta name="_csrf_parameter" content="${_csrf.parameterName}"/>
-    </c:if>
+
 </head>
 <body>
 <!-- 헤더 -->
@@ -82,6 +77,7 @@
 <jsp:include page="footer.jsp"/>
 
 <!-- JavaScript -->
+<script src="<c:url value='/js/common/jwt-client.js' />"></script>
 <script src="<c:url value='/js/common.js' />"></script>
 <script src="<c:url value='/js/auth.js' />"></script>
 <script src="<c:url value='/js/alerts.js' />"></script>

@@ -191,9 +191,6 @@
 <!-- Hidden form for submission -->
 <c:set var="formAction" value="${not empty templateId && templateId ne 'new' ? '/templates/'.concat(templateId) : '/templates'}" />
 <form id="templateForm" method="post" action="${formAction}" class="template-form-hidden">
-    <c:if test="${not empty _csrf}">
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-    </c:if>
     <input type="hidden" name="title" id="formTitle">
     <input type="hidden" name="sectionsJson" id="sectionsJson">
 </form>

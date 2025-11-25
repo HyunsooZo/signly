@@ -211,9 +211,6 @@
 
 <!-- Hidden action form -->
 <form id="templateActionForm" method="post" class="d-none">
-    <c:if test="${not empty _csrf}">
-        <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>" value="<c:out value='${_csrf.token}'/>"/>
-    </c:if>
 </form>
 
 <!-- 삭제 확인 모달 -->
@@ -234,10 +231,6 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                 <form id="deleteForm" method="post" class="d-inline">
-                    <c:if test="${not empty _csrf}">
-                        <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>"
-                               value="<c:out value='${_csrf.token}'/>"/>
-                    </c:if>
                     <button type="submit" class="btn btn-danger">삭제</button>
                 </form>
             </div>
@@ -327,42 +320,8 @@
     }
 
     // 전역 변수로 선언
-    window.csrfParam = '<c:out value="${_csrf.parameterName}" default="_csrf"/>';
-    window.csrfToken = '<c:out value="${_csrf.token}" default=""/>';
 
-    function readCsrfFromCookie() {
-        const match = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='));
-        return match ? decodeURIComponent(match.substring('XSRF-TOKEN='.length)) : '';
-    }
 
-    function ensureCsrf(form) {
-        if (!form) {
-            return;
-        }
-        const tokenValue = readCsrfFromCookie() || window.csrfToken;
-        if (window.csrfParam && tokenValue) {
-            let input = form.querySelector('input[name="' + window.csrfParam + '"]');
-            if (!input) {
-                input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = window.csrfParam;
-                form.appendChild(input);
-            }
-            input.value = tokenValue;
-        } else {
-            const existing = document.querySelector('input[name="_csrf"]');
-            if (existing) {
-                let input = form.querySelector('input[name="_csrf"]');
-                if (!input) {
-                    input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = '_csrf';
-                    form.appendChild(input);
-                }
-                input.value = existing.value;
-            }
-        }
-    }
 
     function submitPost(action) {
         const form = document.getElementById('templateActionForm');
@@ -371,7 +330,6 @@
             return;
         }
         form.action = action;
-        ensureCsrf(form);
         form.submit();
     }
 
