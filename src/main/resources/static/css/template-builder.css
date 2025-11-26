@@ -13,7 +13,7 @@ body {
 
 /* 네비게이션 */
 .navbar {
-    box-shadow: 0 2px 4px rgba(0,0,0,.08);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .08);
 }
 
 /* 메인 컨테이너 */
@@ -89,7 +89,7 @@ body {
 
 .preset-card:hover {
     border-color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(0,102,204,0.15);
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
     transform: translateY(-2px);
 }
 
@@ -174,38 +174,38 @@ body {
     .preset-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .preset-header {
         padding: 15px;
     }
-    
+
     .preset-content {
         padding: 15px;
         max-height: 300px;
     }
-    
+
     .preset-card {
         padding: 12px;
     }
-    
+
     .preset-card-header {
         gap: 8px;
     }
-    
+
     .preset-card-icon {
         width: 35px;
         height: 35px;
         font-size: 1rem;
     }
-    
+
     .preset-card-title {
         font-size: 0.95rem;
     }
-    
+
     .preset-card-description {
         font-size: 0.85rem;
     }
-    
+
     .preset-card-button {
         padding: 5px 10px;
         font-size: 0.8rem;
@@ -216,34 +216,34 @@ body {
     .builder-container {
         padding: 15px 10px;
     }
-    
+
     .preset-section {
         margin-bottom: 15px;
     }
-    
+
     .preset-header {
         padding: 12px;
     }
-    
+
     .preset-title {
         font-size: 1rem;
     }
-    
+
     .preset-content {
         padding: 12px;
         max-height: 250px;
     }
-    
+
     .preset-card {
         padding: 10px;
     }
-    
+
     .preset-card-action {
         flex-direction: column;
         gap: 8px;
         align-items: stretch;
     }
-    
+
     .preset-card-button {
         width: 100%;
         padding: 8px;
@@ -292,7 +292,7 @@ body {
     background: var(--hover-bg);
     border-color: var(--primary-color);
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
 }
 
 .toolbar-btn.active {
@@ -337,7 +337,7 @@ body {
 .document-container {
     background: white;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
     max-width: 900px;
     margin: 0 auto;
     min-height: 800px;
@@ -356,8 +356,8 @@ body {
 }
 
 .document-title-input {
-    background: rgba(255,255,255,.2);
-    border: 2px solid rgba(255,255,255,.3);
+    background: rgba(255, 255, 255, .2);
+    border: 2px solid rgba(255, 255, 255, .3);
     color: white;
     padding: 8px 16px;
     border-radius: 8px;
@@ -367,12 +367,12 @@ body {
 }
 
 .document-title-input::placeholder {
-    color: rgba(255,255,255,.7);
+    color: rgba(255, 255, 255, .7);
 }
 
 .document-title-input:focus {
-    background: rgba(255,255,255,.3);
-    border-color: rgba(255,255,255,.5);
+    background: rgba(255, 255, 255, .3);
+    border-color: rgba(255, 255, 255, .5);
     outline: none;
 }
 
@@ -401,7 +401,7 @@ body {
     flex-direction: column;
 }
 
-.editable-section > :first-child {
+.editable-section> :first-child {
     flex: 1 1 auto;
     width: 100%;
 }
@@ -425,7 +425,7 @@ body {
     background: white;
     padding: 4px;
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
 }
 
 .editable-section:hover .section-controls,
@@ -496,6 +496,29 @@ body {
     padding: 2px 4px;
     flex: 1;
     display: block;
+    outline: none;
+    /* 포커스 아웃라인 제거 */
+}
+
+/* 변수 툴바 버튼 스타일 */
+.btn-variable-tool {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    color: #5f6368;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-variable-tool:hover {
+    background-color: #f8f9fa;
+    border-color: #d1d7d3;
+    color: #2d4a3f;
+    transform: translateY(-1px);
+}
+
+.btn-variable-tool i {
+    color: #3d5a4f;
 }
 
 /* Placeholder 스타일 */
@@ -528,13 +551,14 @@ body {
 }
 
 /* 변수 스타일 */
+/* 변수 스타일 */
 .template-variable {
-    background: #ffe4b5;
+    background: #e3f2fd;
     padding: 2px 8px;
     border-radius: 4px;
-    border: 1px solid #ffa500;
+    border: 1px solid #90caf9;
     font-weight: 600;
-    color: #d2691e;
+    color: #1565c0;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -544,13 +568,13 @@ body {
     font-size: 13px;
 }
 
-.template-variable > span:first-child {
-    color: #d2691e;
+.template-variable>span:first-child {
+    color: #1565c0;
     font-weight: 600;
 }
 
 .template-variable:hover {
-    background: #ffd700;
+    background: #bbdefb;
 }
 
 .template-variable-remove {
@@ -562,9 +586,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(210, 105, 30, 0.2);
+    background: rgba(21, 101, 192, 0.1);
     border-radius: 50%;
-    color: #d2691e;
+    color: #1565c0;
     font-weight: bold;
     opacity: 0.7;
     transition: all 0.2s;
@@ -576,8 +600,8 @@ body {
 
 .template-variable-remove:hover {
     opacity: 1;
-    background: rgba(210, 105, 30, 0.3);
-    color: #c0392b;
+    background: rgba(21, 101, 192, 0.2);
+    color: #c62828;
 }
 
 /* 플레이스홀더 */
@@ -613,7 +637,7 @@ body {
     background: white;
     border-radius: 12px;
     padding: 30px;
-    box-shadow: 0 10px 40px rgba(0,0,0,.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .2);
     z-index: 1000;
     max-width: 600px;
     max-height: 80vh;
@@ -632,7 +656,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,.5);
+    background: rgba(0, 0, 0, .5);
     z-index: 999;
     display: none;
 }
@@ -697,6 +721,7 @@ body {
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -727,14 +752,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
     cursor: pointer;
     transition: all 0.3s;
 }
 
 .floating-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0,0,0,.2);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .2);
 }
 
 /* 추가 스타일 - 인라인 스타일 대체 */

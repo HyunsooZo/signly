@@ -244,7 +244,7 @@ const TemplateBuilder = {
 
             if (type === 'signature' || type === 'html') {
                 console.debug('[normalizePreviewContent] signature/html - keeping HTML as is');
-                value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, function(match) {
+                value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, function (match) {
                     return '<span class="blank-line"></span>';
                 });
                 value = value.replace(/\[[\w_]+\]/g, '<span class="blank-line"></span>');
@@ -252,10 +252,10 @@ const TemplateBuilder = {
             }
 
             const BLANK_MARKER = '___BLANK_LINE___';
-            value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>\s*<span class="template-variable-remove"[^>]*>[\s\S]*?<\/span>/g, function(match) {
+            value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>\s*<span class="template-variable-remove"[^>]*>[\s\S]*?<\/span>/g, function (match) {
                 return BLANK_MARKER;
             });
-            value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, function(match) {
+            value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, function (match) {
                 return BLANK_MARKER;
             });
             value = value.replace(/<span class="template-variable-remove"[^>]*>[\s\S]*?<\/span>/g, '');
@@ -278,12 +278,12 @@ const TemplateBuilder = {
 
         convertBracketsToVariables(html) {
             if (!html) return '';
-            return html.replace(/\[([A-Z_]+)\]/g, function(match, varName) {
+            return html.replace(/\[([A-Z_]+)\]/g, function (match, varName) {
                 const displayName = TemplateBuilder.utils.getDisplayName(varName);
                 return '<span class="template-variable" contenteditable="false" data-var-name="' + varName + '">' +
-                       '<span>' + displayName + '</span>' +
-                       '<span class="template-variable-remove"></span>' +
-                       '</span>';
+                    '<span>' + displayName + '</span>' +
+                    '<span class="template-variable-remove"></span>' +
+                    '</span>';
             });
         },
 
@@ -317,7 +317,7 @@ const TemplateBuilder = {
 
                 const removeBtn = document.createElement('span');
                 removeBtn.className = 'template-variable-remove';
-                removeBtn.onclick = function(e) {
+                removeBtn.onclick = function (e) {
                     e.stopPropagation();
                     varSpan.remove();
                     TemplateBuilder.sections.updateSectionsData();
@@ -376,6 +376,14 @@ const TemplateBuilder = {
             this.updateSectionsData();
         },
 
+        addFromPlaceholder(type, button) {
+            this.add(type);
+            const placeholder = document.querySelector('.add-section-placeholder');
+            if (placeholder) {
+                placeholder.innerHTML = '<i class="bi bi-plus-circle"></i><div>여기를 클릭하여 섹션을 추가하세요</div>';
+            }
+        },
+
         createSectionElement(type, content, metadata) {
             content = content || '';
             metadata = metadata || {};
@@ -399,7 +407,7 @@ const TemplateBuilder = {
 
             let innerHTML = '';
 
-            switch(normalizedType) {
+            switch (normalizedType) {
                 case 'text':
                     innerHTML = '<div contenteditable="true" class="section-text" data-placeholder="텍스트를 입력하세요...">' + (processedContent || '') + '</div>';
                     break;
@@ -430,24 +438,24 @@ const TemplateBuilder = {
                     } else {
                         innerHTML = '<div class="section-signature" contenteditable="true">' +
                             '<div class="signature-section">' +
-                                '<div class="signature-block signature-block--employee">' +
-                                    '<div class="signature-line">(근로자) 주소: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
-                                    '<div class="signature-line">연락처: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_PHONE</span><span class="template-variable-remove"></span></span></div>' +
-                                    '<div class="signature-line">성명: <span class="template-variable" contenteditable="false"><span>EMPLOYEE</span><span class="template-variable-remove"></span></span> (인)</div>' +
-                                '</div>' +
-                                '<div class="signature-block signature-block--employer">' +
-                                    '<div class="signature-line">(사업주) 사업체명: <span class="template-variable" contenteditable="false"><span>COMPANY_NAME</span><span class="template-variable-remove"></span></span></div>' +
-                                    '<div class="signature-line signature-line-indent">주소: <span class="template-variable" contenteditable="false"><span>EMPLOYER_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
-                                    '<div class="signature-line signature-line--seal signature-line-indent">' +
-                                        '대표자: <span class="template-variable" contenteditable="false"><span>EMPLOYER</span><span class="template-variable-remove"></span></span> ' +
-                                        '<span class="signature-stamp-label">(인)' +
-                                            '<span class="signature-stamp-wrapper"><span class="template-variable" contenteditable="false"><span>EMPLOYER_SIGNATURE_IMAGE</span><span class="template-variable-remove"></span></span></span>' +
-                                        '</span>' +
-                                    '</div>' +
-                                    '<div class="signature-line">(전화: <span class="template-variable" contenteditable="false"><span>EMPLOYER_PHONE</span><span class="template-variable-remove"></span></span>)</div>' +
-                                '</div>' +
+                            '<div class="signature-block signature-block--employee">' +
+                            '<div class="signature-line">(근로자) 주소: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="signature-line">연락처: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_PHONE</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="signature-line">성명: <span class="template-variable" contenteditable="false"><span>EMPLOYEE</span><span class="template-variable-remove"></span></span> (인)</div>' +
                             '</div>' +
-                        '</div>';
+                            '<div class="signature-block signature-block--employer">' +
+                            '<div class="signature-line">(사업주) 사업체명: <span class="template-variable" contenteditable="false"><span>COMPANY_NAME</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="signature-line signature-line-indent">주소: <span class="template-variable" contenteditable="false"><span>EMPLOYER_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="signature-line signature-line--seal signature-line-indent">' +
+                            '대표자: <span class="template-variable" contenteditable="false"><span>EMPLOYER</span><span class="template-variable-remove"></span></span> ' +
+                            '<span class="signature-stamp-label">(인)' +
+                            '<span class="signature-stamp-wrapper"><span class="template-variable" contenteditable="false"><span>EMPLOYER_SIGNATURE_IMAGE</span><span class="template-variable-remove"></span></span></span>' +
+                            '</span>' +
+                            '</div>' +
+                            '<div class="signature-line">(전화: <span class="template-variable" contenteditable="false"><span>EMPLOYER_PHONE</span><span class="template-variable-remove"></span></span>)</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
                     }
                     break;
 
@@ -464,8 +472,8 @@ const TemplateBuilder = {
 
             section.innerHTML = innerHTML + this.createSectionControls();
 
-            section.querySelectorAll('.template-variable-remove').forEach(function(btn) {
-                btn.onclick = function(e) {
+            section.querySelectorAll('.template-variable-remove').forEach(function (btn) {
+                btn.onclick = function (e) {
                     e.stopPropagation();
                     btn.parentElement.remove();
                     TemplateBuilder.sections.updateSectionsData();
@@ -478,30 +486,30 @@ const TemplateBuilder = {
         createSectionControls() {
             return '<div class="section-controls">' +
                 '<button class="section-control-btn" onclick="TemplateBuilder.sections.moveSection(this, \'up\')" title="위로">' +
-                    '<i class="bi bi-arrow-up"></i>' +
+                '<i class="bi bi-arrow-up"></i>' +
                 '</button>' +
                 '<button class="section-control-btn" onclick="TemplateBuilder.sections.moveSection(this, \'down\')" title="아래로">' +
-                    '<i class="bi bi-arrow-down"></i>' +
+                '<i class="bi bi-arrow-down"></i>' +
                 '</button>' +
                 '<button class="section-control-btn" onclick="TemplateBuilder.sections.duplicateSection(this)" title="복사">' +
-                    '<i class="bi bi-files"></i>' +
+                '<i class="bi bi-files"></i>' +
                 '</button>' +
                 '<button class="section-control-btn" onclick="TemplateBuilder.sections.deleteSection(this)" title="삭제">' +
-                    '<i class="bi bi-trash"></i>' +
+                '<i class="bi bi-trash"></i>' +
                 '</button>' +
-            '</div>';
+                '</div>';
         },
 
         createPlaceholder() {
             const placeholder = document.createElement('div');
             placeholder.className = 'add-section-placeholder';
-            placeholder.onclick = function() { TemplateBuilder.ui.showAddSectionMenu(this); };
+            placeholder.onclick = function () { TemplateBuilder.ui.showAddSectionMenu(this); };
             placeholder.innerHTML = '<i class="bi bi-plus-circle"></i><div>여기를 클릭하여 섹션을 추가하세요</div>';
             return placeholder;
         },
 
         setActiveSection(section) {
-            document.querySelectorAll('.editable-section').forEach(function(s) { s.classList.remove('active'); });
+            document.querySelectorAll('.editable-section').forEach(function (s) { s.classList.remove('active'); });
             section.classList.add('active');
             TemplateBuilder.state.activeElement = section.querySelector('[contenteditable="true"], .html-editor');
         },
@@ -527,7 +535,7 @@ const TemplateBuilder = {
         deleteSection(button) {
             showConfirmModal(
                 '이 섹션을 삭제하시겠습니까?',
-                function() {
+                function () {
                     const section = button.closest('.editable-section');
                     section.remove();
                     TemplateBuilder.sections.updateSectionsData();
@@ -568,7 +576,7 @@ const TemplateBuilder = {
 
             let clauseIndex = 0;
 
-            documentBody.querySelectorAll('.editable-section').forEach(function(section, index) {
+            documentBody.querySelectorAll('.editable-section').forEach(function (section, index) {
                 const existingMetadata = TemplateBuilder.sections.getSectionMetadata(section);
                 const type = TemplateBuilder.dataProcessor.normalizeFrontendType(section.dataset.type, existingMetadata);
                 const metadata = TemplateBuilder.dataProcessor.ensureMetadataForType(type, existingMetadata);
@@ -628,12 +636,12 @@ const TemplateBuilder = {
                         documentBody.innerHTML = '';
 
                         TemplateBuilder.state.clauseCounter = 0;
-                        sectionsData.slice().sort(function(a, b) {
-                                const orderA = typeof a.order === 'number' ? a.order : parseInt(a.order, 10) || 0;
-                                const orderB = typeof b.order === 'number' ? b.order : parseInt(b.order, 10) || 0;
-                                return orderA - orderB;
-                            })
-                            .forEach(function(sectionData) {
+                        sectionsData.slice().sort(function (a, b) {
+                            const orderA = typeof a.order === 'number' ? a.order : parseInt(a.order, 10) || 0;
+                            const orderB = typeof b.order === 'number' ? b.order : parseInt(b.order, 10) || 0;
+                            return orderA - orderB;
+                        })
+                            .forEach(function (sectionData) {
                                 if (!sectionData) {
                                     return;
                                 }
@@ -667,7 +675,7 @@ const TemplateBuilder = {
         closeVariableModal() {
             const modal = document.getElementById('variableModal');
             const backdrop = document.getElementById('modalBackdrop');
-            
+
             if (modal) {
                 modal.classList.remove('show');
             }
@@ -679,27 +687,27 @@ const TemplateBuilder = {
         showAddSectionMenu(placeholder) {
             const menu = '<div class="add-section-menu">' +
                 '<button class="toolbar-btn toolbar-btn-sm" onclick="TemplateBuilder.sections.addFromPlaceholder(\'text\', this)">' +
-                    '<i class="bi bi-text-left"></i> 텍스트' +
+                '<i class="bi bi-text-left"></i> 텍스트' +
                 '</button>' +
                 '<button class="toolbar-btn toolbar-btn-sm" onclick="TemplateBuilder.sections.addFromPlaceholder(\'title\', this)">' +
-                    '<i class="bi bi-type"></i> 타이틀' +
+                '<i class="bi bi-type"></i> 타이틀' +
                 '</button>' +
                 '<button class="toolbar-btn toolbar-btn-sm" onclick="TemplateBuilder.sections.addFromPlaceholder(\'clause\', this)">' +
-                    '<i class="bi bi-list-ol"></i> 조항' +
+                '<i class="bi bi-list-ol"></i> 조항' +
                 '</button>' +
                 '<button class="toolbar-btn toolbar-btn-sm" onclick="TemplateBuilder.sections.addFromPlaceholder(\'dotted\', this)">' +
-                    '<i class="bi bi-border-style"></i> 점선' +
+                '<i class="bi bi-border-style"></i> 점선' +
                 '</button>' +
                 '<button class="toolbar-btn toolbar-btn-sm" onclick="TemplateBuilder.sections.addFromPlaceholder(\'footer\', this)">' +
-                    '<i class="bi bi-text-center"></i> 꼬릿말' +
+                '<i class="bi bi-text-center"></i> 꼬릿말' +
                 '</button>' +
                 '<button class="toolbar-btn toolbar-btn-sm" onclick="TemplateBuilder.sections.addFromPlaceholder(\'signature\', this)">' +
-                    '<i class="bi bi-pen"></i> 서명란' +
+                '<i class="bi bi-pen"></i> 서명란' +
                 '</button>' +
                 '<button class="toolbar-btn toolbar-btn-sm" onclick="TemplateBuilder.sections.addFromPlaceholder(\'html\', this)">' +
-                    '<i class="bi bi-code-slash"></i> HTML' +
+                '<i class="bi bi-code-slash"></i> HTML' +
                 '</button>' +
-            '</div>';
+                '</div>';
             placeholder.innerHTML = menu;
         }
     },
@@ -721,10 +729,10 @@ const TemplateBuilder = {
         display(presets) {
             const loading = document.getElementById('presetLoading');
             const grid = document.getElementById('presetGrid');
-            
+
             loading.style.display = 'none';
             grid.style.display = 'grid';
-            
+
             if (presets.length === 0) {
                 grid.innerHTML = '<div class="preset-empty">' +
                     '<i class="bi bi-inbox"></i>' +
@@ -732,14 +740,14 @@ const TemplateBuilder = {
                     '</div>';
                 return;
             }
-            
+
             grid.innerHTML = presets.map(preset => this.createCard(preset)).join('');
         },
 
         displayError() {
             const loading = document.getElementById('presetLoading');
             const grid = document.getElementById('presetGrid');
-            
+
             loading.style.display = 'none';
             grid.style.display = 'grid';
             grid.innerHTML = '<div class="preset-empty">' +
@@ -751,21 +759,21 @@ const TemplateBuilder = {
         createCard(preset) {
             return '<div class="preset-card" data-preset-id="' + preset.id + '">' +
                 '<div class="preset-card-header">' +
-                    '<div class="preset-card-icon">' +
-                        '<i class="bi bi-file-text"></i>' +
-                    '</div>' +
-                    '<h6 class="preset-card-title">' + preset.name + '</h6>' +
+                '<div class="preset-card-icon">' +
+                '<i class="bi bi-file-text"></i>' +
+                '</div>' +
+                '<h6 class="preset-card-title">' + preset.name + '</h6>' +
                 '</div>' +
                 '<div class="preset-card-description">' +
-                    '미리 만들어진 템플릿을 기반으로 빠르게 시작할 수 있습니다' +
+                '미리 만들어진 템플릿을 기반으로 빠르게 시작할 수 있습니다' +
                 '</div>' +
                 '<div class="preset-card-action">' +
-                    '<span class="preset-card-preview">클릭하여 미리보기</span>' +
-                    '<button class="preset-card-button" onclick="TemplateBuilder.presets.loadTemplate(\'' + preset.id + '\', \'' + preset.name + '\')">' +
-                        '선택하여 시작하기' +
-                    '</button>' +
+                '<span class="preset-card-preview">클릭하여 미리보기</span>' +
+                '<button class="preset-card-button" onclick="TemplateBuilder.presets.loadTemplate(\'' + preset.id + '\', \'' + preset.name + '\')">' +
+                '선택하여 시작하기' +
+                '</button>' +
                 '</div>' +
-            '</div>';
+                '</div>';
         },
 
         loadTemplate(presetId, presetName) {
@@ -773,7 +781,7 @@ const TemplateBuilder = {
             if (TemplateBuilder.state.sections.length > 0 || document.getElementById('templateTitle').value.trim()) {
                 showConfirmModal(
                     '현재 작업 중인 내용이 있습니다. 프리셋 템플릿을 로드하면 현재 내용이 초기화됩니다. 계속하시겠습니까?',
-                    function() {
+                    function () {
                         TemplateBuilder.presets.performLoad(presetId, presetName);
                     },
                     '로드',
@@ -805,38 +813,38 @@ const TemplateBuilder = {
         loadSections(presetSections, presetName) {
             // clauseCounter 초기화
             TemplateBuilder.state.clauseCounter = 0;
-            
+
             // 현재 섹션들 모두 제거
             const documentBody = document.getElementById('documentBody');
             documentBody.innerHTML = '';
-            
+
             // 템플릿 제목 설정
             document.getElementById('templateTitle').value = presetName;
-            
+
             // 프리셋 섹션들을 빌더에 추가
-            presetSections.forEach(function(sectionData) {
+            presetSections.forEach(function (sectionData) {
                 const metadata = TemplateBuilder.dataProcessor.coerceMetadata(sectionData.metadata);
-                
+
                 // 변수들을 템플릿 변수 형식으로 변환
                 let content = sectionData.content;
                 if (sectionData.type !== 'html' && sectionData.type !== 'signature') {
                     content = TemplateBuilder.variables.convertBracketsToVariables(content);
                 }
-                
+
                 const section = TemplateBuilder.sections.createSectionElement(sectionData.type, content, metadata);
                 section.dataset.id = sectionData.sectionId || ('section-' + Date.now() + '-' + Math.random());
                 documentBody.appendChild(section);
             });
-            
+
             // 플레이스홀더 추가
             documentBody.appendChild(TemplateBuilder.sections.createPlaceholder());
-            
+
             // 섹션 데이터 업데이트
             TemplateBuilder.sections.updateSectionsData();
-            
+
             // 성공 메시지 표시
             showAlertModal('프리셋 템플릿이 성공적으로 로드되었습니다. 필요에 맞게 수정하여 사용하세요.');
-            
+
             // 프리셋 섹션 접기
             TemplateBuilder.presets.collapseSection();
         },
@@ -844,7 +852,7 @@ const TemplateBuilder = {
         toggleSection() {
             const content = document.getElementById('presetContent');
             const icon = document.getElementById('presetToggleIcon');
-            
+
             if (content.classList.contains('collapsed')) {
                 content.classList.remove('collapsed');
                 icon.className = 'bi bi-chevron-up';
@@ -871,9 +879,9 @@ const TemplateBuilder = {
             let bodyContent = '';
             let clauseIndex = 0;
 
-            previewSections.forEach(function(section) {
+            previewSections.forEach(function (section) {
                 let rawContent = TemplateBuilder.dataProcessor.normalizePreviewContent(section.type, section.content);
-                const codePoints = rawContent ? Array.from(rawContent).map(function(ch) { return ch.charCodeAt(0).toString(16); }) : [];
+                const codePoints = rawContent ? Array.from(rawContent).map(function (ch) { return ch.charCodeAt(0).toString(16); }) : [];
                 console.debug('[TemplateEditor] rendering section type:', section.type, 'content length:', rawContent ? rawContent.length : 0, 'value:', JSON.stringify(rawContent), 'codes:', codePoints);
                 switch (section.type) {
                     case 'html':
@@ -919,18 +927,18 @@ const TemplateBuilder = {
             console.debug('[TemplateEditor] body content snippet:', bodyContent.substring(0, 500));
 
             return '<!DOCTYPE html>' +
-            '<html lang="ko">' +
-            '<head>' +
+                '<html lang="ko">' +
+                '<head>' +
                 '<meta charset="UTF-8">' +
                 '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
                 '<title>' + title + '</title>' +
                 '<link rel="stylesheet" href="/css/contract-template-base.css">' +
                 '<link rel="stylesheet" href="/css/contract-common.css">' +
-            '</head>' +
-            '<body>' +
+                '</head>' +
+                '<body>' +
                 bodyContent +
-            '</body>' +
-            '</html>';
+                '</body>' +
+                '</html>';
         },
 
         show() {
@@ -982,7 +990,7 @@ const TemplateBuilder = {
 
             document.getElementById('formTitle').value = title;
 
-            const serializedSections = TemplateBuilder.state.sections.map(function(section, index) {
+            const serializedSections = TemplateBuilder.state.sections.map(function (section, index) {
                 return {
                     sectionId: section.sectionId,
                     type: TemplateBuilder.dataProcessor.mapFrontendTypeToServer(section.type, section.metadata),
@@ -1011,14 +1019,14 @@ const TemplateBuilder = {
 
     // 이벤트 리스너 설정
     setupEventListeners() {
-        document.getElementById('documentBody').addEventListener('click', function(e) {
+        document.getElementById('documentBody').addEventListener('click', function (e) {
             const section = e.target.closest('.editable-section');
             if (section) {
                 TemplateBuilder.sections.setActiveSection(section);
             }
         });
 
-        document.getElementById('documentBody').addEventListener('input', function(e) {
+        document.getElementById('documentBody').addEventListener('input', function (e) {
             if (e.target.contentEditable === 'true') {
                 TemplateBuilder.sections.updateSectionContent(e.target);
             }
@@ -1027,7 +1035,7 @@ const TemplateBuilder = {
         document.getElementById('modalBackdrop').addEventListener('click', TemplateBuilder.ui.closeVariableModal);
 
         // HTML 에디터 실시간 미리보기
-        document.addEventListener('input', function(e) {
+        document.addEventListener('input', function (e) {
             if (e.target.classList.contains('html-editor')) {
                 const preview = e.target.parentElement.querySelector('.html-preview');
                 if (preview) {
@@ -1037,7 +1045,7 @@ const TemplateBuilder = {
         });
 
         // 키보드 단축키
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
                 TemplateBuilder.save.perform();
@@ -1063,11 +1071,11 @@ const TemplateBuilder = {
 
         // 전역 API 노출
         window.SignlyTemplateEditor = {
-            getSectionsSnapshot: function() {
+            getSectionsSnapshot: function () {
                 TemplateBuilder.sections.updateSectionsData();
                 return JSON.parse(JSON.stringify(TemplateBuilder.state.sections));
             },
-            getPreviewHtml: function() {
+            getPreviewHtml: function () {
                 TemplateBuilder.sections.updateSectionsData();
                 return TemplateBuilder.preview.generate();
             }
@@ -1086,12 +1094,12 @@ const TemplateBuilder = {
 };
 
 // DOM 로드 시 초기화
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     TemplateBuilder.init();
 });
 
 // 섹션 추가 함수 추가
-TemplateBuilder.sections.addFromPlaceholder = function(type, button) {
+TemplateBuilder.sections.addFromPlaceholder = function (type, button) {
     const placeholder = button.closest('.add-section-placeholder');
     const section = this.createSectionElement(type);
     placeholder.insertAdjacentElement('beforebegin', section);
