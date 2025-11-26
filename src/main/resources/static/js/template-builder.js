@@ -273,7 +273,7 @@ const TemplateBuilder = {
     variables: {
         convertVariablesToBrackets(html) {
             if (!html) return '';
-            return html.replace(/<span class="template-variable"[^>]*data-var-name="([^"]+)"[^>]*>[\s\S]*?<\/span>/g, '[$1]');
+            return html.replace(/<span class="template-variable"[^>]*data-var-name="([^"]+)"[^>]*>(?:<span[^>]*>[^<]*<\/span>)*<\/span>/g, '[$1]');
         },
 
         convertBracketsToVariables(html) {
@@ -646,7 +646,12 @@ const TemplateBuilder = {
                                     return;
                                 }
                                 const metadata = TemplateBuilder.dataProcessor.coerceMetadata(sectionData.metadata);
-                                const section = TemplateBuilder.sections.createSectionElement(sectionData.type, sectionData.content, metadata);
+                                // 커스텀 템플릿의 [VARIABLE_NAME]을 template-variable 형식으로 변환
+                                let content = sectionData.content;
+                                if (sectionData.type !== 'html' && sectionData.type !== 'signature') {
+                                    content = TemplateBuilder.variables.convertBracketsToVariables(content);
+                                }
+                                const section = TemplateBuilder.sections.createSectionElement(sectionData.type, content, metadata);
                                 section.dataset.id = sectionData.sectionId || ('section-' + Date.now());
                                 documentBody.appendChild(section);
                             });
@@ -995,7 +1000,7 @@ const TemplateBuilder = {
                     sectionId: section.sectionId,
                     type: TemplateBuilder.dataProcessor.mapFrontendTypeToServer(section.type, section.metadata),
                     order: index,
-                    content: section.content,
+                    content: TemplateBuilder.variables.convertVariablesToBrackets(section.content),
                     metadata: section.metadata || {}
                 };
             });
