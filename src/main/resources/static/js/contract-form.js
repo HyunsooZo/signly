@@ -154,6 +154,9 @@ class ContractForm {
         // Form submit validation
         this.setupFormValidation();
         
+        // 실시간 유효성 검사 설정
+        this.setupRealtimeValidation();
+
         // 초기화 후 자동 입력 적용
         setTimeout(() => {
             this.applyOwnerInfoToNormalForm();
@@ -167,6 +170,104 @@ class ContractForm {
                 this.handleFormSubmit(event, form);
             });
         });
+    }
+
+    setupRealtimeValidation() {
+        // 실시간 검증할 필드들 정의
+        const validationFields = [
+            { id: 'templateTitleHidden', name: '계약서 제목', type: 'text' },
+            { id: 'templateContentHidden', name: '계약서 내용', type: 'content' },
+            { id: 'templateFirstPartyName', name: '갑(사업주) 이름', type: 'text' },
+            { id: 'templateFirstPartyEmail', name: '갑(사업주) 이메일', type: 'email' },
+            { id: 'templateSecondPartyName', name: '을(근로자) 이름', type: 'text' },
+            { id: 'templateSecondPartyEmail', name: '을(근로자) 이메일', type: 'email' }
+        ];
+
+        validationFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            if (element) {
+                // input 이벤트 (실시간)
+                element.addEventListener('input', () => {
+                    this.validateFieldRealtime(element, field);
+                });
+                
+                // blur 이벤트 (포커스 아웃)
+                element.addEventListener('blur', () => {
+                    this.validateFieldRealtime(element, field);
+                });
+                
+                // change 이벤트 (값 변경)
+                element.addEventListener('change', () => {
+                    this.validateFieldRealtime(element, field);
+                });
+            }
+        });
+
+        // 템플릿 모드에서의 추가 검증
+        this.setupTemplateModeValidation();
+    }
+
+    validateFieldRealtime(element, fieldConfig) {
+        const validationResult = this.validateSingleField(element, fieldConfig);
+        
+        if (!validationResult.isValid) {
+            // 실시간 검증 시에는 자동 포커스 방지, 애니메이션만 적용
+            showFieldError(element, validationResult.error, { 
+                autoFocus: false, 
+                animate: true 
+            });
+        } else {
+            clearFieldError(element, true);
+        }
+        
+        return validationResult.isValid;
+    }
+
+    setupTemplateModeValidation() {
+        // 템플릿 콘텐츠 변경 감지
+        if (this.contractContentTextarea) {
+            this.contractContentTextarea.addEventListener('input', () => {
+                this.updateTemplateContentHidden();
+                const hiddenField = document.getElementById('templateContentHidden');
+                if (hiddenField) {
+                    this.validateFieldRealtime(hiddenField, {
+                        id: 'templateContentHidden',
+                        name: '계약서 내용',
+                        type: 'content'
+                    });
+                }
+            });
+        }
+
+        // 템플릿 제목 변경 감지
+        if (this.templateTitleInput) {
+            this.templateTitleInput.addEventListener('input', () => {
+                this.updateTemplateTitleHidden();
+                const hiddenField = document.getElementById('templateTitleHidden');
+                if (hiddenField) {
+                    this.validateFieldRealtime(hiddenField, {
+                        id: 'templateTitleHidden',
+                        name: '계약서 제목',
+                        type: 'text'
+                    });
+                }
+            });
+        }
+    }
+
+    updateTemplateContentHidden() {
+        if (this.templateHiddenContent) {
+            // 템플릿 모드에서는 현재 템플릿 내용을 hidden 필드에 업데이트
+            if (this.templateLayout && this.templateLayout.style.display !== 'none') {
+                this.updateTemplateContent();
+            }
+        }
+    }
+
+    updateTemplateTitleHidden() {
+        if (this.templateTitleInput && this.templateHiddenTitle) {
+            this.templateHiddenTitle.value = this.templateTitleInput.value.trim();
+        }
     }
 
     checkAutoLoad() {
@@ -959,7 +1060,7 @@ class ContractForm {
     async loadPresetById(presetId) {
         try {
             const response = await fetch('/templates/presets/' + presetId, {
-                headers: {'Accept': 'application/json'}
+                headers: { 'Accept': 'application/json' }
             });
 
             if (!response.ok) {
@@ -1334,12 +1435,126 @@ class ContractForm {
 
         // 검증 통과
         input.classList.add('is-valid');
-return true;
+        return true;
+    }
+
+    validateAllFields() {
+        let isValid = true;
+        let firstErrorField = null;
+        let errorMessage = '';
+        const errorFields = [];
+
+        // 검증할 필드 목록 (우선순위 순)
+        const validationFields = [
+            { id: 'templateTitleHidden', name: '계약서 제목', type: 'text', required: true },
+            { id: 'templateContentHidden', name: '계약서 내용', type: 'content', required: true },
+            { id: 'templateFirstPartyName', name: '갑(사업주) 이름', type: 'text', required: true },
+            { id: 'templateFirstPartyEmail', name: '갑(사업주) 이메일', type: 'email', required: true },
+            { id: 'templateSecondPartyName', name: '을(근로자) 이름', type: 'text', required: true },
+            { id: 'templateSecondPartyEmail', name: '을(근로자) 이메일', type: 'email', required: true }
+        ];
+
+        // 각 필드 검증
+        for (const fieldConfig of validationFields) {
+            const element = document.getElementById(fieldConfig.id);
+            if (!element) continue;
+
+            const validationResult = this.validateSingleField(element, fieldConfig);
+            
+            if (!validationResult.isValid) {
+                isValid = false;
+                errorFields.push({
+                    element,
+                    name: fieldConfig.name,
+                    error: validationResult.error
+                });
+                
+                if (!firstErrorField) {
+                    firstErrorField = element;
+                    errorMessage = validationResult.error;
+                }
+            } else {
+                // 유효한 필드는 에러 표시 제거
+                clearFieldError(element);
+            }
+        }
+
+        // 이메일 중복 검사
+        const firstEmail = document.getElementById('templateFirstPartyEmail')?.value?.trim();
+        const secondEmail = document.getElementById('templateSecondPartyEmail')?.value?.trim();
+        
+        if (firstEmail && secondEmail && firstEmail === secondEmail) {
+            isValid = false;
+            const secondEmailField = document.getElementById('templateSecondPartyEmail');
+            if (!firstErrorField) {
+                firstErrorField = secondEmailField;
+                errorMessage = '갑과 을의 이메일 주소는 달라야 합니다.';
+            }
+            showFieldError(secondEmailField, '갑과 을의 이메일 주소는 달라야 합니다.');
+        }
+
+        return {
+            isValid,
+            firstErrorField,
+            errorMessage,
+            errorFields
+        };
+    }
+
+    validateSingleField(element, fieldConfig) {
+        const value = element.value?.trim();
+        
+        // 필수값 검사
+        if (fieldConfig.required && !value) {
+            return {
+                isValid: false,
+                error: `${fieldConfig.name}은(는) 필수 항목입니다.`
+            };
+        }
+
+        // 타입별 검사
+        if (value) {
+            switch (fieldConfig.type) {
+                case 'email':
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(value)) {
+                        return {
+                            isValid: false,
+                            error: `${fieldConfig.name}은(는) 올바른 이메일 형식이어야 합니다.`
+                        };
+                    }
+                    break;
+                    
+                case 'text':
+                    if (value.length > 100) {
+                        return {
+                            isValid: false,
+                            error: `${fieldConfig.name}은(는) 100자를 초과할 수 없습니다.`
+                        };
+                    }
+                    break;
+                    
+                case 'content':
+                    if (value.length > 100000) {
+                        return {
+                            isValid: false,
+                            error: `${fieldConfig.name}은(는) 100,000자를 초과할 수 없습니다.`
+                        };
+                    }
+                    break;
+            }
+        }
+
+        return {
+            isValid: true,
+            error: null
+        };
     }
 
     validateHiddenFields() {
         let isValid = true;
         let firstErrorField = null;
+        let firstVisibleElement = null;
 
         // 필수 hidden 필드들 검증
         const requiredHiddenFields = [
@@ -1358,11 +1573,55 @@ return true;
                 if (!value) {
                     isValid = false;
                     if (!firstErrorField) {
-                        firstErrorField = { element, name: field.name };
+                        firstErrorField = { element, name: field.name, id: field.id };
                     }
-                    
+
                     // 에러 표시
                     showFieldError(element, `${field.name}은(는) 필수입니다.`);
+
+                    // 숨겨진 필드를 실제 보이는 필드로 매핑하여 포커스
+                    if (!firstVisibleElement) {
+                        let visibleElement = null;
+
+                        // 필드별 매핑 로직
+                        switch (field.id) {
+                            case 'templateSecondPartyEmail':
+                                // 근로자 이메일은 실제 보이는 input 필드
+                                visibleElement = document.getElementById('templateSecondPartyEmail');
+                                break;
+
+                            case 'templateFirstPartyName':
+                            case 'templateFirstPartyEmail':
+                            case 'templateSecondPartyName':
+                                // 변수 입력 필드들 - HTML 컨테이너 내에서 해당 변수 찾기
+                                const varName = field.id.replace('template', '').replace('Hidden', '');
+                                visibleElement = document.querySelector(`[data-var-name="${varName}"]`);
+                                if (!visibleElement) {
+                                    // 대체: 템플릿 HTML 컨테이너 내에서 name 속성으로 찾기
+                                    visibleElement = this.templateHtmlContainer?.querySelector(`[name="${varName}"]`);
+                                }
+                                break;
+
+                            case 'templateTitleHidden':
+                                // 제목은 현재 수정 불가능할 수 있음 - 템플릿 레이아웃 제목 영역
+                                visibleElement = document.getElementById('templateLayoutTitle');
+                                break;
+
+                            case 'templateContentHidden':
+                                // 커스텀 컨텐츠 에디터
+                                visibleElement = document.getElementById('customContentPreview');
+                                if (!visibleElement || visibleElement.offsetParent === null) {
+                                    // 템플릿 HTML 컨테이너가 보이는 경우
+                                    visibleElement = this.templateHtmlContainer;
+                                }
+                                break;
+                        }
+
+                        // 포커스 가능한 visible 요소 저장
+                        if (visibleElement && visibleElement.offsetParent !== null) {
+                            firstVisibleElement = visibleElement;
+                        }
+                    }
                 } else {
                     // 에러 제거
                     clearFieldError(element);
@@ -1373,8 +1632,22 @@ return true;
         // 첫 번째 에러 필드로 포커스 및 스크롤
         if (!isValid && firstErrorField) {
             setTimeout(() => {
+                // 보이는 요소로 포커스 및 스크롤
+                if (firstVisibleElement) {
+                    // 스크롤
+                    firstVisibleElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    // 포커스 (입력 가능한 요소인 경우)
+                    if (typeof firstVisibleElement.focus === 'function') {
+                        setTimeout(() => {
+                            firstVisibleElement.focus();
+                        }, 300);
+                    }
+                }
+
+                // 에러 메시지 표시
                 showAlertModal(`${firstErrorField.name}은(는) 필수 항목입니다. 입력해주세요.`);
-            }, 200);
+            }, 100);
         }
 
         return isValid;
@@ -1438,7 +1711,7 @@ return true;
         if (!this.ownerInfo) {
             return;
         }
-        
+
         // 일반 폼에 사업주 정보 자동 입력
         if (this.firstPartyNameInput && !this.firstPartyNameInput.value && this.ownerInfo.name) {
             this.firstPartyNameInput.value = this.ownerInfo.name;
@@ -1832,10 +2105,24 @@ return true;
     }
 
     handleFormSubmit(event, form) {
-        // Hidden 필드 유효성 검사 (공통)
-        if (!this.validateHiddenFields()) {
+        // 전체 필드 유효성 검사 (프론트엔드 선 검증)
+        const validationResult = this.validateAllFields();
+        if (!validationResult.isValid) {
             event.preventDefault();
             event.stopPropagation();
+            
+            // 첫 번째 에러 필드로 포커스
+            if (validationResult.firstErrorField) {
+                setTimeout(() => {
+                    validationResult.firstErrorField.focus();
+                    validationResult.firstErrorField.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }, 100);
+            }
+            
+            showAlertModal(validationResult.errorMessage || '입력값을 확인해주세요.');
             return false;
         }
 
@@ -1851,6 +2138,20 @@ return true;
 
             // 템플릿 콘텐츠 업데이트
             this.updateTemplateContent();
+
+            // 업데이트 후 다시 한번 content 확인
+            if (this.templateHiddenContent && !this.templateHiddenContent.value.trim()) {
+                event.preventDefault();
+                event.stopPropagation();
+                showAlertModal('계약서 내용이 비어있습니다. 템플릿 변수를 입력해주세요.');
+                // 첫 번째 빈 변수 입력 필드로 포커스
+                const firstEmptyInput = this.templateHtmlContainer?.querySelector('input[data-variable-name]');
+                if (firstEmptyInput) {
+                    firstEmptyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => firstEmptyInput.focus(), 300);
+                }
+                return false;
+            }
 
             // normalLayout의 필드 비활성화
             if (this.normalLayout) {

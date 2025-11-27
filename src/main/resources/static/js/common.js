@@ -197,12 +197,32 @@ function validateField(field) {
 /**
  * 필드 에러 표시
  */
-function showFieldError(field, message) {
-    field.classList.add('is-invalid');
+function showFieldError(field, message, options = {}) {
+    const { 
+        autoFocus = true, 
+        animate = true, 
+        immediate = false 
+    } = options;
 
-    // 빨간색 테두리 강화를 위한 추가 클래스
+    field.classList.add('is-invalid');
+    
+    // 빨간색 테두리 강화를 위한 추가 스타일
     field.style.borderColor = '#dc3545';
     field.style.boxShadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.25)';
+    
+    // 애니메이션 효과
+    if (animate && !immediate) {
+        field.style.transition = 'all 0.3s ease-in-out';
+        field.style.transform = 'translateX(-2px)';
+        
+        // 흔들림 효과
+        setTimeout(() => {
+            field.style.transform = 'translateX(2px)';
+            setTimeout(() => {
+                field.style.transform = 'translateX(0)';
+            }, 50);
+        }, 50);
+    }
 
     let errorElement = field.parentNode.querySelector('.invalid-feedback');
     if (!errorElement) {
@@ -211,31 +231,64 @@ function showFieldError(field, message) {
         errorElement.style.color = '#dc3545';
         errorElement.style.fontSize = '0.875rem';
         errorElement.style.marginTop = '0.25rem';
+        errorElement.style.fontWeight = '500';
+        
+        // 애니메이션 효과
+        if (animate) {
+            errorElement.style.opacity = '0';
+            errorElement.style.transform = 'translateY(-10px)';
+            errorElement.style.transition = 'all 0.3s ease-in-out';
+        }
+        
         field.parentNode.appendChild(errorElement);
+        
+        // 페이드인 애니메이션
+        if (animate) {
+            setTimeout(() => {
+                errorElement.style.opacity = '1';
+                errorElement.style.transform = 'translateY(0)';
+            }, 10);
+        }
     }
 
     errorElement.textContent = message;
-
+    
     // 포커스 이동 및 스크롤
-    setTimeout(() => {
-        field.focus();
-        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
+    if (autoFocus) {
+        setTimeout(() => {
+            field.focus();
+            field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, immediate ? 0 : 100);
+    }
 }
 
 /**
  * 필드 에러 제거
  */
-function clearFieldError(field) {
+function clearFieldError(field, animate = true) {
     field.classList.remove('is-invalid');
-
+    
     // 추가된 스타일 제거
     field.style.borderColor = '';
     field.style.boxShadow = '';
+    field.style.transform = '';
+    field.style.transition = '';
 
     const errorElement = field.parentNode.querySelector('.invalid-feedback');
     if (errorElement) {
-        errorElement.remove();
+        if (animate) {
+            // 페이드아웃 애니메이션
+            errorElement.style.opacity = '0';
+            errorElement.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                if (errorElement.parentNode) {
+                    errorElement.remove();
+                }
+            }, 300);
+        } else {
+            errorElement.remove();
+        }
     }
 }
 
