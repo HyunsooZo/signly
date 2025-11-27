@@ -35,11 +35,11 @@ class ContractForm {
         // Other elements
         this.presetSelect = document.getElementById('presetSelect');
         this.expiresAtInput = document.getElementById('expiresAt');
-        this.firstPartyNameInput = document.getElementById('firstPartyName');
-        this.firstPartyEmailInput = document.getElementById('firstPartyEmail');
-        this.firstPartyAddressInput = document.getElementById('firstPartyAddress');
-        this.secondPartyNameInput = document.getElementById('secondPartyName');
-        this.secondPartyEmailInput = document.getElementById('secondPartyEmail');
+        this.firstPartyNameInput = document.getElementById('firstPartyName') || document.getElementById('templateFirstPartyName');
+        this.firstPartyEmailInput = document.getElementById('firstPartyEmail') || document.getElementById('templateFirstPartyEmail');
+        this.firstPartyAddressInput = document.getElementById('firstPartyAddress') || document.getElementById('templateFirstPartyAddress');
+        this.secondPartyNameInput = document.getElementById('secondPartyName') || document.getElementById('templateSecondPartyName');
+        this.secondPartyEmailInput = document.getElementById('secondPartyEmail') || document.getElementById('templateSecondPartyEmail');
         this.secondPartyAddressInput = document.getElementById('secondPartyAddress');
 
         // ===== STATE =====
@@ -153,6 +153,11 @@ class ContractForm {
 
         // Form submit validation
         this.setupFormValidation();
+        
+        // 초기화 후 자동 입력 적용
+        setTimeout(() => {
+            this.applyOwnerInfoToNormalForm();
+        }, 100);
     }
 
     setupFormValidation() {
@@ -1329,40 +1334,50 @@ class ContractForm {
 
         // 검증 통과
         input.classList.add('is-valid');
-        return true;
+return true;
     }
 
-    showValidationError(input, message) {
-        input.classList.add('is-invalid');
+    validateHiddenFields() {
+        let isValid = true;
+        let firstErrorField = null;
 
-        const feedback = document.createElement('div');
-        feedback.className = 'invalid-feedback';
-        feedback.textContent = message;
+        // 필수 hidden 필드들 검증
+        const requiredHiddenFields = [
+            { id: 'templateFirstPartyName', name: '갑(사업주) 이름' },
+            { id: 'templateFirstPartyEmail', name: '갑(사업주) 이메일' },
+            { id: 'templateSecondPartyName', name: '을(근로자) 이름' },
+            { id: 'templateSecondPartyEmail', name: '을(근로자) 이메일' },
+            { id: 'templateTitleHidden', name: '계약서 제목' },
+            { id: 'templateContentHidden', name: '계약서 내용' }
+        ];
 
-        input.parentElement.appendChild(feedback);
-    }
-
-    validateAllTemplateVariables() {
-        const variableInputs = document.querySelectorAll('[data-variable-name][data-variable-type]');
-        let allValid = true;
-
-        variableInputs.forEach(input => {
-            const varName = input.getAttribute('data-variable-name');
-            const varType = input.getAttribute('data-variable-type');
-            const isRequired = input.hasAttribute('required');
-
-            const varDef = {
-                label: input.parentElement.querySelector('label')?.textContent.replace('*', '').trim() || varName,
-                type: varType,
-                required: isRequired
-            };
-
-            if (!this.validateVariableInput(input, varDef)) {
-                allValid = false;
+        requiredHiddenFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            if (element) {
+                const value = element.value?.trim();
+                if (!value) {
+                    isValid = false;
+                    if (!firstErrorField) {
+                        firstErrorField = { element, name: field.name };
+                    }
+                    
+                    // 에러 표시
+                    showFieldError(element, `${field.name}은(는) 필수입니다.`);
+                } else {
+                    // 에러 제거
+                    clearFieldError(element);
+                }
             }
         });
 
-        return allValid;
+        // 첫 번째 에러 필드로 포커스 및 스크롤
+        if (!isValid && firstErrorField) {
+            setTimeout(() => {
+                showAlertModal(`${firstErrorField.name}은(는) 필수 항목입니다. 입력해주세요.`);
+            }, 200);
+        }
+
+        return isValid;
     }
 
     // ========================================
@@ -1423,15 +1438,31 @@ class ContractForm {
         if (!this.ownerInfo) {
             return;
         }
+        
         // 일반 폼에 사업주 정보 자동 입력
         if (this.firstPartyNameInput && !this.firstPartyNameInput.value && this.ownerInfo.name) {
             this.firstPartyNameInput.value = this.ownerInfo.name;
+            // hidden 필드 값도 동기화
+            const hiddenFirstPartyName = document.getElementById('templateFirstPartyName');
+            if (hiddenFirstPartyName) {
+                hiddenFirstPartyName.value = this.ownerInfo.name;
+            }
         }
         if (this.firstPartyEmailInput && !this.firstPartyEmailInput.value && this.ownerInfo.email) {
             this.firstPartyEmailInput.value = this.ownerInfo.email;
+            // hidden 필드 값도 동기화
+            const hiddenFirstPartyEmail = document.getElementById('templateFirstPartyEmail');
+            if (hiddenFirstPartyEmail) {
+                hiddenFirstPartyEmail.value = this.ownerInfo.email;
+            }
         }
         if (this.firstPartyAddressInput && !this.firstPartyAddressInput.value && this.ownerInfo.companyName) {
             this.firstPartyAddressInput.value = this.ownerInfo.companyName;
+            // hidden 필드 값도 동기화
+            const hiddenFirstPartyAddress = document.getElementById('templateFirstPartyAddress');
+            if (hiddenFirstPartyAddress) {
+                hiddenFirstPartyAddress.value = this.ownerInfo.companyName;
+            }
         }
     }
 
@@ -1801,6 +1832,13 @@ class ContractForm {
     }
 
     handleFormSubmit(event, form) {
+        // Hidden 필드 유효성 검사 (공통)
+        if (!this.validateHiddenFields()) {
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        }
+
         // 템플릿 모드인 경우
         if (this.templateLayout && this.templateLayout.style.display !== 'none') {
             // 템플릿 변수 검증

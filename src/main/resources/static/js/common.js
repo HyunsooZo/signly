@@ -199,15 +199,28 @@ function validateField(field) {
  */
 function showFieldError(field, message) {
     field.classList.add('is-invalid');
+    
+    // 빨간색 테두리 강화를 위한 추가 클래스
+    field.style.borderColor = '#dc3545';
+    field.style.boxShadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.25)';
 
     let errorElement = field.parentNode.querySelector('.invalid-feedback');
     if (!errorElement) {
         errorElement = document.createElement('div');
         errorElement.className = 'invalid-feedback';
+        errorElement.style.color = '#dc3545';
+        errorElement.style.fontSize = '0.875rem';
+        errorElement.style.marginTop = '0.25rem';
         field.parentNode.appendChild(errorElement);
     }
 
     errorElement.textContent = message;
+    
+    // 포커스 이동 및 스크롤
+    setTimeout(() => {
+        field.focus();
+        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
 }
 
 /**
@@ -215,6 +228,10 @@ function showFieldError(field, message) {
  */
 function clearFieldError(field) {
     field.classList.remove('is-invalid');
+    
+    // 추가된 스타일 제거
+    field.style.borderColor = '';
+    field.style.boxShadow = '';
 
     const errorElement = field.parentNode.querySelector('.invalid-feedback');
     if (errorElement) {
