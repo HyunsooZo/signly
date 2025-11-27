@@ -199,7 +199,7 @@ function validateField(field) {
  */
 function showFieldError(field, message) {
     field.classList.add('is-invalid');
-    
+
     // 빨간색 테두리 강화를 위한 추가 클래스
     field.style.borderColor = '#dc3545';
     field.style.boxShadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.25)';
@@ -215,7 +215,7 @@ function showFieldError(field, message) {
     }
 
     errorElement.textContent = message;
-    
+
     // 포커스 이동 및 스크롤
     setTimeout(() => {
         field.focus();
@@ -228,7 +228,7 @@ function showFieldError(field, message) {
  */
 function clearFieldError(field) {
     field.classList.remove('is-invalid');
-    
+
     // 추가된 스타일 제거
     field.style.borderColor = '';
     field.style.boxShadow = '';
@@ -287,7 +287,7 @@ async function sendRequest(url, options = {}) {
         credentials: 'include'
     };
 
-    const mergedOptions = {...defaultOptions, ...options};
+    const mergedOptions = { ...defaultOptions, ...options };
 
     try {
         // JWT 클라이언트가 로드되어 있으면 JWT 인증 사용
@@ -356,7 +356,7 @@ function showAlert(message, type = 'info') {
 /**
  * 확인 모달 표시
  */
-function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText = '취소', confirmClass = 'btn-primary') {
+function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText = '취소', confirmClass = 'btn-primary', title = '확인') {
     const modalId = 'confirmModal-' + Date.now();
 
     const modalHtml = `
@@ -364,7 +364,7 @@ function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="confirmModalLabel">확인</h5>
+                        <h5 class="modal-title" id="confirmModalLabel">${title}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
                     </div>
                     <div class="modal-body">

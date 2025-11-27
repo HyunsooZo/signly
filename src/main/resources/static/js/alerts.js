@@ -52,7 +52,7 @@ function showAlertModal(message) {
  * @param {string} cancelText - 취소 버튼 텍스트 (기본값: '취소')
  * @param {string} confirmClass - 확인 버튼 클래스 (기본값: 'btn-primary')
  */
-function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText = '취소', confirmClass = 'btn-primary') {
+function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText = '취소', confirmClass = 'btn-primary', title = '확인') {
     // 기존 모달이 있으면 재사용, 없으면 생성
     let modal = document.getElementById('commonConfirmModal');
 
@@ -62,7 +62,7 @@ function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">확인</h5>
+                            <h5 class="modal-title" id="commonConfirmModalTitle">${title}</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body" id="commonConfirmModalBody">
@@ -89,6 +89,12 @@ function showConfirmModal(message, onConfirm, confirmText = '확인', cancelText
     // 메시지 업데이트
     const modalBody = document.getElementById('commonConfirmModalBody');
     modalBody.textContent = message;
+
+    // 제목 업데이트
+    const modalTitle = document.getElementById('commonConfirmModalTitle');
+    if (modalTitle) {
+        modalTitle.textContent = title;
+    }
 
     // 버튼 텍스트 업데이트
     const confirmBtn = document.getElementById('commonConfirmOkBtn');
