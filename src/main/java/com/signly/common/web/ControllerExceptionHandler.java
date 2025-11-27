@@ -37,11 +37,11 @@ public class ControllerExceptionHandler {
         try {
             return operation.get();
         } catch (ValidationException e) {
-            return handleValidationException(e, logger, operationName, model, errorMessage);
+            return handleValidationException(e, logger, operationName, model, errorMessage, errorViewName);
         } catch (BusinessException e) {
-            return handleBusinessException(e, logger, operationName, model, errorMessage);
+            return handleBusinessException(e, logger, operationName, model, errorMessage, errorViewName);
         } catch (Exception e) {
-            return handleGenericException(e, logger, operationName, model, errorMessage);
+            return handleGenericException(e, logger, operationName, model, errorMessage, errorViewName);
         }
     }
 
@@ -76,11 +76,12 @@ public class ControllerExceptionHandler {
             Logger logger,
             String operationName,
             Model model,
-            String customMessage
+            String customMessage,
+            String errorViewName
     ) {
         logger.warn("{} 유효성 검사 실패: {}", operationName, e.getMessage());
         model.addAttribute("errorMessage", customMessage != null ? customMessage : e.getMessage());
-        return determineErrorView(model);
+        return errorViewName != null ? errorViewName : determineErrorView(model);
     }
 
     /**
@@ -91,11 +92,12 @@ public class ControllerExceptionHandler {
             Logger logger,
             String operationName,
             Model model,
-            String customMessage
+            String customMessage,
+            String errorViewName
     ) {
         logger.warn("{} 비즈니스 로직 실패: {}", operationName, e.getMessage());
         model.addAttribute("errorMessage", customMessage != null ? customMessage : e.getMessage());
-        return determineErrorView(model);
+        return errorViewName != null ? errorViewName : determineErrorView(model);
     }
 
     /**
@@ -106,11 +108,12 @@ public class ControllerExceptionHandler {
             Logger logger,
             String operationName,
             Model model,
-            String customMessage
+            String customMessage,
+            String errorViewName
     ) {
         logger.error("{} 중 예상치 못한 오류 발생", operationName, e);
         model.addAttribute("errorMessage", customMessage != null ? customMessage : "처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-        return determineErrorView(model);
+        return errorViewName != null ? errorViewName : determineErrorView(model);
     }
 
     /**

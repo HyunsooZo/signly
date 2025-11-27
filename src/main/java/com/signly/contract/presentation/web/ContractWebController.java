@@ -214,7 +214,7 @@ public class ContractWebController extends BaseWebController {
             return handleFormError("입력값을 확인해주세요.", model, form, resolvedUserId);
         }
 
-        return handleOperation(() -> {
+        try {
             PresetType presetType = PresetType.fromString(form.getSelectedPreset());
             CreateContractCommand command = new CreateContractCommand(
                     form.getTemplateId(),
@@ -235,7 +235,13 @@ public class ContractWebController extends BaseWebController {
             logger.info("계약서 생성 성공: {} (ID: {})", response.getTitle(), response.getId());
             addSuccessMessage(redirectAttributes, "계약서가 성공적으로 생성되었습니다.");
             return "redirect:/contracts";
-        }, "계약서 생성", "contracts/form", model, null);
+        } catch (com.signly.common.exception.ValidationException e) {
+            logger.warn("계약서 생성 유효성 검사 실패: {}", e.getMessage());
+            return handleFormError(e.getMessage(), model, form, resolvedUserId);
+        } catch (Exception e) {
+            logger.error("계약서 생성 중 오류 발생", e);
+            return handleFormError("계약서 생성 중 오류가 발생했습니다. 다시 시도해주세요.", model, form, resolvedUserId);
+        }
     }
 
     private String handleFormError(

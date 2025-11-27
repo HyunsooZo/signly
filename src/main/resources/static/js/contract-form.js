@@ -101,6 +101,9 @@ class ContractForm {
             // 파라미터 없으면 select-type.jsp로 리다이렉트
             window.location.href = '/contracts/select-type';
         }
+
+        // 이벤트 리스너 설정 (반드시 호출해야 함)
+        this.setupEventListeners();
     }
 
     parseJsonData() {
@@ -2155,58 +2158,67 @@ class ContractForm {
 
     handleFormSubmit(event, form) {
         console.log('[ContractForm] Form submit triggered');
-        
-        // 즉시 이벤트 중단
+
+        // ✅ 핵심 수정: 가장 먼저 폼 제출 중단
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        
+
+        // 템플릿 모드인 경우 hidden 필드 업데이트 (검증 전에 수행)
+        if (this.templateLayout && this.templateLayout.style.display !== 'none') {
+            console.log('[ContractForm] Updating template content before validation');
+            this.updateTemplateContent();
+        }
+
         // 전체 필드 유효성 검사 (프론트엔드 선 검증)
         const validationResult = this.validateAllFields();
         console.log('[ContractForm] Validation result:', validationResult);
-        
+
         if (!validationResult.isValid) {
-            
+            console.log('[ContractForm] Validation failed:', validationResult.errorMessage);
+
             // 첫 번째 에러 필드로 포커스
             if (validationResult.firstErrorField) {
                 setTimeout(() => {
                     validationResult.firstErrorField.focus();
-                    validationResult.firstErrorField.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'center' 
+                    validationResult.firstErrorField.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
                     });
                 }, 100);
             }
-            
+
             showAlertModal(validationResult.errorMessage || '입력값을 확인해주세요.');
             return false;
         }
 
-        // 템플릿 모드인 경우
+        // 템플릿 모드인 경우 추가 검증
         if (this.templateLayout && this.templateLayout.style.display !== 'none') {
-            // 템플릿 변수 검증
-            if (!this.validateAllTemplateVariables()) {
-                event.preventDefault();
-                event.stopPropagation();
-                showAlertModal('입력한 변수 값을 확인해주세요.');
-                return false;
-            }
-
-            // 템플릿 콘텐츠 업데이트
-            this.updateTemplateContent();
-
-            // 업데이트 후 다시 한번 content 확인
+            // 콘텐츠가 비어있는지 최종 확인
             if (this.templateHiddenContent && !this.templateHiddenContent.value.trim()) {
-                event.preventDefault();
-                event.stopPropagation();
+                console.log('[ContractForm] Template content is empty after update');
                 showAlertModal('계약서 내용이 비어있습니다. 템플릿 변수를 입력해주세요.');
                 // 첫 번째 빈 변수 입력 필드로 포커스
-                const firstEmptyInput = this.templateHtmlContainer?.querySelector('input[data-variable-name]');
+                const firstEmptyInput = this.templateHtmlContainer?.querySelector('input[data-variable-name]:not([value])');
                 if (firstEmptyInput) {
                     firstEmptyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     setTimeout(() => firstEmptyInput.focus(), 300);
                 }
                 return false;
+            }
+
+            // 템플릿 HTML 내의 모든 입력 필드가 채워져 있는지 확인
+            const emptyInputs = this.templateHtmlContainer?.querySelectorAll('input[data-variable-name]');
+            if (emptyInputs) {
+                for (const input of emptyInputs) {
+                    if (!input.value || input.value.trim() === '') {
+                        console.log('[ContractForm] Empty variable input found:', input.getAttribute('data-variable-name'));
+                        showAlertModal('모든 필드를 입력해주세요.');
+                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(() => input.focus(), 300);
+                        return false;
+                    }
+                }
             }
 
             // normalLayout의 필드 비활성화
@@ -2234,24 +2246,21 @@ class ContractForm {
             }
         }
 
-        const firstEmail = this.firstPartyEmailInput?.value ||
-            this.templateFirstPartyEmail?.value;
-        const secondEmail = this.secondPartyEmailInput?.value ||
-            this.templateSecondPartyEmailInput?.value;
-
-        if (firstEmail && secondEmail && firstEmail === secondEmail) {
-            event.preventDefault();
-            event.stopPropagation();
-            showAlertModal('갑과 을의 이메일 주소는 달라야 합니다.');
-            return false;
-        }
-
+        // CSRF 토큰 확인
         if (window.ensureCsrfToken) {
             window.ensureCsrfToken(form);
         }
 
-        // 모든 검증 통과 시 폼 제출
+        // ✅ 모든 검증 통과 시 폼 제출
         console.log('[ContractForm] All validations passed, submitting form');
+        console.log('[ContractForm] Form data:', {
+            title: document.getElementById('templateTitleHidden')?.value,
+            contentLength: document.getElementById('templateContentHidden')?.value?.length,
+            firstPartyName: document.getElementById('templateFirstPartyName')?.value,
+            firstPartyEmail: document.getElementById('templateFirstPartyEmail')?.value,
+            secondPartyName: document.getElementById('templateSecondPartyName')?.value,
+            secondPartyEmail: document.getElementById('templateSecondPartyEmail')?.value
+        });
         form.submit();
         return true;
     }
