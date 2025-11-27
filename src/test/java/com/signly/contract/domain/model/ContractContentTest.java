@@ -48,21 +48,21 @@ class ContractContentTest {
 
     @Test
     void 최대_길이를_초과하면_예외가_발생한다() {
-        String longContent = "a".repeat(50001);
+        String longContent = "a".repeat(100001);
 
         assertThatThrownBy(() -> ContractContent.of(longContent))
                 .isInstanceOf(ValidationException.class)
-                .hasMessage("계약서 내용은 50,000자를 초과할 수 없습니다");
+                .hasMessage("계약서 내용은 100,000자를 초과할 수 없습니다");
     }
 
     @Test
     void 최대_길이와_같으면_생성된다() {
-        String maxContent = "a".repeat(50000);
+        String maxContent = "a".repeat(100000);
 
         ContractContent contractContent = ContractContent.of(maxContent);
 
         assertThat(contractContent.content()).isEqualTo(maxContent);
-        assertThat(contractContent.getLength()).isEqualTo(50000);
+        assertThat(contractContent.getLength()).isEqualTo(100000);
     }
 
     @Test
