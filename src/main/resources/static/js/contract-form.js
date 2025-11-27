@@ -154,13 +154,44 @@ class ContractForm {
         // Form submit validation
         this.setupFormValidation();
         
-        // 실시간 유효성 검사 설정
-        this.setupRealtimeValidation();
-
         // 초기화 후 자동 입력 적용
         setTimeout(() => {
             this.applyOwnerInfoToNormalForm();
+            this.validateInitialization();
         }, 100);
+        
+        // 실시간 유효성 검사 설정 (초기화 후 약간 지연)
+        setTimeout(() => {
+            this.setupRealtimeValidation();
+            // 초기 상태에서 한번 유효성 검사 실행
+            this.validateAllFields();
+        }, 200);
+    }
+
+    validateInitialization() {
+        // 초기화 상태 검증
+        const criticalFields = [
+            'templateContentHidden',
+            'templateTitleHidden',
+            'templateFirstPartyName',
+            'templateFirstPartyEmail',
+            'templateSecondPartyName',
+            'templateSecondPartyEmail'
+        ];
+
+        const missingFields = criticalFields.filter(id => !document.getElementById(id));
+        
+        if (missingFields.length > 0) {
+            console.error('[ContractForm] Critical fields missing:', missingFields);
+        } else {
+            console.log('[ContractForm] All critical fields found');
+            
+            // 초기 값 상태 로그
+            criticalFields.forEach(id => {
+                const element = document.getElementById(id);
+                console.log(`[ContractForm] ${id}:`, element?.value?.length || 0, 'characters');
+            });
+        }
     }
 
     setupFormValidation() {
@@ -1454,10 +1485,28 @@ class ContractForm {
             { id: 'templateSecondPartyEmail', name: '을(근로자) 이메일', type: 'email', required: true }
         ];
 
+        // 필드 존재 여부 먼저 확인
+        const missingFields = validationFields.filter(config => 
+            !document.getElementById(config.id)
+        );
+        
+        if (missingFields.length > 0) {
+            console.error('[ContractForm] Missing validation fields:', missingFields.map(f => f.id));
+            return {
+                isValid: false,
+                firstErrorField: null,
+                errorMessage: '필수 폼 필드가 누락되었습니다. 페이지를 새로고침해주세요.',
+                errorFields: missingFields
+            };
+        }
+
         // 각 필드 검증
         for (const fieldConfig of validationFields) {
             const element = document.getElementById(fieldConfig.id);
-            if (!element) continue;
+            if (!element) {
+                console.error(`[ContractForm] Field not found: ${fieldConfig.id}`);
+                continue;
+            }
 
             const validationResult = this.validateSingleField(element, fieldConfig);
             
@@ -2105,11 +2154,18 @@ class ContractForm {
     }
 
     handleFormSubmit(event, form) {
+        console.log('[ContractForm] Form submit triggered');
+        
+        // 즉시 이벤트 중단
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        
         // 전체 필드 유효성 검사 (프론트엔드 선 검증)
         const validationResult = this.validateAllFields();
+        console.log('[ContractForm] Validation result:', validationResult);
+        
         if (!validationResult.isValid) {
-            event.preventDefault();
-            event.stopPropagation();
             
             // 첫 번째 에러 필드로 포커스
             if (validationResult.firstErrorField) {
@@ -2194,6 +2250,9 @@ class ContractForm {
             window.ensureCsrfToken(form);
         }
 
+        // 모든 검증 통과 시 폼 제출
+        console.log('[ContractForm] All validations passed, submitting form');
+        form.submit();
         return true;
     }
 }

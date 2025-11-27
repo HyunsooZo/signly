@@ -156,6 +156,8 @@
                                                 value="<c:out value='${contract.firstPartyAddress}'/>">
                                             <input type="hidden" id="templateSecondPartyName" name="secondPartyName"
                                                 value="<c:out value='${contract.secondPartyName}'/>" required>
+                                            <input type="hidden" id="templateSecondPartyEmail" name="secondPartyEmail"
+                                                value="<c:out value='${contract.secondPartyEmail}'/>" required>
                                         </div>
                                     </div>
 
