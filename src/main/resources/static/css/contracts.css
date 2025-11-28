@@ -386,14 +386,14 @@
 }
 
 .template-card-new {
-    background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
-    border-color: #667eea;
+    background: linear-gradient(135deg, #f0f8f4 0%, #e8f5e9 100%);
+    border-color: #2d4a3f;
 }
 
 .template-card-new:hover {
-    background: linear-gradient(135deg, #e8f0ff 0%, #d8e4ff 100%);
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 12px 24px rgba(45, 74, 63, 0.2);
 }
 
 .template-card-header {
@@ -417,7 +417,7 @@
 }
 
 .template-card-new .template-title {
-    color: #667eea;
+    color: #2d4a3f;
 }
 
 .template-description {
@@ -448,7 +448,7 @@
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2d4a3f 0%, #4a7c6a 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -462,7 +462,7 @@
 
 .new-template-text {
     font-size: 1rem !important;
-    color: #667eea;
+    color: #2d4a3f;
     font-weight: 600;
     text-align: center;
     line-height: normal !important;
