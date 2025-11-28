@@ -156,13 +156,13 @@ class ContractForm {
 
         // Form submit validation
         this.setupFormValidation();
-        
+
         // 초기화 후 자동 입력 적용
         setTimeout(() => {
             this.applyOwnerInfoToNormalForm();
             this.validateInitialization();
         }, 100);
-        
+
         // 실시간 유효성 검사 설정 (초기화 후 약간 지연)
         setTimeout(() => {
             this.setupRealtimeValidation();
@@ -183,12 +183,12 @@ class ContractForm {
         ];
 
         const missingFields = criticalFields.filter(id => !document.getElementById(id));
-        
+
         if (missingFields.length > 0) {
             console.error('[ContractForm] Critical fields missing:', missingFields);
         } else {
             console.log('[ContractForm] All critical fields found');
-            
+
             // 초기 값 상태 로그
             criticalFields.forEach(id => {
                 const element = document.getElementById(id);
@@ -224,12 +224,12 @@ class ContractForm {
                 element.addEventListener('input', () => {
                     this.validateFieldRealtime(element, field);
                 });
-                
+
                 // blur 이벤트 (포커스 아웃)
                 element.addEventListener('blur', () => {
                     this.validateFieldRealtime(element, field);
                 });
-                
+
                 // change 이벤트 (값 변경)
                 element.addEventListener('change', () => {
                     this.validateFieldRealtime(element, field);
@@ -243,17 +243,17 @@ class ContractForm {
 
     validateFieldRealtime(element, fieldConfig) {
         const validationResult = this.validateSingleField(element, fieldConfig);
-        
+
         if (!validationResult.isValid) {
             // 실시간 검증 시에는 자동 포커스 방지, 애니메이션만 적용
-            showFieldError(element, validationResult.error, { 
-                autoFocus: false, 
-                animate: true 
+            showFieldError(element, validationResult.error, {
+                autoFocus: false,
+                animate: true
             });
         } else {
             clearFieldError(element, true);
         }
-        
+
         return validationResult.isValid;
     }
 
@@ -924,6 +924,11 @@ class ContractForm {
     }
 
     createSignatureImage() {
+        // 래퍼 생성 (밑줄 포함)
+        const wrapper = document.createElement('span');
+        wrapper.className = 'contract-signature-wrapper';
+        wrapper.style.cssText = 'display: inline-block; border-bottom: 1px solid #000; min-width: 80px; text-align: center; vertical-align: bottom; padding-bottom: 2px; margin: 0 2px; line-height: 1;';
+
         // localStorage에서 서명 이미지 가져오기
         const signatureRaw = localStorage.getItem('signly_owner_signature');
 
@@ -931,8 +936,9 @@ class ContractForm {
             // 서명이 없으면 빈 span 반환
             const span = document.createElement('span');
             span.textContent = '(서명 없음)';
-            span.style.cssText = 'color: #999; font-size: 11px;';
-            return span;
+            span.style.cssText = 'color: #999; font-size: 11px; display: inline-block; padding: 5px 0;';
+            wrapper.appendChild(span);
+            return wrapper;
         }
 
         try {
@@ -943,23 +949,26 @@ class ContractForm {
                 console.warn('[WARN] 서명 이미지 데이터가 없습니다:', signatureData);
                 const span = document.createElement('span');
                 span.textContent = '(서명 없음)';
-                span.style.cssText = 'color: #999; font-size: 11px;';
-                return span;
+                span.style.cssText = 'color: #999; font-size: 11px; display: inline-block; padding: 5px 0;';
+                wrapper.appendChild(span);
+                return wrapper;
             }
 
             const img = document.createElement('img');
             img.src = imgSrc;
             img.className = 'signature-stamp-image-element';
-            img.style.cssText = 'display: inline-block; max-width: 90px; max-height: 40px; vertical-align: middle;';
+            img.style.cssText = 'display: inline-block; max-width: 90px; max-height: 40px; vertical-align: bottom;';
             img.alt = '사업주 서명';
 
-            return img;
+            wrapper.appendChild(img);
+            return wrapper;
         } catch (error) {
             console.error('[ERROR] 서명 이미지 파싱 실패:', error);
             const span = document.createElement('span');
             span.textContent = '(서명 오류)';
-            span.style.cssText = 'color: #f00; font-size: 11px;';
-            return span;
+            span.style.cssText = 'color: #f00; font-size: 11px; display: inline-block; padding: 5px 0;';
+            wrapper.appendChild(span);
+            return wrapper;
         }
     }
 
@@ -1516,10 +1525,10 @@ class ContractForm {
         ];
 
         // 필드 존재 여부 먼저 확인
-        const missingFields = validationFields.filter(config => 
+        const missingFields = validationFields.filter(config =>
             !document.getElementById(config.id)
         );
-        
+
         if (missingFields.length > 0) {
             console.error('[ContractForm] Missing validation fields:', missingFields.map(f => f.id));
             return {
@@ -1539,7 +1548,7 @@ class ContractForm {
             }
 
             const validationResult = this.validateSingleField(element, fieldConfig);
-            
+
             if (!validationResult.isValid) {
                 isValid = false;
                 errorFields.push({
@@ -1547,7 +1556,7 @@ class ContractForm {
                     name: fieldConfig.name,
                     error: validationResult.error
                 });
-                
+
                 if (!firstErrorField) {
                     firstErrorField = element;
                     errorMessage = validationResult.error;
@@ -1561,7 +1570,7 @@ class ContractForm {
         // 이메일 중복 검사
         const firstEmail = document.getElementById('templateFirstPartyEmail')?.value?.trim();
         const secondEmail = document.getElementById('templateSecondPartyEmail')?.value?.trim();
-        
+
         if (firstEmail && secondEmail && firstEmail === secondEmail) {
             isValid = false;
             const secondEmailField = document.getElementById('templateSecondPartyEmail');
@@ -1582,7 +1591,7 @@ class ContractForm {
 
     validateSingleField(element, fieldConfig) {
         const value = element.value?.trim();
-        
+
         // 필수값 검사
         if (fieldConfig.required && !value) {
             return {
@@ -1603,7 +1612,7 @@ class ContractForm {
                         };
                     }
                     break;
-                    
+
                 case 'text':
                     if (value.length > 100) {
                         return {
@@ -1612,7 +1621,7 @@ class ContractForm {
                         };
                     }
                     break;
-                    
+
                 case 'content':
                     if (value.length > 100000) {
                         return {
@@ -2182,7 +2191,7 @@ class ContractForm {
                 while (walker.nextNode()) {
                     if (walker.currentNode.nodeValue &&
                         (walker.currentNode.nodeValue.includes('[EMPLOYER_SIGNATURE_IMAGE]') ||
-                         walker.currentNode.nodeValue.includes('[EMPLOYEE_SIGNATURE_IMAGE]'))) {
+                            walker.currentNode.nodeValue.includes('[EMPLOYEE_SIGNATURE_IMAGE]'))) {
                         textNodes.push(walker.currentNode);
                     }
                 }

@@ -443,20 +443,20 @@ const TemplateBuilder = {
                         innerHTML = '<div class="section-signature" contenteditable="true">' +
                             '<div class="signature-section">' +
                             '<div class="signature-block signature-block--employee">' +
-                            '<div class="signature-line">(근로자) 주소: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
-                            '<div class="signature-line">연락처: <span class="template-variable" contenteditable="false"><span>EMPLOYEE_PHONE</span><span class="template-variable-remove"></span></span></div>' +
-                            '<div class="signature-line">성명: <span class="template-variable" contenteditable="false"><span>EMPLOYEE</span><span class="template-variable-remove"></span></span> (인)</div>' +
+                            '<div class="signature-line">(근로자) 주소: <span class="template-variable" contenteditable="false" data-var-name="EMPLOYEE_ADDRESS"><span>EMPLOYEE_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="signature-line">연락처: <span class="template-variable" contenteditable="false" data-var-name="EMPLOYEE_PHONE"><span>EMPLOYEE_PHONE</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="signature-line">성명: <span class="template-variable" contenteditable="false" data-var-name="EMPLOYEE"><span>EMPLOYEE</span><span class="template-variable-remove"></span></span> (인)</div>' +
                             '</div>' +
                             '<div class="signature-block signature-block--employer">' +
-                            '<div class="signature-line">(사업주) 사업체명: <span class="template-variable" contenteditable="false"><span>COMPANY_NAME</span><span class="template-variable-remove"></span></span></div>' +
-                            '<div class="signature-line signature-line-indent">주소: <span class="template-variable" contenteditable="false"><span>EMPLOYER_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="signature-line">(사업주) 사업체명: <span class="template-variable" contenteditable="false" data-var-name="COMPANY_NAME"><span>COMPANY_NAME</span><span class="template-variable-remove"></span></span></div>' +
+                            '<div class="signature-line signature-line-indent">주소: <span class="template-variable" contenteditable="false" data-var-name="EMPLOYER_ADDRESS"><span>EMPLOYER_ADDRESS</span><span class="template-variable-remove"></span></span></div>' +
                             '<div class="signature-line signature-line--seal signature-line-indent">' +
-                            '대표자: <span class="template-variable" contenteditable="false"><span>EMPLOYER</span><span class="template-variable-remove"></span></span> ' +
+                            '대표자: <span class="template-variable" contenteditable="false" data-var-name="EMPLOYER"><span>EMPLOYER</span><span class="template-variable-remove"></span></span> ' +
                             '<span class="signature-stamp-label">(인)' +
-                            '<span class="signature-stamp-wrapper"><span class="template-variable" contenteditable="false"><span>EMPLOYER_SIGNATURE_IMAGE</span><span class="template-variable-remove"></span></span></span>' +
+                            '<span class="signature-stamp-wrapper"><span class="template-variable" contenteditable="false" data-var-name="EMPLOYER_SIGNATURE_IMAGE"><span>EMPLOYER_SIGNATURE_IMAGE</span><span class="template-variable-remove"></span></span></span>' +
                             '</span>' +
                             '</div>' +
-                            '<div class="signature-line">(전화: <span class="template-variable" contenteditable="false"><span>EMPLOYER_PHONE</span><span class="template-variable-remove"></span></span>)</div>' +
+                            '<div class="signature-line">(전화: <span class="template-variable" contenteditable="false" data-var-name="EMPLOYER_PHONE"><span>EMPLOYER_PHONE</span><span class="template-variable-remove"></span></span>)</div>' +
                             '</div>' +
                             '</div>' +
                             '</div>';
