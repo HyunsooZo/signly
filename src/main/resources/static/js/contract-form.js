@@ -49,7 +49,7 @@ class ContractForm {
 
         // ===== CONSTANTS =====
         this.PLACEHOLDER_REGEX = /\{([^{}]+)\}|\[([^\[\]]+)\]/g;
-        this.IGNORED_PLACEHOLDERS = new Set(['EMPLOYER_SIGNATURE_IMAGE']);
+        this.IGNORED_PLACEHOLDERS = new Set(['EMPLOYER_SIGNATURE_IMAGE', 'EMPLOYEE_SIGNATURE_IMAGE']);
 
         // ===== DATA =====
         this.ownerInfo = null;
@@ -612,11 +612,27 @@ class ContractForm {
             // 이미 input이 있으면 스킵
             if (element.querySelector('input')) return;
 
-            // 서명 이미지 처리
+            // 갑(사업주) 서명 이미지 표시 (저장 시에는 플레이스홀더로 변환)
             if (varName === 'EMPLOYER_SIGNATURE_IMAGE') {
+                // 화면에는 실제 서명 이미지를 보여줌
                 const signatureImg = this.createSignatureImage();
                 element.innerHTML = '';
                 element.appendChild(signatureImg);
+                // 저장 시 플레이스홀더로 변환하기 위한 마커
+                element.setAttribute('data-preserve-placeholder', 'EMPLOYER_SIGNATURE_IMAGE');
+                return;
+            }
+
+            // 을(근로자) 서명 플레이스홀더 - 나중에 서명하므로 빈 공간으로 표시
+            if (varName === 'EMPLOYEE_SIGNATURE_IMAGE') {
+                element.innerHTML = '';
+                // 빈 공간 (서명 대기)
+                const emptySpan = document.createElement('span');
+                emptySpan.style.cssText = 'display: inline-block; width: 90px; height: 40px;';
+                emptySpan.innerHTML = '&nbsp;'; // 공간 유지
+                element.appendChild(emptySpan);
+                // 저장 시 플레이스홀더로 변환하기 위한 마커
+                element.setAttribute('data-preserve-placeholder', 'EMPLOYEE_SIGNATURE_IMAGE');
                 return;
             }
 
@@ -1044,7 +1060,18 @@ class ContractForm {
             }
         });
 
-        // 서명 이미지를 img src에서 실제 이미지 데이터로 교체
+        // 갑(사업주) 서명 플레이스홀더 복원
+        const placeholderElements = clone.querySelectorAll('[data-preserve-placeholder]');
+        placeholderElements.forEach(element => {
+            const placeholderName = element.getAttribute('data-preserve-placeholder');
+            if (placeholderName) {
+                // 플레이스홀더 텍스트로 교체 (대괄호 포함)
+                const placeholderText = document.createTextNode('[' + placeholderName + ']');
+                element.parentNode.replaceChild(placeholderText, element);
+            }
+        });
+
+        // 을(근로자) 서명 이미지는 그대로 유지
         const signatureImgs = clone.querySelectorAll('img.signature-stamp-image-element');
         signatureImgs.forEach(img => {
             // 이미 src가 있으면 그대로 유지 (Base64 데이터)
@@ -2136,6 +2163,51 @@ class ContractForm {
                     input.parentNode.replaceChild(span, input);
                 });
 
+                // 서명 플레이스홀더 처리 (data-preserve-placeholder 속성을 가진 요소들)
+                const signaturePlaceholders = clone.querySelectorAll('[data-preserve-placeholder]');
+                signaturePlaceholders.forEach(element => {
+                    const placeholderType = element.getAttribute('data-preserve-placeholder');
+                    if (placeholderType === 'EMPLOYER_SIGNATURE_IMAGE') {
+                        // 갑(사업주) 서명은 이미 표시되어 있음 (createSignatureImage로 생성됨)
+                        // 추가 처리 불필요
+                    } else if (placeholderType === 'EMPLOYEE_SIGNATURE_IMAGE') {
+                        // 을(근로자) 서명은 빈 공간으로 표시 (아직 서명 전)
+                        // 추가 처리 불필요
+                    }
+                });
+
+                // 텍스트 노드에서 플레이스홀더 문자열 제거 ([EMPLOYER_SIGNATURE_IMAGE], [EMPLOYEE_SIGNATURE_IMAGE])
+                const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
+                const textNodes = [];
+                while (walker.nextNode()) {
+                    if (walker.currentNode.nodeValue &&
+                        (walker.currentNode.nodeValue.includes('[EMPLOYER_SIGNATURE_IMAGE]') ||
+                         walker.currentNode.nodeValue.includes('[EMPLOYEE_SIGNATURE_IMAGE]'))) {
+                        textNodes.push(walker.currentNode);
+                    }
+                }
+                textNodes.forEach(node => {
+                    // EMPLOYER_SIGNATURE_IMAGE 플레이스홀더를 실제 서명 이미지로 교체
+                    if (node.nodeValue.includes('[EMPLOYER_SIGNATURE_IMAGE]')) {
+                        const signatureImg = this.createSignatureImage();
+                        const fragment = document.createDocumentFragment();
+                        const parts = node.nodeValue.split('[EMPLOYER_SIGNATURE_IMAGE]');
+
+                        fragment.appendChild(document.createTextNode(parts[0]));
+                        if (signatureImg) {
+                            fragment.appendChild(signatureImg);
+                        }
+                        if (parts[1]) {
+                            fragment.appendChild(document.createTextNode(parts[1]));
+                        }
+                        node.parentNode.replaceChild(fragment, node);
+                    }
+                    // EMPLOYEE_SIGNATURE_IMAGE 플레이스홀더는 빈 공간으로 교체
+                    else if (node.nodeValue.includes('[EMPLOYEE_SIGNATURE_IMAGE]')) {
+                        node.nodeValue = node.nodeValue.replace('[EMPLOYEE_SIGNATURE_IMAGE]', '');
+                    }
+                });
+
                 htmlToPreview = clone.innerHTML;
             } else {
                 htmlToPreview = '<p>템플릿 내용이 없습니다.</p>';
@@ -2244,6 +2316,33 @@ class ContractForm {
                     field.required = false;
                 });
             }
+        }
+
+        // 템플릿 모드에서는 visible input 값을 hidden field로 동기화하고 중복 제출 방지
+        if (this.templateLayout && this.templateLayout.style.display !== 'none') {
+            // secondPartyEmail: visible input → hidden field
+            const visibleSecondEmail = document.querySelector('#templateLayout input[type="email"][name="secondPartyEmail"]');
+            const hiddenSecondEmail = document.querySelector('input[type="hidden"][name="secondPartyEmail"]');
+
+            console.log('[ContractForm] Email field sync debug:');
+            console.log('  - visibleSecondEmail found:', !!visibleSecondEmail, 'value:', visibleSecondEmail?.value);
+            console.log('  - hiddenSecondEmail found:', !!hiddenSecondEmail, 'value:', hiddenSecondEmail?.value);
+
+            if (visibleSecondEmail && hiddenSecondEmail) {
+                // 값 복사
+                hiddenSecondEmail.value = visibleSecondEmail.value;
+                // 중복 제출 방지: visible 필드의 name 제거 (hidden 필드만 제출되도록)
+                visibleSecondEmail.removeAttribute('name');
+                console.log('[ContractForm] Synced secondPartyEmail and removed name from visible field:', visibleSecondEmail.value);
+            } else if (!visibleSecondEmail) {
+                console.warn('[ContractForm] Visible secondPartyEmail field not found!');
+            } else if (!hiddenSecondEmail) {
+                console.warn('[ContractForm] Hidden secondPartyEmail field not found!');
+            }
+
+            // firstPartyEmail 값도 확인
+            const firstEmail = document.getElementById('templateFirstPartyEmail');
+            console.log('  - firstPartyEmail found:', !!firstEmail, 'value:', firstEmail?.value);
         }
 
         // CSRF 토큰 확인

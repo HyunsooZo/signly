@@ -190,6 +190,11 @@ class ContractDetail {
             finalHtml = finalHtml.replace(regex, value);
         });
 
+        // 서명 플레이스홀더 처리 (문자열로 표시되는 것 방지)
+        // [EMPLOYER_SIGNATURE_IMAGE]와 [EMPLOYEE_SIGNATURE_IMAGE]를 적절히 처리
+        finalHtml = finalHtml.replace(/\[EMPLOYER_SIGNATURE_IMAGE\]/g, '<span class="text-muted small">(갑 서명 위치)</span>');
+        finalHtml = finalHtml.replace(/\[EMPLOYEE_SIGNATURE_IMAGE\]/g, '<span class="text-muted small">(을 서명 위치)</span>');
+
         container.innerHTML = finalHtml;
     }
 

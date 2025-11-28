@@ -209,6 +209,10 @@ public class ContractWebController extends BaseWebController {
     ) {
         String resolvedUserId = resolveUserId(currentUserProvider, securityUser, request, userId, true);
 
+        // 디버깅: 폼에서 받은 이메일 값 로깅
+        logger.info("[DEBUG] 계약서 생성 폼 데이터 - firstPartyEmail: '{}', secondPartyEmail: '{}'",
+                form.getFirstPartyEmail(), form.getSecondPartyEmail());
+
         if (bindingResult.hasErrors()) {
             logger.warn("계약서 폼 검증 실패: {}", bindingResult.getAllErrors());
             return handleFormError("입력값을 확인해주세요.", model, form, resolvedUserId);

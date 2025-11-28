@@ -12,6 +12,7 @@ import com.signly.contract.domain.model.Signature;
 import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.contract.domain.repository.SignatureRepository;
 import com.signly.contract.domain.service.PdfGenerator;
+import com.signly.signature.application.FirstPartySignatureService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,7 @@ public class ContractPdfService {
     private final PdfGenerator pdfGenerator;
     private final FileStorageService fileStorageService;
     private final ImageResizer imageResizer;
+    private final FirstPartySignatureService firstPartySignatureService;
 
     /**
      * 계약서 ID로 PDF 생성
@@ -53,9 +55,11 @@ public class ContractPdfService {
         var contract = contractRepository.findById(cId)
                 .orElseThrow(() -> new NotFoundException("계약서를 찾을 수 없습니다: " + contractId));
 
-        // 양측 서명 이미지 조회
-        String firstPartySignatureImage = getSignatureImage(cId, contract.getFirstParty().email());
-        String secondPartySignatureImage = getSignatureImage(cId, contract.getSecondParty().email());
+        // 갑(사업주) 서명 이미지 조회 - FirstPartySignatureService 사용
+        String firstPartySignatureImage = getFirstPartySignatureImage(contract.getCreatorId().value());
+
+        // 을(근로자) 서명 이미지 조회 - SignatureRepository 사용
+        String secondPartySignatureImage = getSecondPartySignatureImage(cId, contract.getSecondParty().email());
 
         // PDF 데이터 구성
         var pdfData = ContractPdfData.builder()
@@ -89,8 +93,45 @@ public class ContractPdfService {
     }
 
     /**
-     * 서명 이미지 조회 및 리사이징 (없으면 null 반환)
+     * 갑(사업주) 서명 이미지 조회 - FirstPartySignatureService 사용
+     * @param ownerId 사업주 ID
+     * @return 서명 이미지 Data URL, 없으면 null
      */
+    private String getFirstPartySignatureImage(String ownerId) {
+        try {
+            // FirstPartySignatureService를 통해 파일에서 원본 서명 로드
+            String dataUrl = firstPartySignatureService.getSignatureDataUrl(ownerId);
+            return imageResizer.resizeSignatureImage(dataUrl);
+        } catch (Exception e) {
+            logger.warn("갑(사업주) 서명을 찾을 수 없습니다: ownerId={}", ownerId);
+            return null;
+        }
+    }
+
+    /**
+     * 을(근로자) 서명 이미지 조회 - SignatureRepository 사용
+     * @param contractId 계약서 ID
+     * @param signerEmail 서명자 이메일
+     * @return 서명 이미지 Data URL, 없으면 null
+     */
+    private String getSecondPartySignatureImage(
+            ContractId contractId,
+            String signerEmail
+    ) {
+        String normalizedEmail = normalizeEmail(signerEmail);
+        var signature = signatureRepository.findByContractIdAndSignerEmail(contractId, normalizedEmail);
+
+        return signature
+                .flatMap(this::buildSignatureDataUrl)
+                .map(imageResizer::resizeSignatureImage)
+                .orElse(null);
+    }
+
+    /**
+     * 서명 이미지 조회 및 리사이징 (없으면 null 반환)
+     * @deprecated 하위 호환성을 위해 유지, getFirstPartySignatureImage 또는 getSecondPartySignatureImage 사용 권장
+     */
+    @Deprecated
     private String getSignatureImage(
             ContractId contractId,
             String signerEmail
@@ -149,15 +190,27 @@ public class ContractPdfService {
             int wrapperIndex
     ) {
         if (dataUrl == null || dataUrl.isBlank()) {
+            // 서명이 없으면 placeholder만 제거
             return html.replace(placeholder, "");
         }
 
         String imageTag = createImageTag(dataUrl);
 
+        // 1. placeholder가 있으면 교체 (새 계약서)
         if (html.contains(placeholder)) {
+            logger.debug("플레이스홀더 발견, 서명 이미지로 교체: {}", placeholder);
             return html.replace(placeholder, imageTag);
         }
 
+        // 2. 기존 이미지 태그가 있으면 교체 (기존 계약서 품질 개선)
+        String existingImagePattern = "<img[^>]*class=\"signature-stamp-image-element\"[^>]*>";
+        if (html.matches("(?s).*" + existingImagePattern + ".*")) {
+            logger.debug("기존 서명 이미지 발견, 새 고품질 이미지로 교체");
+            return html.replaceFirst(existingImagePattern, imageTag);
+        }
+
+        // 3. placeholder도 없고 이미지도 없으면 wrapper에 삽입 시도 (fallback)
+        logger.debug("플레이스홀더와 기존 이미지 없음, wrapper에 삽입 시도");
         return insertIntoWrapper(html, imageTag, wrapperIndex);
     }
 

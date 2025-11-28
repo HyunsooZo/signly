@@ -247,6 +247,10 @@ const TemplateBuilder = {
                 value = value.replace(/<span class="template-variable"[^>]*>[\s\S]*?<\/span>/g, function (match) {
                     return '<span class="blank-line"></span>';
                 });
+                // 서명 플레이스홀더는 명확한 라벨로 표시
+                value = value.replace(/\[EMPLOYER_SIGNATURE_IMAGE\]/g, '<span class="text-muted small">(갑 서명 위치)</span>');
+                value = value.replace(/\[EMPLOYEE_SIGNATURE_IMAGE\]/g, '<span class="text-muted small">(을 서명 위치)</span>');
+                // 나머지 변수들은 빈 줄로 표시
                 value = value.replace(/\[[\w_]+\]/g, '<span class="blank-line"></span>');
                 return value;
             }
