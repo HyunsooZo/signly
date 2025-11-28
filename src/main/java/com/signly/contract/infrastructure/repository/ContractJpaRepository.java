@@ -13,24 +13,26 @@ import java.util.List;
 
 public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, String> {
 
+    @Query("SELECT c FROM ContractJpaEntity c WHERE c.creatorId = :creatorId ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC")
     Page<ContractJpaEntity> findByCreatorId(
-            String creatorId,
+            @Param("creatorId") String creatorId,
             Pageable pageable
     );
 
+    @Query("SELECT c FROM ContractJpaEntity c WHERE c.creatorId = :creatorId AND c.status = :status ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC")
     Page<ContractJpaEntity> findByCreatorIdAndStatus(
-            String creatorId,
-            ContractStatus status,
+            @Param("creatorId") String creatorId,
+            @Param("status") ContractStatus status,
             Pageable pageable
     );
 
-    @Query("SELECT c FROM ContractJpaEntity c WHERE c.firstPartyEmail = :email OR c.secondPartyEmail = :email")
+    @Query("SELECT c FROM ContractJpaEntity c WHERE c.firstPartyEmail = :email OR c.secondPartyEmail = :email ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC")
     Page<ContractJpaEntity> findByPartyEmail(
             @Param("email") String email,
             Pageable pageable
     );
 
-    @Query("SELECT c FROM ContractJpaEntity c WHERE (c.firstPartyEmail = :email OR c.secondPartyEmail = :email) AND c.status = :status")
+    @Query("SELECT c FROM ContractJpaEntity c WHERE (c.firstPartyEmail = :email OR c.secondPartyEmail = :email) AND c.status = :status ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC")
     Page<ContractJpaEntity> findByPartyEmailAndStatus(
             @Param("email") String email,
             @Param("status") ContractStatus status,

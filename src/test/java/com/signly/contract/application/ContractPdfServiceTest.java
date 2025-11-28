@@ -42,11 +42,14 @@ class ContractPdfServiceTest {
     @Mock
     private ImageResizer imageResizer;
 
+    @Mock
+    private com.signly.signature.application.FirstPartySignatureService firstPartySignatureService;
+
     private ContractPdfService contractPdfService;
 
     @BeforeEach
     void setUp() {
-        contractPdfService = new ContractPdfService(contractRepository, signatureRepository, pdfGenerator, fileStorageService, imageResizer);
+        contractPdfService = new ContractPdfService(contractRepository, signatureRepository, pdfGenerator, fileStorageService, imageResizer, firstPartySignatureService);
     }
 
     @Test
