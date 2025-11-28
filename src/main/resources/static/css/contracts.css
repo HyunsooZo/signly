@@ -445,19 +445,24 @@
 /* 새 템플릿 만들기 카드 스타일은 contract-template-preview.css로 이동 */
 
 .new-template-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #2d4a3f 0%, #4a7c6a 100%);
+    width: 100%;
+    height: auto;
+    background: none;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .new-template-icon i {
-    font-size: 2.5rem !important;
-    color: white;
+    font-size: 3.5rem !important;
+    color: #2d4a3f;
     line-height: normal !important;
+    transition: all 0.3s ease;
+}
+
+.template-card-new:hover .new-template-icon i {
+    transform: scale(1.1);
+    color: #4a7c6a;
 }
 
 .new-template-text {
