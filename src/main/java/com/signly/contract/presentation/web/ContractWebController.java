@@ -1,5 +1,6 @@
 package com.signly.contract.presentation.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signly.common.exception.BusinessException;
 import com.signly.common.exception.ValidationException;
@@ -16,7 +17,9 @@ import com.signly.contract.domain.model.GeneratedPdf;
 import com.signly.contract.domain.model.PresetType;
 import com.signly.signature.application.FirstPartySignatureService;
 import com.signly.template.application.TemplateService;
+import com.signly.template.application.VariableDefinitionService;
 import com.signly.template.application.dto.TemplateResponse;
+import com.signly.template.application.dto.VariableDefinitionDto;
 import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.domain.model.TemplateStatus;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +36,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -59,6 +63,7 @@ public class ContractWebController extends BaseWebController {
     private final ContractPdfService contractPdfService;
     private final TemplateService templateService;
     private final TemplatePresetService templatePresetService;
+    private final VariableDefinitionService variableDefinitionService;
     private final CurrentUserProvider currentUserProvider;
     private final FirstPartySignatureService firstPartySignatureService;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -188,6 +193,7 @@ public class ContractWebController extends BaseWebController {
             model.addAttribute("contract", form);
             model.addAttribute("templates", activeTemplates.getContent());
             model.addAttribute("presets", templatePresetService.getSummaries());
+            addVariableDefinitionsToModel(model);
             return "contracts/form";
 
         } catch (Exception e) {
@@ -262,6 +268,7 @@ public class ContractWebController extends BaseWebController {
         addPageTitle(model, "새 계약서 생성");
         model.addAttribute("contract", form);
         model.addAttribute("presets", templatePresetService.getSummaries());
+        addVariableDefinitionsToModel(model);
         if (userId != null) {
             model.addAttribute("currentUserId", userId);
         }
@@ -390,6 +397,7 @@ public class ContractWebController extends BaseWebController {
             model.addAttribute("contractId", contractId);
             model.addAttribute("templates", java.util.Collections.emptyList());
             model.addAttribute("presets", templatePresetService.getSummaries());
+            addVariableDefinitionsToModel(model);
             return "contracts/form";
 
         } catch (Exception e) {
@@ -417,6 +425,7 @@ public class ContractWebController extends BaseWebController {
                 model.addAttribute("pageTitle", "계약서 수정");
                 model.addAttribute("contractId", contractId);
                 model.addAttribute("currentUserId", resolvedUserId);
+                addVariableDefinitionsToModel(model);
                 return "contracts/form";
             }
 
@@ -438,6 +447,7 @@ public class ContractWebController extends BaseWebController {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("pageTitle", "계약서 수정");
             model.addAttribute("contractId", contractId);
+            addVariableDefinitionsToModel(model);
             if (securityUser != null) {
                 String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
                 model.addAttribute("currentUserId", resolvedUserId);
@@ -449,6 +459,7 @@ public class ContractWebController extends BaseWebController {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("pageTitle", "계약서 수정");
             model.addAttribute("contractId", contractId);
+            addVariableDefinitionsToModel(model);
             if (securityUser != null) {
                 String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
                 model.addAttribute("currentUserId", resolvedUserId);
@@ -460,6 +471,7 @@ public class ContractWebController extends BaseWebController {
             model.addAttribute("errorMessage", "계약서 수정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
             model.addAttribute("pageTitle", "계약서 수정");
             model.addAttribute("contractId", contractId);
+            addVariableDefinitionsToModel(model);
             if (securityUser != null) {
                 String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
                 model.addAttribute("currentUserId", resolvedUserId);
@@ -686,6 +698,34 @@ public class ContractWebController extends BaseWebController {
         } catch (Exception e) {
             logger.error("PDF 인라인 뷰 중 오류 발생: contractId={}", contractId, e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "PDF 조회 중 오류가 발생했습니다.");
+        }
+    }
+
+    @GetMapping("/variables")
+    @ResponseBody
+    public ResponseEntity<java.util.List<VariableDefinitionDto>> getVariableDefinitions() {
+        return ResponseEntity.ok(variableDefinitionService.getAllActiveVariables());
+    }
+
+    @GetMapping("/variables/grouped")
+    @ResponseBody
+    public ResponseEntity<java.util.Map<String, java.util.List<VariableDefinitionDto>>> getVariableDefinitionsGrouped() {
+        return ResponseEntity.ok(variableDefinitionService.getVariablesByCategory());
+    }
+
+    /**
+     * 변수 정의를 JSON 문자열로 변환하여 Model에 추가
+     */
+    private void addVariableDefinitionsToModel(Model model) {
+        try {
+            String variableDefinitionsJson = objectMapper.writeValueAsString(
+                variableDefinitionService.getAllActiveVariables()
+            );
+            model.addAttribute("variableDefinitionsJson", variableDefinitionsJson);
+        } catch (JsonProcessingException e) {
+            logger.error("Failed to serialize variable definitions to JSON", e);
+            // 실패 시 빈 배열로 폴백
+            model.addAttribute("variableDefinitionsJson", "[]");
         }
     }
 

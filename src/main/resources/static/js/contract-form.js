@@ -46,6 +46,7 @@ class ContractForm {
         this.customVariableValues = {};
         this.customVariables = [];
         this.legacyVariableCounter = 0;
+        this.variableDefinitions = [];
 
         // ===== CONSTANTS =====
         this.PLACEHOLDER_REGEX = /\{([^{}]+)\}|\[([^\[\]]+)\]/g;
@@ -68,9 +69,25 @@ class ContractForm {
     // SECTION 1: INITIALIZATION
     // ========================================
 
+    loadVariableDefinitions() {
+        try {
+            const definitionsScript = document.getElementById('variableDefinitions');
+            if (definitionsScript) {
+                const definitionsText = definitionsScript.textContent.trim();
+                if (definitionsText) {
+                    this.variableDefinitions = JSON.parse(definitionsText);
+                    console.log('Loaded variable definitions:', this.variableDefinitions.length);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load variable definitions:', error);
+        }
+    }
+
     init() {
         // 먼저 JSON 데이터 파싱
         this.parseJsonData();
+        this.loadVariableDefinitions();
         this.loadOwnerData();
 
         console.log('[DEBUG] init - selectedTemplateData:', this.selectedTemplateData);
@@ -665,7 +682,7 @@ class ContractForm {
 
             input.size = inputSize;
             if (maxLength) input.maxLength = maxLength;
-            input.placeholder = this.getPlaceholderExample(varName, upper, normalized);
+            input.placeholder = this.getPlaceholderExample(varName);
 
             const value = this.getDefaultValueForVariable(varName);
             if (value) input.value = value;
@@ -758,82 +775,49 @@ class ContractForm {
     }
 
     createVariableInput(varName) {
-        const upper = varName.toUpperCase();
-        const normalized = upper.replace(/[-_\s]/g, '');
-
-        // 변수 타입에 따라 적절한 문자 수 결정 (size 속성)
-        let inputSize = 10;
-        let maxLength = null;
-
-        // 이름 관련 (최대 6자) - 한글과 영문 모두 지원
-        if (normalized.includes('NAME') || upper === 'EMPLOYER' || upper === 'EMPLOYEE' ||
-            upper.includes('이름') || upper === '사업주' || upper === '근로자' || upper === '직원' ||
-            upper === '갑' || upper === '을') {
-            inputSize = 6;
-            maxLength = 10;
-        }
-        // 날짜 관련 (yyyy-mm-dd = 10자)
-        else if (normalized.includes('DATE') || upper.includes('날짜') || upper.includes('일자') ||
-            upper.includes('계약일') || upper.includes('시작일') || upper.includes('종료일')) {
-            inputSize = 11;
-            maxLength = 10;
-        }
-        // 시간 관련 (hh:mm = 5자)
-        else if (normalized.includes('TIME') || upper.includes('시간') || upper.includes('시각')) {
-            inputSize = 6;
-            maxLength = 5;
-        }
-        // 요일, 숫자 등 짧은 값
-        else if (normalized.includes('DAY') || normalized.includes('DAYS') || normalized.includes('HOLIDAYS') ||
-            upper.includes('요일') || upper.includes('휴일')) {
-            inputSize = 4;
-            maxLength = 10;
-        }
-        // 주소, 장소, 업무 등 긴 값 (최대 20자)
-        else if (normalized.includes('ADDRESS') || normalized.includes('WORKPLACE') || normalized.includes('DESCRIPTION') ||
-            upper.includes('주소') || upper.includes('장소') || upper.includes('업무') || upper.includes('내용')) {
-            inputSize = 20;
-            maxLength = 50;
-        }
-        // 급여, 금액 관련
-        else if (normalized.includes('SALARY') || normalized.includes('BONUS') || normalized.includes('ALLOWANCE') ||
-            normalized.includes('PAYMENT') || normalized.includes('METHOD') ||
-            upper.includes('급여') || upper.includes('임금') || upper.includes('금액') || upper.includes('지급') || upper.includes('방법')) {
-            inputSize = 12;
-            maxLength = 30;
-        }
-        // 전화번호
-        else if (normalized.includes('PHONE') || normalized.includes('TEL') || upper.includes('전화') || upper.includes('연락처')) {
-            inputSize = 13;
-            maxLength = 15;
-        }
-        // 이메일
-        else if (normalized.includes('EMAIL') || normalized.includes('MAIL') || upper.includes('이메일') || upper.includes('메일')) {
-            inputSize = 20;
-            maxLength = 50;
-        }
-        // 회사명/조직명
-        else if (normalized.includes('COMPANY') || normalized.includes('ORGANIZATION') ||
-            upper.includes('회사') || upper.includes('조직')) {
-            inputSize = 15;
-            maxLength = 30;
-        }
-
+        // Find variable definition in database
+        const varDef = this.variableDefinitions.find(v => v.name === varName);
+        
         const wrapper = document.createElement('span');
         wrapper.className = 'contract-variable-underline';
         wrapper.setAttribute('data-variable-name', varName);
 
         const input = document.createElement('input');
-        input.type = 'text';
         input.className = 'contract-input-inline';
-        input.size = inputSize;
-        if (maxLength) {
-            input.maxLength = maxLength;
-        }
         input.setAttribute('data-variable-name', varName);
 
-        // 적절한 플레이스홀더 설정
-        input.placeholder = this.getPlaceholderExample(varName, upper, normalized);
+        // Use database definition if available, otherwise fallback to legacy logic
+        if (varDef) {
+            // Use HTML5 input type based on database definition
+            input.type = this.getHtmlInputType(varDef.type);
+            
+            // Set size and maxLength based on database definition or fallback
+            if (varDef.validationRule && varDef.validationRule.maxLength) {
+                input.maxLength = varDef.validationRule.maxLength;
+                input.size = Math.min(varDef.validationRule.maxLength, 20);
+            } else {
+                input.size = this.getDefaultInputSize(varName);
+            }
+            
+            // Set placeholder from database
+            input.placeholder = varDef.placeholderExample || this.getPlaceholderExample(varName);
+            
+            // Add HTML5 validation attributes
+            if (varDef.validationRule && varDef.validationRule.pattern) {
+                input.pattern = varDef.validationRule.pattern;
+            }
+            if (varDef.required) {
+                input.required = true;
+            }
+        } else {
+            // Fallback to legacy logic
+            const upper = varName.toUpperCase();
+            const normalized = upper.replace(/[-_\s]/g, '');
+            
+            input.type = 'text';
+            input.size = this.getDefaultInputSize(varName);
+            input.placeholder = this.getPlaceholderExample(varName);
+        }
 
         // 자동 값 설정
         const value = this.getDefaultValueForVariable(varName);
@@ -847,80 +831,40 @@ class ContractForm {
         return wrapper;
     }
 
-    getPlaceholderExample(varName, upper, normalized) {
-        // 이름 관련
-        if (normalized.includes('NAME') || upper === 'EMPLOYER' || upper === 'EMPLOYEE' ||
-            upper.includes('이름') || upper === '사업주' || upper === '근로자' || upper === '직원' ||
-            upper === '갑' || upper === '을') {
-            if (upper.includes('EMPLOYEE') || upper.includes('근로자') || upper.includes('직원') || upper === '을') {
-                return '예) 홍길동';
-            }
-            return '예) 김철수';
-        }
-        // 날짜 관련
-        if (normalized.includes('DATE') || upper.includes('날짜') || upper.includes('일자') ||
-            upper.includes('계약일') || upper.includes('시작일') || upper.includes('종료일')) {
-            return '예) 2025-01-01';
-        }
-        // 시간 관련
-        if (normalized.includes('TIME') || upper.includes('시간') || upper.includes('시각')) {
-            return '예) 09:00';
-        }
-        // 요일
-        if (normalized.includes('DAY') || normalized.includes('DAYS') || upper.includes('요일')) {
-            return '예) 월~금';
-        }
-        // 휴일
-        if (normalized.includes('HOLIDAYS') || upper.includes('휴일')) {
-            return '예) 토, 일요일';
-        }
-        // 주소
-        if (normalized.includes('ADDRESS') || upper.includes('주소')) {
-            return '예) 서울시 강남구';
-        }
-        // 장소
-        if (normalized.includes('WORKPLACE') || upper.includes('장소')) {
-            return '예) 본사 사무실';
-        }
-        // 업무 내용
-        if (normalized.includes('DESCRIPTION') || normalized.includes('JOB') || upper.includes('업무') || upper.includes('내용')) {
-            return '예) 소프트웨어 개발';
-        }
-        // 급여
-        if (normalized.includes('SALARY') || upper.includes('급여') || upper.includes('임금')) {
-            return '예) 3,000,000';
-        }
-        // 상여금
-        if (normalized.includes('BONUS') || upper.includes('상여')) {
-            return '예) 연 500만원';
-        }
-        // 수당
-        if (normalized.includes('ALLOWANCE') || upper.includes('수당')) {
-            return '예) 식대 10만원';
-        }
-        // 지급일
-        if (normalized.includes('PAYMENT') && normalized.includes('DAY') || upper.includes('지급일')) {
-            return '예) 25';
-        }
-        // 지급방법
-        if (normalized.includes('METHOD') || upper.includes('방법')) {
-            return '예) 계좌이체';
-        }
-        // 전화번호
-        if (normalized.includes('PHONE') || normalized.includes('TEL') || upper.includes('전화') || upper.includes('연락처')) {
-            return '예) 010-1234-5678';
-        }
-        // 이메일
-        if (normalized.includes('EMAIL') || normalized.includes('MAIL') || upper.includes('이메일') || upper.includes('메일')) {
-            return '예) hong@example.com';
-        }
-        // 회사명
-        if (normalized.includes('COMPANY') || normalized.includes('ORGANIZATION') || upper.includes('회사') || upper.includes('조직')) {
-            return '예) (주)테크컴퍼니';
-        }
+    getHtmlInputType(variableType) {
+        const typeMap = {
+            'TEXT': 'text',
+            'TIME': 'time',
+            'DATE': 'date',
+            'EMAIL': 'email',
+            'NUMBER': 'number',
+            'TEL': 'tel',
+            'URL': 'url',
+            'IMAGE': 'text' // For now, use text for image variables
+        };
+        return typeMap[variableType] || 'text';
+    }
 
-        // 기본값
-        return '';
+    getDefaultInputSize(varName) {
+        // DB 데이터 우선 (대부분 createVariableInput에서 이미 처리됨)
+        const varDef = this.variableDefinitions.find(v => v.name === varName);
+        if (varDef && varDef.inputSize) {
+            return varDef.inputSize;
+        }
+        
+        // 폴백: 기본값 반환
+        return 10;
+    }
+
+    getPlaceholderExample(varName) {
+        // DB 데이터 우선
+        const varDef = this.variableDefinitions.find(v => v.name === varName);
+        if (varDef && varDef.placeholderExample) {
+            return varDef.placeholderExample;
+        }
+        
+        // 폴백: 기본 메시지
+        return '입력하세요';
     }
 
     createSignatureImage() {

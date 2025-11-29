@@ -87,6 +87,11 @@
                                     <script type="application/json" id="existingContractData"><c:out value="${existingContractJson}"
                                                                                  escapeXml="false"/></script>
                                 </c:if>
+                                
+                                <!-- Variable definitions from database -->
+                                <script id="variableDefinitions" type="application/json">
+<c:out value="${variableDefinitionsJson}" escapeXml="false"/>
+                                </script>
 
                                 <!-- 템플릿 레이아웃 -->
                                 <div id="templateLayout">

@@ -6,13 +6,17 @@ import com.signly.common.security.CurrentUserProvider;
 import com.signly.common.security.SecurityUser;
 import com.signly.common.web.BaseWebController;
 import com.signly.template.application.TemplateService;
+import com.signly.template.application.VariableDefinitionService;
 import com.signly.template.application.dto.CreateTemplateCommand;
 import com.signly.template.application.dto.TemplateResponse;
 import com.signly.template.application.dto.UpdateTemplateCommand;
+import com.signly.template.application.dto.VariableDefinitionDto;
 import com.signly.template.application.preset.PresetSection;
 import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.application.preset.TemplatePresetSummary;
 import com.signly.template.domain.model.TemplateStatus;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.Getter;
@@ -39,15 +43,37 @@ public class TemplateWebController extends BaseWebController {
     private final TemplateService templateService;
     private final CurrentUserProvider currentUserProvider;
     private final TemplatePresetService templatePresetService;
+    private final VariableDefinitionService variableDefinitionService;
+    private final ObjectMapper objectMapper;
 
     public TemplateWebController(
             TemplateService templateService,
             CurrentUserProvider currentUserProvider,
-            TemplatePresetService templatePresetService
+            TemplatePresetService templatePresetService,
+            VariableDefinitionService variableDefinitionService,
+            ObjectMapper objectMapper
     ) {
         this.templateService = templateService;
         this.currentUserProvider = currentUserProvider;
         this.templatePresetService = templatePresetService;
+        this.variableDefinitionService = variableDefinitionService;
+        this.objectMapper = objectMapper;
+    }
+    
+    /**
+     * 변수 정의를 JSON 문자열로 변환하여 Model에 추가
+     */
+    private void addVariableDefinitionsToModel(Model model) {
+        try {
+            String variableDefinitionsJson = objectMapper.writeValueAsString(
+                variableDefinitionService.getAllActiveVariables()
+            );
+            model.addAttribute("variableDefinitionsJson", variableDefinitionsJson);
+        } catch (JsonProcessingException e) {
+            logger.error("Failed to serialize variable definitions to JSON", e);
+            // 실패 시 빈 배열로 폴백
+            model.addAttribute("variableDefinitionsJson", "[]");
+        }
     }
 
     @GetMapping
@@ -90,6 +116,7 @@ public class TemplateWebController extends BaseWebController {
             model.addAttribute("template", new TemplateForm());
             model.addAttribute("presets", templatePresetService.getSummaries());
             model.addAttribute("currentUserId", resolvedUserId);
+            addVariableDefinitionsToModel(model);
             return "templates/form";
         }, "템플릿 생성 폼 조회", "redirect:/templates", model, "템플릿 생성 폼을 불러오는 중 오류가 발생했습니다.");
     }
@@ -107,6 +134,7 @@ public class TemplateWebController extends BaseWebController {
         if (bindingResult.hasErrors()) {
             addPageTitle(model, "새 템플릿 생성");
             model.addAttribute("presets", templatePresetService.getSummaries());
+            addVariableDefinitionsToModel(model);
             return "templates/form";
         }
 
@@ -164,6 +192,7 @@ public class TemplateWebController extends BaseWebController {
             model.addAttribute("template", form);
             model.addAttribute("templateId", templateId);
             model.addAttribute("presets", templatePresetService.getSummaries());
+            addVariableDefinitionsToModel(model);
             return "templates/form";
 
         } catch (Exception e) {
@@ -189,6 +218,7 @@ public class TemplateWebController extends BaseWebController {
                 model.addAttribute("pageTitle", "템플릿 수정");
                 model.addAttribute("templateId", templateId);
                 model.addAttribute("presets", templatePresetService.getSummaries());
+                addVariableDefinitionsToModel(model);
                 return "templates/form";
             }
 
@@ -206,6 +236,7 @@ public class TemplateWebController extends BaseWebController {
             model.addAttribute("pageTitle", "템플릿 수정");
             model.addAttribute("templateId", templateId);
             model.addAttribute("presets", templatePresetService.getSummaries());
+            addVariableDefinitionsToModel(model);
             return "templates/form";
 
         } catch (BusinessException e) {
@@ -214,6 +245,7 @@ public class TemplateWebController extends BaseWebController {
             model.addAttribute("pageTitle", "템플릿 수정");
             model.addAttribute("templateId", templateId);
             model.addAttribute("presets", templatePresetService.getSummaries());
+            addVariableDefinitionsToModel(model);
             return "templates/form";
 
         } catch (Exception e) {
@@ -222,6 +254,7 @@ public class TemplateWebController extends BaseWebController {
             model.addAttribute("pageTitle", "템플릿 수정");
             model.addAttribute("templateId", templateId);
             model.addAttribute("presets", templatePresetService.getSummaries());
+            addVariableDefinitionsToModel(model);
             return "templates/form";
         }
     }
@@ -255,6 +288,18 @@ public class TemplateWebController extends BaseWebController {
                         new TemplatePresetSectionsResponse(preset.getId(), preset.getName(), preset.getSections())
                 ))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/variables")
+    @ResponseBody
+    public ResponseEntity<java.util.List<VariableDefinitionDto>> getVariableDefinitions() {
+        return ResponseEntity.ok(variableDefinitionService.getAllActiveVariables());
+    }
+
+    @GetMapping("/variables/grouped")
+    @ResponseBody
+    public ResponseEntity<java.util.Map<String, java.util.List<VariableDefinitionDto>>> getVariableDefinitionsGrouped() {
+        return ResponseEntity.ok(variableDefinitionService.getVariablesByCategory());
     }
 
 

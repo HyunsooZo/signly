@@ -65,30 +65,16 @@
                                 <!-- 변수 툴바 카드 (Sticky) -->
                                 <div class="card border-0 shadow-sm mb-4 sticky-top" style="top: 20px; z-index: 100;">
                                     <div class="card-body py-3">
-                                        <div class="d-flex align-items-center flex-wrap gap-2">
+                                        <div class="d-flex align-items-center flex-wrap gap-2" id="variableToolbar">
                                             <small class="text-muted me-2 fw-bold"><i class="bi bi-braces me-1"></i>변수
                                                 도구상자:</small>
-                                            <button type="button" class="btn btn-sm btn-variable-tool rounded-pill"
-                                                onclick="insertVariable('[EMPLOYER]')"><i
-                                                    class="bi bi-person-badge me-1"></i>사업주</button>
-                                            <button type="button" class="btn btn-sm btn-variable-tool rounded-pill"
-                                                onclick="insertVariable('[COMPANY_NAME]')"><i
-                                                    class="bi bi-building me-1"></i>회사명</button>
-                                            <button type="button" class="btn btn-sm btn-variable-tool rounded-pill"
-                                                onclick="insertVariable('[EMPLOYEE]')"><i
-                                                    class="bi bi-person me-1"></i>근로자</button>
-                                            <button type="button" class="btn btn-sm btn-variable-tool rounded-pill"
-                                                onclick="insertVariable('[CONTRACT_DATE]')"><i
-                                                    class="bi bi-calendar-event me-1"></i>계약일</button>
-                                            <button type="button" class="btn btn-sm btn-variable-tool rounded-pill"
-                                                onclick="insertVariable('[WORKPLACE]')"><i
-                                                    class="bi bi-geo-alt me-1"></i>근무장소</button>
-                                            <button type="button" class="btn btn-sm btn-variable-tool rounded-pill"
-                                                onclick="insertVariable('[JOB_DESCRIPTION]')"><i
-                                                    class="bi bi-briefcase me-1"></i>업무내용</button>
-                                            <button type="button" class="btn btn-sm btn-variable-tool rounded-pill"
-                                                onclick="insertVariable('[MONTHLY_SALARY]')"><i
-                                                    class="bi bi-cash me-1"></i>월급</button>
+                                            <!-- 변수 버튼들이 여기에 동적으로 추가됩니다 -->
+                                            <div id="variableButtons" class="d-flex align-items-center flex-wrap gap-2">
+                                                <!-- 로딩 중 표시 -->
+                                                <div class="spinner-border spinner-border-sm text-muted" role="status">
+                                                    <span class="visually-hidden">로딩 중...</span>
+                                                </div>
+                                            </div>
                                             <button type="button" class="btn btn-sm btn-secondary rounded-pill ms-auto"
                                                 onclick="showVariableModal()">
                                                 <i class="bi bi-plus-lg me-1"></i>전체보기
@@ -132,68 +118,13 @@
                     <h5 class="mb-3">변수 선택</h5>
                     <p class="text-muted small">클릭하여 현재 커서 위치에 변수를 삽입합니다</p>
 
-                    <div class="mb-3">
-                        <strong>근로자 정보</strong>
-                        <div class="variable-grid">
-                            <div class="variable-item" onclick="insertVariable('[EMPLOYEE]')">근로자</div>
-                            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_ADDRESS]')">근로자주소</div>
-                            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_PHONE]')">근로자연락처</div>
-                            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_ID]')">주민등록번호</div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <strong>사업주 정보</strong>
-                        <div class="variable-grid">
-                            <div class="variable-item" onclick="insertVariable('[EMPLOYER]')">사업주</div>
-                            <div class="variable-item" onclick="insertVariable('[COMPANY_NAME]')">회사명</div>
-                            <div class="variable-item" onclick="insertVariable('[EMPLOYER_ADDRESS]')">사업주주소</div>
-                            <div class="variable-item" onclick="insertVariable('[EMPLOYER_PHONE]')">사업주전화</div>
-                            <div class="variable-item" onclick="insertVariable('[BUSINESS_NUMBER]')">사업자번호</div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <strong>계약 정보</strong>
-                        <div class="variable-grid">
-                            <div class="variable-item" onclick="insertVariable('[CONTRACT_START_DATE]')">시작일</div>
-                            <div class="variable-item" onclick="insertVariable('[CONTRACT_END_DATE]')">종료일</div>
-                            <div class="variable-item" onclick="insertVariable('[CONTRACT_DATE]')">계약일</div>
-                            <div class="variable-item" onclick="insertVariable('[WORKPLACE]')">근무장소</div>
-                            <div class="variable-item" onclick="insertVariable('[JOB_DESCRIPTION]')">업무내용</div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <strong>근무 조건</strong>
-                        <div class="variable-grid">
-                            <div class="variable-item" onclick="insertVariable('[WORK_START_TIME]')">근무시작</div>
-                            <div class="variable-item" onclick="insertVariable('[WORK_END_TIME]')">근무종료</div>
-                            <div class="variable-item" onclick="insertVariable('[BREAK_START_TIME]')">휴게시작</div>
-                            <div class="variable-item" onclick="insertVariable('[BREAK_END_TIME]')">휴게종료</div>
-                            <div class="variable-item" onclick="insertVariable('[WORK_DAYS]')">근무일수</div>
-                            <div class="variable-item" onclick="insertVariable('[HOLIDAYS]')">휴일</div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <strong>임금 정보</strong>
-                        <div class="variable-grid">
-                            <div class="variable-item" onclick="insertVariable('[MONTHLY_SALARY]')">월급</div>
-                            <div class="variable-item" onclick="insertVariable('[HOURLY_WAGE]')">시급</div>
-                            <div class="variable-item" onclick="insertVariable('[BONUS]')">상여금</div>
-                            <div class="variable-item" onclick="insertVariable('[OTHER_ALLOWANCES]')">기타수당</div>
-                            <div class="variable-item" onclick="insertVariable('[PAYMENT_DAY]')">지급일</div>
-                            <div class="variable-item" onclick="insertVariable('[PAYMENT_METHOD]')">지급방법</div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <strong>서명</strong>
-                        <div class="variable-grid">
-                            <div class="variable-item" onclick="insertVariable('[EMPLOYER_SIGNATURE]')">사업주서명</div>
-                            <div class="variable-item" onclick="insertVariable('[EMPLOYEE_SIGNATURE]')">근로자서명</div>
-                            <div class="variable-item" onclick="insertVariable('[SIGNATURE_DATE]')">서명일</div>
+                    <div id="variableCategories">
+                        <!-- 변수 카테고리들이 여기에 동적으로 추가됩니다 -->
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">로딩 중...</span>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">변수 목록을 불러오는 중...</p>
                         </div>
                     </div>
 
@@ -246,6 +177,11 @@
                 <c:set var="sectionsJsonSafe" value="${fn:replace(sectionsJsonRaw, '</script>', '<&#92;/script>')}" />
                 <script id="initialSections"
                     type="application/json"><c:out value="${sectionsJsonSafe}" escapeXml="false" /></script>
+                
+                <!-- Variable definitions from database -->
+                <script id="variableDefinitions" type="application/json">
+<c:out value="${variableDefinitionsJson}" escapeXml="false"/>
+                </script>
                 <script src="/js/alerts.js"></script>
                 <script src="/js/template-builder.js"></script>
                 <script>
@@ -299,6 +235,7 @@
                     document.addEventListener('DOMContentLoaded', function () {
                         TemplateBuilder.sections.loadInitialSections();
                         TemplateBuilder.presets.load();
+                        TemplateBuilder.variables.loadVariableDefinitions();
                     });
                 </script>
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

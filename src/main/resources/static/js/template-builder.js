@@ -13,6 +13,10 @@ const TemplateBuilder = {
     // 상수 정의
     constants: {
         FRONTEND_TYPES: new Set(['text', 'clause', 'dotted', 'footer', 'signature', 'html', 'title']),
+        
+        // DEPRECATED: 이 객체는 폴백(fallback)용으로만 사용됩니다
+        // 정상 동작 시에는 DB에서 로드한 variableDefinitions를 우선 사용합니다
+        // DB 연결 실패 또는 변수 정의가 없을 경우에만 이 하드코딩된 값을 사용합니다
         VARIABLE_DISPLAY_NAMES: {
             'EMPLOYER': '사업주',
             'EMPLOYEE': '근로자',
@@ -91,7 +95,25 @@ const TemplateBuilder = {
         },
 
         getDisplayName(varName) {
-            return TemplateBuilder.constants.VARIABLE_DISPLAY_NAMES[varName] || varName;
+            // 1순위: DB 데이터에서 찾기
+            if (TemplateBuilder.variables && TemplateBuilder.variables.variableDefinitions) {
+                const dbDef = TemplateBuilder.variables.variableDefinitions.find(
+                    v => v.name === varName
+                );
+                if (dbDef && dbDef.displayName) {
+                    return dbDef.displayName;
+                }
+            }
+            
+            // 2순위: 폴백 (하드코딩된 이름 - 하위 호환성용)
+            const fallbackName = TemplateBuilder.constants.VARIABLE_DISPLAY_NAMES[varName];
+            if (fallbackName) {
+                console.warn(`[Fallback] Using hardcoded display name for variable: ${varName}`);
+                return fallbackName;
+            }
+            
+            // 3순위: 변수명 그대로 반환
+            return varName;
         }
     },
 
@@ -275,6 +297,214 @@ const TemplateBuilder = {
 
     // 변수 처리
     variables: {
+        variableDefinitions: [],
+
+        loadVariableDefinitions() {
+            try {
+                const definitionsScript = document.getElementById('variableDefinitions');
+                if (definitionsScript) {
+                    const definitionsText = definitionsScript.textContent.trim();
+                    if (definitionsText) {
+                        this.variableDefinitions = JSON.parse(definitionsText);
+                        console.log('Loaded variable definitions:', this.variableDefinitions.length);
+                        this.populateVariableToolbar();
+                        this.populateVariableModal();
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load variable definitions:', error);
+                // Fallback to hardcoded variables
+                this.populateVariableToolbar();
+                this.populateVariableModal();
+            }
+        },
+
+        populateVariableToolbar() {
+            const toolbarContainer = document.getElementById('variableButtons');
+            if (!toolbarContainer) return;
+
+            toolbarContainer.innerHTML = '';
+
+            if (this.variableDefinitions.length === 0) {
+                // Fallback to hardcoded variables
+                const fallbackVariables = [
+                    { name: 'EMPLOYER', displayName: '사업주', icon: 'person-badge' },
+                    { name: 'COMPANY_NAME', displayName: '회사명', icon: 'building' },
+                    { name: 'EMPLOYEE', displayName: '근로자', icon: 'person' },
+                    { name: 'CONTRACT_DATE', displayName: '계약일', icon: 'calendar-event' },
+                    { name: 'WORKPLACE', displayName: '근무장소', icon: 'geo-alt' },
+                    { name: 'JOB_DESCRIPTION', displayName: '업무내용', icon: 'briefcase' },
+                    { name: 'MONTHLY_SALARY', displayName: '월급', icon: 'cash' }
+                ];
+
+                fallbackVariables.forEach(variable => {
+                    const button = this.createVariableButton(variable);
+                    toolbarContainer.appendChild(button);
+                });
+            } else {
+                // Show first 7 most important variables in toolbar
+                const priorityVariables = this.variableDefinitions
+                    .filter(v => v.category === 'EMPLOYEE_INFO' || v.category === 'EMPLOYER_INFO' || v.name === 'CONTRACT_DATE')
+                    .slice(0, 7);
+
+                priorityVariables.forEach(variable => {
+                    const button = this.createVariableButton(variable);
+                    toolbarContainer.appendChild(button);
+                });
+            }
+        },
+
+        createVariableButton(variable) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn btn-sm btn-variable-tool rounded-pill';
+            button.onclick = () => this.insert('[' + variable.name + ']');
+
+            const icon = document.createElement('i');
+            icon.className = 'bi bi-' + this.getVariableIcon(variable.name) + ' me-1';
+
+            const text = document.createTextNode(variable.displayName || variable.name);
+
+            button.appendChild(icon);
+            button.appendChild(text);
+
+            return button;
+        },
+
+        getVariableIcon(variableName) {
+            const iconMap = {
+                'EMPLOYER': 'person-badge',
+                'COMPANY_NAME': 'building',
+                'EMPLOYEE': 'person',
+                'CONTRACT_DATE': 'calendar-event',
+                'WORKPLACE': 'geo-alt',
+                'JOB_DESCRIPTION': 'briefcase',
+                'MONTHLY_SALARY': 'cash',
+                'WORK_START_TIME': 'clock',
+                'WORK_END_TIME': 'clock',
+                'BREAK_START_TIME': 'clock',
+                'BREAK_END_TIME': 'clock',
+                'HOURLY_WAGE': 'cash',
+                'BONUS': 'cash',
+                'PAYMENT_DAY': 'calendar-check',
+                'EMPLOYEE_ADDRESS': 'house',
+                'EMPLOYER_ADDRESS': 'house',
+                'EMPLOYEE_PHONE': 'telephone',
+                'EMPLOYER_PHONE': 'telephone',
+                'BUSINESS_NUMBER': 'card-text',
+                'EMPLOYEE_ID': 'card-text',
+                'EMPLOYER_SIGNATURE': 'pen',
+                'EMPLOYEE_SIGNATURE': 'pen',
+                'SIGNATURE_DATE': 'calendar-check'
+            };
+            return iconMap[variableName] || 'tag';
+        },
+
+        populateVariableModal() {
+            const modalContainer = document.getElementById('variableCategories');
+            if (!modalContainer) return;
+
+            modalContainer.innerHTML = '';
+
+            if (this.variableDefinitions.length === 0) {
+                // Fallback to hardcoded categories
+                this.createFallbackCategories(modalContainer);
+            } else {
+                // Group variables by category
+                const groupedVariables = {};
+                this.variableDefinitions.forEach(variable => {
+                    if (!groupedVariables[variable.category]) {
+                        groupedVariables[variable.category] = [];
+                    }
+                    groupedVariables[variable.category].push(variable);
+                });
+
+                // Create category sections
+                Object.keys(groupedVariables).sort().forEach(category => {
+                    this.createVariableCategory(modalContainer, category, groupedVariables[category]);
+                });
+            }
+        },
+
+        createVariableCategory(container, category, variables) {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'mb-3';
+
+            const categoryTitle = document.createElement('strong');
+            categoryTitle.textContent = this.getCategoryDisplayName(category);
+            categoryDiv.appendChild(categoryTitle);
+
+            const gridDiv = document.createElement('div');
+            gridDiv.className = 'variable-grid';
+
+            variables.forEach(variable => {
+                const variableDiv = document.createElement('div');
+                variableDiv.className = 'variable-item';
+                variableDiv.textContent = variable.displayName || variable.name;
+                variableDiv.onclick = () => this.insert('[' + variable.name + ']');
+                gridDiv.appendChild(variableDiv);
+            });
+
+            categoryDiv.appendChild(gridDiv);
+            container.appendChild(categoryDiv);
+        },
+
+        getCategoryDisplayName(category) {
+            const categoryNames = {
+                'EMPLOYEE_INFO': '근로자 정보',
+                'EMPLOYER_INFO': '사업주 정보',
+                'CONTRACT_INFO': '계약 정보',
+                'WORK_CONDITION': '근무 조건',
+                'SALARY_INFO': '임금 정보',
+                'SIGNATURE': '서명'
+            };
+            return categoryNames[category] || category;
+        },
+
+        createFallbackCategories(container) {
+            const fallbackData = [
+                {
+                    category: 'EMPLOYEE_INFO',
+                    displayName: '근로자 정보',
+                    variables: ['EMPLOYEE', 'EMPLOYEE_ADDRESS', 'EMPLOYEE_PHONE', 'EMPLOYEE_ID']
+                },
+                {
+                    category: 'EMPLOYER_INFO',
+                    displayName: '사업주 정보',
+                    variables: ['EMPLOYER', 'COMPANY_NAME', 'EMPLOYER_ADDRESS', 'EMPLOYER_PHONE', 'BUSINESS_NUMBER']
+                },
+                {
+                    category: 'CONTRACT_INFO',
+                    displayName: '계약 정보',
+                    variables: ['CONTRACT_START_DATE', 'CONTRACT_END_DATE', 'CONTRACT_DATE', 'WORKPLACE', 'JOB_DESCRIPTION']
+                },
+                {
+                    category: 'WORK_CONDITION',
+                    displayName: '근무 조건',
+                    variables: ['WORK_START_TIME', 'WORK_END_TIME', 'BREAK_START_TIME', 'BREAK_END_TIME', 'WORK_DAYS', 'HOLIDAYS']
+                },
+                {
+                    category: 'SALARY_INFO',
+                    displayName: '임금 정보',
+                    variables: ['MONTHLY_SALARY', 'HOURLY_WAGE', 'BONUS', 'OTHER_ALLOWANCES', 'PAYMENT_DAY', 'PAYMENT_METHOD']
+                },
+                {
+                    category: 'SIGNATURE',
+                    displayName: '서명',
+                    variables: ['EMPLOYER_SIGNATURE', 'EMPLOYEE_SIGNATURE', 'SIGNATURE_DATE']
+                }
+            ];
+
+            fallbackData.forEach(categoryData => {
+                this.createVariableCategory(container, categoryData.category, 
+                    categoryData.variables.map(name => ({
+                        name: name,
+                        displayName: TemplateBuilder.utils.getDisplayName(name)
+                    }))
+                );
+            });
+        },
+
         convertVariablesToBrackets(html) {
             if (!html) return '';
             return html.replace(/<span class="template-variable"[^>]*data-var-name="([^"]+)"[^>]*>(?:<span[^>]*>[^<]*<\/span>)*<\/span>/g, '[$1]');
