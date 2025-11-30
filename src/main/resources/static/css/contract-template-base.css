@@ -124,6 +124,14 @@ body:not(:has(.navbar)) {
     height: 100%;
 }
 
+.signature-placeholder-box {
+    border: 2px dashed rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.05);
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
 /* 밑줄 변수 스타일 - PDF와 웹 공통 (통합 버전) */
 .blank-line {
     display: inline-block;

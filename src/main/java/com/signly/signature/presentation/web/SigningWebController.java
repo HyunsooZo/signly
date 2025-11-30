@@ -1,7 +1,9 @@
 package com.signly.signature.presentation.web;
 
+import com.signly.common.image.ImageResizer;
 import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.ContractResponse;
+import com.signly.signature.application.FirstPartySignatureService;
 import com.signly.signature.application.SignatureService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +22,13 @@ public class SigningWebController {
     private static final Logger logger = LoggerFactory.getLogger(SigningWebController.class);
     private final ContractService contractService;
     private final SignatureService signatureService;
+    private final FirstPartySignatureService firstPartySignatureService;
+    private final ImageResizer imageResizer;
 
     @GetMapping("/{token}")
     public String signingPage(
             @PathVariable String token,
-            Model model
-    ) {
+            Model model) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -39,6 +42,10 @@ public class SigningWebController {
             model.addAttribute("contract", contract);
             model.addAttribute("token", token);
 
+            // 서명 이미지 처리 및 플레이스홀더 교체
+            String processedContent = processSignaturePlaceholders(contract);
+            model.addAttribute("processedContent", processedContent);
+
             return "sign/signature";
 
         } catch (Exception e) {
@@ -51,8 +58,7 @@ public class SigningWebController {
     @GetMapping("/{token}/verify")
     public String verifyPage(
             @PathVariable String token,
-            Model model
-    ) {
+            Model model) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -75,8 +81,7 @@ public class SigningWebController {
             @RequestParam String signerEmail,
             @RequestParam String signerName,
             Model model,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -104,8 +109,7 @@ public class SigningWebController {
             @RequestParam String signatureData,
             @RequestParam String signerEmail,
             @RequestParam String signerName,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         try {
             logger.info("서명 처리 요청: token={}, signerEmail={}", token, signerEmail);
 
@@ -113,7 +117,8 @@ public class SigningWebController {
             String userAgent = request.getHeader("User-Agent");
 
             // Contract 상태 업데이트 및 서명 처리
-            ContractResponse contract = contractService.processSignature(token, signerEmail, signerName, signatureData, ipAddress);
+            ContractResponse contract = contractService.processSignature(token, signerEmail, signerName, signatureData,
+                    ipAddress);
 
             logger.info("서명 처리 완료: contractId={}", contract.getId());
 
@@ -128,8 +133,7 @@ public class SigningWebController {
     @GetMapping("/{token}/complete")
     public String completePage(
             @PathVariable String token,
-            Model model
-    ) {
+            Model model) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -157,5 +161,44 @@ public class SigningWebController {
         }
 
         return request.getRemoteAddr();
+    }
+
+    private String processSignaturePlaceholders(ContractResponse contract) {
+        String content = contract.getContent();
+        if (content == null) {
+            return "";
+        }
+
+        // 1. 갑(사업주) 서명 이미지 처리
+        // 갑의 서명 이미지를 가져와서 [EMPLOYER_SIGNATURE_IMAGE] 태그를 교체
+        String employerSignatureImage = getEmployerSignatureImage(contract.getCreatorId());
+        if (employerSignatureImage != null) {
+            String imageTag = String.format(
+                    "<img src=\"%s\" class=\"signature-stamp-image-element\" alt=\"서명\" style=\"max-width: 100%%; max-height: 100%%;\"/>",
+                    employerSignatureImage);
+            content = content.replace("[EMPLOYER_SIGNATURE_IMAGE]", imageTag);
+        } else {
+            // 서명 이미지가 없으면 빈 문자열로 대체하거나 기본 텍스트 표시
+            content = content.replace("[EMPLOYER_SIGNATURE_IMAGE]", "");
+        }
+
+        // 2. 을(근로자) 서명란 처리
+        // 을의 서명란은 사용자가 서명해야 할 곳이므로 점선 박스로 표시
+        // [EMPLOYEE_SIGNATURE_IMAGE] 태그를 점선 박스 div로 교체
+        String placeholderBox = "<div class=\"signature-placeholder-box\"></div>";
+        content = content.replace("[EMPLOYEE_SIGNATURE_IMAGE]", placeholderBox);
+
+        return content;
+    }
+
+    private String getEmployerSignatureImage(String ownerId) {
+        try {
+            // FirstPartySignatureService를 통해 파일에서 원본 서명 로드
+            String dataUrl = firstPartySignatureService.getSignatureDataUrl(ownerId);
+            return imageResizer.resizeSignatureImage(dataUrl);
+        } catch (Exception e) {
+            logger.warn("갑(사업주) 서명을 찾을 수 없습니다: ownerId={}", ownerId);
+            return null;
+        }
     }
 }
