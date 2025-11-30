@@ -12,44 +12,7 @@ const TemplateBuilder = {
 
     // 상수 정의
     constants: {
-        FRONTEND_TYPES: new Set(['text', 'clause', 'dotted', 'footer', 'signature', 'html', 'title']),
-        
-        // DEPRECATED: 이 객체는 폴백(fallback)용으로만 사용됩니다
-        // 정상 동작 시에는 DB에서 로드한 variableDefinitions를 우선 사용합니다
-        // DB 연결 실패 또는 변수 정의가 없을 경우에만 이 하드코딩된 값을 사용합니다
-        VARIABLE_DISPLAY_NAMES: {
-            'EMPLOYER': '사업주',
-            'EMPLOYEE': '근로자',
-            'WORKPLACE': '근무장소',
-            'CONTRACT_START_DATE': '시작일',
-            'CONTRACT_END_DATE': '종료일',
-            'JOB_DESCRIPTION': '업무내용',
-            'WORK_START_TIME': '근무시작',
-            'WORK_END_TIME': '근무종료',
-            'BREAK_START_TIME': '휴게시작',
-            'BREAK_END_TIME': '휴게종료',
-            'WORK_DAYS': '근무일수',
-            'HOLIDAYS': '휴일',
-            'MONTHLY_SALARY': '월급',
-            'BONUS': '상여금',
-            'OTHER_ALLOWANCES': '기타수당',
-            'PAYMENT_DAY': '지급일',
-            'PAYMENT_METHOD': '지급방법',
-            'CONTRACT_DATE': '계약일',
-            'EMPLOYEE_ADDRESS': '근로자주소',
-            'EMPLOYEE_PHONE': '근로자연락처',
-            'COMPANY_NAME': '회사명',
-            'EMPLOYER_ADDRESS': '사업주주소',
-            'EMPLOYER_PHONE': '사업주전화',
-            'EMPLOYEE_SIGNATURE_IMAGE': '근로자서명',
-            'EMPLOYER_SIGNATURE_IMAGE': '사업주서명',
-            'EMPLOYEE_ID': '주민등록번호',
-            'BUSINESS_NUMBER': '사업자번호',
-            'HOURLY_WAGE': '시급',
-            'EMPLOYER_SIGNATURE': '사업주서명',
-            'EMPLOYEE_SIGNATURE': '근로자서명',
-            'SIGNATURE_DATE': '서명일'
-        }
+        FRONTEND_TYPES: new Set(['text', 'clause', 'dotted', 'footer', 'signature', 'html', 'title'])
     },
 
     // 유틸리티 함수
@@ -95,7 +58,7 @@ const TemplateBuilder = {
         },
 
         getDisplayName(varName) {
-            // 1순위: DB 데이터에서 찾기
+            // DB 데이터에서 찾기
             if (TemplateBuilder.variables && TemplateBuilder.variables.variableDefinitions) {
                 const dbDef = TemplateBuilder.variables.variableDefinitions.find(
                     v => v.name === varName
@@ -104,15 +67,8 @@ const TemplateBuilder = {
                     return dbDef.displayName;
                 }
             }
-            
-            // 2순위: 폴백 (하드코딩된 이름 - 하위 호환성용)
-            const fallbackName = TemplateBuilder.constants.VARIABLE_DISPLAY_NAMES[varName];
-            if (fallbackName) {
-                console.warn(`[Fallback] Using hardcoded display name for variable: ${varName}`);
-                return fallbackName;
-            }
-            
-            // 3순위: 변수명 그대로 반환
+
+            // DB에 없으면 변수명 그대로 반환
             return varName;
         }
     },
@@ -326,32 +282,23 @@ const TemplateBuilder = {
             toolbarContainer.innerHTML = '';
 
             if (this.variableDefinitions.length === 0) {
-                // Fallback to hardcoded variables
-                const fallbackVariables = [
-                    { name: 'EMPLOYER', displayName: '사업주', icon: 'person-badge' },
-                    { name: 'COMPANY_NAME', displayName: '회사명', icon: 'building' },
-                    { name: 'EMPLOYEE', displayName: '근로자', icon: 'person' },
-                    { name: 'CONTRACT_DATE', displayName: '계약일', icon: 'calendar-event' },
-                    { name: 'WORKPLACE', displayName: '근무장소', icon: 'geo-alt' },
-                    { name: 'JOB_DESCRIPTION', displayName: '업무내용', icon: 'briefcase' },
-                    { name: 'MONTHLY_SALARY', displayName: '월급', icon: 'cash' }
-                ];
-
-                fallbackVariables.forEach(variable => {
-                    const button = this.createVariableButton(variable);
-                    toolbarContainer.appendChild(button);
-                });
-            } else {
-                // Show first 7 most important variables in toolbar
-                const priorityVariables = this.variableDefinitions
-                    .filter(v => v.category === 'EMPLOYEE_INFO' || v.category === 'EMPLOYER_INFO' || v.name === 'CONTRACT_DATE')
-                    .slice(0, 7);
-
-                priorityVariables.forEach(variable => {
-                    const button = this.createVariableButton(variable);
-                    toolbarContainer.appendChild(button);
-                });
+                // Show empty state message
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'text-muted small';
+                emptyMessage.textContent = '변수가 없습니다';
+                toolbarContainer.appendChild(emptyMessage);
+                return;
             }
+
+            // Show first 7 most important variables in toolbar
+            const priorityVariables = this.variableDefinitions
+                .filter(v => v.category === 'EMPLOYEE_INFO' || v.category === 'EMPLOYER_INFO' || v.name === 'CONTRACT_DATE')
+                .slice(0, 7);
+
+            priorityVariables.forEach(variable => {
+                const button = this.createVariableButton(variable);
+                toolbarContainer.appendChild(button);
+            });
         },
 
         createVariableButton(variable) {
@@ -407,23 +354,27 @@ const TemplateBuilder = {
             modalContainer.innerHTML = '';
 
             if (this.variableDefinitions.length === 0) {
-                // Fallback to hardcoded categories
-                this.createFallbackCategories(modalContainer);
-            } else {
-                // Group variables by category
-                const groupedVariables = {};
-                this.variableDefinitions.forEach(variable => {
-                    if (!groupedVariables[variable.category]) {
-                        groupedVariables[variable.category] = [];
-                    }
-                    groupedVariables[variable.category].push(variable);
-                });
-
-                // Create category sections
-                Object.keys(groupedVariables).sort().forEach(category => {
-                    this.createVariableCategory(modalContainer, category, groupedVariables[category]);
-                });
+                // Show empty state message
+                const emptyState = document.createElement('div');
+                emptyState.className = 'text-muted text-center py-4';
+                emptyState.innerHTML = '<i class="bi bi-inbox"></i><div class="mt-2">사용 가능한 변수가 없습니다</div>';
+                modalContainer.appendChild(emptyState);
+                return;
             }
+
+            // Group variables by category
+            const groupedVariables = {};
+            this.variableDefinitions.forEach(variable => {
+                if (!groupedVariables[variable.category]) {
+                    groupedVariables[variable.category] = [];
+                }
+                groupedVariables[variable.category].push(variable);
+            });
+
+            // Create category sections
+            Object.keys(groupedVariables).sort().forEach(category => {
+                this.createVariableCategory(modalContainer, category, groupedVariables[category]);
+            });
         },
 
         createVariableCategory(container, category, variables) {
@@ -459,50 +410,6 @@ const TemplateBuilder = {
                 'SIGNATURE': '서명'
             };
             return categoryNames[category] || category;
-        },
-
-        createFallbackCategories(container) {
-            const fallbackData = [
-                {
-                    category: 'EMPLOYEE_INFO',
-                    displayName: '근로자 정보',
-                    variables: ['EMPLOYEE', 'EMPLOYEE_ADDRESS', 'EMPLOYEE_PHONE', 'EMPLOYEE_ID']
-                },
-                {
-                    category: 'EMPLOYER_INFO',
-                    displayName: '사업주 정보',
-                    variables: ['EMPLOYER', 'COMPANY_NAME', 'EMPLOYER_ADDRESS', 'EMPLOYER_PHONE', 'BUSINESS_NUMBER']
-                },
-                {
-                    category: 'CONTRACT_INFO',
-                    displayName: '계약 정보',
-                    variables: ['CONTRACT_START_DATE', 'CONTRACT_END_DATE', 'CONTRACT_DATE', 'WORKPLACE', 'JOB_DESCRIPTION']
-                },
-                {
-                    category: 'WORK_CONDITION',
-                    displayName: '근무 조건',
-                    variables: ['WORK_START_TIME', 'WORK_END_TIME', 'BREAK_START_TIME', 'BREAK_END_TIME', 'WORK_DAYS', 'HOLIDAYS']
-                },
-                {
-                    category: 'SALARY_INFO',
-                    displayName: '임금 정보',
-                    variables: ['MONTHLY_SALARY', 'HOURLY_WAGE', 'BONUS', 'OTHER_ALLOWANCES', 'PAYMENT_DAY', 'PAYMENT_METHOD']
-                },
-                {
-                    category: 'SIGNATURE',
-                    displayName: '서명',
-                    variables: ['EMPLOYER_SIGNATURE', 'EMPLOYEE_SIGNATURE', 'SIGNATURE_DATE']
-                }
-            ];
-
-            fallbackData.forEach(categoryData => {
-                this.createVariableCategory(container, categoryData.category, 
-                    categoryData.variables.map(name => ({
-                        name: name,
-                        displayName: TemplateBuilder.utils.getDisplayName(name)
-                    }))
-                );
-            });
         },
 
         convertVariablesToBrackets(html) {

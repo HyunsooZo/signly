@@ -653,36 +653,28 @@ class ContractForm {
                 return;
             }
 
-            // 변수를 input으로 교체
+            // 변수를 input으로 교체 (DB 정의 사용)
+            const varDef = this.variableDefinitions.find(v => v.name === varName);
+
             const input = document.createElement('input');
-            input.type = 'text';
             input.className = 'contract-input-inline';
             input.setAttribute('data-variable-name', varName);
 
-            // 변수 타입에 따라 size 설정
-            const upper = varName.toUpperCase();
-            const normalized = upper.replace(/[-_\s]/g, '');
-            let inputSize = 10;
-            let maxLength = null;
-
-            if (normalized.includes('NAME') || upper === 'EMPLOYER' || upper === 'EMPLOYEE' ||
-                upper.includes('이름') || upper === '사업주' || upper === '근로자') {
-                inputSize = 6;
-                maxLength = 10;
-            } else if (normalized.includes('DATE') || upper.includes('날짜')) {
-                inputSize = 11;
-                maxLength = 10;
-            } else if (normalized.includes('ADDRESS') || upper.includes('주소')) {
-                inputSize = 20;
-                maxLength = 50;
-            } else if (normalized.includes('PHONE') || upper.includes('전화')) {
-                inputSize = 13;
-                maxLength = 15;
+            // DB 정의를 사용하거나 기본값 사용
+            if (varDef) {
+                input.type = this.getHtmlInputType(varDef.type);
+                if (varDef.validationRule && varDef.validationRule.maxLength) {
+                    input.maxLength = varDef.validationRule.maxLength;
+                    input.size = Math.min(varDef.validationRule.maxLength, 20);
+                } else {
+                    input.size = 10;
+                }
+                input.placeholder = varDef.placeholderExample || '입력하세요';
+            } else {
+                input.type = 'text';
+                input.size = 10;
+                input.placeholder = '입력하세요';
             }
-
-            input.size = inputSize;
-            if (maxLength) input.maxLength = maxLength;
-            input.placeholder = this.getPlaceholderExample(varName);
 
             const value = this.getDefaultValueForVariable(varName);
             if (value) input.value = value;
@@ -917,58 +909,30 @@ class ContractForm {
     }
 
     getDefaultValueForVariable(varName) {
-        if (!varName) return '';
+        if (!varName || !this.ownerInfo) return '';
 
-        const upper = varName.toUpperCase();
-        const normalized = upper.replace(/[-_\s]/g, '');
-
-        // 사업주/고용주 이름
-        if (normalized.includes('EMPLOYER') && normalized.includes('NAME') ||
-            upper === 'EMPLOYER' ||
-            normalized.includes('OWNER') && normalized.includes('NAME') ||
-            upper === '사업주' || upper === '사업주명' || upper === '갑') {
-            return this.ownerInfo?.name || '';
+        // DB 기반 변수 정의에서 defaultSource 확인
+        const varDef = this.variableDefinitions.find(v => v.name === varName);
+        if (varDef && varDef.defaultSource) {
+            // DB에 정의된 defaultSource에 따라 값 반환
+            const sourceMap = {
+                'OWNER_NAME': this.ownerInfo.name,
+                'OWNER_EMAIL': this.ownerInfo.email,
+                'OWNER_COMPANY': this.ownerInfo.companyName,
+                'OWNER_PHONE': this.ownerInfo.businessPhone,
+                'OWNER_ADDRESS': this.ownerInfo.businessAddress
+            };
+            return sourceMap[varDef.defaultSource] || '';
         }
 
-        // 사업주/고용주 이메일
-        if (normalized.includes('EMPLOYER') && normalized.includes('EMAIL') ||
-            normalized.includes('OWNER') && normalized.includes('EMAIL') ||
-            upper === '사업주이메일') {
-            return this.ownerInfo?.email || '';
-        }
-
-        // 회사명/조직명
-        if (normalized.includes('COMPANY') || normalized.includes('ORGANIZATION') ||
-            upper === '회사' || upper === '회사명' || upper === '조직' || upper === '조직명') {
-            return this.ownerInfo?.companyName || '';
-        }
-
-        // 사업주 전화번호
-        if (normalized.includes('EMPLOYER') && (normalized.includes('PHONE') || normalized.includes('TEL')) ||
-            normalized.includes('OWNER') && (normalized.includes('PHONE') || normalized.includes('TEL')) ||
-            upper === '사업주전화번호' || upper === '사업장전화번호' || upper === '업체전화번호') {
-            return this.ownerInfo?.businessPhone || '';
-        }
-
-        // 사업주 주소
-        if (normalized.includes('EMPLOYER') && normalized.includes('ADDRESS') ||
-            normalized.includes('OWNER') && normalized.includes('ADDRESS') ||
-            upper === '사업주주소' || upper === '사업장주소' || upper === '업체주소') {
-            return this.ownerInfo?.businessAddress || '';
-        }
-
-        // 근로자/직원 이름
-        if (normalized.includes('EMPLOYEE') && normalized.includes('NAME') ||
-            upper === 'EMPLOYEE' ||
-            upper === '근로자' || upper === '근로자명' || upper === '직원' || upper === '직원명' || upper === '을') {
-            return '';
-        }
-
-        // 날짜 관련
-        if (normalized.includes('DATE') || normalized.includes('START') ||
-            upper === '날짜' || upper === '계약일' || upper === '시작일') {
-            return new Date().toISOString().split('T')[0];
-        }
+        // 폴백: 기본 매핑 (최소한의 하드코딩)
+        const nameUpper = varName.toUpperCase();
+        if (nameUpper === 'EMPLOYER') return this.ownerInfo.name || '';
+        if (nameUpper === 'COMPANY_NAME') return this.ownerInfo.companyName || '';
+        if (nameUpper === 'EMPLOYER_EMAIL') return this.ownerInfo.email || '';
+        if (nameUpper === 'EMPLOYER_PHONE') return this.ownerInfo.businessPhone || '';
+        if (nameUpper === 'EMPLOYER_ADDRESS') return this.ownerInfo.businessAddress || '';
+        if (nameUpper === 'CONTRACT_DATE') return new Date().toISOString().split('T')[0];
 
         return '';
     }
