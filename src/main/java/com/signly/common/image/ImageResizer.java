@@ -22,8 +22,8 @@ public class ImageResizer {
     private static final Logger logger = LoggerFactory.getLogger(ImageResizer.class);
 
     // 서명 이미지 표준 크기 (PDF CSS와 동일)
-    private static final int SIGNATURE_MAX_WIDTH = 180;  // 60px * 3 (고해상도)
-    private static final int SIGNATURE_MAX_HEIGHT = 105; // 35px * 3 (고해상도)
+    private static final int SIGNATURE_MAX_WIDTH = 600; // 고해상도 (기존 180 -> 600)
+    private static final int SIGNATURE_MAX_HEIGHT = 350; // 고해상도 (기존 105 -> 350)
 
     /**
      * Base64 Data URL을 받아서 리사이즈 후 다시 Base64 Data URL로 반환
@@ -69,7 +69,7 @@ public class ImageResizer {
             String resizedDataUrl = mimeHeader + "," + resizedBase64;
 
             logger.debug("이미지 리사이징 완료: 원본={}bytes, 리사이즈={}bytes",
-                imageBytes.length, resizedBytes.length);
+                    imageBytes.length, resizedBytes.length);
 
             return resizedDataUrl;
 
@@ -108,7 +108,7 @@ public class ImageResizer {
         int newHeight = (int) (originalHeight * ratio);
 
         logger.debug("이미지 리사이징: {}x{} -> {}x{}",
-            originalWidth, originalHeight, newWidth, newHeight);
+                originalWidth, originalHeight, newWidth, newHeight);
 
         // 고품질 리사이징
         BufferedImage resizedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
