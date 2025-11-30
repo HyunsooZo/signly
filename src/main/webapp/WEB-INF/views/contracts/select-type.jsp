@@ -32,7 +32,7 @@
                                 <div class="template-card-body">
                                     <div class="template-preview">
                                         <div class="new-template-icon">
-                                            <i class="bi bi-plus-circle"></i>
+                                            <i class="bi bi-plus-circle-dotted"></i>
                                         </div>
                                     </div>
                                     <h5 class="template-title">새 템플릿 만들기</h5>
