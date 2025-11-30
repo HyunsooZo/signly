@@ -117,7 +117,8 @@
                     try {
                         const userInfo = JSON.parse(localStorage.getItem('signly_user_info'));
                         const userId = userInfo?.userId;
-                        const response = await fetch('/api/templates?status=ACTIVE&size=100', {
+                        // 최신순 정렬 (createdAt DESC)
+                        const response = await fetch('/api/templates?status=ACTIVE&size=100&sort=createdAt,desc', {
                             headers: {
                                 'X-User-Id': userId
                             }
@@ -125,12 +126,12 @@
                         if (response.ok) {
                             const data = await response.json();
                             const allTemplatesContainer = document.getElementById('allTemplates');
-                            const newTemplateCard = allTemplatesContainer.querySelector('.col-md-6.col-lg-3:last-child');
 
                             if (data.content && data.content.length > 0) {
+                                // 사용자 템플릿을 맨 뒤에 추가 (프리셋 다음)
                                 data.content.forEach(template => {
                                     const templateCard = createUserTemplateCard(template);
-                                    allTemplatesContainer.insertBefore(templateCard, newTemplateCard);
+                                    allTemplatesContainer.appendChild(templateCard);
                                 });
                             }
                         }
