@@ -360,7 +360,7 @@ class ContractForm {
         })();
 
         try {
-            const raw = localStorage.getItem('signly_user_info');
+            const raw = localStorage.getItem('deally_user_info');
             if (!raw) {
                 return datasetInfo;
             }
@@ -384,7 +384,7 @@ class ContractForm {
 
     readOwnerSignature() {
         try {
-            const raw = localStorage.getItem('signly_owner_signature');
+            const raw = localStorage.getItem('deally_owner_signature');
             if (!raw) {
                 return {};
             }
@@ -866,7 +866,7 @@ class ContractForm {
         wrapper.style.cssText = 'display: inline-block; border-bottom: 1px solid #000; min-width: 80px; text-align: center; vertical-align: bottom; padding-bottom: 2px; margin: 0 2px; line-height: 1;';
 
         // localStorage에서 서명 이미지 가져오기
-        const signatureRaw = localStorage.getItem('signly_owner_signature');
+        const signatureRaw = localStorage.getItem('deally_owner_signature');
 
         if (!signatureRaw) {
             // 서명이 없으면 빈 span 반환
@@ -1977,7 +1977,7 @@ class ContractForm {
             });
 
             if (response.status === 204) {
-                localStorage.removeItem('signly_owner_signature');
+                localStorage.removeItem('deally_owner_signature');
                 return;
             }
 
@@ -2000,7 +2000,7 @@ class ContractForm {
 
     persistOwnerSignature(dataUrl, updatedAt) {
         if (!dataUrl) {
-            localStorage.removeItem('signly_owner_signature');
+            localStorage.removeItem('deally_owner_signature');
             return;
         }
 
@@ -2009,7 +2009,7 @@ class ContractForm {
                 dataUrl: dataUrl,
                 updatedAt: updatedAt || new Date().toISOString()
             };
-            localStorage.setItem('signly_owner_signature', JSON.stringify(payload));
+            localStorage.setItem('deally_owner_signature', JSON.stringify(payload));
         } catch (error) {
             console.warn('[WARN] 사업주 서명 정보를 localStorage에 저장할 수 없습니다:', error);
         }

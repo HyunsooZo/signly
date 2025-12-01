@@ -115,7 +115,7 @@
 
                 async function loadUserTemplates() {
                     try {
-                        const userInfo = JSON.parse(localStorage.getItem('signly_user_info'));
+                        const userInfo = JSON.parse(localStorage.getItem('deally_user_info'));
                         const userId = userInfo?.userId;
                         // 최신순 정렬 (createdAt DESC)
                         const response = await fetch('/api/templates?status=ACTIVE&size=100&sort=createdAt,desc', {

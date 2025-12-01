@@ -159,8 +159,8 @@ class SignatureManager {
         if (this.completeSigningBtn) {
             this.completeSigningBtn.addEventListener('click', () => {
                 if (this.signaturePad.isEmpty()) {
-                    if (window.Signly && window.Signly.showAlert) {
-                        window.Signly.showAlert('서명을 입력해 주세요.', 'warning');
+                    if (window.Deally && window.Deally.showAlert) {
+                        window.Deally.showAlert('서명을 입력해 주세요.', 'warning');
                     }
                     return;
                 }
@@ -396,8 +396,8 @@ class SignatureManager {
 
         } catch (error) {
             console.error('Signature submission error:', error);
-            if (window.Signly && window.Signly.showAlert) {
-                window.Signly.showAlert(error.message || '서명 처리 중 오류가 발생했습니다.', 'danger');
+            if (window.Deally && window.Deally.showAlert) {
+                window.Deally.showAlert(error.message || '서명 처리 중 오류가 발생했습니다.', 'danger');
             }
             finalSignBtn.disabled = false;
             finalSignBtn.innerHTML = originalHtml;

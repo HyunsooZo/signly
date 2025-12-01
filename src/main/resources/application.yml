@@ -1,6 +1,6 @@
 spring:
   application:
-    name: e-signature-signly
+    name: e-signature-deally
 
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
@@ -58,7 +58,7 @@ server:
     max-http-post-size: 20971520  # 20MB
 
 app:
-  name: Signly E-Signature Service
+  name: Deally E-Signature Service
   version: 1.0.0
   description: 전자계약 서비스 API
 

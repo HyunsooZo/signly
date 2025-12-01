@@ -1,5 +1,5 @@
 /**
- * 공통 자바스크립트 - Signly
+ * 공통 자바스크립트 - Deally
  */
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -606,7 +606,7 @@ const Utils = {
 };
 
 // 전역 객체로 노출
-window.Signly = {
+window.Deally = {
     sendRequest,
     showAlert,
     showConfirmModal,

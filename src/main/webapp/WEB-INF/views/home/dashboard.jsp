@@ -20,7 +20,7 @@
                     <i class="bi bi-house-door text-primary me-2"></i>
                     대시보드
                 </h2>
-                <p class="text-muted mb-0">Signly 전자계약 시스템에 오신 것을 환영합니다</p>
+                <p class="text-muted mb-0">Deally 전자계약 시스템에 오신 것을 환영합니다</p>
             </div>
         </div>
 
@@ -328,7 +328,7 @@
             businessAddress: '${currentUserBusinessAddress}' || '',
             updatedAt: new Date().toISOString()
         };
-        localStorage.setItem('signly_user_info', JSON.stringify(userInfo));
+        localStorage.setItem('deally_user_info', JSON.stringify(userInfo));
         console.log('[INFO] 사용자 정보 로컬스토리지 저장:', userInfo);
 
         if (userInfo.userId) {
@@ -340,7 +340,7 @@
                 }
             }).then(response => {
                 if (response.status === 204) {
-                    localStorage.removeItem('signly_owner_signature');
+                    localStorage.removeItem('deally_owner_signature');
                     return null;
                 }
                 if (!response.ok) {
@@ -355,7 +355,7 @@
                     dataUrl: payload.dataUrl,
                     updatedAt: payload.updatedAt || new Date().toISOString()
                 };
-                localStorage.setItem('signly_owner_signature', JSON.stringify(signaturePayload));
+                localStorage.setItem('deally_owner_signature', JSON.stringify(signaturePayload));
                 console.log('[INFO] 사업주 서명 정보를 로컬스토리지에 동기화했습니다.');
             }).catch(error => {
                 console.warn('[WARN] 사업주 서명 정보를 가져오지 못했습니다:', error);

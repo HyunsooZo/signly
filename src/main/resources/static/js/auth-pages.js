@@ -84,8 +84,8 @@ class AuthPages {
     // 경고 메시지 표시
     showWarning(message) {
         if (!window.inputWarningShown) {
-            if (this.pageType === 'login' && window.Signly && window.Signly.Alert) {
-                window.Signly.Alert.warning(message);
+            if (this.pageType === 'login' && window.Deally && window.Deally.Alert) {
+                window.Deally.Alert.warning(message);
             } else if (window.showAlertModal) {
                 window.showAlertModal(message);
             }

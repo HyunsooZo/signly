@@ -1216,7 +1216,7 @@ const TemplateBuilder = {
         TemplateBuilder.presets.load();
 
         // 전역 API 노출
-        window.SignlyTemplateEditor = {
+        window.DeallyTemplateEditor = {
             getSectionsSnapshot: function () {
                 TemplateBuilder.sections.updateSectionsData();
                 return JSON.parse(JSON.stringify(TemplateBuilder.state.sections));
