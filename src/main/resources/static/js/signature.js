@@ -189,7 +189,7 @@ class SignatureManager {
 
         // canvas의 실제 크기가 0이면 기본값 사용
         const width = rect.width || 600;
-        const height = rect.height || 200;
+        const height = rect.height || 260;
 
         console.log('[SignatureManager] Calculated width:', width, 'height:', height);
 
