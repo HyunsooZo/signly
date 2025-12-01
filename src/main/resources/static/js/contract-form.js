@@ -769,7 +769,7 @@ class ContractForm {
     createVariableInput(varName) {
         // Find variable definition in database
         const varDef = this.variableDefinitions.find(v => v.name === varName);
-        
+
         const wrapper = document.createElement('span');
         wrapper.className = 'contract-variable-underline';
         wrapper.setAttribute('data-variable-name', varName);
@@ -817,7 +817,7 @@ class ContractForm {
             input.value = value;
         }
 
-        input.addEventListener('input', () => this.updatePresetContent());
+        input.addEventListener('input', () => this.updateTemplateContent());
 
         wrapper.appendChild(input);
         return wrapper;
@@ -843,7 +843,7 @@ class ContractForm {
         if (varDef && varDef.inputSize) {
             return varDef.inputSize;
         }
-        
+
         // 폴백: 기본값 반환
         return 10;
     }
