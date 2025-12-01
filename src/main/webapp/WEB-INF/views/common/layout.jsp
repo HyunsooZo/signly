@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><c:out value="${pageTitle != null ? pageTitle : 'Signly'}"/></title>
+    <title><c:out value="${pageTitle != null ? pageTitle : 'Deally'}"/></title>
 
     <!-- CSS -->
     <link href="<c:url value='/css/common.css' />" rel="stylesheet">
@@ -18,19 +18,14 @@
     </c:if>
 
     <!-- 메타 태그 -->
-    <meta name="description" content="Signly - 안전하고 간편한 전자계약 서비스">
+    <meta name="description" content="Deally - 안전하고 간편한 전자계약 서비스">
     <meta name="keywords" content="전자계약, 전자서명, 디지털 계약, e-signature">
-    <meta name="author" content="Signly">
+    <meta name="author" content="Deally">
 
     <!-- 파비콘 -->
     <link rel="icon" type="image/png" href="<c:url value='/images/favicon.png' />">
 
-    <!-- CSRF Protection -->
-    <c:if test="${not empty _csrf}">
-        <meta name="_csrf" content="${_csrf.token}"/>
-        <meta name="_csrf_header" content="${_csrf.headerName}"/>
-        <meta name="_csrf_parameter" content="${_csrf.parameterName}"/>
-    </c:if>
+
 </head>
 <body>
 <!-- 헤더 -->
@@ -82,6 +77,7 @@
 <jsp:include page="footer.jsp"/>
 
 <!-- JavaScript -->
+<script src="<c:url value='/js/common/jwt-client.js' />"></script>
 <script src="<c:url value='/js/common.js' />"></script>
 <script src="<c:url value='/js/auth.js' />"></script>
 <script src="<c:url value='/js/alerts.js' />"></script>

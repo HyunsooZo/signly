@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>비밀번호 재설정 - Signly</title>
+    <title>비밀번호 재설정 - Deally</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,8 +30,6 @@
 
         <form action="/reset-password" method="post" class="auth-form" onsubmit="return validateForm()">
             <input type="hidden" name="token" value="<c:out value="${token}"/>">
-            <input type="hidden" name="<c:out value="${_csrf.parameterName}"/>"
-                   value="<c:out value="${_csrf.token}"/>"/>
 
             <div class="form-group">
                 <label for="newPassword" class="form-label">

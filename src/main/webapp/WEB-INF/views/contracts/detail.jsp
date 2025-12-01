@@ -363,10 +363,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                 <form id="deleteForm" method="post" action="/contracts/<c:out value='${contract.id}'/>/delete"
                       class="d-inline">
-                    <c:if test="${not empty _csrf}">
-                        <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>"
-                               value="<c:out value='${_csrf.token}'/>"/>
-                    </c:if>
+
                     <button type="submit" class="btn btn-danger">삭제</button>
                 </form>
             </div>

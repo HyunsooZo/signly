@@ -10,7 +10,7 @@
 <div class="auth-container">
     <div class="auth-card">
         <div class="auth-header">
-            <h1 class="auth-title">Signly</h1>
+            <h1 class="auth-title">Deally</h1>
             <p class="auth-subtitle">전자계약 서비스 로그인</p>
         </div>
 
@@ -79,7 +79,7 @@
                 </label>
             </div>
 
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
             <c:if test="${not empty returnUrl}">
                 <input type="hidden" name="returnUrl" value="<c:out value="${returnUrl}"/>"/>
             </c:if>

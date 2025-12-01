@@ -8,8 +8,6 @@ console.log('[SignatureManager] Script loaded');
 class SignatureManager {
     constructor() {
         this.contractData = {};
-        this.csrfParam = '';
-        this.csrfToken = '';
         this.signaturePad = null;
         this.signatureCanvas = null;
         this.signaturePlaceholder = null;
@@ -37,8 +35,7 @@ class SignatureManager {
             signerEmail: signingDataset.signerEmail || ''
         };
 
-        this.csrfParam = window.csrfParam || '';
-        this.csrfToken = window.csrfToken || '';
+
     }
 
     setupEventListeners() {
@@ -162,8 +159,8 @@ class SignatureManager {
         if (this.completeSigningBtn) {
             this.completeSigningBtn.addEventListener('click', () => {
                 if (this.signaturePad.isEmpty()) {
-                    if (window.Signly && window.Signly.showAlert) {
-                        window.Signly.showAlert('서명을 입력해 주세요.', 'warning');
+                    if (window.Deally && window.Deally.showAlert) {
+                        window.Deally.showAlert('서명을 입력해 주세요.', 'warning');
                     }
                     return;
                 }
@@ -192,7 +189,7 @@ class SignatureManager {
 
         // canvas의 실제 크기가 0이면 기본값 사용
         const width = rect.width || 600;
-        const height = rect.height || 200;
+        const height = rect.height || 260;
 
         console.log('[SignatureManager] Calculated width:', width, 'height:', height);
 
@@ -363,29 +360,26 @@ class SignatureManager {
             payload.append('signerName', this.contractData.signerName);
             payload.append('signerEmail', this.contractData.signerEmail);
 
-            // CSRF 토큰을 실시간으로 가져오기 (window.csrfParam/csrfToken 우선, 없으면 meta 태그에서)
-            const csrfParam = window.csrfParam || document.querySelector('meta[name="_csrf_parameter"]')?.content || '_csrf';
-            const csrfToken = window.csrfToken || document.querySelector('meta[name="_csrf"]')?.content || '';
-
-            console.log('[SignatureManager] CSRF Param:', csrfParam);
-            console.log('[SignatureManager] CSRF Token:', csrfToken ? csrfToken.substring(0, 10) + '...' : 'EMPTY');
-
-            if (csrfParam && csrfToken) {
-                payload.append(csrfParam, csrfToken);
-                console.log('[SignatureManager] CSRF token added to payload');
-            } else {
-                console.error('[SignatureManager] CSRF token not found!');
-            }
-
             const headers = {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
             };
 
-            const response = await fetch('/sign/' + this.contractData.token + '/sign', {
-                method: 'POST',
-                headers,
-                body: payload.toString()
-            });
+            // JWT 클라이언트를 사용한 인증 요청
+            let response;
+            if (window.jwtClient) {
+                response = await window.jwtClient.fetchWithAuth('/sign/' + this.contractData.token + '/sign', {
+                    method: 'POST',
+                    headers,
+                    body: payload.toString()
+                });
+            } else {
+                // JWT 클라이언트가 없으면 일반 fetch 사용 (서명 페이지는 토큰 기반 인증)
+                response = await fetch('/sign/' + this.contractData.token + '/sign', {
+                    method: 'POST',
+                    headers,
+                    body: payload.toString()
+                });
+            }
 
             if (!response.ok) {
                 throw new Error('서명 처리 중 오류가 발생했습니다.');
@@ -402,8 +396,8 @@ class SignatureManager {
 
         } catch (error) {
             console.error('Signature submission error:', error);
-            if (window.Signly && window.Signly.showAlert) {
-                window.Signly.showAlert(error.message || '서명 처리 중 오류가 발생했습니다.', 'danger');
+            if (window.Deally && window.Deally.showAlert) {
+                window.Deally.showAlert(error.message || '서명 처리 중 오류가 발생했습니다.', 'danger');
             }
             finalSignBtn.disabled = false;
             finalSignBtn.innerHTML = originalHtml;

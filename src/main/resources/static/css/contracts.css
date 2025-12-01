@@ -386,14 +386,14 @@
 }
 
 .template-card-new {
-    background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
-    border-color: #667eea;
+    background: linear-gradient(135deg, #f0f8f4 0%, #e8f5e9 100%);
+    border-color: #2d4a3f;
 }
 
 .template-card-new:hover {
-    background: linear-gradient(135deg, #e8f0ff 0%, #d8e4ff 100%);
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 12px 24px rgba(45, 74, 63, 0.2);
 }
 
 .template-card-header {
@@ -417,7 +417,7 @@
 }
 
 .template-card-new .template-title {
-    color: #667eea;
+    color: #2d4a3f;
 }
 
 .template-description {
@@ -445,24 +445,29 @@
 /* 새 템플릿 만들기 카드 스타일은 contract-template-preview.css로 이동 */
 
 .new-template-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    width: 100%;
+    height: auto;
+    background: none;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .new-template-icon i {
-    font-size: 2.5rem !important;
-    color: white;
+    font-size: 3.5rem !important;
+    color: #2d4a3f;
     line-height: normal !important;
+    transition: all 0.3s ease;
+}
+
+.template-card-new:hover .new-template-icon i {
+    transform: scale(1.1);
+    color: #4a7c6a;
 }
 
 .new-template-text {
     font-size: 1rem !important;
-    color: #667eea;
+    color: #2d4a3f;
     font-weight: 600;
     text-align: center;
     line-height: normal !important;
@@ -619,6 +624,7 @@
 .pagination .page-item.active .page-link {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
+    color: white;
 }
 
 /* 모달 스타일 */
@@ -631,12 +637,12 @@
 .modal-header {
     border-bottom: 1px solid #f0f0f0;
     border-radius: 15px 15px 0 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: white;
+    color: #2d4a3f;
 }
 
 .modal-header .btn-close {
-    filter: invert(1);
+    filter: none;
 }
 
 /* 알림 메시지 스타일 */
@@ -898,17 +904,34 @@
 /* 중복 밑줄(취소선 효과) 제거 - 입력창이 있을 때만 제거 */
 .preset-document .blank-line:has(.contract-input-inline) {
     border-bottom: none !important;
+    margin: 0 2px !important;
+    padding: 0 2px !important;
+    min-width: 50px !important;
+}
+
+/* 입력 필드 자체 너비 설정 */
+.contract-input-inline {
+    min-width: 50px;
 }
 
 /* 계약서 상세 페이지: 완성된 값에는 밑줄 없음, 문장 중앙 정렬 */
 #templateHtmlContainer .blank-line {
     border-bottom: none !important;
     vertical-align: baseline !important;
+    margin: 0 1px !important;
+    padding: 0 1px !important;
+    min-width: 20px !important;
 }
 
 /* 서명란 스타일 오버라이드 (박스 및 밑줄 제거) */
 .preset-document .signature-stamp-label {
     border: none !important;
+}
+
+/* 서명란 내부 blank-line 최적화 */
+.signature-stamp-label .blank-line {
+    margin: 0 1px;
+    padding: 0;
 }
 
 .preset-document .signature-stamp-label .contract-input-inline,

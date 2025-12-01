@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>비밀번호 찾기 - Signly</title>
+    <title>비밀번호 찾기 - Deally</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,8 +42,6 @@
                        value="<c:out value="${param.email}"/>" required placeholder="가입하신 이메일을 입력해주세요">
             </div>
 
-            <input type="hidden" name="<c:out value="${_csrf.parameterName}"/>"
-                   value="<c:out value="${_csrf.token}"/>"/>
 
             <button type="submit" class="btn btn-primary btn-auth">비밀번호 재설정 링크 발송</button>
         </form>

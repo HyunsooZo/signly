@@ -19,7 +19,7 @@ body:not(:has(.navbar)) {
     padding: 0;
 }
 
-.template-section > p {
+.template-section>p {
     margin: 0;
     padding: 0;
 }
@@ -42,7 +42,7 @@ body:not(:has(.navbar)) {
     font-family: 'Noto Sans KR', 'NanumGothic', 'Nanum Gothic', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
 }
 
-.contract-body > .title:first-child {
+.contract-body>.title:first-child {
     display: none;
 }
 
@@ -124,14 +124,28 @@ body:not(:has(.navbar)) {
     height: 100%;
 }
 
+.signature-stamp-image-element {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.signature-placeholder-box {
+    border: 2px dashed rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.05);
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
 /* 밑줄 변수 스타일 - PDF와 웹 공통 (통합 버전) */
 .blank-line {
     display: inline-block;
     border-bottom: 1px solid #000;
-    min-width: 60px;
+    min-width: 40px;
     height: 1.4em;
-    margin: 0 4px;
-    padding: 0 4px 2px 4px;
+    margin: 0 1px;
+    padding: 0 1px 2px 1px;
     vertical-align: bottom;
     line-height: 1.4;
     text-align: center;
@@ -201,6 +215,35 @@ body:not(:has(.navbar)) {
     margin: 15px 0;
 }
 
+.new-template-icon {
+    width: 100%;
+    height: auto;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.new-template-icon i {
+    font-size: 3.5rem !important;
+    color: #2d4a3f;
+    line-height: normal !important;
+    transition: all 0.3s ease;
+}
+
+.template-card-new:hover .new-template-icon i {
+    transform: scale(1.1);
+    color: #4a7c6a;
+}
+
+.new-template-text {
+    font-size: 1rem !important;
+    color: #2d4a3f;
+    font-weight: 600;
+    text-align: center;
+    line-height: normal !important;
+}
+
 /* 텍스트 정렬 */
 .text-center {
     text-align: center;
@@ -268,7 +311,8 @@ table th {
 }
 
 /* 리스트 스타일 */
-ul, ol {
+ul,
+ol {
     margin: 10px 0;
     padding-left: 20px;
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><c:if test="${not empty param.pageTitle}"><c:out value="${param.pageTitle}"/> - </c:if>Signly</title>
+    <title><c:if test="${not empty param.pageTitle}"><c:out value="${param.pageTitle}"/> - </c:if>Deally</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,15 +30,9 @@
         <link href="<c:out value='${param.additionalCss6}'/>" rel="stylesheet">
     </c:if>
 
-    <c:if test="${not empty _csrf}">
-        <meta name="_csrf" content="${_csrf.token}"/>
-        <meta name="_csrf_header" content="${_csrf.headerName}"/>
-        <meta name="_csrf_parameter" content="${_csrf.parameterName}"/>
-    </c:if>
-
     <!-- NProgress 로딩 바 -->
     <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
     <link href="/css/page-loader.css" rel="stylesheet">
     <script src="/js/page-loader.js"></script>
-    <script src="/js/common/csrf.js" defer></script>
+    <script src="/js/common/jwt-client.js" defer></script>
 </head>

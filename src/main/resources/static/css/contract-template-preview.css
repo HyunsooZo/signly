@@ -144,9 +144,9 @@
 .template-preview .blank-line {
     display: inline-block !important;
     border-bottom: 1px solid #000 !important;
-    min-width: 20px !important;
+    min-width: 12px !important;
     height: 0.8em !important;
-    margin: 0 2px !important;
+    margin: 0 1px !important;
     vertical-align: bottom !important;
     font-size: inherit !important;
     line-height: inherit !important;

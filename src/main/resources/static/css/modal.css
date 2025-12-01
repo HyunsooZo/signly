@@ -43,28 +43,11 @@
 }
 
 /* Alert Modal 스타일 */
-#commonAlertModal .modal-header {
-    background-color: white;
-}
-
-#commonAlertModal .modal-title {
-    color: #2d4a3f;
-}
-
 #commonAlertModal .modal-footer .btn-primary {
     min-width: 80px;
 }
 
 /* Confirm Modal 스타일 */
-#commonConfirmModal .modal-header {
-    background-color: white;
-    border-bottom-color: #dee2e6;
-}
-
-#commonConfirmModal .modal-title {
-    color: #2d4a3f;
-}
-
 #commonConfirmModal .modal-body {
     font-weight: 500;
 }
@@ -78,15 +61,7 @@
     font-weight: 500;
 }
 
-#commonConfirmModal .modal-footer .btn-secondary {
-    background-color: #3d5a4f;
-    border-color: #3d5a4f;
-}
 
-#commonConfirmModal .modal-footer .btn-secondary:hover {
-    background-color: #2f4840;
-    border-color: #2d4a3f;
-}
 
 #commonConfirmModal .modal-footer .btn-primary {
     background-color: #0d6efd;
@@ -154,4 +129,3 @@
         width: 100%;
     }
 }
-

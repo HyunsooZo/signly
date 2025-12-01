@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><c:out value="${pageTitle}"/> - Signly</title>
+    <title><c:out value="${pageTitle}"/> - Deally</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,12 +16,7 @@
     <link href="/css/common.css" rel="stylesheet">
     <link href="/css/signature.css" rel="stylesheet">
 
-    <c:if test="${not empty _csrf}">
-        <meta name="_csrf" content="${_csrf.token}"/>
-        <meta name="_csrf_header" content="${_csrf.headerName}"/>
-        <meta name="_csrf_parameter" content="${_csrf.parameterName}"/>
-    </c:if>
-    <script src="/js/common/csrf.js" defer></script>
+
 </head>
 <body class="verify-page">
 
@@ -30,7 +25,7 @@
     <div class="header-container">
         <div class="header-logo">
             <a href="<c:url value='/' />" class="logo-link">
-                <span class="logo-text">Signly</span>
+                <span class="logo-text">Deally</span>
             </a>
         </div>
         <div class="header-info">
@@ -78,9 +73,7 @@
                     </div>
                     <div class="card-body">
                         <form method="post" action="/sign/<c:out value='${token}'/>/verify">
-                            <c:if test="${not empty _csrf}">
-                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                            </c:if>
+
                             <div class="mb-3">
                                 <label for="signerEmail" class="form-label">
                                     <i class="bi bi-envelope me-2"></i>이메일 주소 <span class="text-danger">*</span>

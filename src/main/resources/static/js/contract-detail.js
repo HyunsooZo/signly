@@ -190,56 +190,60 @@ class ContractDetail {
             finalHtml = finalHtml.replace(regex, value);
         });
 
+        // 서명 플레이스홀더 처리 (문자열로 표시되는 것 방지)
+        // [EMPLOYER_SIGNATURE_IMAGE]와 [EMPLOYEE_SIGNATURE_IMAGE]를 적절히 처리
+        finalHtml = finalHtml.replace(/\[EMPLOYER_SIGNATURE_IMAGE\]/g, '<span class="text-muted small">(갑 서명 위치)</span>');
+        finalHtml = finalHtml.replace(/\[EMPLOYEE_SIGNATURE_IMAGE\]/g, '<span class="text-muted small">(을 서명 위치)</span>');
+
         container.innerHTML = finalHtml;
     }
 
-    appendCsrfField(form) {
+    async submitFormWithJwt(form) {
         if (!form) {
             return;
         }
 
-        // 먼저 csrfManager 사용 시도
-        if (window.csrfManager) {
-            window.csrfManager.ensureFormToken(form);
-            return;
-        }
-
-        // csrfManager가 없으면 meta 태그에서 직접 가져오기
-        const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-        const csrfParam = document.querySelector('meta[name="_csrf_parameter"]')?.getAttribute('content') || '_csrf';
-
-        if (csrfToken) {
-            let input = form.querySelector(`input[name="${csrfParam}"]`);
-            if (!input) {
-                input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = csrfParam;
-                form.appendChild(input);
+        try {
+            if (window.jwtClient) {
+                // JWT 클라이언트로 폼 제출
+                const response = await window.jwtClient.submitFormWithAuth(form);
+                
+                if (response.ok) {
+                    // 성공 시 페이지 리로드 또는 리다이렉트
+                    window.location.reload();
+                } else {
+                    throw new Error('요청 처리 중 오류가 발생했습니다.');
+                }
+            } else {
+                // JWT 클라이언트가 없으면 일반 폼 제출
+                form.submit();
             }
-            input.value = csrfToken;
+        } catch (error) {
+            console.error('Form submission error:', error);
+            if (window.Deally && window.Deally.showAlert) {
+                window.Deally.showAlert('요청 처리 중 오류가 발생했습니다.', 'danger');
+            }
         }
     }
 
-    downloadPdf() {
+    async downloadPdf() {
         const form = document.createElement('form');
         form.method = 'post';
         form.action = `/contracts/${this.getContractId()}/pdf`;
-        this.appendCsrfField(form);
         document.body.appendChild(form);
-        form.submit();
+        await this.submitFormWithJwt(form);
     }
 
     resendEmail() {
         if (window.showConfirmModal) {
             window.showConfirmModal(
                 '서명 요청 이메일을 다시 전송하시겠습니까?',
-                () => {
+                async () => {
                     const form = document.createElement('form');
                     form.method = 'post';
                     form.action = `/contracts/${this.getContractId()}/resend`;
-                    this.appendCsrfField(form);
                     document.body.appendChild(form);
-                    form.submit();
+                    await this.submitFormWithJwt(form);
                 },
                 '재전송',
                 '취소',
@@ -252,13 +256,12 @@ class ContractDetail {
         if (window.showConfirmModal) {
             window.showConfirmModal(
                 '계약서를 취소하시겠습니까? 취소된 계약서는 더 이상 서명할 수 없습니다.',
-                () => {
+                async () => {
                     const form = document.createElement('form');
                     form.method = 'post';
                     form.action = `/contracts/${this.getContractId()}/cancel`;
-                    this.appendCsrfField(form);
                     document.body.appendChild(form);
-                    form.submit();
+                    await this.submitFormWithJwt(form);
                 },
                 '취소',
                 '닫기',

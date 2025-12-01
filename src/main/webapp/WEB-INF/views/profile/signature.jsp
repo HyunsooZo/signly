@@ -90,9 +90,6 @@
                     </div>
                     <div class="card-body">
                         <form method="post" id="signatureForm" class="d-flex flex-column h-100">
-                            <c:if test="${not empty _csrf}">
-                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-                            </c:if>
                             <input type="hidden" name="signatureData" id="signatureData">
 
                             <div class="canvas-wrapper mb-3">
@@ -281,21 +278,21 @@
         try {
             const signatureJsonElement = document.getElementById('ownerSignatureDataJson');
             if (!signatureJsonElement) {
-                localStorage.removeItem('signly_owner_signature');
+                localStorage.removeItem('deally_owner_signature');
                 return;
             }
 
             const raw = (signatureJsonElement.textContent || '').trim();
             if (!raw || raw === 'null') {
-                localStorage.removeItem('signly_owner_signature');
+                localStorage.removeItem('deally_owner_signature');
                 return;
             }
 
             const parsed = JSON.parse(raw);
             if (parsed && typeof parsed === 'object' && parsed.dataUrl) {
-                localStorage.setItem('signly_owner_signature', JSON.stringify(parsed));
+                localStorage.setItem('deally_owner_signature', JSON.stringify(parsed));
             } else {
-                localStorage.removeItem('signly_owner_signature');
+                localStorage.removeItem('deally_owner_signature');
             }
         } catch (error) {
             console.warn('[WARN] 사업주 서명 정보를 localStorage에 저장하는 중 오류 발생:', error);

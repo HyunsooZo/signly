@@ -219,14 +219,8 @@
 <!-- Hidden forms for sensitive actions -->
 <form id="activateForm" method="post" action="/templates/<c:out value='${template.templateId}'/>/activate"
       class="d-none">
-    <c:if test="${not empty _csrf}">
-        <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>" value="<c:out value='${_csrf.token}'/>"/>
-    </c:if>
 </form>
 <form id="archiveForm" method="post" action="/templates/<c:out value='${template.templateId}'/>/archive" class="d-none">
-    <c:if test="${not empty _csrf}">
-        <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>" value="<c:out value='${_csrf.token}'/>"/>
-    </c:if>
 </form>
 
 <!-- 삭제 확인 모달 -->
@@ -248,10 +242,6 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                 <form id="deleteForm" method="post" action="/templates/<c:out value='${template.templateId}'/>/delete"
                       class="d-inline">
-                    <c:if test="${not empty _csrf}">
-                        <input type="hidden" name="<c:out value='${_csrf.parameterName}'/>"
-                               value="<c:out value='${_csrf.token}'/>"/>
-                    </c:if>
                     <button type="submit" class="btn btn-danger">삭제</button>
                 </form>
             </div>
@@ -261,8 +251,6 @@
 
 <script>
     // 전역 변수로 선언
-    window.csrfParam = '<c:out value="${_csrf.parameterName}" default="_csrf"/>';
-    window.csrfToken = '<c:out value="${_csrf.token}" default=""/>';
 
     // 페이지 로드 시 템플릿 내용 디코딩 및 표시
     document.addEventListener('DOMContentLoaded', function () {
@@ -301,47 +289,10 @@
             templateContent.innerHTML = decoded;
         }
 
-        const deleteForm = document.getElementById('deleteForm');
-        if (deleteForm) {
-            deleteForm.addEventListener('submit', function () {
-                appendCsrfField(deleteForm);
-            });
-        }
+
     });
 
-    function readCsrfFromCookie() {
-        const match = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='));
-        return match ? decodeURIComponent(match.substring('XSRF-TOKEN='.length)) : '';
-    }
 
-    function appendCsrfField(form) {
-        if (!form) {
-            return;
-        }
-        const tokenValue = readCsrfFromCookie() || window.csrfToken;
-        if (window.csrfParam && tokenValue) {
-            let input = form.querySelector('input[name="' + window.csrfParam + '"]');
-            if (!input) {
-                input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = window.csrfParam;
-                form.appendChild(input);
-            }
-            input.value = tokenValue;
-        } else {
-            const existingCsrfInput = document.querySelector('input[name="_csrf"]');
-            if (existingCsrfInput) {
-                let input = form.querySelector('input[name="_csrf"]');
-                if (!input) {
-                    input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = '_csrf';
-                    form.appendChild(input);
-                }
-                input.value = existingCsrfInput.value;
-            }
-        }
-    }
 
     function submitHiddenForm(formId) {
         const form = document.getElementById(formId);
@@ -349,7 +300,6 @@
             console.warn('Form not found:', formId);
             return;
         }
-        appendCsrfField(form);
         form.submit();
     }
 

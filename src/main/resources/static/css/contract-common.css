@@ -15,7 +15,7 @@ body:not(:has(.navbar)) {
 body:not(:has(.navbar)) {
     max-width: 210mm;
     margin: 0 auto;
-    padding: 20mm;
+    padding: 12mm;
 }
 
 /* 제목 */
@@ -152,7 +152,9 @@ body:not(:has(.navbar)) {
 
 /* date-section 내부의 blank-line은 margin 제거하여 중앙 정렬 가능하게 */
 .date-section .blank-line {
-    margin: 0 auto;
+    margin: 0 2px;
+    padding: 0 2px;
+    min-width: 90px;
     display: inline-flex;
     align-items: flex-end;
     justify-content: center;
@@ -421,19 +423,19 @@ body,
     /* 페이지 여백 및 크기 최적화 */
     body {
         margin: 0;
-        padding: 15mm;
+        padding: 12mm;
         max-width: 100%;
     }
 
-    /* 빈 페이지 방지 */
+    /* 빈 페이지 방지 - 명시적인 페이지 나누기 방지 */
     * {
-        page-break-after: auto;
-        page-break-before: auto;
+        page-break-after: avoid;
+        page-break-before: avoid;
+        page-break-inside: auto;
     }
 
     .signature-section {
         page-break-inside: avoid;
-        page-break-after: avoid;
     }
 
     /* 안내 문구 숨김 (작성 시에만 표시) */

@@ -3,14 +3,14 @@
  * 사용자 정보, 서명 데이터 등을 안전하게 저장/조회
  */
 
-window.SignlyStorage = (function () {
+window.DeallyStorage = (function () {
     'use strict';
 
     const STORAGE_KEYS = {
-        USER_INFO: 'signly_user_info',
-        OWNER_SIGNATURE: 'signly_owner_signature',
-        FORM_DATA: 'signly_form_data',
-        PREFERENCES: 'signly_preferences'
+        USER_INFO: 'deally_user_info',
+        OWNER_SIGNATURE: 'deally_owner_signature',
+        FORM_DATA: 'deally_form_data',
+        PREFERENCES: 'deally_preferences'
     };
 
     /**

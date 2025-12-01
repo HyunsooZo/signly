@@ -35,21 +35,22 @@ class ContractForm {
         // Other elements
         this.presetSelect = document.getElementById('presetSelect');
         this.expiresAtInput = document.getElementById('expiresAt');
-        this.firstPartyNameInput = document.getElementById('firstPartyName');
-        this.firstPartyEmailInput = document.getElementById('firstPartyEmail');
-        this.firstPartyAddressInput = document.getElementById('firstPartyAddress');
-        this.secondPartyNameInput = document.getElementById('secondPartyName');
-        this.secondPartyEmailInput = document.getElementById('secondPartyEmail');
+        this.firstPartyNameInput = document.getElementById('firstPartyName') || document.getElementById('templateFirstPartyName');
+        this.firstPartyEmailInput = document.getElementById('firstPartyEmail') || document.getElementById('templateFirstPartyEmail');
+        this.firstPartyAddressInput = document.getElementById('firstPartyAddress') || document.getElementById('templateFirstPartyAddress');
+        this.secondPartyNameInput = document.getElementById('secondPartyName') || document.getElementById('templateSecondPartyName');
+        this.secondPartyEmailInput = document.getElementById('secondPartyEmail') || document.getElementById('templateSecondPartyEmail');
         this.secondPartyAddressInput = document.getElementById('secondPartyAddress');
 
         // ===== STATE =====
         this.customVariableValues = {};
         this.customVariables = [];
         this.legacyVariableCounter = 0;
+        this.variableDefinitions = [];
 
         // ===== CONSTANTS =====
         this.PLACEHOLDER_REGEX = /\{([^{}]+)\}|\[([^\[\]]+)\]/g;
-        this.IGNORED_PLACEHOLDERS = new Set(['EMPLOYER_SIGNATURE_IMAGE']);
+        this.IGNORED_PLACEHOLDERS = new Set(['EMPLOYER_SIGNATURE_IMAGE', 'EMPLOYEE_SIGNATURE_IMAGE']);
 
         // ===== DATA =====
         this.ownerInfo = null;
@@ -68,9 +69,25 @@ class ContractForm {
     // SECTION 1: INITIALIZATION
     // ========================================
 
+    loadVariableDefinitions() {
+        try {
+            const definitionsScript = document.getElementById('variableDefinitions');
+            if (definitionsScript) {
+                const definitionsText = definitionsScript.textContent.trim();
+                if (definitionsText) {
+                    this.variableDefinitions = JSON.parse(definitionsText);
+                    console.log('Loaded variable definitions:', this.variableDefinitions.length);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load variable definitions:', error);
+        }
+    }
+
     init() {
         // 먼저 JSON 데이터 파싱
         this.parseJsonData();
+        this.loadVariableDefinitions();
         this.loadOwnerData();
 
         console.log('[DEBUG] init - selectedTemplateData:', this.selectedTemplateData);
@@ -101,6 +118,9 @@ class ContractForm {
             // 파라미터 없으면 select-type.jsp로 리다이렉트
             window.location.href = '/contracts/select-type';
         }
+
+        // 이벤트 리스너 설정 (반드시 호출해야 함)
+        this.setupEventListeners();
     }
 
     parseJsonData() {
@@ -153,6 +173,45 @@ class ContractForm {
 
         // Form submit validation
         this.setupFormValidation();
+
+        // 초기화 후 자동 입력 적용
+        setTimeout(() => {
+            this.applyOwnerInfoToNormalForm();
+            this.validateInitialization();
+        }, 100);
+
+        // 실시간 유효성 검사 설정 (초기화 후 약간 지연)
+        setTimeout(() => {
+            this.setupRealtimeValidation();
+            // 초기 상태에서 한번 유효성 검사 실행
+            this.validateAllFields();
+        }, 200);
+    }
+
+    validateInitialization() {
+        // 초기화 상태 검증
+        const criticalFields = [
+            'templateContentHidden',
+            'templateTitleHidden',
+            'templateFirstPartyName',
+            'templateFirstPartyEmail',
+            'templateSecondPartyName',
+            'templateSecondPartyEmail'
+        ];
+
+        const missingFields = criticalFields.filter(id => !document.getElementById(id));
+
+        if (missingFields.length > 0) {
+            console.error('[ContractForm] Critical fields missing:', missingFields);
+        } else {
+            console.log('[ContractForm] All critical fields found');
+
+            // 초기 값 상태 로그
+            criticalFields.forEach(id => {
+                const element = document.getElementById(id);
+                console.log(`[ContractForm] ${id}:`, element?.value?.length || 0, 'characters');
+            });
+        }
     }
 
     setupFormValidation() {
@@ -162,6 +221,104 @@ class ContractForm {
                 this.handleFormSubmit(event, form);
             });
         });
+    }
+
+    setupRealtimeValidation() {
+        // 실시간 검증할 필드들 정의
+        const validationFields = [
+            { id: 'templateTitleHidden', name: '계약서 제목', type: 'text' },
+            { id: 'templateContentHidden', name: '계약서 내용', type: 'content' },
+            { id: 'templateFirstPartyName', name: '갑(사업주) 이름', type: 'text' },
+            { id: 'templateFirstPartyEmail', name: '갑(사업주) 이메일', type: 'email' },
+            { id: 'templateSecondPartyName', name: '을(근로자) 이름', type: 'text' },
+            { id: 'templateSecondPartyEmail', name: '을(근로자) 이메일', type: 'email' }
+        ];
+
+        validationFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            if (element) {
+                // input 이벤트 (실시간)
+                element.addEventListener('input', () => {
+                    this.validateFieldRealtime(element, field);
+                });
+
+                // blur 이벤트 (포커스 아웃)
+                element.addEventListener('blur', () => {
+                    this.validateFieldRealtime(element, field);
+                });
+
+                // change 이벤트 (값 변경)
+                element.addEventListener('change', () => {
+                    this.validateFieldRealtime(element, field);
+                });
+            }
+        });
+
+        // 템플릿 모드에서의 추가 검증
+        this.setupTemplateModeValidation();
+    }
+
+    validateFieldRealtime(element, fieldConfig) {
+        const validationResult = this.validateSingleField(element, fieldConfig);
+
+        if (!validationResult.isValid) {
+            // 실시간 검증 시에는 자동 포커스 방지, 애니메이션만 적용
+            showFieldError(element, validationResult.error, {
+                autoFocus: false,
+                animate: true
+            });
+        } else {
+            clearFieldError(element, true);
+        }
+
+        return validationResult.isValid;
+    }
+
+    setupTemplateModeValidation() {
+        // 템플릿 콘텐츠 변경 감지
+        if (this.contractContentTextarea) {
+            this.contractContentTextarea.addEventListener('input', () => {
+                this.updateTemplateContentHidden();
+                const hiddenField = document.getElementById('templateContentHidden');
+                if (hiddenField) {
+                    this.validateFieldRealtime(hiddenField, {
+                        id: 'templateContentHidden',
+                        name: '계약서 내용',
+                        type: 'content'
+                    });
+                }
+            });
+        }
+
+        // 템플릿 제목 변경 감지
+        if (this.templateTitleInput) {
+            this.templateTitleInput.addEventListener('input', () => {
+                this.updateTemplateTitleHidden();
+                const hiddenField = document.getElementById('templateTitleHidden');
+                if (hiddenField) {
+                    this.validateFieldRealtime(hiddenField, {
+                        id: 'templateTitleHidden',
+                        name: '계약서 제목',
+                        type: 'text'
+                    });
+                }
+            });
+        }
+    }
+
+    updateTemplateContentHidden() {
+        if (this.templateHiddenContent) {
+            // 템플릿 모드에서는 현재 템플릿 내용을 hidden 필드에 업데이트
+            if (this.templateLayout && this.templateLayout.style.display !== 'none') {
+                this.updateTemplateContent();
+            }
+        }
+    }
+
+    updateTemplateTitleHidden() {
+        if (this.templateTitleInput && this.templateHiddenTitle) {
+            this.templateHiddenTitle.value = this.templateTitleInput.value.trim();
+        }
     }
 
     checkAutoLoad() {
@@ -203,7 +360,7 @@ class ContractForm {
         })();
 
         try {
-            const raw = localStorage.getItem('signly_user_info');
+            const raw = localStorage.getItem('deally_user_info');
             if (!raw) {
                 return datasetInfo;
             }
@@ -227,7 +384,7 @@ class ContractForm {
 
     readOwnerSignature() {
         try {
-            const raw = localStorage.getItem('signly_owner_signature');
+            const raw = localStorage.getItem('deally_owner_signature');
             if (!raw) {
                 return {};
             }
@@ -472,44 +629,52 @@ class ContractForm {
             // 이미 input이 있으면 스킵
             if (element.querySelector('input')) return;
 
-            // 서명 이미지 처리
+            // 갑(사업주) 서명 이미지 표시 (저장 시에는 플레이스홀더로 변환)
             if (varName === 'EMPLOYER_SIGNATURE_IMAGE') {
+                // 화면에는 실제 서명 이미지를 보여줌
                 const signatureImg = this.createSignatureImage();
                 element.innerHTML = '';
                 element.appendChild(signatureImg);
+                // 저장 시 플레이스홀더로 변환하기 위한 마커
+                element.setAttribute('data-preserve-placeholder', 'EMPLOYER_SIGNATURE_IMAGE');
                 return;
             }
 
-            // 변수를 input으로 교체
+            // 을(근로자) 서명 플레이스홀더 - 나중에 서명하므로 빈 공간으로 표시
+            if (varName === 'EMPLOYEE_SIGNATURE_IMAGE') {
+                element.innerHTML = '';
+                // 빈 공간 (서명 대기)
+                const emptySpan = document.createElement('span');
+                emptySpan.style.cssText = 'display: inline-block; width: 90px; height: 40px;';
+                emptySpan.innerHTML = '&nbsp;'; // 공간 유지
+                element.appendChild(emptySpan);
+                // 저장 시 플레이스홀더로 변환하기 위한 마커
+                element.setAttribute('data-preserve-placeholder', 'EMPLOYEE_SIGNATURE_IMAGE');
+                return;
+            }
+
+            // 변수를 input으로 교체 (DB 정의 사용)
+            const varDef = this.variableDefinitions.find(v => v.name === varName);
+
             const input = document.createElement('input');
-            input.type = 'text';
             input.className = 'contract-input-inline';
             input.setAttribute('data-variable-name', varName);
 
-            // 변수 타입에 따라 size 설정
-            const upper = varName.toUpperCase();
-            const normalized = upper.replace(/[-_\s]/g, '');
-            let inputSize = 10;
-            let maxLength = null;
-
-            if (normalized.includes('NAME') || upper === 'EMPLOYER' || upper === 'EMPLOYEE' ||
-                upper.includes('이름') || upper === '사업주' || upper === '근로자') {
-                inputSize = 6;
-                maxLength = 10;
-            } else if (normalized.includes('DATE') || upper.includes('날짜')) {
-                inputSize = 11;
-                maxLength = 10;
-            } else if (normalized.includes('ADDRESS') || upper.includes('주소')) {
-                inputSize = 20;
-                maxLength = 50;
-            } else if (normalized.includes('PHONE') || upper.includes('전화')) {
-                inputSize = 13;
-                maxLength = 15;
+            // DB 정의를 사용하거나 기본값 사용
+            if (varDef) {
+                input.type = this.getHtmlInputType(varDef.type);
+                if (varDef.validationRule && varDef.validationRule.maxLength) {
+                    input.maxLength = varDef.validationRule.maxLength;
+                    input.size = Math.min(varDef.validationRule.maxLength, 20);
+                } else {
+                    input.size = 10;
+                }
+                input.placeholder = varDef.placeholderExample || '입력하세요';
+            } else {
+                input.type = 'text';
+                input.size = 10;
+                input.placeholder = '입력하세요';
             }
-
-            input.size = inputSize;
-            if (maxLength) input.maxLength = maxLength;
-            input.placeholder = this.getPlaceholderExample(varName, upper, normalized);
 
             const value = this.getDefaultValueForVariable(varName);
             if (value) input.value = value;
@@ -602,82 +767,49 @@ class ContractForm {
     }
 
     createVariableInput(varName) {
-        const upper = varName.toUpperCase();
-        const normalized = upper.replace(/[-_\s]/g, '');
-
-        // 변수 타입에 따라 적절한 문자 수 결정 (size 속성)
-        let inputSize = 10;
-        let maxLength = null;
-
-        // 이름 관련 (최대 6자) - 한글과 영문 모두 지원
-        if (normalized.includes('NAME') || upper === 'EMPLOYER' || upper === 'EMPLOYEE' ||
-            upper.includes('이름') || upper === '사업주' || upper === '근로자' || upper === '직원' ||
-            upper === '갑' || upper === '을') {
-            inputSize = 6;
-            maxLength = 10;
-        }
-        // 날짜 관련 (yyyy-mm-dd = 10자)
-        else if (normalized.includes('DATE') || upper.includes('날짜') || upper.includes('일자') ||
-            upper.includes('계약일') || upper.includes('시작일') || upper.includes('종료일')) {
-            inputSize = 11;
-            maxLength = 10;
-        }
-        // 시간 관련 (hh:mm = 5자)
-        else if (normalized.includes('TIME') || upper.includes('시간') || upper.includes('시각')) {
-            inputSize = 6;
-            maxLength = 5;
-        }
-        // 요일, 숫자 등 짧은 값
-        else if (normalized.includes('DAY') || normalized.includes('DAYS') || normalized.includes('HOLIDAYS') ||
-            upper.includes('요일') || upper.includes('휴일')) {
-            inputSize = 4;
-            maxLength = 10;
-        }
-        // 주소, 장소, 업무 등 긴 값 (최대 20자)
-        else if (normalized.includes('ADDRESS') || normalized.includes('WORKPLACE') || normalized.includes('DESCRIPTION') ||
-            upper.includes('주소') || upper.includes('장소') || upper.includes('업무') || upper.includes('내용')) {
-            inputSize = 20;
-            maxLength = 50;
-        }
-        // 급여, 금액 관련
-        else if (normalized.includes('SALARY') || normalized.includes('BONUS') || normalized.includes('ALLOWANCE') ||
-            normalized.includes('PAYMENT') || normalized.includes('METHOD') ||
-            upper.includes('급여') || upper.includes('임금') || upper.includes('금액') || upper.includes('지급') || upper.includes('방법')) {
-            inputSize = 12;
-            maxLength = 30;
-        }
-        // 전화번호
-        else if (normalized.includes('PHONE') || normalized.includes('TEL') || upper.includes('전화') || upper.includes('연락처')) {
-            inputSize = 13;
-            maxLength = 15;
-        }
-        // 이메일
-        else if (normalized.includes('EMAIL') || normalized.includes('MAIL') || upper.includes('이메일') || upper.includes('메일')) {
-            inputSize = 20;
-            maxLength = 50;
-        }
-        // 회사명/조직명
-        else if (normalized.includes('COMPANY') || normalized.includes('ORGANIZATION') ||
-            upper.includes('회사') || upper.includes('조직')) {
-            inputSize = 15;
-            maxLength = 30;
-        }
+        // Find variable definition in database
+        const varDef = this.variableDefinitions.find(v => v.name === varName);
 
         const wrapper = document.createElement('span');
         wrapper.className = 'contract-variable-underline';
         wrapper.setAttribute('data-variable-name', varName);
 
         const input = document.createElement('input');
-        input.type = 'text';
         input.className = 'contract-input-inline';
-        input.size = inputSize;
-        if (maxLength) {
-            input.maxLength = maxLength;
-        }
         input.setAttribute('data-variable-name', varName);
 
-        // 적절한 플레이스홀더 설정
-        input.placeholder = this.getPlaceholderExample(varName, upper, normalized);
+        // Use database definition if available, otherwise fallback to legacy logic
+        if (varDef) {
+            // Use HTML5 input type based on database definition
+            input.type = this.getHtmlInputType(varDef.type);
+            
+            // Set size and maxLength based on database definition or fallback
+            if (varDef.validationRule && varDef.validationRule.maxLength) {
+                input.maxLength = varDef.validationRule.maxLength;
+                input.size = Math.min(varDef.validationRule.maxLength, 20);
+            } else {
+                input.size = this.getDefaultInputSize(varName);
+            }
+            
+            // Set placeholder from database
+            input.placeholder = varDef.placeholderExample || this.getPlaceholderExample(varName);
+            
+            // Add HTML5 validation attributes
+            if (varDef.validationRule && varDef.validationRule.pattern) {
+                input.pattern = varDef.validationRule.pattern;
+            }
+            if (varDef.required) {
+                input.required = true;
+            }
+        } else {
+            // Fallback to legacy logic
+            const upper = varName.toUpperCase();
+            const normalized = upper.replace(/[-_\s]/g, '');
+            
+            input.type = 'text';
+            input.size = this.getDefaultInputSize(varName);
+            input.placeholder = this.getPlaceholderExample(varName);
+        }
 
         // 자동 값 설정
         const value = this.getDefaultValueForVariable(varName);
@@ -685,98 +817,64 @@ class ContractForm {
             input.value = value;
         }
 
-        input.addEventListener('input', () => this.updatePresetContent());
+        input.addEventListener('input', () => this.updateTemplateContent());
 
         wrapper.appendChild(input);
         return wrapper;
     }
 
-    getPlaceholderExample(varName, upper, normalized) {
-        // 이름 관련
-        if (normalized.includes('NAME') || upper === 'EMPLOYER' || upper === 'EMPLOYEE' ||
-            upper.includes('이름') || upper === '사업주' || upper === '근로자' || upper === '직원' ||
-            upper === '갑' || upper === '을') {
-            if (upper.includes('EMPLOYEE') || upper.includes('근로자') || upper.includes('직원') || upper === '을') {
-                return '예) 홍길동';
-            }
-            return '예) 김철수';
-        }
-        // 날짜 관련
-        if (normalized.includes('DATE') || upper.includes('날짜') || upper.includes('일자') ||
-            upper.includes('계약일') || upper.includes('시작일') || upper.includes('종료일')) {
-            return '예) 2025-01-01';
-        }
-        // 시간 관련
-        if (normalized.includes('TIME') || upper.includes('시간') || upper.includes('시각')) {
-            return '예) 09:00';
-        }
-        // 요일
-        if (normalized.includes('DAY') || normalized.includes('DAYS') || upper.includes('요일')) {
-            return '예) 월~금';
-        }
-        // 휴일
-        if (normalized.includes('HOLIDAYS') || upper.includes('휴일')) {
-            return '예) 토, 일요일';
-        }
-        // 주소
-        if (normalized.includes('ADDRESS') || upper.includes('주소')) {
-            return '예) 서울시 강남구';
-        }
-        // 장소
-        if (normalized.includes('WORKPLACE') || upper.includes('장소')) {
-            return '예) 본사 사무실';
-        }
-        // 업무 내용
-        if (normalized.includes('DESCRIPTION') || normalized.includes('JOB') || upper.includes('업무') || upper.includes('내용')) {
-            return '예) 소프트웨어 개발';
-        }
-        // 급여
-        if (normalized.includes('SALARY') || upper.includes('급여') || upper.includes('임금')) {
-            return '예) 3,000,000';
-        }
-        // 상여금
-        if (normalized.includes('BONUS') || upper.includes('상여')) {
-            return '예) 연 500만원';
-        }
-        // 수당
-        if (normalized.includes('ALLOWANCE') || upper.includes('수당')) {
-            return '예) 식대 10만원';
-        }
-        // 지급일
-        if (normalized.includes('PAYMENT') && normalized.includes('DAY') || upper.includes('지급일')) {
-            return '예) 25';
-        }
-        // 지급방법
-        if (normalized.includes('METHOD') || upper.includes('방법')) {
-            return '예) 계좌이체';
-        }
-        // 전화번호
-        if (normalized.includes('PHONE') || normalized.includes('TEL') || upper.includes('전화') || upper.includes('연락처')) {
-            return '예) 010-1234-5678';
-        }
-        // 이메일
-        if (normalized.includes('EMAIL') || normalized.includes('MAIL') || upper.includes('이메일') || upper.includes('메일')) {
-            return '예) hong@example.com';
-        }
-        // 회사명
-        if (normalized.includes('COMPANY') || normalized.includes('ORGANIZATION') || upper.includes('회사') || upper.includes('조직')) {
-            return '예) (주)테크컴퍼니';
+    getHtmlInputType(variableType) {
+        const typeMap = {
+            'TEXT': 'text',
+            'TIME': 'time',
+            'DATE': 'date',
+            'EMAIL': 'email',
+            'NUMBER': 'number',
+            'TEL': 'tel',
+            'URL': 'url',
+            'IMAGE': 'text' // For now, use text for image variables
+        };
+        return typeMap[variableType] || 'text';
+    }
+
+    getDefaultInputSize(varName) {
+        // DB 데이터 우선 (대부분 createVariableInput에서 이미 처리됨)
+        const varDef = this.variableDefinitions.find(v => v.name === varName);
+        if (varDef && varDef.inputSize) {
+            return varDef.inputSize;
         }
 
-        // 기본값
-        return '';
+        // 폴백: 기본값 반환
+        return 10;
+    }
+
+    getPlaceholderExample(varName) {
+        // DB 데이터 우선
+        const varDef = this.variableDefinitions.find(v => v.name === varName);
+        if (varDef && varDef.placeholderExample) {
+            return varDef.placeholderExample;
+        }
+        
+        // 폴백: 기본 메시지
+        return '입력하세요';
     }
 
     createSignatureImage() {
+        // 래퍼 생성 (밑줄 포함)
+        const wrapper = document.createElement('span');
+        wrapper.className = 'contract-signature-wrapper';
+        wrapper.style.cssText = 'display: inline-block; border-bottom: 1px solid #000; min-width: 80px; text-align: center; vertical-align: bottom; padding-bottom: 2px; margin: 0 2px; line-height: 1;';
+
         // localStorage에서 서명 이미지 가져오기
-        const signatureRaw = localStorage.getItem('signly_owner_signature');
+        const signatureRaw = localStorage.getItem('deally_owner_signature');
 
         if (!signatureRaw) {
             // 서명이 없으면 빈 span 반환
             const span = document.createElement('span');
             span.textContent = '(서명 없음)';
-            span.style.cssText = 'color: #999; font-size: 11px;';
-            return span;
+            span.style.cssText = 'color: #999; font-size: 11px; display: inline-block; padding: 5px 0;';
+            wrapper.appendChild(span);
+            return wrapper;
         }
 
         try {
@@ -787,79 +885,54 @@ class ContractForm {
                 console.warn('[WARN] 서명 이미지 데이터가 없습니다:', signatureData);
                 const span = document.createElement('span');
                 span.textContent = '(서명 없음)';
-                span.style.cssText = 'color: #999; font-size: 11px;';
-                return span;
+                span.style.cssText = 'color: #999; font-size: 11px; display: inline-block; padding: 5px 0;';
+                wrapper.appendChild(span);
+                return wrapper;
             }
 
             const img = document.createElement('img');
             img.src = imgSrc;
             img.className = 'signature-stamp-image-element';
-            img.style.cssText = 'display: inline-block; max-width: 90px; max-height: 40px; vertical-align: middle;';
+            img.style.cssText = 'display: inline-block; max-width: 90px; max-height: 40px; vertical-align: bottom;';
             img.alt = '사업주 서명';
 
-            return img;
+            wrapper.appendChild(img);
+            return wrapper;
         } catch (error) {
             console.error('[ERROR] 서명 이미지 파싱 실패:', error);
             const span = document.createElement('span');
             span.textContent = '(서명 오류)';
-            span.style.cssText = 'color: #f00; font-size: 11px;';
-            return span;
+            span.style.cssText = 'color: #f00; font-size: 11px; display: inline-block; padding: 5px 0;';
+            wrapper.appendChild(span);
+            return wrapper;
         }
     }
 
     getDefaultValueForVariable(varName) {
-        if (!varName) return '';
+        if (!varName || !this.ownerInfo) return '';
 
-        const upper = varName.toUpperCase();
-        const normalized = upper.replace(/[-_\s]/g, '');
-
-        // 사업주/고용주 이름
-        if (normalized.includes('EMPLOYER') && normalized.includes('NAME') ||
-            upper === 'EMPLOYER' ||
-            normalized.includes('OWNER') && normalized.includes('NAME') ||
-            upper === '사업주' || upper === '사업주명' || upper === '갑') {
-            return this.ownerInfo?.name || '';
+        // DB 기반 변수 정의에서 defaultSource 확인
+        const varDef = this.variableDefinitions.find(v => v.name === varName);
+        if (varDef && varDef.defaultSource) {
+            // DB에 정의된 defaultSource에 따라 값 반환
+            const sourceMap = {
+                'OWNER_NAME': this.ownerInfo.name,
+                'OWNER_EMAIL': this.ownerInfo.email,
+                'OWNER_COMPANY': this.ownerInfo.companyName,
+                'OWNER_PHONE': this.ownerInfo.businessPhone,
+                'OWNER_ADDRESS': this.ownerInfo.businessAddress
+            };
+            return sourceMap[varDef.defaultSource] || '';
         }
 
-        // 사업주/고용주 이메일
-        if (normalized.includes('EMPLOYER') && normalized.includes('EMAIL') ||
-            normalized.includes('OWNER') && normalized.includes('EMAIL') ||
-            upper === '사업주이메일') {
-            return this.ownerInfo?.email || '';
-        }
-
-        // 회사명/조직명
-        if (normalized.includes('COMPANY') || normalized.includes('ORGANIZATION') ||
-            upper === '회사' || upper === '회사명' || upper === '조직' || upper === '조직명') {
-            return this.ownerInfo?.companyName || '';
-        }
-
-        // 사업주 전화번호
-        if (normalized.includes('EMPLOYER') && (normalized.includes('PHONE') || normalized.includes('TEL')) ||
-            normalized.includes('OWNER') && (normalized.includes('PHONE') || normalized.includes('TEL')) ||
-            upper === '사업주전화번호' || upper === '사업장전화번호' || upper === '업체전화번호') {
-            return this.ownerInfo?.businessPhone || '';
-        }
-
-        // 사업주 주소
-        if (normalized.includes('EMPLOYER') && normalized.includes('ADDRESS') ||
-            normalized.includes('OWNER') && normalized.includes('ADDRESS') ||
-            upper === '사업주주소' || upper === '사업장주소' || upper === '업체주소') {
-            return this.ownerInfo?.businessAddress || '';
-        }
-
-        // 근로자/직원 이름
-        if (normalized.includes('EMPLOYEE') && normalized.includes('NAME') ||
-            upper === 'EMPLOYEE' ||
-            upper === '근로자' || upper === '근로자명' || upper === '직원' || upper === '직원명' || upper === '을') {
-            return '';
-        }
-
-        // 날짜 관련
-        if (normalized.includes('DATE') || normalized.includes('START') ||
-            upper === '날짜' || upper === '계약일' || upper === '시작일') {
-            return new Date().toISOString().split('T')[0];
-        }
+        // 폴백: 기본 매핑 (최소한의 하드코딩)
+        const nameUpper = varName.toUpperCase();
+        if (nameUpper === 'EMPLOYER') return this.ownerInfo.name || '';
+        if (nameUpper === 'COMPANY_NAME') return this.ownerInfo.companyName || '';
+        if (nameUpper === 'EMPLOYER_EMAIL') return this.ownerInfo.email || '';
+        if (nameUpper === 'EMPLOYER_PHONE') return this.ownerInfo.businessPhone || '';
+        if (nameUpper === 'EMPLOYER_ADDRESS') return this.ownerInfo.businessAddress || '';
+        if (nameUpper === 'CONTRACT_DATE') return new Date().toISOString().split('T')[0];
 
         return '';
     }
@@ -904,7 +977,18 @@ class ContractForm {
             }
         });
 
-        // 서명 이미지를 img src에서 실제 이미지 데이터로 교체
+        // 갑(사업주) 서명 플레이스홀더 복원
+        const placeholderElements = clone.querySelectorAll('[data-preserve-placeholder]');
+        placeholderElements.forEach(element => {
+            const placeholderName = element.getAttribute('data-preserve-placeholder');
+            if (placeholderName) {
+                // 플레이스홀더 텍스트로 교체 (대괄호 포함)
+                const placeholderText = document.createTextNode('[' + placeholderName + ']');
+                element.parentNode.replaceChild(placeholderText, element);
+            }
+        });
+
+        // 을(근로자) 서명 이미지는 그대로 유지
         const signatureImgs = clone.querySelectorAll('img.signature-stamp-image-element');
         signatureImgs.forEach(img => {
             // 이미 src가 있으면 그대로 유지 (Base64 데이터)
@@ -954,7 +1038,7 @@ class ContractForm {
     async loadPresetById(presetId) {
         try {
             const response = await fetch('/templates/presets/' + presetId, {
-                headers: {'Accept': 'application/json'}
+                headers: { 'Accept': 'application/json' }
             });
 
             if (!response.ok) {
@@ -1332,37 +1416,237 @@ class ContractForm {
         return true;
     }
 
-    showValidationError(input, message) {
-        input.classList.add('is-invalid');
+    validateAllFields() {
+        let isValid = true;
+        let firstErrorField = null;
+        let errorMessage = '';
+        const errorFields = [];
 
-        const feedback = document.createElement('div');
-        feedback.className = 'invalid-feedback';
-        feedback.textContent = message;
+        // 검증할 필드 목록 (우선순위 순)
+        const validationFields = [
+            { id: 'templateTitleHidden', name: '계약서 제목', type: 'text', required: true },
+            { id: 'templateContentHidden', name: '계약서 내용', type: 'content', required: true },
+            { id: 'templateFirstPartyName', name: '갑(사업주) 이름', type: 'text', required: true },
+            { id: 'templateFirstPartyEmail', name: '갑(사업주) 이메일', type: 'email', required: true },
+            { id: 'templateSecondPartyName', name: '을(근로자) 이름', type: 'text', required: true },
+            { id: 'templateSecondPartyEmail', name: '을(근로자) 이메일', type: 'email', required: true }
+        ];
 
-        input.parentElement.appendChild(feedback);
+        // 필드 존재 여부 먼저 확인
+        const missingFields = validationFields.filter(config =>
+            !document.getElementById(config.id)
+        );
+
+        if (missingFields.length > 0) {
+            console.error('[ContractForm] Missing validation fields:', missingFields.map(f => f.id));
+            return {
+                isValid: false,
+                firstErrorField: null,
+                errorMessage: '필수 폼 필드가 누락되었습니다. 페이지를 새로고침해주세요.',
+                errorFields: missingFields
+            };
+        }
+
+        // 각 필드 검증
+        for (const fieldConfig of validationFields) {
+            const element = document.getElementById(fieldConfig.id);
+            if (!element) {
+                console.error(`[ContractForm] Field not found: ${fieldConfig.id}`);
+                continue;
+            }
+
+            const validationResult = this.validateSingleField(element, fieldConfig);
+
+            if (!validationResult.isValid) {
+                isValid = false;
+                errorFields.push({
+                    element,
+                    name: fieldConfig.name,
+                    error: validationResult.error
+                });
+
+                if (!firstErrorField) {
+                    firstErrorField = element;
+                    errorMessage = validationResult.error;
+                }
+            } else {
+                // 유효한 필드는 에러 표시 제거
+                clearFieldError(element);
+            }
+        }
+
+        // 이메일 중복 검사
+        const firstEmail = document.getElementById('templateFirstPartyEmail')?.value?.trim();
+        const secondEmail = document.getElementById('templateSecondPartyEmail')?.value?.trim();
+
+        if (firstEmail && secondEmail && firstEmail === secondEmail) {
+            isValid = false;
+            const secondEmailField = document.getElementById('templateSecondPartyEmail');
+            if (!firstErrorField) {
+                firstErrorField = secondEmailField;
+                errorMessage = '갑과 을의 이메일 주소는 달라야 합니다.';
+            }
+            showFieldError(secondEmailField, '갑과 을의 이메일 주소는 달라야 합니다.');
+        }
+
+        return {
+            isValid,
+            firstErrorField,
+            errorMessage,
+            errorFields
+        };
     }
 
-    validateAllTemplateVariables() {
-        const variableInputs = document.querySelectorAll('[data-variable-name][data-variable-type]');
-        let allValid = true;
+    validateSingleField(element, fieldConfig) {
+        const value = element.value?.trim();
 
-        variableInputs.forEach(input => {
-            const varName = input.getAttribute('data-variable-name');
-            const varType = input.getAttribute('data-variable-type');
-            const isRequired = input.hasAttribute('required');
-
-            const varDef = {
-                label: input.parentElement.querySelector('label')?.textContent.replace('*', '').trim() || varName,
-                type: varType,
-                required: isRequired
+        // 필수값 검사
+        if (fieldConfig.required && !value) {
+            return {
+                isValid: false,
+                error: `${fieldConfig.name}은(는) 필수 항목입니다.`
             };
+        }
 
-            if (!this.validateVariableInput(input, varDef)) {
-                allValid = false;
+        // 타입별 검사
+        if (value) {
+            switch (fieldConfig.type) {
+                case 'email':
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(value)) {
+                        return {
+                            isValid: false,
+                            error: `${fieldConfig.name}은(는) 올바른 이메일 형식이어야 합니다.`
+                        };
+                    }
+                    break;
+
+                case 'text':
+                    if (value.length > 100) {
+                        return {
+                            isValid: false,
+                            error: `${fieldConfig.name}은(는) 100자를 초과할 수 없습니다.`
+                        };
+                    }
+                    break;
+
+                case 'content':
+                    if (value.length > 100000) {
+                        return {
+                            isValid: false,
+                            error: `${fieldConfig.name}은(는) 100,000자를 초과할 수 없습니다.`
+                        };
+                    }
+                    break;
+            }
+        }
+
+        return {
+            isValid: true,
+            error: null
+        };
+    }
+
+    validateHiddenFields() {
+        let isValid = true;
+        let firstErrorField = null;
+        let firstVisibleElement = null;
+
+        // 필수 hidden 필드들 검증
+        const requiredHiddenFields = [
+            { id: 'templateFirstPartyName', name: '갑(사업주) 이름' },
+            { id: 'templateFirstPartyEmail', name: '갑(사업주) 이메일' },
+            { id: 'templateSecondPartyName', name: '을(근로자) 이름' },
+            { id: 'templateSecondPartyEmail', name: '을(근로자) 이메일' },
+            { id: 'templateTitleHidden', name: '계약서 제목' },
+            { id: 'templateContentHidden', name: '계약서 내용' }
+        ];
+
+        requiredHiddenFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            if (element) {
+                const value = element.value?.trim();
+                if (!value) {
+                    isValid = false;
+                    if (!firstErrorField) {
+                        firstErrorField = { element, name: field.name, id: field.id };
+                    }
+
+                    // 에러 표시
+                    showFieldError(element, `${field.name}은(는) 필수입니다.`);
+
+                    // 숨겨진 필드를 실제 보이는 필드로 매핑하여 포커스
+                    if (!firstVisibleElement) {
+                        let visibleElement = null;
+
+                        // 필드별 매핑 로직
+                        switch (field.id) {
+                            case 'templateSecondPartyEmail':
+                                // 근로자 이메일은 실제 보이는 input 필드
+                                visibleElement = document.getElementById('templateSecondPartyEmail');
+                                break;
+
+                            case 'templateFirstPartyName':
+                            case 'templateFirstPartyEmail':
+                            case 'templateSecondPartyName':
+                                // 변수 입력 필드들 - HTML 컨테이너 내에서 해당 변수 찾기
+                                const varName = field.id.replace('template', '').replace('Hidden', '');
+                                visibleElement = document.querySelector(`[data-var-name="${varName}"]`);
+                                if (!visibleElement) {
+                                    // 대체: 템플릿 HTML 컨테이너 내에서 name 속성으로 찾기
+                                    visibleElement = this.templateHtmlContainer?.querySelector(`[name="${varName}"]`);
+                                }
+                                break;
+
+                            case 'templateTitleHidden':
+                                // 제목은 현재 수정 불가능할 수 있음 - 템플릿 레이아웃 제목 영역
+                                visibleElement = document.getElementById('templateLayoutTitle');
+                                break;
+
+                            case 'templateContentHidden':
+                                // 커스텀 컨텐츠 에디터
+                                visibleElement = document.getElementById('customContentPreview');
+                                if (!visibleElement || visibleElement.offsetParent === null) {
+                                    // 템플릿 HTML 컨테이너가 보이는 경우
+                                    visibleElement = this.templateHtmlContainer;
+                                }
+                                break;
+                        }
+
+                        // 포커스 가능한 visible 요소 저장
+                        if (visibleElement && visibleElement.offsetParent !== null) {
+                            firstVisibleElement = visibleElement;
+                        }
+                    }
+                } else {
+                    // 에러 제거
+                    clearFieldError(element);
+                }
             }
         });
 
-        return allValid;
+        // 첫 번째 에러 필드로 포커스 및 스크롤
+        if (!isValid && firstErrorField) {
+            setTimeout(() => {
+                // 보이는 요소로 포커스 및 스크롤
+                if (firstVisibleElement) {
+                    // 스크롤
+                    firstVisibleElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    // 포커스 (입력 가능한 요소인 경우)
+                    if (typeof firstVisibleElement.focus === 'function') {
+                        setTimeout(() => {
+                            firstVisibleElement.focus();
+                        }, 300);
+                    }
+                }
+
+                // 에러 메시지 표시
+                showAlertModal(`${firstErrorField.name}은(는) 필수 항목입니다. 입력해주세요.`);
+            }, 100);
+        }
+
+        return isValid;
     }
 
     // ========================================
@@ -1423,15 +1707,31 @@ class ContractForm {
         if (!this.ownerInfo) {
             return;
         }
+
         // 일반 폼에 사업주 정보 자동 입력
         if (this.firstPartyNameInput && !this.firstPartyNameInput.value && this.ownerInfo.name) {
             this.firstPartyNameInput.value = this.ownerInfo.name;
+            // hidden 필드 값도 동기화
+            const hiddenFirstPartyName = document.getElementById('templateFirstPartyName');
+            if (hiddenFirstPartyName) {
+                hiddenFirstPartyName.value = this.ownerInfo.name;
+            }
         }
         if (this.firstPartyEmailInput && !this.firstPartyEmailInput.value && this.ownerInfo.email) {
             this.firstPartyEmailInput.value = this.ownerInfo.email;
+            // hidden 필드 값도 동기화
+            const hiddenFirstPartyEmail = document.getElementById('templateFirstPartyEmail');
+            if (hiddenFirstPartyEmail) {
+                hiddenFirstPartyEmail.value = this.ownerInfo.email;
+            }
         }
         if (this.firstPartyAddressInput && !this.firstPartyAddressInput.value && this.ownerInfo.companyName) {
             this.firstPartyAddressInput.value = this.ownerInfo.companyName;
+            // hidden 필드 값도 동기화
+            const hiddenFirstPartyAddress = document.getElementById('templateFirstPartyAddress');
+            if (hiddenFirstPartyAddress) {
+                hiddenFirstPartyAddress.value = this.ownerInfo.companyName;
+            }
         }
     }
 
@@ -1677,7 +1977,7 @@ class ContractForm {
             });
 
             if (response.status === 204) {
-                localStorage.removeItem('signly_owner_signature');
+                localStorage.removeItem('deally_owner_signature');
                 return;
             }
 
@@ -1700,7 +2000,7 @@ class ContractForm {
 
     persistOwnerSignature(dataUrl, updatedAt) {
         if (!dataUrl) {
-            localStorage.removeItem('signly_owner_signature');
+            localStorage.removeItem('deally_owner_signature');
             return;
         }
 
@@ -1709,7 +2009,7 @@ class ContractForm {
                 dataUrl: dataUrl,
                 updatedAt: updatedAt || new Date().toISOString()
             };
-            localStorage.setItem('signly_owner_signature', JSON.stringify(payload));
+            localStorage.setItem('deally_owner_signature', JSON.stringify(payload));
         } catch (error) {
             console.warn('[WARN] 사업주 서명 정보를 localStorage에 저장할 수 없습니다:', error);
         }
@@ -1780,6 +2080,51 @@ class ContractForm {
                     input.parentNode.replaceChild(span, input);
                 });
 
+                // 서명 플레이스홀더 처리 (data-preserve-placeholder 속성을 가진 요소들)
+                const signaturePlaceholders = clone.querySelectorAll('[data-preserve-placeholder]');
+                signaturePlaceholders.forEach(element => {
+                    const placeholderType = element.getAttribute('data-preserve-placeholder');
+                    if (placeholderType === 'EMPLOYER_SIGNATURE_IMAGE') {
+                        // 갑(사업주) 서명은 이미 표시되어 있음 (createSignatureImage로 생성됨)
+                        // 추가 처리 불필요
+                    } else if (placeholderType === 'EMPLOYEE_SIGNATURE_IMAGE') {
+                        // 을(근로자) 서명은 빈 공간으로 표시 (아직 서명 전)
+                        // 추가 처리 불필요
+                    }
+                });
+
+                // 텍스트 노드에서 플레이스홀더 문자열 제거 ([EMPLOYER_SIGNATURE_IMAGE], [EMPLOYEE_SIGNATURE_IMAGE])
+                const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
+                const textNodes = [];
+                while (walker.nextNode()) {
+                    if (walker.currentNode.nodeValue &&
+                        (walker.currentNode.nodeValue.includes('[EMPLOYER_SIGNATURE_IMAGE]') ||
+                            walker.currentNode.nodeValue.includes('[EMPLOYEE_SIGNATURE_IMAGE]'))) {
+                        textNodes.push(walker.currentNode);
+                    }
+                }
+                textNodes.forEach(node => {
+                    // EMPLOYER_SIGNATURE_IMAGE 플레이스홀더를 실제 서명 이미지로 교체
+                    if (node.nodeValue.includes('[EMPLOYER_SIGNATURE_IMAGE]')) {
+                        const signatureImg = this.createSignatureImage();
+                        const fragment = document.createDocumentFragment();
+                        const parts = node.nodeValue.split('[EMPLOYER_SIGNATURE_IMAGE]');
+
+                        fragment.appendChild(document.createTextNode(parts[0]));
+                        if (signatureImg) {
+                            fragment.appendChild(signatureImg);
+                        }
+                        if (parts[1]) {
+                            fragment.appendChild(document.createTextNode(parts[1]));
+                        }
+                        node.parentNode.replaceChild(fragment, node);
+                    }
+                    // EMPLOYEE_SIGNATURE_IMAGE 플레이스홀더는 빈 공간으로 교체
+                    else if (node.nodeValue.includes('[EMPLOYEE_SIGNATURE_IMAGE]')) {
+                        node.nodeValue = node.nodeValue.replace('[EMPLOYEE_SIGNATURE_IMAGE]', '');
+                    }
+                });
+
                 htmlToPreview = clone.innerHTML;
             } else {
                 htmlToPreview = '<p>템플릿 내용이 없습니다.</p>';
@@ -1801,18 +2146,69 @@ class ContractForm {
     }
 
     handleFormSubmit(event, form) {
-        // 템플릿 모드인 경우
+        console.log('[ContractForm] Form submit triggered');
+
+        // ✅ 핵심 수정: 가장 먼저 폼 제출 중단
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
+        // 템플릿 모드인 경우 hidden 필드 업데이트 (검증 전에 수행)
         if (this.templateLayout && this.templateLayout.style.display !== 'none') {
-            // 템플릿 변수 검증
-            if (!this.validateAllTemplateVariables()) {
-                event.preventDefault();
-                event.stopPropagation();
-                showAlertModal('입력한 변수 값을 확인해주세요.');
+            console.log('[ContractForm] Updating template content before validation');
+            this.updateTemplateContent();
+        }
+
+        // 전체 필드 유효성 검사 (프론트엔드 선 검증)
+        const validationResult = this.validateAllFields();
+        console.log('[ContractForm] Validation result:', validationResult);
+
+        if (!validationResult.isValid) {
+            console.log('[ContractForm] Validation failed:', validationResult.errorMessage);
+
+            // 첫 번째 에러 필드로 포커스
+            if (validationResult.firstErrorField) {
+                setTimeout(() => {
+                    validationResult.firstErrorField.focus();
+                    validationResult.firstErrorField.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }, 100);
+            }
+
+            showAlertModal(validationResult.errorMessage || '입력값을 확인해주세요.');
+            return false;
+        }
+
+        // 템플릿 모드인 경우 추가 검증
+        if (this.templateLayout && this.templateLayout.style.display !== 'none') {
+            // 콘텐츠가 비어있는지 최종 확인
+            if (this.templateHiddenContent && !this.templateHiddenContent.value.trim()) {
+                console.log('[ContractForm] Template content is empty after update');
+                showAlertModal('계약서 내용이 비어있습니다. 템플릿 변수를 입력해주세요.');
+                // 첫 번째 빈 변수 입력 필드로 포커스
+                const firstEmptyInput = this.templateHtmlContainer?.querySelector('input[data-variable-name]:not([value])');
+                if (firstEmptyInput) {
+                    firstEmptyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => firstEmptyInput.focus(), 300);
+                }
                 return false;
             }
 
-            // 템플릿 콘텐츠 업데이트
-            this.updateTemplateContent();
+            // 템플릿 HTML 내의 모든 입력 필드가 채워져 있는지 확인
+            const emptyInputs = this.templateHtmlContainer?.querySelectorAll('input[data-variable-name]');
+            if (emptyInputs) {
+                for (const input of emptyInputs) {
+                    if (!input.value || input.value.trim() === '') {
+                        console.log('[ContractForm] Empty variable input found:', input.getAttribute('data-variable-name'));
+                        showAlertModal('모든 필드를 입력해주세요.');
+                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(() => input.focus(), 300);
+                        return false;
+                    }
+                }
+            }
 
             // normalLayout의 필드 비활성화
             if (this.normalLayout) {
@@ -1839,22 +2235,49 @@ class ContractForm {
             }
         }
 
-        const firstEmail = this.firstPartyEmailInput?.value ||
-            this.templateFirstPartyEmail?.value;
-        const secondEmail = this.secondPartyEmailInput?.value ||
-            this.templateSecondPartyEmailInput?.value;
+        // 템플릿 모드에서는 visible input 값을 hidden field로 동기화하고 중복 제출 방지
+        if (this.templateLayout && this.templateLayout.style.display !== 'none') {
+            // secondPartyEmail: visible input → hidden field
+            const visibleSecondEmail = document.querySelector('#templateLayout input[type="email"][name="secondPartyEmail"]');
+            const hiddenSecondEmail = document.querySelector('input[type="hidden"][name="secondPartyEmail"]');
 
-        if (firstEmail && secondEmail && firstEmail === secondEmail) {
-            event.preventDefault();
-            event.stopPropagation();
-            showAlertModal('갑과 을의 이메일 주소는 달라야 합니다.');
-            return false;
+            console.log('[ContractForm] Email field sync debug:');
+            console.log('  - visibleSecondEmail found:', !!visibleSecondEmail, 'value:', visibleSecondEmail?.value);
+            console.log('  - hiddenSecondEmail found:', !!hiddenSecondEmail, 'value:', hiddenSecondEmail?.value);
+
+            if (visibleSecondEmail && hiddenSecondEmail) {
+                // 값 복사
+                hiddenSecondEmail.value = visibleSecondEmail.value;
+                // 중복 제출 방지: visible 필드의 name 제거 (hidden 필드만 제출되도록)
+                visibleSecondEmail.removeAttribute('name');
+                console.log('[ContractForm] Synced secondPartyEmail and removed name from visible field:', visibleSecondEmail.value);
+            } else if (!visibleSecondEmail) {
+                console.warn('[ContractForm] Visible secondPartyEmail field not found!');
+            } else if (!hiddenSecondEmail) {
+                console.warn('[ContractForm] Hidden secondPartyEmail field not found!');
+            }
+
+            // firstPartyEmail 값도 확인
+            const firstEmail = document.getElementById('templateFirstPartyEmail');
+            console.log('  - firstPartyEmail found:', !!firstEmail, 'value:', firstEmail?.value);
         }
 
+        // CSRF 토큰 확인
         if (window.ensureCsrfToken) {
             window.ensureCsrfToken(form);
         }
 
+        // ✅ 모든 검증 통과 시 폼 제출
+        console.log('[ContractForm] All validations passed, submitting form');
+        console.log('[ContractForm] Form data:', {
+            title: document.getElementById('templateTitleHidden')?.value,
+            contentLength: document.getElementById('templateContentHidden')?.value?.length,
+            firstPartyName: document.getElementById('templateFirstPartyName')?.value,
+            firstPartyEmail: document.getElementById('templateFirstPartyEmail')?.value,
+            secondPartyName: document.getElementById('templateSecondPartyName')?.value,
+            secondPartyEmail: document.getElementById('templateSecondPartyEmail')?.value
+        });
+        form.submit();
         return true;
     }
 }
