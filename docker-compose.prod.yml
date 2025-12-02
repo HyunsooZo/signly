@@ -43,7 +43,7 @@ services:
 
   # Spring Boot 애플리케이션 (프로덕션)
   app:
-    image: ${DOCKER_IMAGE:-HyunsooZo/deally-app:latest}
+    image: ${DOCKER_IMAGE:-***/deally-app:latest}
     container_name: deally-app-prod
     restart: always
     depends_on:
