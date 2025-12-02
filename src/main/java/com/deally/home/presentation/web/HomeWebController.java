@@ -31,18 +31,6 @@ public class HomeWebController extends BaseWebController {
     public String root() {
         return "redirect:/home";
     }
-    
-    @GetMapping("/login")
-    public String login(Model model) {
-        model.addAttribute("pageTitle", "로그인");
-        return "auth/login";
-    }
-    
-    @GetMapping("/register")
-    public String register(Model model) {
-        model.addAttribute("pageTitle", "회원가입");
-        return "auth/register";
-    }
 
     @GetMapping("/home")
     public String home(
