@@ -16,7 +16,7 @@ RUN gradle dependencies --no-daemon || true
 COPY src ./src
 
 # 빌드 (테스트 제외)
-RUN gradle bootJar --no-daemon -x test
+RUN gradle bootWar --no-daemon -x test
 
 # =================================
 # Stage 2: Runtime
@@ -32,8 +32,8 @@ RUN groupadd -r spring && useradd -r -g spring spring
 RUN mkdir -p /app/uploads /app/logs && \
     chown -R spring:spring /app
 
-# 빌드된 JAR 파일 복사
-COPY --from=builder /app/build/libs/*.jar app.jar
+# 빌드된 WAR 파일 복사
+COPY --from=builder /app/build/libs/*.war app.war
 
 # 폰트 파일 복사 (PDF 생성용)
 COPY --from=builder /app/src/main/resources/fonts /app/fonts
@@ -53,5 +53,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
 EXPOSE 8080
 
 # 실행
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar app.war"]
 # Build timestamp: Tue Dec  2 23:49:17 KST 2025
