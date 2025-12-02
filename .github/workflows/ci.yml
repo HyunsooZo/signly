@@ -16,7 +16,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: test_root_password
-          MYSQL_DATABASE: signly_test
+          MYSQL_DATABASE: deally_test
           MYSQL_USER: test_user
           MYSQL_PASSWORD: test_password
         ports:
@@ -64,7 +64,7 @@ jobs:
       - name: Run tests
         env:
           SPRING_PROFILES_ACTIVE: test
-          DB_URL: jdbc:mysql://localhost:3306/signly_test?useSSL=false&allowPublicKeyRetrieval=true
+          DB_URL: jdbc:mysql://localhost:3306/deally_test?useSSL=false&allowPublicKeyRetrieval=true
           DB_USERNAME: test_user
           DB_PASSWORD: test_password
           REDIS_HOST: localhost

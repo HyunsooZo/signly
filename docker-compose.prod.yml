@@ -2,11 +2,11 @@ services:
   # MySQL 데이터베이스 (프로덕션)
   mysql:
     image: mysql:8.0
-    container_name: signly-mysql-prod
+    container_name: deally-mysql-prod
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-signly_prod}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-deally_prod}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       TZ: Asia/Seoul
@@ -21,12 +21,12 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - signly-network
+      - deally-network
 
   # Redis 캐시/세션 스토어 (프로덕션)
   redis:
     image: redis:7-alpine
-    container_name: signly-redis-prod
+    container_name: deally-redis-prod
     restart: always
     ports:
       - "6379:6379"
@@ -39,12 +39,12 @@ services:
       timeout: 3s
       retries: 5
     networks:
-      - signly-network
+      - deally-network
 
   # Spring Boot 애플리케이션 (프로덕션)
   app:
-    image: ${DOCKER_IMAGE:-signly-app:latest}
-    container_name: signly-app-prod
+    image: ${DOCKER_IMAGE:-deally-app:latest}
+    container_name: deally-app-prod
     restart: always
     depends_on:
       mysql:
@@ -58,7 +58,7 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       
       # Database
-      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-signly_prod}?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-deally_prod}?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
       DB_USERNAME: ${MYSQL_USER}
       DB_PASSWORD: ${MYSQL_PASSWORD}
       
@@ -106,7 +106,7 @@ services:
       retries: 3
       start_period: 90s
     networks:
-      - signly-network
+      - deally-network
     deploy:
       resources:
         limits:
@@ -125,5 +125,5 @@ volumes:
     driver: local
 
 networks:
-  signly-network:
+  deally-network:
     driver: bridge
