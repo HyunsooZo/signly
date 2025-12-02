@@ -1,0 +1,60 @@
+# Build artifacts
+build/
+.gradle/
+*.jar
+*.war
+target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+out/
+
+# Logs
+logs/
+*.log
+app.log
+
+# Uploads (로컬 테스트 파일)
+uploads/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+docs/
+*.md
+README.md
+
+# Node modules (if any)
+node_modules/
+
+# System files
+.DS_Store
+Thumbs.db
+.env
+.env.local
+.env.*.local
+
+# CI/CD
+.github/
+
+# AI assistants
+.claude/
+.amazonq/
+
+# Test files
+**/test/
+**/*Test.java
+**/*Tests.java
+
+# Gradle wrapper jar (will be copied separately)
+!gradle/wrapper/gradle-wrapper.jar

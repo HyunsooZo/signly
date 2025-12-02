@@ -1,0 +1,130 @@
+name: CD - Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # 수동 트리거 가능
+
+jobs:
+  build-and-push:
+    name: Build Docker Image and Push
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew bootJar --no-daemon
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/signly-app
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/signly-app:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/signly-app:buildcache,mode=max
+
+      - name: Image digest
+        run: echo ${{ steps.meta.outputs.tags }}
+
+  # 프로덕션 서버에 배포 (SSH 방식)
+  deploy:
+    name: Deploy to Production Server
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          script: |
+            # 프로젝트 디렉토리로 이동
+            cd ${{ secrets.DEPLOY_PATH || '/opt/signly' }}
+            
+            # 최신 이미지 pull
+            docker pull ${{ secrets.DOCKER_USERNAME }}/signly-app:latest
+            
+            # 기존 컨테이너 중지 및 제거
+            docker-compose -f docker-compose.prod.yml down
+            
+            # 새 컨테이너 시작
+            docker-compose -f docker-compose.prod.yml up -d
+            
+            # 이전 이미지 정리
+            docker image prune -af
+            
+            # 헬스체크
+            echo "Waiting for application to be ready..."
+            sleep 30
+            curl -f http://localhost:8080/actuator/health || exit 1
+            
+            echo "Deployment completed successfully!"
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Deployment succeeded"
+          else
+            echo "❌ Deployment failed"
+          fi
+
+  # AWS ECS 배포 (선택사항)
+  # deploy-ecs:
+  #   name: Deploy to AWS ECS
+  #   needs: build-and-push
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main'
+  #   
+  #   steps:
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ap-northeast-2
+  #
+  #     - name: Deploy to ECS
+  #       run: |
+  #         aws ecs update-service \
+  #           --cluster signly-cluster \
+  #           --service signly-service \
+  #           --force-new-deployment
