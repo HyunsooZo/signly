@@ -80,12 +80,14 @@ jobs:
             # 프로젝트 디렉토리로 이동
             cd ${{ secrets.DEPLOY_PATH || '/opt/deally' }}
             
+            export DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/deally-app:latest"
+
             # 최신 이미지 pull
-            docker pull ${{ secrets.DOCKER_USERNAME }}/deally-app:latest
+            docker pull "$DOCKER_IMAGE"
             
             # 기존 컨테이너 중지 및 제거
             docker-compose -f docker-compose.prod.yml down
-            
+
             # 새 컨테이너 시작
             docker-compose -f docker-compose.prod.yml up -d
             
