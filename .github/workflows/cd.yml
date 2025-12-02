@@ -2,7 +2,7 @@ name: CD - Build and Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:  # 수동 트리거 가능
 
 jobs:
@@ -58,14 +58,14 @@ jobs:
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/signly-app:buildcache,mode=max
 
       - name: Image digest
-        run: echo ${{ steps.meta.outputs.tags }}
+        run: echo "${{ steps.meta.outputs.tags }}"
 
   # 프로덕션 서버에 배포 (SSH 방식)
   deploy:
     name: Deploy to Production Server
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     
     steps:
       - name: Deploy to server via SSH
