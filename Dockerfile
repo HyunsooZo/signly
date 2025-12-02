@@ -54,3 +54,4 @@ EXPOSE 8080
 
 # 실행
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar app.jar"]
+# Build timestamp: Tue Dec  2 23:49:17 KST 2025
