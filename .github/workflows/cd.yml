@@ -165,3 +165,4 @@ jobs:
   #           --cluster deally-cluster \
   #           --service deally-service \
   #           --force-new-deployment
+# Force rebuild Thu Dec  4 00:53:59 KST 2025
