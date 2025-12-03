@@ -79,9 +79,6 @@ services:
 
   # Spring Boot 애플리케이션
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: ${APP_IMAGE:-signly-app:latest}
     container_name: signly-app-prod
     restart: always
