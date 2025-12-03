@@ -57,6 +57,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/signly-app:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/signly-app:buildcache,mode=max
+          no-cache: false
+          pull: true
 
       - name: Image digest
         run: echo "${{ steps.meta.outputs.tags }}"
@@ -96,6 +98,9 @@ jobs:
             
             export DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/signly-app:latest"
 
+            # 기존 이미지 완전 삭제
+            docker rmi -f "$DOCKER_IMAGE" 2>/dev/null || true
+            
             # 최신 이미지 pull
             docker pull "$DOCKER_IMAGE"
             
