@@ -3,7 +3,7 @@
  * 사용자 정보, 서명 데이터 등을 안전하게 저장/조회
  */
 
-window.DeallyStorage = (function () {
+window.SignlyStorage = (function () {
     'use strict';
 
     const STORAGE_KEYS = {

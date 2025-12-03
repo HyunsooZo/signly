@@ -1,5 +1,5 @@
 /**
- * JWT 인증 관리 - Deally
+ * JWT 인증 관리 - Signly
  */
 
 const AuthManager = {

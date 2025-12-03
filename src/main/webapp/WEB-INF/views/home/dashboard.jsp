@@ -20,7 +20,7 @@
                     <i class="bi bi-house-door text-primary me-2"></i>
                     대시보드
                 </h2>
-                <p class="text-muted mb-0">Deally 전자계약 시스템에 오신 것을 환영합니다</p>
+                <p class="text-muted mb-0">Signly 전자계약 시스템에 오신 것을 환영합니다</p>
             </div>
         </div>
 

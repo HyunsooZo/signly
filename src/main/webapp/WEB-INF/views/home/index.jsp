@@ -15,9 +15,9 @@
     <link href="<c:url value='/css/home.css' />" rel="stylesheet">
 
     <!-- 메타 태그 -->
-    <meta name="description" content="Deally - 안전하고 간편한 전자계약 서비스">
+    <meta name="description" content="Signly - 안전하고 간편한 전자계약 서비스">
     <meta name="keywords" content="전자계약, 전자서명, 디지털 계약, e-signature">
-    <meta name="author" content="Deally">
+    <meta name="author" content="Signly">
 </head>
 <body>
 <!-- 헤더 -->
@@ -34,7 +34,7 @@
                     <span class="text-primary">전자계약 서비스</span>
                 </h1>
                 <p class="hero-description">
-                    Deally와 함께 종이 계약서의 번거로움을 없애고,<br>
+                    Signly와 함께 종이 계약서의 번거로움을 없애고,<br>
                     언제 어디서나 안전하게 계약을 체결하세요.
                 </p>
                 <div class="hero-actions">
@@ -68,7 +68,7 @@
     <section class="features-section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">왜 Deally를 선택해야 할까요?</h2>
+                <h2 class="section-title">왜 Signly를 선택해야 할까요?</h2>
                 <p class="section-description">
                     비즈니스의 효율성을 높이는 전자계약의 핵심 기능들을 제공합니다.
                 </p>
@@ -139,7 +139,7 @@
                 <div class="cta-content">
                     <h2 class="cta-title">지금 바로 시작하세요!</h2>
                     <p class="cta-description">
-                        Deally와 함께 더 효율적인 비즈니스를 만들어보세요.
+                        Signly와 함께 더 효율적인 비즈니스를 만들어보세요.
                     </p>
                     <div class="cta-actions">
                         <a href="<c:url value='/register' />" class="btn btn-primary btn-lg">

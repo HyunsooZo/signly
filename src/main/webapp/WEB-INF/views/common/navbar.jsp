@@ -4,7 +4,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
         <a class="navbar-brand" href="/home">
-            Deally
+            Signly
         </a>
         <c:if test="${not hideNavLinks}">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

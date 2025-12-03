@@ -10,7 +10,7 @@
 <div class="auth-container">
     <div class="auth-card">
         <div class="auth-header">
-            <h1 class="auth-title">Deally</h1>
+            <h1 class="auth-title">Signly</h1>
             <p class="auth-subtitle">전자계약 서비스 로그인</p>
         </div>
 

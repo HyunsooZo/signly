@@ -1,5 +1,5 @@
 /**
- * Canvas 기반 서명 기능 - Deally
+ * Canvas 기반 서명 기능 - Signly
  */
 
 class SignatureCanvas {

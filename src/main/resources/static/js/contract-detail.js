@@ -220,8 +220,8 @@ class ContractDetail {
             }
         } catch (error) {
             console.error('Form submission error:', error);
-            if (window.Deally && window.Deally.showAlert) {
-                window.Deally.showAlert('요청 처리 중 오류가 발생했습니다.', 'danger');
+            if (window.Signly && window.Signly.showAlert) {
+                window.Signly.showAlert('요청 처리 중 오류가 발생했습니다.', 'danger');
             }
         }
     }
