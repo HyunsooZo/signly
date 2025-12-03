@@ -46,6 +46,15 @@ spring:
   security:
     require-ssl: true
 
+server:
+  port: 8080
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      remote-ip-header: x-forwarded-for
+      protocol-header: x-forwarded-proto
+      port-header: x-forwarded-port
+
 app:
   jwt:
     secret: ${JWT_SECRET}

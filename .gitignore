@@ -45,3 +45,15 @@ logs/
 
 uploads/
 /.amazonq/
+
+### Environment Variables ###
+.env
+.env.local
+.env.production
+
+### SSL Certificates ###
+certbot/
+
+### OS ###
+.DS_Store
+Thumbs.db

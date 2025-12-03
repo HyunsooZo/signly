@@ -1,5 +1,40 @@
+version: '3.8'
+
 services:
-  # MySQL 데이터베이스 (프로덕션)
+  # Nginx 리버스 프록시
+  nginx:
+    image: nginx:alpine
+    container_name: signly-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - app
+    networks:
+      - signly-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Certbot (SSL 인증서 자동 갱신)
+  certbot:
+    image: certbot/certbot
+    container_name: signly-certbot
+    restart: unless-stopped
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --quiet; sleep 12h & wait $${!}; done;'"
+
+  # MySQL 데이터베이스
   mysql:
     image: mysql:8.0
     container_name: signly-mysql-prod
@@ -15,11 +50,111 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --max_connections=200
+    networks:
+      - signly-network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # Redis 캐시
+  redis:
+    image: redis:7-alpine
+    container_name: signly-redis-prod
+    restart: always
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - signly-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Spring Boot 애플리케이션
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${APP_IMAGE:-signly-app:latest}
+    container_name: signly-app-prod
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose:
+      - "8080"
+    environment:
+      # Spring Profile
+      SPRING_PROFILES_ACTIVE: prod
+      
+      # Database
+      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_TOKEN_EXPIRATION: 3600000
+      JWT_REFRESH_TOKEN_EXPIRATION: 604800000
+      
+      # File Upload
+      UPLOAD_DIR: /app/uploads
+      MAX_FILE_SIZE: 10MB
+      MAX_REQUEST_SIZE: 10MB
+      
+      # Mail
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@signly.kr}
+      
+      # Server (behind Nginx proxy)
+      SERVER_FORWARD_HEADERS_STRATEGY: NATIVE
+      SERVER_USE_FORWARD_HEADERS: true
+      
+      # Logging
+      LOG_LEVEL: INFO
+      
+      # JVM Options
+      JAVA_OPTS: -Xms512m -Xmx1024m -XX:+UseG1GC
+    volumes:
+      - uploads_data:/app/uploads
+      - logs_data:/app/logs
+    networks:
+      - signly-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  uploads_data:
+    driver: local
+  logs_data:
+    driver: local
+  nginx_logs:
+    driver: local
+
 networks:
   signly-network:
     driver: bridge
