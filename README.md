@@ -178,7 +178,7 @@ src/main/resources/db/migration/
 e-contract-singly/
 ├── src/
 │   ├── main/
-│   │   ├── java/com/deally/
+│   │   ├── java/com/signly/
 │   │   │   ├── common/         # 공통 유틸리티
 │   │   │   ├── contract/       # 계약 도메인
 │   │   │   ├── signature/      # 서명 도메인
@@ -221,5 +221,5 @@ Proprietary - All rights reserved
 
 ## 📞 문의
 
-- Email: support@deally.com
+- Email: support@signly.kr
 - GitHub: https://github.com/your-org/e-contract-singly
