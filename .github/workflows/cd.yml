@@ -40,8 +40,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/deally-app
-          tags: |
+          images: ${{ secrets.DOCKER_USERNAME }}/signly-app
+          tags: | 
             type=ref,event=branch
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
@@ -56,7 +56,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/signly-app:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/deally-app:buildcache,mode=max
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/signly-app:buildcache,mode=max
 
       - name: Image digest
         run: echo "${{ steps.meta.outputs.tags }}"
@@ -78,9 +78,9 @@ jobs:
           port: ${{ secrets.DEPLOY_PORT || 22 }}
           script: |
             # 프로젝트 디렉토리로 이동
-            cd ${{ secrets.DEPLOY_PATH || '/opt/deally' }}
+            cd ${{ secrets.DEPLOY_PATH || '/opt/signly' }}
             
-            export DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/deally-app:latest"
+            export DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/signly-app:latest"
 
             # 최신 이미지 pull
             docker pull "$DOCKER_IMAGE"
