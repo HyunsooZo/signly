@@ -1,6 +1,6 @@
 spring:
   application:
-    name: e-signature-deally
+    name: e-signature-signly
 
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}

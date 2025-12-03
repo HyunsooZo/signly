@@ -87,16 +87,16 @@ echo ""
 
 echo -e "${YELLOW}5. 배포 디렉토리 생성...${NC}"
 ssh -i "$SSH_KEY" "$SSH_USER@$SERVER_IP" << 'ENDSSH'
-    sudo mkdir -p /opt/deally
-    sudo chown $USER:$USER /opt/deally
-    echo "✓ /opt/deally 디렉토리 생성 완료"
+    sudo mkdir -p /opt/signly
+    sudo chown $USER:$USER /opt/signly
+    echo "✓ /opt/signly 디렉토리 생성 완료"
 ENDSSH
 echo -e "${GREEN}✓ 배포 디렉토리 생성 완료${NC}"
 echo ""
 
 echo -e "${YELLOW}6. 서버에 필요한 파일 업로드...${NC}"
-scp -i "$SSH_KEY" docker-compose.prod.yml "$SSH_USER@$SERVER_IP:/opt/deally/"
-scp -i "$SSH_KEY" .env.example "$SSH_USER@$SERVER_IP:/opt/deally/.env"
+scp -i "$SSH_KEY" docker-compose.prod.yml "$SSH_USER@$SERVER_IP:/opt/signly/"
+scp -i "$SSH_KEY" .env.example "$SSH_USER@$SERVER_IP:/opt/signly/.env"
 echo -e "${GREEN}✓ 파일 업로드 완료${NC}"
 echo ""
 
@@ -107,7 +107,7 @@ echo ""
 echo -e "${YELLOW}다음 단계:${NC}"
 echo "1. 서버에 접속해서 .env 파일 수정:"
 echo "   ssh -i $SSH_KEY $SSH_USER@$SERVER_IP"
-echo "   cd /opt/deally"
+echo "   cd /opt/signly"
 echo "   nano .env"
 echo ""
 echo "2. GitHub Secrets 등록:"

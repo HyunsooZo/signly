@@ -4,13 +4,13 @@ services:
   # MySQL 데이터베이스
   mysql:
     image: mysql:8.0
-    container_name: deally-mysql
+    container_name: signly-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root_password_change_me
-      MYSQL_DATABASE: deally_dev
-      MYSQL_USER: deally
-      MYSQL_PASSWORD: deally_password_change_me
+      MYSQL_DATABASE: signly_dev
+      MYSQL_USER: signly
+      MYSQL_PASSWORD: signly_password_change_me
       TZ: Asia/Seoul
     ports:
       - "3306:3306"
@@ -27,7 +27,7 @@ services:
   # Redis 캐시/세션 스토어
   redis:
     image: redis:7-alpine
-    container_name: deally-redis
+    container_name: signly-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -45,7 +45,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: deally-app
+    container_name: signly-app
     restart: unless-stopped
     depends_on:
       mysql:
@@ -59,9 +59,9 @@ services:
       SPRING_PROFILES_ACTIVE: dev
       
       # Database
-      DB_URL: jdbc:mysql://mysql:3306/deally_dev?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
-      DB_USERNAME: deally
-      DB_PASSWORD: deally_password_change_me
+      DB_URL: jdbc:mysql://mysql:3306/signly_dev?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+      DB_USERNAME: signly
+      DB_PASSWORD: signly_password_change_me
       
       # Redis
       REDIS_HOST: redis
@@ -113,4 +113,4 @@ volumes:
 
 networks:
   default:
-    name: deally-network
+    name: signly-network

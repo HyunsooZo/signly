@@ -2,11 +2,11 @@ services:
   # MySQL 데이터베이스 (프로덕션)
   mysql:
     image: mysql:8.0
-    container_name: deally-mysql-prod
+    container_name: signly-mysql-prod
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-deally_prod}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-signly_prod}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       TZ: Asia/Seoul
@@ -20,110 +20,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - deally-network
-
-  # Redis 캐시/세션 스토어 (프로덕션)
-  redis:
-    image: redis:7-alpine
-    container_name: deally-redis-prod
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
-    healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    networks:
-      - deally-network
-
-  # Spring Boot 애플리케이션 (프로덕션)
-  app:
-    image: ${DOCKER_IMAGE:-***/deally-app:latest}
-    container_name: deally-app-prod
-    restart: always
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    ports:
-      - "${APP_PORT:-8080}:8080"
-    environment:
-      # Spring Profile
-      SPRING_PROFILES_ACTIVE: prod
-      
-      # Database
-      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-deally_prod}?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
-      DB_USERNAME: ${MYSQL_USER}
-      DB_PASSWORD: ${MYSQL_PASSWORD}
-      
-      # Redis
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-      
-      # JWT
-      JWT_SECRET: ${JWT_SECRET}
-      ACCESS_TOKEN_VALIDITY: ${ACCESS_TOKEN_VALIDITY:-3600000}
-      REFRESH_TOKEN_VALIDITY: ${REFRESH_TOKEN_VALIDITY:-2592000000}
-      
-      # File Upload
-      UPLOAD_DIR: /app/uploads
-      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-10MB}
-      MAX_REQUEST_SIZE: ${MAX_REQUEST_SIZE:-10MB}
-      
-      # Mail
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
-      EMAIL_FROM: ${EMAIL_FROM}
-      
-      # CORS
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
-      
-      # Logging
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      SECURITY_LOG_LEVEL: ${SECURITY_LOG_LEVEL:-WARN}
-      WEB_LOG_LEVEL: ${WEB_LOG_LEVEL:-WARN}
-      HIBERNATE_SQL_LEVEL: ${HIBERNATE_SQL_LEVEL:-WARN}
-      
-      # JVM Options
-      JAVA_OPTS: ${JAVA_OPTS:--Xms1024m -Xmx2048m -XX:+UseG1GC -XX:MaxGCPauseMillis=200}
-      
-    volumes:
-      - uploads_data:/app/uploads
-      - logs_data:/app/logs
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 90s
-    networks:
-      - deally-network
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-        reservations:
-          memory: 1G
-
-volumes:
-  mysql_data:
-    driver: local
-  redis_data:
-    driver: local
-  uploads_data:
-    driver: local
-  logs_data:
-    driver: local
-
 networks:
-  deally-network:
+  signly-network:
     driver: bridge
