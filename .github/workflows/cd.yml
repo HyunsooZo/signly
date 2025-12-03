@@ -100,6 +100,9 @@ jobs:
             docker-compose -f docker-compose.prod.yml down
             docker rmi -f $(docker images '${{ secrets.DOCKER_USERNAME }}/signly-app' -q) 2>/dev/null || true
             
+            # Docker 빌드 캐시 완전 삭제
+            docker builder prune -af
+            
             # 최신 이미지 pull
             docker pull "$DOCKER_IMAGE"
             
