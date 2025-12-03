@@ -110,14 +110,16 @@ jobs:
             
             # 헬스체크
             echo "Waiting for application to be ready..."
+            sleep 30
             READY=false
-            for i in {1..10}; do
-              sleep 15
-              if curl -sf http://localhost:8080/actuator/health; then
+            for i in {1..15}; do
+              if docker exec signly-app-prod curl -sf http://localhost:8080/actuator/health > /dev/null 2>&1; then
                 READY=true
+                echo "✅ Application is healthy!"
                 break
               fi
               echo "Health check attempt $i failed, retrying..."
+              sleep 10
             done
 
             if [ "$READY" != "true" ]; then
