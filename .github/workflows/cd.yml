@@ -36,30 +36,21 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract metadata for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ secrets.DOCKER_USERNAME }}/signly-app
-          tags: | 
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/signly-app:master-${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/signly-app:latest
           no-cache: true
           pull: true
 
       - name: Image digest
-        run: echo "${{ steps.meta.outputs.tags }}"
+        run: echo "Pushed image: ${{ secrets.DOCKER_USERNAME }}/signly-app:master-${{ github.sha }}"
 
   # 프로덕션 서버에 배포 (SSH 방식)
   deploy:
