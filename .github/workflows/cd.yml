@@ -46,8 +46,8 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/signly-app:master-${{ github.sha }}
             ${{ secrets.DOCKER_USERNAME }}/signly-app:latest
-          no-cache: true
-          pull: true
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/signly-app:latest
+          cache-to: type=inline
 
       - name: Image digest
         run: echo "Pushed image: ${{ secrets.DOCKER_USERNAME }}/signly-app:master-${{ github.sha }}"
