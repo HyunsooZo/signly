@@ -96,16 +96,17 @@ jobs:
             # 프로젝트 디렉토리로 이동
             cd ${{ secrets.DEPLOY_PATH || '/opt/signly' }}
             
-            export DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/signly-app:latest"
+            export DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/signly-app:master-${{ github.sha }}"
 
-            # 기존 이미지 완전 삭제
-            docker rmi -f "$DOCKER_IMAGE" 2>/dev/null || true
+            # 기존 컨테이너 및 이미지 완전 삭제
+            docker-compose -f docker-compose.prod.yml down
+            docker rmi -f $(docker images '${{ secrets.DOCKER_USERNAME }}/signly-app' -q) 2>/dev/null || true
             
             # 최신 이미지 pull
             docker pull "$DOCKER_IMAGE"
             
-            # 기존 컨테이너 중지 및 제거
-            docker-compose -f docker-compose.prod.yml down
+            # docker-compose.prod.yml에 이미지 설정
+            export APP_IMAGE="$DOCKER_IMAGE"
 
             # 새 컨테이너 시작
             docker-compose -f docker-compose.prod.yml up -d
