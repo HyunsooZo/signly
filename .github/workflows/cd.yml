@@ -69,9 +69,9 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          port: ${{ secrets.DEPLOY_PORT }}
           source: "docker-compose.prod.yml,nginx/nginx.conf"
-          target: ${{ secrets.DEPLOY_PATH || '/opt/signly' }}
+          target: ${{ secrets.DEPLOY_PATH }}
           strip_components: 0
 
       - name: Deploy to server via SSH
@@ -80,10 +80,10 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          port: ${{ secrets.DEPLOY_PORT }}
           script: |
             # 프로젝트 디렉토리로 이동
-            cd ${{ secrets.DEPLOY_PATH || '/opt/signly' }}
+            cd ${{ secrets.DEPLOY_PATH }}
             
             export DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/signly-app:master-${{ github.sha }}"
 
