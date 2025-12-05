@@ -16,5 +16,13 @@ public interface UserRepository {
 
     boolean existsByEmail(Email email);
 
+    /**
+     * 인증 토큰으로 사용자 조회
+     *
+     * @param token 인증 토큰
+     * @return 사용자 (Optional)
+     */
+    Optional<User> findByVerificationToken(String token);
+
     void delete(User user);
 }
