@@ -12,7 +12,7 @@ public class UserEntityMapper {
 
     public UserEntity toEntity(User user) {
         Company company = user.getCompany();
-        return new UserEntity(
+        UserEntity entity = new UserEntity(
                 user.getUserId().value(),
                 user.getEmail().value(),
                 user.getEncodedPassword(),
@@ -22,9 +22,13 @@ public class UserEntityMapper {
                 company != null ? company.address() : null,
                 user.getUserType(),
                 user.getStatus(),
+                user.isEmailVerified(),
+                user.getVerificationTokenValue(),
+                user.getVerificationTokenExpiry(),
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );
+        return entity;
     }
 
     public User toDomain(UserEntity entity) {
@@ -42,6 +46,9 @@ public class UserEntityMapper {
                 company,
                 entity.getUserType(),
                 entity.getStatus(),
+                entity.isEmailVerified(),
+                entity.getVerificationToken(),
+                entity.getVerificationTokenExpiry(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
@@ -58,6 +65,9 @@ public class UserEntityMapper {
         entity.setBusinessPhone(company != null ? company.phone() : null);
         entity.setBusinessAddress(company != null ? company.address() : null);
         entity.setStatus(user.getStatus());
+        entity.setEmailVerified(user.isEmailVerified());
+        entity.setVerificationToken(user.getVerificationTokenValue());
+        entity.setVerificationTokenExpiry(user.getVerificationTokenExpiry());
         entity.setUpdatedAt(user.getUpdatedAt());
     }
 }

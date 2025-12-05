@@ -58,6 +58,12 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Optional<User> findByVerificationToken(String token) {
+        return userJpaRepository.findByVerificationToken(token)
+                .map(userEntityMapper::toDomain);
+    }
+
+    @Override
     public void delete(User user) {
         userJpaRepository.deleteById(user.getUserId().value());
     }

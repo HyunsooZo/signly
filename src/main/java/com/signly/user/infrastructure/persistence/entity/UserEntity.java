@@ -17,7 +17,8 @@ import java.time.LocalDateTime;
         @Index(name = "idx_user_status", columnList = "status"),
         @Index(name = "idx_user_type", columnList = "user_type"),
         @Index(name = "idx_user_status_type", columnList = "status, user_type"),
-        @Index(name = "idx_user_created_at", columnList = "created_at")
+        @Index(name = "idx_user_created_at", columnList = "created_at"),
+        @Index(name = "idx_verification_token", columnList = "verification_token")
 })
 @Getter
 @Setter
@@ -54,6 +55,15 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
     private UserStatus status;
+
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified;
+
+    @Column(name = "verification_token", length = 255)
+    private String verificationToken;
+
+    @Column(name = "verification_token_expiry")
+    private LocalDateTime verificationTokenExpiry;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
