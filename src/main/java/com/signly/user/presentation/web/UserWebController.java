@@ -96,10 +96,11 @@ public class UserWebController {
 
             userService.registerUser(command);
 
-            logger.info("사용자 회원가입 성공: {}", email);
+            logger.info("사용자 회원가입 성공: {} (이메일 인증 대기)", email);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "회원가입이 완료되었습니다. 로그인해주세요.");
-            return "redirect:/login";
+                    "회원가입이 완료되었습니다. 이메일을 확인하여 인증을 완료해주세요.");
+            redirectAttributes.addFlashAttribute("userEmail", email);
+            return "redirect:/registration-pending";
 
         } catch (ValidationException e) {
             logger.warn("회원가입 유효성 검사 실패: {}", e.getMessage());

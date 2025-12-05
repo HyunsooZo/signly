@@ -22,15 +22,27 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserDtoMapper userDtoMapper;
+    private final com.signly.notification.application.EmailNotificationService emailNotificationService;
 
     // 비밀번호 재설정 토큰 저장소 (실제 운영환경에서는 Redis나 DB 사용 권장)
     private final Map<String, PasswordResetToken> resetTokens = new ConcurrentHashMap<>();
+
+    public UserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            UserDtoMapper userDtoMapper,
+            com.signly.notification.application.EmailNotificationService emailNotificationService
+    ) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.userDtoMapper = userDtoMapper;
+        this.emailNotificationService = emailNotificationService;
+    }
 
     private record PasswordResetToken(String email, LocalDateTime expiryTime) {
         public boolean isExpired() {
@@ -61,7 +73,18 @@ public class UserService {
                 passwordEncoder
         );
 
+        // 이메일 인증 토큰 생성
+        var token = user.generateVerificationToken();
+
         var savedUser = userRepository.save(user);
+
+        // 인증 이메일 발송
+        emailNotificationService.sendEmailVerification(
+                savedUser.getEmail().value(),
+                savedUser.getName(),
+                token.getValue()
+        );
+
         return userDtoMapper.toResponse(savedUser);
     }
 
@@ -131,5 +154,46 @@ public class UserService {
         }
 
         return resetToken.email();
+    }
+
+    /**
+     * 이메일 인증 처리 (멱등성 보장)
+     * 
+     * @param token 인증 토큰
+     */
+    public void verifyEmail(String token) {
+        var user = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new ValidationException("유효하지 않은 인증 토큰입니다"));
+
+        // 도메인 로직에서 멱등성 처리
+        user.verifyEmail(token);
+
+        userRepository.save(user);
+    }
+
+    /**
+     * 인증 이메일 재발송
+     * 
+     * @param email 이메일
+     */
+    public void resendVerificationEmail(String email) {
+        var emailObj = Email.of(email);
+        var user = userRepository.findByEmail(emailObj)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
+
+        if (user.isEmailVerified()) {
+            throw new ValidationException("이미 인증된 사용자입니다");
+        }
+
+        // 새 토큰 생성
+        var token = user.generateVerificationToken();
+        userRepository.save(user);
+
+        // 인증 이메일 재발송
+        emailNotificationService.sendEmailVerification(
+                user.getEmail().value(),
+                user.getName(),
+                token.getValue()
+        );
     }
 }
