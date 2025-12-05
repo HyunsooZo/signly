@@ -6,7 +6,8 @@ public enum EmailTemplate {
     CONTRACT_CANCELLED("계약서 취소 알림", "contract-cancelled.html"),
     CONTRACT_EXPIRED("계약서 만료 알림", "contract-expired.html"),
     EXPIRATION_WARNING("계약서 만료 임박 알림", "expiration-warning.html"),
-    CONTRACT_REMINDER("계약서 서명 독촉", "contract-reminder.html");
+    CONTRACT_REMINDER("계약서 서명 독촉", "contract-reminder.html"),
+    EMAIL_VERIFICATION("이메일 인증", "email-verification.html");
 
     private final String subject;
     private final String templateName;

@@ -229,4 +229,41 @@ public class EmailNotificationService {
         }
     }
 
+    /**
+     * 이메일 인증 메일 발송
+     * 
+     * @param email 수신자 이메일
+     * @param userName 사용자 이름
+     * @param verificationToken 인증 토큰
+     */
+    @Transactional
+    public void sendEmailVerification(
+            String email,
+            String userName,
+            String verificationToken
+    ) {
+        try {
+            String verificationUrl = baseUrl + "/verify-email?token=" + verificationToken;
+
+            var variables = new HashMap<String, Object>();
+            variables.put("userName", userName);
+            variables.put("verificationUrl", verificationUrl);
+            variables.put("expiryHours", "24");
+            variables.put("companyName", companyName);
+
+            var outbox = EmailOutbox.create(
+                    EmailTemplate.EMAIL_VERIFICATION,
+                    email,
+                    userName,
+                    variables
+            );
+
+            outboxRepository.save(outbox);
+            logger.info("이메일 인증 메일을 Outbox에 저장: email={}, outboxId={}", email, outbox.getId().value());
+
+        } catch (Exception e) {
+            logger.error("이메일 인증 메일 Outbox 저장 실패: email={}", email, e);
+        }
+    }
+
 }
