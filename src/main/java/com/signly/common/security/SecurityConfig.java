@@ -72,6 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/sign/**").permitAll()
                         // 인증 관련 페이지는 공개 허용
                         .requestMatchers("/", "/login", "/register", "/forgot-password").permitAll()
+                        .requestMatchers("/verify-email", "/email-verified", "/email-verify-error", "/registration-pending", "/resend-verification").permitAll()
                         .requestMatchers("/WEB-INF/views/auth/**").permitAll()
                         // 개발 도구는 공개 허용
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()

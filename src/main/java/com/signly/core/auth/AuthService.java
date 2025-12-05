@@ -38,6 +38,11 @@ public class AuthService {
             var securityUser = (SecurityUser) authentication.getPrincipal();
             var user = securityUser.getUser();
 
+            // PENDING 상태 사용자 로그인 차단
+            if (user.getStatus() == com.signly.user.domain.model.UserStatus.PENDING) {
+                throw new UnauthorizedException("이메일 인증을 완료해주세요");
+            }
+
             String accessToken = jwtTokenProvider.createAccessToken(
                     user.getUserId().value(),
                     user.getEmail().value(),
