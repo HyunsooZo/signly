@@ -5,6 +5,9 @@ spring:
     password: ${DB_PASSWORD:signly123!}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  flyway:
+    enabled: true
+
   jpa:
     show-sql: ${SHOW_SQL:true}
     properties:
