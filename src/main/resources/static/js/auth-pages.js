@@ -45,26 +45,21 @@ class AuthPages {
     }
 
     initializeLoginPage() {
-        document.addEventListener('DOMContentLoaded', () => {
-            this.initializePasswordField('password');
-            this.setupEnterKeyHandler();
-        });
+        this.initializePasswordField('password');
+        this.setupEnterKeyHandler();
     }
 
     initializeRegisterPage() {
-        document.addEventListener('DOMContentLoaded', () => {
-            this.initializePasswordField('password', 'password-status');
-            this.initializePasswordField('confirmPassword', 'confirmPassword-status');
-            this.setupPasswordValidation();
-        });
+        this.initializePasswordField('password', 'password-status');
+        this.initializePasswordField('confirmPassword', 'confirmPassword-status');
+        this.setupPasswordValidation();
+        this.setupModals();
     }
 
     initializeResetPasswordPage() {
-        document.addEventListener('DOMContentLoaded', () => {
-            this.initializePasswordField('password', 'password-status');
-            this.initializePasswordField('confirmPassword', 'confirmPassword-status');
-            this.setupPasswordValidation();
-        });
+        this.initializePasswordField('password', 'password-status');
+        this.initializePasswordField('confirmPassword', 'confirmPassword-status');
+        this.setupPasswordValidation();
     }
 
     setupEventListeners() {
@@ -308,6 +303,30 @@ class AuthPages {
 
         passwordInput.addEventListener('input', validatePasswords);
         confirmPasswordInput.addEventListener('input', validatePasswords);
+    }
+
+    // 약관 및 개인정보처리방침 모달 설정
+    setupModals() {
+        const termsLink = document.getElementById('link-terms');
+        const privacyLink = document.getElementById('link-privacy');
+
+        if (termsLink) {
+            termsLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const termsModal = new bootstrap.Modal(document.getElementById('termsModal'));
+                termsModal.show();
+            });
+        }
+
+        if (privacyLink) {
+            privacyLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const privacyModal = new bootstrap.Modal(document.getElementById('privacyModal'));
+                privacyModal.show();
+            });
+        }
     }
 }
 
