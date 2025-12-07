@@ -121,6 +121,9 @@ services:
       # CORS
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8080}
 
+      # Discord
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+
       # Server (behind Nginx proxy)
       SERVER_FORWARD_HEADERS_STRATEGY: NATIVE
       SERVER_USE_FORWARD_HEADERS: true
