@@ -82,12 +82,72 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT }}
+          envs: DOCKER_IMAGE,IMAGE_REPO,APP_IMAGE,MYSQL_ROOT_PASSWORD,MYSQL_DATABASE,MYSQL_USER,MYSQL_PASSWORD,REDIS_PASSWORD,JWT_SECRET,MAIL_HOST,MAIL_PORT,MAIL_USERNAME,MAIL_PASSWORD,EMAIL_FROM,CORS_ALLOWED_ORIGINS,LOG_LEVEL,SECURITY_LOG_LEVEL,WEB_LOG_LEVEL,HIBERNATE_SQL_LEVEL,JAVA_OPTS
           script: |
             # 프로젝트 디렉토리로 이동
             cd ${{ secrets.DEPLOY_PATH }}
             
             export DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/signly-app:master-${{ github.sha }}"
             export IMAGE_REPO="${{ secrets.DOCKER_USERNAME }}/signly-app"
+            export APP_IMAGE="$DOCKER_IMAGE"
+            
+            # GitHub Secrets로부터 환경 변수 설정
+            export MYSQL_ROOT_PASSWORD="${{ secrets.MYSQL_ROOT_PASSWORD }}"
+            export MYSQL_DATABASE="${{ secrets.MYSQL_DATABASE }}"
+            export MYSQL_USER="${{ secrets.MYSQL_USER }}"
+            export MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
+            export REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}"
+            export JWT_SECRET="${{ secrets.JWT_SECRET }}"
+            export MAIL_HOST="${{ secrets.MAIL_HOST }}"
+            export MAIL_PORT="${{ secrets.MAIL_PORT }}"
+            export MAIL_USERNAME="${{ secrets.MAIL_USERNAME }}"
+            export MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}"
+            export EMAIL_FROM="${{ secrets.EMAIL_FROM }}"
+            export CORS_ALLOWED_ORIGINS="${{ secrets.CORS_ALLOWED_ORIGINS }}"
+            export LOG_LEVEL="${{ secrets.LOG_LEVEL || 'INFO' }}"
+            export SECURITY_LOG_LEVEL="${{ secrets.SECURITY_LOG_LEVEL || 'WARN' }}"
+            export WEB_LOG_LEVEL="${{ secrets.WEB_LOG_LEVEL || 'WARN' }}"
+            export HIBERNATE_SQL_LEVEL="${{ secrets.HIBERNATE_SQL_LEVEL || 'WARN' }}"
+            export JAVA_OPTS="${{ secrets.JAVA_OPTS || '-Xms1024m -Xmx2048m -XX:+UseG1GC -XX:MaxGCPauseMillis=200' }}"
+            
+            # .env 파일 생성
+            cat > .env << EOF
+# MySQL 설정
+MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+MYSQL_DATABASE=${MYSQL_DATABASE}
+MYSQL_USER=${MYSQL_USER}
+MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+# Redis 설정
+REDIS_PASSWORD=${REDIS_PASSWORD}
+
+# JWT 설정
+JWT_SECRET=${JWT_SECRET}
+
+# Docker 이미지
+APP_IMAGE=${APP_IMAGE}
+
+# 이메일 설정
+MAIL_HOST=${MAIL_HOST}
+MAIL_PORT=${MAIL_PORT}
+MAIL_USERNAME=${MAIL_USERNAME}
+MAIL_PASSWORD=${MAIL_PASSWORD}
+EMAIL_FROM=${EMAIL_FROM}
+
+# CORS 설정
+CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+
+# 로그 레벨
+LOG_LEVEL=${LOG_LEVEL}
+SECURITY_LOG_LEVEL=${SECURITY_LOG_LEVEL}
+WEB_LOG_LEVEL=${WEB_LOG_LEVEL}
+HIBERNATE_SQL_LEVEL=${HIBERNATE_SQL_LEVEL}
+
+# JVM 옵션
+JAVA_OPTS=${JAVA_OPTS}
+EOF
+
+            echo "✅ .env file created successfully"
 
             # 기존 컨테이너 및 이미지 완전 삭제
             docker-compose -f docker-compose.prod.yml down
@@ -98,9 +158,6 @@ jobs:
             
             # 최신 이미지 pull
             docker pull "$DOCKER_IMAGE"
-            
-            # docker-compose.prod.yml에 이미지 설정
-            export APP_IMAGE="$DOCKER_IMAGE"
 
             # 새 컨테이너 시작
             docker-compose -f docker-compose.prod.yml up -d
