@@ -1,7 +1,11 @@
 package com.signly.common.exception;
 
+import com.signly.notification.application.DiscordNotificationService;
+import com.signly.notification.domain.model.ErrorContext;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -10,6 +14,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -22,6 +27,9 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @Autowired
+    private DiscordNotificationService discordNotificationService;
 
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(
@@ -233,6 +241,9 @@ public class GlobalExceptionHandler {
     ) {
         logger.error("Unexpected error occurred", ex);
 
+        // Discord 에러 알림 전송 (비동기)
+        sendDiscordNotification(ex, request);
+
         ErrorResponse errorResponse = new ErrorResponse(
                 "INTERNAL_SERVER_ERROR",
                 "서버 내부 오류가 발생했습니다",
@@ -242,6 +253,39 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+
+    private void sendDiscordNotification(Exception ex, WebRequest request) {
+        try {
+            HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
+            
+            ErrorContext errorContext = ErrorContext.of(
+                    ex,
+                    servletRequest.getRequestURI(),
+                    servletRequest.getMethod(),
+                    getClientIp(servletRequest),
+                    servletRequest.getHeader("User-Agent")
+            );
+            
+            discordNotificationService.sendErrorNotification(errorContext);
+        } catch (Exception e) {
+            // Discord 알림 실패는 무시
+            logger.error("Discord 알림 전송 중 예외 발생", e);
+        }
+    }
+
+    /**
+     * 클라이언트 IP 추출
+     */
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
     }
 
     public record ErrorResponse(

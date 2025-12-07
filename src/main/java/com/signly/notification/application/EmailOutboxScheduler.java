@@ -3,7 +3,7 @@ package com.signly.notification.application;
 import com.signly.notification.application.dto.EmailRequest;
 import com.signly.notification.domain.model.EmailOutbox;
 import com.signly.notification.domain.repository.EmailOutboxRepository;
-import com.signly.notification.infrastructure.EmailSender;
+import com.signly.notification.infrastructure.gateway.EmailSender;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

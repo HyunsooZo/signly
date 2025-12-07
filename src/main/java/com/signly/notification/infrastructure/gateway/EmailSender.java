@@ -1,4 +1,4 @@
-package com.signly.notification.infrastructure;
+package com.signly.notification.infrastructure.gateway;
 
 import com.signly.notification.application.dto.EmailRequest;
 
