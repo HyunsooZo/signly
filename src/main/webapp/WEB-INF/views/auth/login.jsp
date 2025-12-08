@@ -15,10 +15,29 @@
         </div>
 
         <c:if test="${not empty errorMessage}">
-            <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
-                <c:out value="${errorMessage}"/>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+            <c:choose>
+                <c:when test="${isPendingUser}">
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert" data-auto-dismiss="false">
+                        <strong>⚠️ 이메일 인증 필요</strong>
+                        <p class="mb-2"><c:out value="${errorMessage}"/></p>
+                        <c:if test="${showResendButton}">
+                            <form action="/resend-verification" method="post" style="display: inline;">
+                                <input type="hidden" name="email" value="<c:out value="${email}"/>"/>
+                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                    📧 인증 메일 재전송
+                                </button>
+                            </form>
+                        </c:if>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="true">
+                        <c:out value="${errorMessage}"/>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </c:otherwise>
+            </c:choose>
         </c:if>
 
         <c:if test="${not empty successMessage}">

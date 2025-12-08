@@ -1,6 +1,7 @@
 package com.signly.core.auth;
 
 import com.signly.common.email.EmailService;
+import com.signly.common.exception.UnauthorizedException;
 import com.signly.common.security.SecurityUser;
 import com.signly.common.security.TokenRedisService;
 import com.signly.core.auth.dto.LoginRequest;
@@ -123,6 +124,23 @@ public class AuthWebController {
             String redirectUrl = (returnUrl != null && !returnUrl.isEmpty()) ? returnUrl : "/home";
             return "redirect:" + redirectUrl;
 
+        } catch (UnauthorizedException e) {
+            logger.warn("로그인 실패: {} - {}", loginRequest.email(), e.getMessage());
+            
+            // 이메일 인증 필요 메시지 체크
+            if (e.getMessage() != null && e.getMessage().contains("이메일 인증")) {
+                model.addAttribute("errorMessage", e.getMessage());
+                model.addAttribute("showResendButton", true);
+                model.addAttribute("isPendingUser", true);
+            } else {
+                model.addAttribute("errorMessage", e.getMessage());
+            }
+            
+            model.addAttribute("email", loginRequest.email());
+            if (returnUrl != null) {
+                model.addAttribute("returnUrl", returnUrl);
+            }
+            return "auth/login";
         } catch (Exception e) {
             logger.warn("로그인 실패: {} - {}", loginRequest.email(), e.getMessage());
             model.addAttribute("errorMessage", "이메일 또는 비밀번호가 올바르지 않습니다.");
