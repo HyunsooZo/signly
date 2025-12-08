@@ -10,9 +10,11 @@ import com.signly.core.auth.dto.RefreshTokenRequest;
 import com.signly.user.domain.model.Email;
 import com.signly.user.domain.model.Password;
 import com.signly.user.domain.model.User;
+import com.signly.user.domain.model.UserStatus;
 import com.signly.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,11 +39,6 @@ public class AuthService {
 
             var securityUser = (SecurityUser) authentication.getPrincipal();
             var user = securityUser.getUser();
-
-            // PENDING 상태 사용자 로그인 차단
-            if (user.getStatus() == com.signly.user.domain.model.UserStatus.PENDING) {
-                throw new UnauthorizedException("이메일 인증을 완료해주세요");
-            }
 
             String accessToken = jwtTokenProvider.createAccessToken(
                     user.getUserId().value(),
@@ -69,6 +66,16 @@ public class AuthService {
                     jwtTokenProvider.getAccessTokenValidityInMs()
             );
 
+        } catch (DisabledException e) {
+            // 계정 비활성화 - PENDING 상태 확인
+            User user = userRepository.findByEmail(Email.of(request.email())).orElse(null);
+            if (user != null && user.getStatus() == UserStatus.PENDING) {
+                throw new UnauthorizedException("이메일 인증을 완료해주세요");
+            } else if (user != null && user.getStatus() == UserStatus.SUSPENDED) {
+                throw new UnauthorizedException("정지된 계정입니다. 관리자에게 문의하세요.");
+            } else {
+                throw new UnauthorizedException("비활성화된 계정입니다");
+            }
         } catch (AuthenticationException e) {
             throw new UnauthorizedException("이메일 또는 비밀번호가 올바르지 않습니다");
         }

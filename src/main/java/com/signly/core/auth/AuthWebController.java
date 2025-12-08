@@ -7,6 +7,10 @@ import com.signly.common.security.TokenRedisService;
 import com.signly.core.auth.dto.LoginRequest;
 import com.signly.core.auth.dto.LoginResponse;
 import com.signly.user.application.UserService;
+import com.signly.user.domain.model.Email;
+import com.signly.user.domain.model.User;
+import com.signly.user.domain.model.UserStatus;
+import com.signly.user.domain.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,6 +43,7 @@ public class AuthWebController {
     private final EmailService emailService;
     private final TokenRedisService tokenRedisService;
     private final Environment environment;
+    private final UserRepository userRepository;
 
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
@@ -124,6 +130,30 @@ public class AuthWebController {
             String redirectUrl = (returnUrl != null && !returnUrl.isEmpty()) ? returnUrl : "/home";
             return "redirect:" + redirectUrl;
 
+        } catch (DisabledException e) {
+            logger.warn("로그인 실패: {} - 계정 비활성화", loginRequest.email());
+            
+            // PENDING 상태인지 확인
+            try {
+                User user = userRepository.findByEmail(Email.of(loginRequest.email())).orElse(null);
+                if (user != null && user.getStatus() == UserStatus.PENDING) {
+                    model.addAttribute("errorMessage", "이메일 인증을 완료해주세요");
+                    model.addAttribute("showResendButton", true);
+                    model.addAttribute("isPendingUser", true);
+                } else if (user != null && user.getStatus() == UserStatus.SUSPENDED) {
+                    model.addAttribute("errorMessage", "정지된 계정입니다. 관리자에게 문의하세요.");
+                } else {
+                    model.addAttribute("errorMessage", "비활성화된 계정입니다");
+                }
+            } catch (Exception ex) {
+                model.addAttribute("errorMessage", "로그인 중 오류가 발생했습니다");
+            }
+            
+            model.addAttribute("email", loginRequest.email());
+            if (returnUrl != null) {
+                model.addAttribute("returnUrl", returnUrl);
+            }
+            return "auth/login";
         } catch (UnauthorizedException e) {
             logger.warn("로그인 실패: {} - {}", loginRequest.email(), e.getMessage());
             
