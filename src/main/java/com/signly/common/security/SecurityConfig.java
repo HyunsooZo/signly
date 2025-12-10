@@ -2,6 +2,8 @@ package com.signly.common.security;
 
 import com.signly.common.config.RateLimitConfig;
 import com.signly.common.config.RateLimitFilter;
+import com.signly.core.auth.CustomOAuth2UserService;
+import com.signly.core.auth.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +36,8 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final RateLimitConfig.RateLimitService rateLimitService;
     private final RateLimitConfig.RateLimitProperties rateLimitProperties;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
     @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:8080}")
     private String allowedOrigins;
@@ -74,6 +78,8 @@ public class SecurityConfig {
                         .requestMatchers("/", "/login", "/register", "/forgot-password").permitAll()
                         .requestMatchers("/verify-email", "/email-verified", "/email-verify-error", "/registration-pending", "/resend-verification").permitAll()
                         .requestMatchers("/WEB-INF/views/auth/**").permitAll()
+                        // OAuth2 로그인 엔드포인트 허용
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         // 개발 도구는 공개 허용
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
@@ -87,6 +93,12 @@ public class SecurityConfig {
                         .requestMatchers("/home", "/templates", "/contracts/**").authenticated()
                         // 나머지 모든 요청은 인증 필요
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
                 )
                 .addFilterBefore(rateLimitFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

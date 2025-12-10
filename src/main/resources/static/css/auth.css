@@ -295,6 +295,69 @@ body.auth-page {
     box-shadow: 0 5px 15px rgba(45, 74, 63, 0.4);
 }
 
+/* OAuth 구분선 */
+.oauth-divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+.oauth-divider::before,
+.oauth-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 45%;
+    height: 1px;
+    background-color: #e9ecef;
+}
+
+.oauth-divider::before {
+    left: 0;
+}
+
+.oauth-divider::after {
+    right: 0;
+}
+
+.oauth-divider span {
+    background: white;
+    padding: 0 10px;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Google 로그인 버튼 */
+.btn-google {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 8px;
+    background: white;
+    color: #3c4043;
+    border: 2px solid #dadce0;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    margin-bottom: 20px;
+}
+
+.btn-google:hover {
+    background: #f8f9fa;
+    border-color: #d2e3fc;
+    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    color: #3c4043;
+    text-decoration: none;
+}
+
+.btn-google:active {
+    background: #ecf3fe;
+    border-color: #4285f4;
+}
+
 .auth-footer {
     text-align: center;
     color: #3d5a4f;

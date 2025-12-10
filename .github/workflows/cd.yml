@@ -120,6 +120,10 @@ jobs:
             # Discord 설정
             DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL }}
 
+            # Google OAuth2 설정
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+
             # 로그 레벨
             LOG_LEVEL=${{ secrets.LOG_LEVEL || 'INFO' }}
             SECURITY_LOG_LEVEL=${{ secrets.SECURITY_LOG_LEVEL || 'WARN' }}

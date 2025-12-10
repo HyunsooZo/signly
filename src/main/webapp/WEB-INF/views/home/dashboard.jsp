@@ -316,6 +316,22 @@
 </div>
 
 <script>
+    // OAuth2 토큰 처리 (쿼리 파라미터로 전달된 경우)
+    (function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessToken = urlParams.get('access_token');
+        const refreshToken = urlParams.get('refresh_token');
+
+        if (accessToken && refreshToken) {
+            console.log('[INFO] OAuth2 로그인 성공 - 토큰 저장');
+            localStorage.setItem('signly_access_token', accessToken);
+            localStorage.setItem('signly_refresh_token', refreshToken);
+
+            // URL에서 토큰 제거 (보안)
+            window.history.replaceState({}, document.title, '/home');
+        }
+    })();
+
     // 로그인 시 사용자 정보를 로컬스토리지에 저장
     <c:if test="${not empty currentUserName}">
     (function () {
