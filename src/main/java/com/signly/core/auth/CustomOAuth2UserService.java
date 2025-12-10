@@ -1,6 +1,6 @@
 package com.signly.core.auth;
 
-import com.signly.common.security.SecurityUser;
+import com.signly.common.security.OAuth2SecurityUser;
 import com.signly.user.domain.model.*;
 import com.signly.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -54,9 +54,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException("이메일 정보를 가져올 수 없습니다");
         }
 
-        if (name == null || name.trim().isEmpty()) {
-            name = email.split("@")[0]; // 이름이 없으면 이메일 아이디 사용
-        }
+        // 이름이 없으면 이메일 아이디 사용 (final 변수로 생성)
+        final String userName = (name == null || name.trim().isEmpty()) 
+                ? email.split("@")[0] 
+                : name;
 
         // Google에서 이메일 인증이 완료되지 않은 경우 차단
         if (emailVerified == null || !emailVerified) {
@@ -66,7 +67,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         Email userEmail = Email.of(email);
         User user = userRepository.findByEmail(userEmail)
-                .orElseGet(() -> createNewOAuth2User(userEmail, name));
+                .orElseGet(() -> createNewOAuth2User(userEmail, userName));
 
         // 사용자 상태 확인
         if (user.getStatus() == UserStatus.SUSPENDED) {
@@ -85,7 +86,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             log.info("OAuth2 user activated: {}", email);
         }
 
-        return SecurityUser.from(user);
+        // OAuth2SecurityUser 반환 (UserDetails + OAuth2User 구현)
+        return new OAuth2SecurityUser(user, oAuth2User.getAttributes(), "sub");
     }
 
     /**
