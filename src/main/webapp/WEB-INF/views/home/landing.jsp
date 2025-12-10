@@ -41,31 +41,31 @@
                 <!-- Features Section -->
                 <div class="features-grid">
                     <div class="feature-card">
-                        <div class="feature-icon-wrapper">
-                            <i class="bi bi-pen"></i>
-                        </div>
-                        <div class="feature-content">
+                        <div class="feature-header">
+                            <div class="feature-icon-wrapper">
+                                <i class="bi bi-pen"></i>
+                            </div>
                             <h3 class="feature-title">간편한 서명</h3>
-                            <p class="feature-desc">이메일이나 링크로 계약서를 보내고, 몇 번의 클릭만으로 서명을 완료하세요.</p>
                         </div>
+                        <p class="feature-desc">이메일이나 링크로 계약서를 보내고,<br>몇 번의 클릭만으로 서명을 완료하세요.</p>
                     </div>
                     <div class="feature-card">
-                        <div class="feature-icon-wrapper">
-                            <i class="bi bi-shield-check"></i>
-                        </div>
-                        <div class="feature-content">
+                        <div class="feature-header">
+                            <div class="feature-icon-wrapper">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
                             <h3 class="feature-title">강력한 보안</h3>
-                            <p class="feature-desc">모든 계약 과정은 암호화되며, 법적 효력을 갖는 감사 로그가 기록됩니다.</p>
                         </div>
+                        <p class="feature-desc">모든 계약 과정은 암호화되며,<br>법적 효력을 갖는 감사 로그가 기록됩니다.</p>
                     </div>
                     <div class="feature-card">
-                        <div class="feature-icon-wrapper">
-                            <i class="bi bi-folder2-open"></i>
-                        </div>
-                        <div class="feature-content">
+                        <div class="feature-header">
+                            <div class="feature-icon-wrapper">
+                                <i class="bi bi-folder2-open"></i>
+                            </div>
                             <h3 class="feature-title">스마트한 관리</h3>
-                            <p class="feature-desc">완료된 계약서를 클라우드에서 안전하게 보관하고 언제든 쉽게 찾아보세요.</p>
                         </div>
+                        <p class="feature-desc">완료된 계약서를 클라우드에서<br>안전하게 보관하고 언제든 쉽게 찾아보세요.</p>
                     </div>
                 </div>
             </div>
