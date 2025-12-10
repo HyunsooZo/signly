@@ -110,7 +110,7 @@
             <span>또는</span>
         </div>
 
-        <a href="/oauth2/authorization/google" class="btn btn-google btn-auth">
+        <a href="/oauth2/authorization/google" class="btn btn-google btn-auth" onclick="handleGoogleLogin(event)">
             <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
                 <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
                 <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
@@ -132,5 +132,28 @@
 
 <jsp:include page="../common/footer.jsp"/>
 <script src="/js/auth-pages.js"></script>
+<script>
+    // Google 로그인 전 스토리지 정리
+    function handleGoogleLogin(event) {
+        console.log('[INFO] Google OAuth2 로그인 - 스토리지 정리 시작');
+        
+        // 모든 인증 관련 스토리지 정리
+        if (typeof clearAllAuthStorage === 'function') {
+            clearAllAuthStorage();
+        } else {
+            // fallback: 직접 정리
+            localStorage.removeItem('signly_access_token');
+            localStorage.removeItem('signly_refresh_token');
+            localStorage.removeItem('signly_user_info');
+            localStorage.removeItem('signly_owner_signature');
+            sessionStorage.clear();
+        }
+        
+        console.log('[INFO] Google OAuth2 로그인 - 스토리지 정리 완료');
+        
+        // 정상적인 페이지 이동 허용
+        return true;
+    }
+</script>
 </body>
 </html>

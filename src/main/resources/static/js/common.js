@@ -550,6 +550,42 @@ const Cookie = {
 };
 
 /**
+ * 모든 인증 관련 스토리지 정리
+ */
+function clearAllAuthStorage() {
+    console.log('[INFO] 모든 인증 스토리지 정리 시작');
+    
+    // localStorage 정리
+    localStorage.removeItem('signly_access_token');
+    localStorage.removeItem('signly_refresh_token');
+    localStorage.removeItem('signly_user_info');
+    localStorage.removeItem('signly_owner_signature');
+    
+    // sessionStorage 정리
+    sessionStorage.clear();
+    
+    // 관련 쿠키 정리
+    Cookie.delete('authToken');
+    Cookie.delete('refreshToken');
+    
+    console.log('[INFO] 모든 인증 스토리지 정리 완료');
+}
+
+/**
+ * 로그아웃 핸들러
+ */
+function handleLogout(event) {
+    event.preventDefault();
+    console.log('[INFO] 로그아웃 처리 시작');
+    
+    // 모든 인증 정보 정리
+    clearAllAuthStorage();
+    
+    // 서버 로그아웃 호출
+    window.location.href = '/logout';
+}
+
+/**
  * 유틸리티 함수들
  */
 const Utils = {
@@ -613,6 +649,8 @@ window.Signly = {
     showAlertModal,
     showLoadingSpinner,
     hideLoadingSpinner,
+    clearAllAuthStorage,
+    handleLogout,
     Cookie,
     Utils
 };
@@ -621,3 +659,5 @@ window.Signly = {
 window.showAlert = showAlert;
 window.showConfirmModal = showConfirmModal;
 window.showAlertModal = showAlertModal;
+window.clearAllAuthStorage = clearAllAuthStorage;
+window.handleLogout = handleLogout;

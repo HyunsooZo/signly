@@ -304,4 +304,17 @@ public class User extends AggregateRoot {
     public String getEncodedPassword() {
         return encodedPassword.value();
     }
+
+    /**
+     * 프로필 완성 여부 확인
+     * - 기업 정보가 필수적으로 있어야 함
+     * 
+     * @return 프로필 완성 여부
+     */
+    public boolean isProfileComplete() {
+        if (company == null || company.isEmpty()) {
+            return false;
+        }
+        return !company.name().trim().isEmpty();
+    }
 }

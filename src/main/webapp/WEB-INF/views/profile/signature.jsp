@@ -24,6 +24,96 @@
             </div>
         </div>
 
+        <!-- 프로필 완성 안내 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-person-badge me-2"></i>프로필 정보 확인
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="text-primary mb-3">
+                                    <i class="bi bi-building me-2"></i>회사 정보 (필수)
+                                </h6>
+                                <div class="profile-info-grid">
+                                    <div class="profile-info-item">
+                                        <label class="form-label text-muted">회사명</label>
+                                        <div class="profile-info-value">
+                                            <c:choose>
+                                                <c:when test="${not empty currentUserCompany and not empty currentUserCompany.name}">
+                                                    <span class="badge bg-success">
+                                                        <i class="bi bi-check-circle me-1"></i>
+                                                        <c:out value="${currentUserCompany.name}"/>
+                                                    </span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge bg-warning">
+                                                        <i class="bi bi-exclamation-triangle me-1"></i>
+                                                        미입력
+                                                    </span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                    </div>
+                                    <div class="profile-info-item">
+                                        <label class="form-label text-muted">사업자 연락처</label>
+                                        <div class="profile-info-value">
+                                            <c:choose>
+                                                <c:when test="${not empty currentUserBusinessPhone}">
+                                                    <span class="text-success">
+                                                        <i class="bi bi-telephone me-1"></i>
+                                                        <c:out value="${currentUserBusinessPhone}"/>
+                                                    </span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="text-muted">미입력</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                    </div>
+                                    <div class="profile-info-item">
+                                        <label class="form-label text-muted">사업자 주소</label>
+                                        <div class="profile-info-value">
+                                            <c:choose>
+                                                <c:when test="${not empty currentUserBusinessAddress}">
+                                                    <span class="text-success">
+                                                        <i class="bi bi-geo-alt me-1"></i>
+                                                        <c:out value="${currentUserBusinessAddress}"/>
+                                                    </span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="text-muted">미입력</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex flex-column h-100 justify-content-center">
+                                    <div class="alert alert-info mb-3">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        <strong>왜 회사 정보가 필요한가요?</strong>
+                                        <p class="mb-0 mt-2 small">
+                                            계약서에는 법적 효력을 위해 발신자의 회사 정보가 포함되어야 합니다.
+                                            정확한 정보 입력으로 계약의 신뢰도를 높이세요.
+                                        </p>
+                                    </div>
+                                    <button type="button" class="btn btn-primary w-100" onclick="goToUserEdit()">
+                                        <i class="bi bi-pencil-square me-2"></i>회사 정보 수정하기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <c:if test="${showSignatureAlert}">
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <h5 class="alert-heading">
@@ -298,6 +388,12 @@
             console.warn('[WARN] 사업주 서명 정보를 localStorage에 저장하는 중 오류 발생:', error);
         }
     })();
+
+    // 회사 정보 수정 페이지로 이동
+    function goToUserEdit() {
+        // 사용자 정보 수정 페이지로 이동 (없으면 기본 프로필 페이지)
+        window.location.href = '/profile/edit';
+    }
 </script>
 <jsp:include page="../common/footer.jsp"/>
 </body>

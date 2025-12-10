@@ -133,14 +133,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // 쿠키에서 토큰 추출
-        return extractCookieValue(request, "authToken");
+        String cookieToken = extractCookieValue(request, "authToken");
+        if (StringUtils.hasText(cookieToken)) {
+            return cookieToken;
+        }
+        
+        // URL 파라미터에서 토큰 추출 (OAuth2 로그인용)
+        String paramToken = request.getParameter("access_token");
+        if (StringUtils.hasText(paramToken)) {
+            return paramToken;
+        }
+
+        return null;
     }
 
     /**
      * 리프레시 토큰 추출
      */
     private String extractRefreshTokenFromRequest(HttpServletRequest request) {
-        return extractCookieValue(request, "refreshToken");
+        // 쿠키에서 토큰 추출
+        String cookieToken = extractCookieValue(request, "refreshToken");
+        if (StringUtils.hasText(cookieToken)) {
+            return cookieToken;
+        }
+        
+        // URL 파라미터에서 리프레시 토큰 추출 (OAuth2 로그인용)
+        String paramToken = request.getParameter("refresh_token");
+        if (StringUtils.hasText(paramToken)) {
+            return paramToken;
+        }
+
+        return null;
     }
 
     /**

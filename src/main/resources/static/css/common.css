@@ -47,6 +47,24 @@
     --font-size-3xl: 1.875rem;
 }
 
+/* 프로필 정보 그리드 */
+.profile-info-grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.profile-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.profile-info-value {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
 /* 기본 리셋 */
 * {
     margin: 0;
@@ -1176,4 +1194,24 @@ a:hover {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--gray-400);
+}
+
+/* 모바일 메뉴 토글 버튼 스타일 커스터마이징 */
+.navbar-toggler {
+    border: 1.5px solid var(--primary-color) !important;
+    padding: 0.4rem 0.6rem;
+    border-radius: var(--border-radius);
+    transition: all 0.2s ease;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none !important;
+    outline: none !important;
+    background-color: rgba(45, 74, 63, 0.05);
+}
+
+.navbar-toggler .bi-list {
+    font-size: 1.75rem;
+    color: var(--primary-color);
+    line-height: 1;
 }

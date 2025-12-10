@@ -39,6 +39,26 @@
             </div>
         </c:if>
 
+        <!-- 프로필 완성 알림 -->
+        <div id="profileCompletionAlert" class="alert alert-info alert-dismissible fade show" role="alert" style="display: none;">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-person-check me-3 fs-4"></i>
+                <div class="flex-grow-1">
+                    <h6 class="alert-heading mb-1">프로필 정보를 완성해주세요</h6>
+                    <p class="mb-2">Google 계정으로 로그인하셨습니다. 계약서 생성을 위해 회사 정보를 입력해주세요.</p>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="goToProfile()">
+                            <i class="bi bi-pencil-square me-1"></i>프로필 완성하기
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="dismissProfileAlert()">
+                            나중에 하기
+                        </button>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" onclick="dismissProfileAlert()"></button>
+            </div>
+        </div>
+
         <!-- 통계 카드 -->
         <div class="row mb-4">
             <div class="col-md-6 col-lg-3 mb-3">
@@ -379,6 +399,66 @@
         }
     })();
     </c:if>
+
+    // 프로필 완성 상태 확인 및 알림 표시
+    (function () {
+        // 페이지 로드 후 프로필 상태 확인
+        checkProfileStatus();
+    })();
+
+    function checkProfileStatus() {
+        fetch('/api/profile-status', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('프로필 상태를 확인할 수 없습니다.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('[INFO] 프로필 상태:', data);
+            
+            // 프로필이 완성되지 않은 경우 알림 표시
+            if (!data.isProfileComplete) {
+                showProfileCompletionAlert(data);
+            }
+        })
+        .catch(error => {
+            console.warn('[WARN] 프로필 상태 확인 실패:', error);
+        });
+    }
+
+    function showProfileCompletionAlert(profileData) {
+        const alertElement = document.getElementById('profileCompletionAlert');
+        if (alertElement) {
+            alertElement.style.display = 'block';
+            
+            // 누락된 필드에 따라 메시지 동적 변경
+            if (profileData.missingFields && profileData.missingFields.company) {
+                const messageElement = alertElement.querySelector('p');
+                messageElement.textContent = `${profileData.userName}님, 계약서 생성을 위해 회사 정보를 입력해주세요.`;
+            }
+        }
+    }
+
+    function dismissProfileAlert() {
+        const alertElement = document.getElementById('profileCompletionAlert');
+        if (alertElement) {
+            alertElement.style.display = 'none';
+            // 24시간 동안 알림 숨김 (localStorage 사용)
+            localStorage.setItem('profile_alert_dismissed', Date.now().toString());
+        }
+    }
+
+    function goToProfile() {
+        // 프로필 페이지로 이동
+        window.location.href = '/profile/signature';
+    }
 </script>
 <jsp:include page="../common/footer.jsp"/>
 </body>

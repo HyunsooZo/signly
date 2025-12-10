@@ -29,9 +29,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -297,5 +300,34 @@ public class AuthWebController {
             model.addAttribute("token", token);
             return "auth/reset-password";
         }
+    }
+
+    @GetMapping("/api/profile-status")
+    @ResponseBody
+    public Map<String, Object> getProfileStatus(@AuthenticationPrincipal SecurityUser securityUser) {
+        Map<String, Object> response = new HashMap<>();
+        
+        if (securityUser != null) {
+            User user = securityUser.getUser();
+            boolean isProfileComplete = user.isProfileComplete();
+            
+            response.put("isProfileComplete", isProfileComplete);
+            response.put("userName", user.getName());
+            response.put("userEmail", user.getEmail().value());
+            
+            // Check what's missing for profile completion
+            if (!isProfileComplete) {
+                Map<String, String> missingFields = new HashMap<>();
+                if (user.getCompany() == null || user.getCompany().name().trim().isEmpty()) {
+                    missingFields.put("company", "회사 정보");
+                }
+                response.put("missingFields", missingFields);
+            }
+        } else {
+            response.put("isProfileComplete", false);
+            response.put("error", "User not authenticated");
+        }
+        
+        return response;
     }
 }
