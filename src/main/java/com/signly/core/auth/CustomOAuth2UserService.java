@@ -99,8 +99,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private User createNewOAuth2User(Email email, String name) {
         log.info("Creating new OAuth2 user: {}", email.value());
 
-        // OAuth2 사용자는 비밀번호 로그인 불가 (랜덤 UUID 사용)
-        Password randomPassword = Password.of(UUID.randomUUID().toString());
+        // OAuth2 사용자는 비밀번호 로그인 불가 (정책 만족하는 랜덤 비밀번호)
+        String oauthPassword = "OAuth2User!" + UUID.randomUUID().toString().substring(0, 20);
+        Password randomPassword = Password.of(oauthPassword);
 
         User newUser = User.create(
                 email,
