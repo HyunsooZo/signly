@@ -318,7 +318,7 @@ public class AuthWebController {
             // Check what's missing for profile completion
             if (!isProfileComplete) {
                 Map<String, String> missingFields = new HashMap<>();
-                if (user.getCompany() == null || user.getCompany().name().trim().isEmpty()) {
+                if (user.getCompany() == null || user.getCompany().name() == null || user.getCompany().name().trim().isEmpty()) {
                     missingFields.put("company", "회사 정보");
                 }
                 response.put("missingFields", missingFields);
