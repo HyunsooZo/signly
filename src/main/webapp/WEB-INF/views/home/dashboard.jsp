@@ -457,7 +457,7 @@
 
     function goToProfile() {
         // 프로필 페이지로 이동
-        window.location.href = '/profile/signature';
+        window.location.href = '/profile/info';
     }
 </script>
 <jsp:include page="../common/footer.jsp"/>

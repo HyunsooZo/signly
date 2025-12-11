@@ -18,7 +18,7 @@
                             <a class="nav-link ${param.currentPage == 'contracts' ? 'active' : ''}"
                                 href="/contracts">계약서</a>
                             <a class="nav-link ${param.currentPage == 'signature' ? 'active' : ''}"
-                                href="/profile/signature">서명 관리</a>
+                                href="/profile/info">나의 정보</a>
                             <a class="nav-link" href="#" onclick="handleLogout(event)">로그아웃</a>
                         </div>
                     </div>

@@ -119,7 +119,7 @@ public class ContractWebController extends BaseWebController {
                 redirectAttributes.addFlashAttribute("errorMessage",
                         "계약서를 생성하려면 먼저 서명을 등록해야 합니다.");
                 redirectAttributes.addFlashAttribute("showSignatureAlert", true);
-                return "redirect:/profile/signature";
+                return "redirect:/profile/info";
             }
 
             // templateId가 없으면 유형 선택 화면으로 이동

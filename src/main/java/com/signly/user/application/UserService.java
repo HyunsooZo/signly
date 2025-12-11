@@ -2,6 +2,7 @@ package com.signly.user.application;
 
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
+import com.signly.notification.application.EmailNotificationService;
 import com.signly.user.application.dto.RegisterUserCommand;
 import com.signly.user.application.dto.UserResponse;
 import com.signly.user.application.mapper.UserDtoMapper;
@@ -21,6 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@RequiredArgsConstructor
 @Transactional
 public class UserService {
 
@@ -31,18 +33,6 @@ public class UserService {
 
     // 비밀번호 재설정 토큰 저장소 (실제 운영환경에서는 Redis나 DB 사용 권장)
     private final Map<String, PasswordResetToken> resetTokens = new ConcurrentHashMap<>();
-
-    public UserService(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            UserDtoMapper userDtoMapper,
-            com.signly.notification.application.EmailNotificationService emailNotificationService
-    ) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.userDtoMapper = userDtoMapper;
-        this.emailNotificationService = emailNotificationService;
-    }
 
     private record PasswordResetToken(String email, LocalDateTime expiryTime) {
         public boolean isExpired() {
@@ -87,7 +77,6 @@ public class UserService {
 
         return userDtoMapper.toResponse(savedUser);
     }
-
 
     @Transactional(readOnly = true)
     public UserResponse getUserByEmail(String email) {
@@ -156,11 +145,6 @@ public class UserService {
         return resetToken.email();
     }
 
-    /**
-     * 이메일 인증 처리 (멱등성 보장)
-     * 
-     * @param token 인증 토큰
-     */
     public void verifyEmail(String token) {
         var user = userRepository.findByVerificationToken(token)
                 .orElseThrow(() -> new ValidationException("유효하지 않은 인증 토큰입니다"));
@@ -171,11 +155,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-    /**
-     * 인증 이메일 재발송
-     * 
-     * @param email 이메일
-     */
     public void resendVerificationEmail(String email) {
         var emailObj = Email.of(email);
         var user = userRepository.findByEmail(emailObj)
@@ -193,7 +172,22 @@ public class UserService {
         emailNotificationService.sendEmailVerification(
                 user.getEmail().value(),
                 user.getName(),
-                token.getValue()
+                token.getValue());
+    }
+
+    public void updateUser(com.signly.user.application.dto.UpdateUserCommand command) {
+        var user = userRepository.findById(com.signly.user.domain.model.UserId.of(command.userId()))
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
+
+        var company = Company.of(
+                command.companyName(),
+                command.businessPhone(),
+                command.businessAddress()
         );
+
+        user.updateProfile(command.name(), company);
+        userRepository.save(user);
+
+        userDtoMapper.toResponse(user);
     }
 }

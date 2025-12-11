@@ -242,7 +242,7 @@ public class AuthWebController {
             var user = userService.getUserByEmail(email);
 
             // 이메일 발송
-            emailService.sendPasswordResetEmail(email, user.name(), token, baseUrl);
+            emailService.sendPasswordResetEmail(email, user.getName(), token, baseUrl);
 
             logger.info("비밀번호 재설정 이메일 발송 완료: {}", email);
             redirectAttributes.addFlashAttribute("successMessage", "비밀번호 재설정 링크를 이메일로 발송했습니다. 이메일을 확인해주세요.");

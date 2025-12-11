@@ -2,19 +2,27 @@ package com.signly.user.application.dto;
 
 import com.signly.user.domain.model.UserStatus;
 import com.signly.user.domain.model.UserType;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-public record UserResponse(
-        String userId,
-        String email,
-        String name,
-        String companyName,
-        String businessPhone,
-        String businessAddress,
-        UserType userType,
-        UserStatus status,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
-) {
+@Getter
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+public final class UserResponse {
+    private String userId;
+    private String email;
+    private String name;
+    private String companyName;
+    private String businessPhone;
+    private String businessAddress;
+    private UserType userType;
+    private UserStatus status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

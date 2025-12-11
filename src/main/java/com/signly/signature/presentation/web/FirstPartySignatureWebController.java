@@ -27,18 +27,18 @@ public class FirstPartySignatureWebController extends BaseWebController {
 
     private final FirstPartySignatureService firstPartySignatureService;
     private final CurrentUserProvider currentUserProvider;
+    private final com.signly.user.application.UserService userService;
 
-    @GetMapping("/profile/signature")
+    @GetMapping("/profile/info")
     public String viewSignature(
             @RequestHeader(value = "X-User-Id", required = false) String userId,
             @AuthenticationPrincipal SecurityUser securityUser,
             HttpServletRequest request,
             Model model,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
-            model.addAttribute("pageTitle", "서명 관리");
+            model.addAttribute("pageTitle", "나의 정보");
 
             try {
                 FirstPartySignatureResponse signature = firstPartySignatureService.getSignature(resolvedUserId);
@@ -49,7 +49,18 @@ public class FirstPartySignatureWebController extends BaseWebController {
                 model.addAttribute("hasSignature", false);
             }
 
-            return "profile/signature";
+            // 현재 사용자 정보 추가 (프로필 수정 폼용)
+            com.signly.user.application.dto.UserResponse currentUser = userService
+                    .getUserByEmail(securityUser.getEmail());
+            model.addAttribute("currentUser", currentUser);
+            model.addAttribute("currentUserCompany",
+                    currentUser.getCompanyName() != null ? BusinessResponse
+                            .of(currentUser.getCompanyName(), currentUser.getBusinessPhone(), currentUser.getBusinessAddress())
+                            : null);
+            model.addAttribute("currentUserBusinessPhone", currentUser.getBusinessPhone());
+            model.addAttribute("currentUserBusinessAddress", currentUser.getBusinessAddress());
+
+            return "profile/profile";
         } catch (Exception e) {
             logger.error("서명 관리 페이지 로드 중 오류 발생", e);
             redirectAttributes.addFlashAttribute("errorMessage", "서명 정보를 불러오는 중 오류가 발생했습니다.");
@@ -57,14 +68,13 @@ public class FirstPartySignatureWebController extends BaseWebController {
         }
     }
 
-    @PostMapping("/profile/signature")
+    @PostMapping("/profile/info")
     public String uploadSignature(
             @RequestHeader(value = "X-User-Id", required = false) String userId,
             @AuthenticationPrincipal SecurityUser securityUser,
             HttpServletRequest request,
             @RequestParam("signatureData") String signatureData,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             firstPartySignatureService.uploadSignature(resolvedUserId, signatureData);
@@ -75,6 +85,6 @@ public class FirstPartySignatureWebController extends BaseWebController {
             logger.error("서명 업로드 중 오류 발생", e);
             redirectAttributes.addFlashAttribute("errorMessage", "서명 업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
         }
-        return "redirect:/profile/signature";
+        return "redirect:/profile/info";
     }
 }
