@@ -118,6 +118,11 @@ services:
       MAIL_PASSWORD: ${MAIL_PASSWORD}
       EMAIL_FROM: ${EMAIL_FROM:-noreply@signly.kr}
 
+      # OAuth2 Google 설정
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      APP_BASE_URL: ${APP_BASE_URL:-https://signly.kr}
+
       # CORS
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8080}
 
