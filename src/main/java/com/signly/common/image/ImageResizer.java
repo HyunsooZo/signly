@@ -82,7 +82,10 @@ public class ImageResizer {
     /**
      * 이미지 바이트 배열을 받아서 리사이즈
      */
-    private byte[] resizeImage(byte[] imageBytes, String formatName) throws IOException {
+    private byte[] resizeImage(
+            byte[] imageBytes,
+            String formatName
+    ) throws IOException {
         // 원본 이미지 로드
         BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
         if (originalImage == null) {

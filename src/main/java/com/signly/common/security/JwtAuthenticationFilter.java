@@ -137,7 +137,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(cookieToken)) {
             return cookieToken;
         }
-        
+
         // URL 파라미터에서 토큰 추출 (OAuth2 로그인용)
         String paramToken = request.getParameter("access_token");
         if (StringUtils.hasText(paramToken)) {
@@ -156,7 +156,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(cookieToken)) {
             return cookieToken;
         }
-        
+
         // URL 파라미터에서 리프레시 토큰 추출 (OAuth2 로그인용)
         String paramToken = request.getParameter("refresh_token");
         if (StringUtils.hasText(paramToken)) {

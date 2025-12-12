@@ -1,8 +1,10 @@
 package com.signly.user.application;
 
+import com.signly.common.audit.aop.Auditable;
+import com.signly.common.audit.domain.model.AuditAction;
+import com.signly.common.audit.domain.model.EntityType;
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
-import com.signly.notification.application.EmailNotificationService;
 import com.signly.user.application.dto.RegisterUserCommand;
 import com.signly.user.application.dto.UserResponse;
 import com.signly.user.application.mapper.UserDtoMapper;
@@ -40,6 +42,11 @@ public class UserService {
         }
     }
 
+    @Auditable(
+            entityType = EntityType.USER,
+            action = AuditAction.USER_REGISTERED,
+            entityIdParam = "#result.userId"
+    )
     public UserResponse registerUser(RegisterUserCommand command) {
         var email = Email.of(command.email());
 

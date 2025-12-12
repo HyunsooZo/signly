@@ -1,5 +1,8 @@
 package com.signly.signature.application;
 
+import com.signly.common.audit.aop.Auditable;
+import com.signly.common.audit.domain.model.AuditAction;
+import com.signly.common.audit.domain.model.EntityType;
 import com.signly.common.exception.ValidationException;
 import com.signly.common.storage.FileStorageService;
 import com.signly.document.domain.model.FileMetadata;
@@ -26,6 +29,11 @@ public class FirstPartySignatureService {
     private final FirstPartySignatureRepository signatureRepository;
     private final FileStorageService fileStorageService;
 
+    @Auditable(
+            entityType = EntityType.FIRST_PARTY_SIGNATURE,
+            action = AuditAction.FIRST_PARTY_SIGNATURE_UPLOADED,
+            entityIdParam = "#ownerId"
+    )
     public void uploadSignature(
             String ownerId,
             String dataUrl

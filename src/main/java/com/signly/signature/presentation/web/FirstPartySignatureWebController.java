@@ -35,7 +35,8 @@ public class FirstPartySignatureWebController extends BaseWebController {
             @AuthenticationPrincipal SecurityUser securityUser,
             HttpServletRequest request,
             Model model,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             model.addAttribute("pageTitle", "나의 정보");
@@ -74,7 +75,8 @@ public class FirstPartySignatureWebController extends BaseWebController {
             @AuthenticationPrincipal SecurityUser securityUser,
             HttpServletRequest request,
             @RequestParam("signatureData") String signatureData,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
             firstPartySignatureService.uploadSignature(resolvedUserId, signatureData);

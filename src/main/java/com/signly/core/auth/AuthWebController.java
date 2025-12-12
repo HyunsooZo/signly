@@ -25,11 +25,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Arrays;
@@ -135,7 +131,7 @@ public class AuthWebController {
 
         } catch (DisabledException e) {
             logger.warn("로그인 실패: {} - 계정 비활성화", loginRequest.email());
-            
+
             // PENDING 상태인지 확인
             try {
                 User user = userRepository.findByEmail(Email.of(loginRequest.email())).orElse(null);
@@ -151,7 +147,7 @@ public class AuthWebController {
             } catch (Exception ex) {
                 model.addAttribute("errorMessage", "로그인 중 오류가 발생했습니다");
             }
-            
+
             model.addAttribute("email", loginRequest.email());
             if (returnUrl != null) {
                 model.addAttribute("returnUrl", returnUrl);
@@ -159,7 +155,7 @@ public class AuthWebController {
             return "auth/login";
         } catch (UnauthorizedException e) {
             logger.warn("로그인 실패: {} - {}", loginRequest.email(), e.getMessage());
-            
+
             // 이메일 인증 필요 메시지 체크
             if (e.getMessage() != null && e.getMessage().contains("이메일 인증")) {
                 model.addAttribute("errorMessage", e.getMessage());
@@ -168,7 +164,7 @@ public class AuthWebController {
             } else {
                 model.addAttribute("errorMessage", e.getMessage());
             }
-            
+
             model.addAttribute("email", loginRequest.email());
             if (returnUrl != null) {
                 model.addAttribute("returnUrl", returnUrl);
@@ -306,15 +302,15 @@ public class AuthWebController {
     @ResponseBody
     public Map<String, Object> getProfileStatus(@AuthenticationPrincipal SecurityUser securityUser) {
         Map<String, Object> response = new HashMap<>();
-        
+
         if (securityUser != null) {
             User user = securityUser.getUser();
             boolean isProfileComplete = user.isProfileComplete();
-            
+
             response.put("isProfileComplete", isProfileComplete);
             response.put("userName", user.getName());
             response.put("userEmail", user.getEmail().value());
-            
+
             // Check what's missing for profile completion
             if (!isProfileComplete) {
                 Map<String, String> missingFields = new HashMap<>();
@@ -327,7 +323,7 @@ public class AuthWebController {
             response.put("isProfileComplete", false);
             response.put("error", "User not authenticated");
         }
-        
+
         return response;
     }
 }

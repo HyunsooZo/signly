@@ -6,8 +6,8 @@ import com.signly.contract.domain.repository.SignatureRepository;
 import com.signly.contract.infrastructure.entity.ContractJpaEntity;
 import com.signly.contract.infrastructure.entity.SignatureEntity;
 import com.signly.contract.infrastructure.mapper.SignatureEntityMapper;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +32,10 @@ public class SignatureRepositoryImpl implements SignatureRepository {
 
     @Override
     @Transactional
-    public void save(ContractId contractId, Signature signature) {
+    public void save(
+            ContractId contractId,
+            Signature signature
+    ) {
         SignatureEntity entity = mapper.toEntity(signature);
         ContractJpaEntity contract = contractJpaRepository.findById(contractId.value())
                 .orElseThrow(() -> new IllegalArgumentException("Contract not found: " + contractId.value()));

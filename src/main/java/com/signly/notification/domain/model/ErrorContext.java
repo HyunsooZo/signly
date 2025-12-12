@@ -31,19 +31,22 @@ public record ErrorContext(
         );
     }
 
-    private static String getStackTraceAsString(Exception exception, int maxLines) {
+    private static String getStackTraceAsString(
+            Exception exception,
+            int maxLines
+    ) {
         StackTraceElement[] stackTrace = exception.getStackTrace();
         StringBuilder sb = new StringBuilder();
-        
+
         int linesToShow = Math.min(maxLines, stackTrace.length);
         for (int i = 0; i < linesToShow; i++) {
             sb.append("at ").append(stackTrace[i].toString()).append("\n");
         }
-        
+
         if (stackTrace.length > maxLines) {
             sb.append("... ").append(stackTrace.length - maxLines).append(" more");
         }
-        
+
         return sb.toString();
     }
 }

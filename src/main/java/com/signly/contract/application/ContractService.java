@@ -1,5 +1,8 @@
 package com.signly.contract.application;
 
+import com.signly.common.audit.aop.Auditable;
+import com.signly.common.audit.domain.model.AuditAction;
+import com.signly.common.audit.domain.model.EntityType;
 import com.signly.contract.application.dto.ContractResponse;
 import com.signly.contract.application.dto.CreateContractCommand;
 import com.signly.contract.application.dto.UpdateContractCommand;
@@ -27,6 +30,11 @@ public class ContractService {
     private final ContractAuthorizationService authorizationService;
     private final ContractDtoMapper contractDtoMapper;
 
+    @Auditable(
+            entityType = EntityType.CONTRACT,
+            action = AuditAction.CONTRACT_CREATED,
+            entityIdParam = "#result.id.value"
+    )
     public ContractResponse createContract(
             String userId,
             CreateContractCommand command
@@ -35,6 +43,11 @@ public class ContractService {
         return contractDtoMapper.toResponse(contract);
     }
 
+    @Auditable(
+            entityType = EntityType.CONTRACT,
+            action = AuditAction.CONTRACT_UPDATED,
+            entityIdParam = "#contractId"
+    )
     public ContractResponse updateContract(
             String userId,
             String contractId,
@@ -44,6 +57,11 @@ public class ContractService {
         return contractDtoMapper.toResponse(contract);
     }
 
+    @Auditable(
+            entityType = EntityType.CONTRACT,
+            action = AuditAction.CONTRACT_DELETED,
+            entityIdParam = "#contractId"
+    )
     public void deleteContract(
             String userId,
             String contractId
@@ -51,6 +69,11 @@ public class ContractService {
         creationService.deleteContract(userId, contractId);
     }
 
+    @Auditable(
+            entityType = EntityType.CONTRACT,
+            action = AuditAction.CONTRACT_SENT,
+            entityIdParam = "#contractId"
+    )
     public void sendForSigning(
             String userId,
             String contractId
@@ -66,7 +89,11 @@ public class ContractService {
     }
 
 
-
+    @Auditable(
+            entityType = EntityType.CONTRACT,
+            action = AuditAction.CONTRACT_SIGNED,
+            entityIdParam = "#result.id"
+    )
     public ContractResponse processSignature(
             String token,
             String signerEmail,
@@ -78,6 +105,11 @@ public class ContractService {
         return contractDtoMapper.toResponse(contract);
     }
 
+    @Auditable(
+            entityType = EntityType.CONTRACT,
+            action = AuditAction.CONTRACT_CANCELLED,
+            entityIdParam = "#contractId"
+    )
     public void cancelContract(
             String userId,
             String contractId

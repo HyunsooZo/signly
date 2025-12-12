@@ -37,7 +37,8 @@ public class HomeWebController extends BaseWebController {
             @RequestHeader(value = "X-User-Id", defaultValue = "01ARZ3NDEKTSV4RRFFQ69G5FAV") String userId,
             @AuthenticationPrincipal SecurityUser securityUser,
             HttpServletRequest request,
-            Model model) {
+            Model model
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
 

@@ -1,5 +1,8 @@
 package com.signly.template.application;
 
+import com.signly.common.audit.aop.Auditable;
+import com.signly.common.audit.domain.model.AuditAction;
+import com.signly.common.audit.domain.model.EntityType;
 import com.signly.common.exception.ForbiddenException;
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
@@ -29,6 +32,11 @@ public class TemplateService {
     private final UserRepository userRepository;
     private final TemplateDtoMapper templateDtoMapper;
 
+    @Auditable(
+            action = AuditAction.TEMPLATE_CREATED,
+            entityType = EntityType.TEMPLATE,
+            entityIdParam = "#result.id"
+    )
     public TemplateResponse createTemplate(
             String userId,
             CreateTemplateCommand command
@@ -52,6 +60,11 @@ public class TemplateService {
         return templateDtoMapper.toResponse(savedTemplate);
     }
 
+    @Auditable(
+            action = AuditAction.TEMPLATE_UPDATED,
+            entityType = EntityType.TEMPLATE,
+            entityIdParam = "#templateId"
+    )
     public TemplateResponse updateTemplate(
             String userId,
             String templateId,
@@ -76,6 +89,11 @@ public class TemplateService {
         return templateDtoMapper.toResponse(updatedTemplate);
     }
 
+    @Auditable(
+            action = AuditAction.TEMPLATE_ACTIVATED,
+            entityType = EntityType.TEMPLATE,
+            entityIdParam = "#templateId"
+    )
     public void activateTemplate(
             String userId,
             String templateId
@@ -89,6 +107,11 @@ public class TemplateService {
         templateRepository.save(template);
     }
 
+    @Auditable(
+            action = AuditAction.TEMPLATE_ARCHIVED,
+            entityType = EntityType.TEMPLATE,
+            entityIdParam = "#templateId"
+    )
     public void archiveTemplate(
             String userId,
             String templateId
@@ -102,6 +125,11 @@ public class TemplateService {
         templateRepository.save(template);
     }
 
+    @Auditable(
+            action = AuditAction.TEMPLATE_DELETED,
+            entityType = EntityType.TEMPLATE,
+            entityIdParam = "#templateId"
+    )
     public void deleteTemplate(
             String userId,
             String templateId

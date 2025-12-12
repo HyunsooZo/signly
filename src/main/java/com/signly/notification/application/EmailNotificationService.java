@@ -231,9 +231,9 @@ public class EmailNotificationService {
 
     /**
      * 이메일 인증 메일 발송
-     * 
-     * @param email 수신자 이메일
-     * @param userName 사용자 이름
+     *
+     * @param email             수신자 이메일
+     * @param userName          사용자 이름
      * @param verificationToken 인증 토큰
      */
     @Transactional

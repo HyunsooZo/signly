@@ -2,11 +2,7 @@ package com.signly.template.infrastructure.entity;
 
 import com.signly.template.domain.model.TemplateStatus;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 

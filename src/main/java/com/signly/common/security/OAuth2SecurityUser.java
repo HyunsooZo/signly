@@ -22,11 +22,15 @@ public class OAuth2SecurityUser extends SecurityUser implements OAuth2User {
     /**
      * OAuth2SecurityUser 생성자
      *
-     * @param user              도메인 User 객체
-     * @param attributes        OAuth2 공급자로부터 받은 사용자 속성
-     * @param nameAttributeKey  사용자 이름 속성의 키 (예: Google은 "sub")
+     * @param user             도메인 User 객체
+     * @param attributes       OAuth2 공급자로부터 받은 사용자 속성
+     * @param nameAttributeKey 사용자 이름 속성의 키 (예: Google은 "sub")
      */
-    public OAuth2SecurityUser(User user, Map<String, Object> attributes, String nameAttributeKey) {
+    public OAuth2SecurityUser(
+            User user,
+            Map<String, Object> attributes,
+            String nameAttributeKey
+    ) {
         super(user);
         this.attributes = attributes;
         this.nameAttributeKey = nameAttributeKey;

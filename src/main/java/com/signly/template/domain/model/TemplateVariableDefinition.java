@@ -1,11 +1,7 @@
 package com.signly.template.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -22,69 +18,69 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class TemplateVariableDefinition {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(nullable = false, unique = true, length = 100)
     private String variableName;
-    
+
     @Column(nullable = false, length = 100)
     private String displayName;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private VariableCategory category;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private VariableType variableType;
-    
+
     @Column(columnDefinition = "TEXT")
     private String description;
-    
+
     @Column(length = 50)
     private String iconClass;
-    
+
     @Column(nullable = false)
     @Builder.Default
     private Integer inputSize = 10;
-    
+
     private Integer maxLength;
-    
+
     @Column(length = 200)
     private String placeholderExample;
-    
+
     @Column(nullable = false)
     @Builder.Default
     private Boolean isRequired = false;
-    
+
     @Column(length = 500)
     private String validationRule;
-    
+
     @Column(length = 200)
     private String validationMessage;
-    
+
     @Column(columnDefinition = "TEXT")
     private String defaultValue;
-    
+
     @Column(nullable = false)
     @Builder.Default
     private Integer displayOrder = 0;
-    
+
     @Column(nullable = false)
     @Builder.Default
     private Boolean isActive = true;
-    
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-    
+
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-    
+
     /**
      * 변수 정의 생성
      */
@@ -101,7 +97,7 @@ public class TemplateVariableDefinition {
                 .variableType(variableType)
                 .build();
     }
-    
+
     /**
      * 변수 정의 업데이트
      */
@@ -131,7 +127,7 @@ public class TemplateVariableDefinition {
         this.displayOrder = displayOrder;
         return this;
     }
-    
+
     /**
      * 활성화 상태 변경
      */
@@ -139,7 +135,7 @@ public class TemplateVariableDefinition {
         this.isActive = true;
         return this;
     }
-    
+
     /**
      * 비활성화 상태 변경
      */
@@ -147,7 +143,7 @@ public class TemplateVariableDefinition {
         this.isActive = false;
         return this;
     }
-    
+
     /**
      * HTML input 타입으로 변환
      */
@@ -162,7 +158,7 @@ public class TemplateVariableDefinition {
             default -> "text";
         };
     }
-    
+
     /**
      * 변수 값 유효성 검증
      */
@@ -170,14 +166,14 @@ public class TemplateVariableDefinition {
         if (value == null || value.trim().isEmpty()) {
             return !isRequired;
         }
-        
+
         if (validationRule != null && !validationRule.isEmpty()) {
             return value.matches(validationRule);
         }
-        
+
         return true;
     }
-    
+
     /**
      * 검증 실패 시 에러 메시지 반환
      */

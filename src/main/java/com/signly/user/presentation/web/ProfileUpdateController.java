@@ -34,7 +34,8 @@ public class ProfileUpdateController extends BaseWebController {
             @RequestParam(required = false) String companyName,
             @RequestParam(required = false) String businessPhone,
             @RequestParam(required = false) String businessAddress,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             String resolvedUserId = currentUserProvider.resolveUserId(securityUser, request, userId, true);
 

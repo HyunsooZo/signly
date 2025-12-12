@@ -94,6 +94,7 @@ public class ContractPdfService {
 
     /**
      * 갑(사업주) 서명 이미지 조회 - FirstPartySignatureService 사용
+     *
      * @param ownerId 사업주 ID
      * @return 서명 이미지 Data URL, 없으면 null
      */
@@ -110,7 +111,8 @@ public class ContractPdfService {
 
     /**
      * 을(근로자) 서명 이미지 조회 - SignatureRepository 사용
-     * @param contractId 계약서 ID
+     *
+     * @param contractId  계약서 ID
      * @param signerEmail 서명자 이메일
      * @return 서명 이미지 Data URL, 없으면 null
      */
@@ -129,6 +131,7 @@ public class ContractPdfService {
 
     /**
      * 서명 이미지 조회 및 리사이징 (없으면 null 반환)
+     *
      * @deprecated 하위 호환성을 위해 유지, getFirstPartySignatureImage 또는 getSecondPartySignatureImage 사용 권장
      */
     @Deprecated

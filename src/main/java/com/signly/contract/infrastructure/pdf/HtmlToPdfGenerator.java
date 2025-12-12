@@ -112,9 +112,9 @@ public class HtmlToPdfGenerator implements PdfGenerator {
      */
     private boolean isAlreadyCompleteDocument(String html) {
         String trimmed = html.trim().toLowerCase();
-        return trimmed.startsWith("<!doctype") || 
-               trimmed.startsWith("<html") ||
-               (trimmed.contains("<html") && trimmed.contains("</html>"));
+        return trimmed.startsWith("<!doctype") ||
+                trimmed.startsWith("<html") ||
+                (trimmed.contains("<html") && trimmed.contains("</html>"));
     }
 
     /**
@@ -226,8 +226,8 @@ public class HtmlToPdfGenerator implements PdfGenerator {
 
         // @media print { ... } 패턴 찾기
         java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
-            "@media\\s+print\\s*\\{([^}]*(?:\\{[^}]*\\}[^}]*)*)\\}",
-            java.util.regex.Pattern.DOTALL
+                "@media\\s+print\\s*\\{([^}]*(?:\\{[^}]*\\}[^}]*)*)\\}",
+                java.util.regex.Pattern.DOTALL
         );
 
         java.util.regex.Matcher matcher = pattern.matcher(css);

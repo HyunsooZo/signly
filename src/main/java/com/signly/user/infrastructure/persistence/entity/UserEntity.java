@@ -3,11 +3,7 @@ package com.signly.user.infrastructure.persistence.entity;
 import com.signly.user.domain.model.UserStatus;
 import com.signly.user.domain.model.UserType;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 

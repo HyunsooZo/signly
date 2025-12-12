@@ -104,7 +104,7 @@ public class User extends AggregateRoot {
         if (verificationTokenValue != null && verificationTokenExpiry != null) {
             token = VerificationToken.of(verificationTokenValue, verificationTokenExpiry);
         }
-        
+
         return new User(
                 userId,
                 email,
@@ -217,7 +217,7 @@ public class User extends AggregateRoot {
     /**
      * 이메일 인증 토큰 생성
      * - 새로운 인증 토큰 생성 및 PENDING 상태로 전환
-     * 
+     *
      * @return 생성된 인증 토큰
      */
     public VerificationToken generateVerificationToken() {
@@ -232,7 +232,7 @@ public class User extends AggregateRoot {
      * 이메일 인증 처리 (멱등성 보장)
      * - 이미 인증된 경우 성공 처리 (예외 없이 반환)
      * - 토큰 검증 후 ACTIVE 상태로 전환
-     * 
+     *
      * @param token 인증 토큰
      */
     public void verifyEmail(String token) {
@@ -261,7 +261,7 @@ public class User extends AggregateRoot {
 
     /**
      * 이메일 인증 여부 확인
-     * 
+     *
      * @return 인증 완료 여부
      */
     public boolean isEmailVerified() {
@@ -270,7 +270,7 @@ public class User extends AggregateRoot {
 
     /**
      * 로그인 가능 여부 확인
-     * 
+     *
      * @return 로그인 가능 여부 (ACTIVE + 이메일 인증 완료)
      */
     public boolean canLogin() {
@@ -279,7 +279,7 @@ public class User extends AggregateRoot {
 
     /**
      * 인증 토큰 값 반환 (영속성 계층 전용)
-     * 
+     *
      * @return 인증 토큰 값 (없으면 null)
      */
     public String getVerificationTokenValue() {
@@ -288,7 +288,7 @@ public class User extends AggregateRoot {
 
     /**
      * 인증 토큰 만료 시간 반환 (영속성 계층 전용)
-     * 
+     *
      * @return 만료 시간 (없으면 null)
      */
     public LocalDateTime getVerificationTokenExpiry() {
@@ -308,7 +308,7 @@ public class User extends AggregateRoot {
     /**
      * 프로필 완성 여부 확인
      * - 기업 정보가 필수적으로 있어야 함
-     * 
+     *
      * @return 프로필 완성 여부
      */
     public boolean isProfileComplete() {

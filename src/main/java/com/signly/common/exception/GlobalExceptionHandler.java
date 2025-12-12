@@ -255,10 +255,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 
-    private void sendDiscordNotification(Exception ex, WebRequest request) {
+    private void sendDiscordNotification(
+            Exception ex,
+            WebRequest request
+    ) {
         try {
             HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
-            
+
             ErrorContext errorContext = ErrorContext.of(
                     ex,
                     servletRequest.getRequestURI(),
@@ -266,7 +269,7 @@ public class GlobalExceptionHandler {
                     getClientIp(servletRequest),
                     servletRequest.getHeader("User-Agent")
             );
-            
+
             discordNotificationService.sendErrorNotification(errorContext);
         } catch (Exception e) {
             // Discord 알림 실패는 무시

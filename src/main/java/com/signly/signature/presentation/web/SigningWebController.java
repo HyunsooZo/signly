@@ -28,7 +28,8 @@ public class SigningWebController {
     @GetMapping("/{token}")
     public String signingPage(
             @PathVariable String token,
-            Model model) {
+            Model model
+    ) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -58,7 +59,8 @@ public class SigningWebController {
     @GetMapping("/{token}/verify")
     public String verifyPage(
             @PathVariable String token,
-            Model model) {
+            Model model
+    ) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -81,7 +83,8 @@ public class SigningWebController {
             @RequestParam String signerEmail,
             @RequestParam String signerName,
             Model model,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 
@@ -109,7 +112,8 @@ public class SigningWebController {
             @RequestParam String signatureData,
             @RequestParam String signerEmail,
             @RequestParam String signerName,
-            HttpServletRequest request) {
+            HttpServletRequest request
+    ) {
         try {
             logger.info("서명 처리 요청: token={}, signerEmail={}", token, signerEmail);
 
@@ -133,7 +137,8 @@ public class SigningWebController {
     @GetMapping("/{token}/complete")
     public String completePage(
             @PathVariable String token,
-            Model model) {
+            Model model
+    ) {
         try {
             ContractResponse contract = contractService.getContractByToken(token);
 

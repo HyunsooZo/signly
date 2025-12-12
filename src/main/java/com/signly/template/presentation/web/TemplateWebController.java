@@ -1,5 +1,7 @@
 package com.signly.template.presentation.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signly.common.exception.BusinessException;
 import com.signly.common.exception.ValidationException;
 import com.signly.common.security.CurrentUserProvider;
@@ -15,8 +17,6 @@ import com.signly.template.application.preset.PresetSection;
 import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.application.preset.TemplatePresetSummary;
 import com.signly.template.domain.model.TemplateStatus;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.Getter;
@@ -59,14 +59,14 @@ public class TemplateWebController extends BaseWebController {
         this.variableDefinitionService = variableDefinitionService;
         this.objectMapper = objectMapper;
     }
-    
+
     /**
      * 변수 정의를 JSON 문자열로 변환하여 Model에 추가
      */
     private void addVariableDefinitionsToModel(Model model) {
         try {
             String variableDefinitionsJson = objectMapper.writeValueAsString(
-                variableDefinitionService.getAllActiveVariables()
+                    variableDefinitionService.getAllActiveVariables()
             );
             model.addAttribute("variableDefinitionsJson", variableDefinitionsJson);
         } catch (JsonProcessingException e) {
@@ -365,7 +365,6 @@ public class TemplateWebController extends BaseWebController {
         }
         return "redirect:/templates";
     }
-
 
 
     @Getter

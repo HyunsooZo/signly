@@ -719,7 +719,7 @@ public class ContractWebController extends BaseWebController {
     private void addVariableDefinitionsToModel(Model model) {
         try {
             String variableDefinitionsJson = objectMapper.writeValueAsString(
-                variableDefinitionService.getAllActiveVariables()
+                    variableDefinitionService.getAllActiveVariables()
             );
             model.addAttribute("variableDefinitionsJson", variableDefinitionsJson);
         } catch (JsonProcessingException e) {

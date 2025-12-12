@@ -55,8 +55,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // 이름이 없으면 이메일 아이디 사용 (final 변수로 생성)
-        final String userName = (name == null || name.trim().isEmpty()) 
-                ? email.split("@")[0] 
+        final String userName = (name == null || name.trim().isEmpty())
+                ? email.split("@")[0]
                 : name;
 
         // Google에서 이메일 인증이 완료되지 않은 경우 차단
@@ -96,7 +96,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * - ACTIVE 상태로 생성
      * - 비밀번호는 랜덤 UUID (OAuth2만 사용)
      */
-    private User createNewOAuth2User(Email email, String name) {
+    private User createNewOAuth2User(
+            Email email,
+            String name
+    ) {
         log.info("Creating new OAuth2 user: {}", email.value());
 
         // OAuth2 사용자는 비밀번호 로그인 불가 (정책 만족하는 랜덤 비밀번호)

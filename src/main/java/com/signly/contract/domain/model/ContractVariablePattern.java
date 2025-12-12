@@ -103,7 +103,10 @@ public final class ContractVariablePattern {
      * @param variableName 찾을 변수 이름
      * @return 포함 여부
      */
-    public static boolean containsVariable(String html, String variableName) {
+    public static boolean containsVariable(
+            String html,
+            String variableName
+    ) {
         if (html == null || variableName == null) {
             return false;
         }
