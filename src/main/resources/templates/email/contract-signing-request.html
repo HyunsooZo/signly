@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>계약서 서명 요청</title>
     <th:block th:replace="~{fragments/email-style :: emailStyles}"></th:block>
 </head>
+
 <body class="email-body">
     <div class="email-wrapper">
         <div class="email-card">
             <div class="email-header email-header--success">
-                <div class="email-logo email-logo--success" th:text="${companyName}">Signly</div>
+                <div class="email-logo email-logo--success">Signly</div>
             </div>
 
             <div class="email-content">
@@ -45,4 +47,5 @@
         </div>
     </div>
 </body>
+
 </html>

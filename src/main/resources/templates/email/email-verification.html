@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>이메일 인증</title>
     <th:block th:replace="~{fragments/email-style :: emailStyles}"></th:block>
 </head>
+
 <body class="email-body">
     <div class="email-wrapper">
         <div class="email-card">
@@ -27,7 +29,7 @@
 
                 <div class="email-highlight email-highlight--info">
                     <p class="email-meta">
-                        <strong>유효 시간:</strong> 
+                        <strong>유효 시간:</strong>
                         <span th:text="${expiryHours}">24</span>시간
                     </p>
                 </div>
@@ -52,4 +54,5 @@
         </div>
     </div>
 </body>
+
 </html>
