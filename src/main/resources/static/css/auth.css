@@ -208,11 +208,7 @@ body.auth-page {
     position: relative;
 }
 
-/* 영문 전용 모드 시 강조 */
-.form-control[style*="ime-mode: disabled"] {
-    border-color: #28a745;
-    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-}
+
 
 /* 모바일 키보드 표시기 */
 @media (max-width: 768px) {
