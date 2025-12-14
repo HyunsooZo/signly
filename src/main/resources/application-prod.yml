@@ -92,8 +92,9 @@ app:
     iv-length: 12
     tag-length: 128
     charset: UTF-8
+    salt: ${ENCRYPTION_SALT}
 
-    email:
+  email:
     from: ${EMAIL_FROM}
 
   cors:

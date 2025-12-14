@@ -1,19 +1,28 @@
 package com.signly.contract.infrastructure.mapper;
 
+import com.signly.common.encryption.AesEncryptionService;
 import com.signly.common.util.UlidGenerator;
 import com.signly.contract.domain.model.*;
 import com.signly.contract.infrastructure.entity.ContractJpaEntity;
 import com.signly.contract.infrastructure.entity.SignatureEntity;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class ContractEntityMapper {
 
+    private final AesEncryptionService encryptionService;
+
     public ContractJpaEntity toEntity(Contract contract) {
+        // 이메일 해시 생성 (Blind Index)
+        String firstPartyEmailHash = encryptionService.hashEmail(contract.getFirstParty().email());
+        String secondPartyEmailHash = encryptionService.hashEmail(contract.getSecondParty().email());
+
         ContractJpaEntity entity = new ContractJpaEntity(
                 contract.getId().value(),
                 contract.getCreatorId().value(),
@@ -32,6 +41,10 @@ public class ContractEntityMapper {
                 contract.getExpiresAt(),
                 contract.getPresetType()
         );
+
+        // 이메일 해시 설정
+        entity.setFirstPartyEmailHash(firstPartyEmailHash);
+        entity.setSecondPartyEmailHash(secondPartyEmailHash);
 
         entity.setPdfPath(contract.getPdfPath());
 

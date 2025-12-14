@@ -1,5 +1,6 @@
 package com.signly.contract.infrastructure.repository;
 
+import com.signly.common.encryption.AesEncryptionService;
 import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.model.ContractId;
 import com.signly.contract.domain.model.ContractStatus;
@@ -27,13 +28,16 @@ public class ContractRepositoryImpl implements ContractRepository {
 
     private final ContractJpaRepository jpaRepository;
     private final ContractEntityMapper entityMapper;
+    private final AesEncryptionService encryptionService;
 
     public ContractRepositoryImpl(
             ContractJpaRepository jpaRepository,
-            ContractEntityMapper entityMapper
+            ContractEntityMapper entityMapper,
+            AesEncryptionService encryptionService
     ) {
         this.jpaRepository = jpaRepository;
         this.entityMapper = entityMapper;
+        this.encryptionService = encryptionService;
     }
 
     @Override
@@ -79,7 +83,9 @@ public class ContractRepositoryImpl implements ContractRepository {
             String email,
             Pageable pageable
     ) {
-        Page<ContractJpaEntity> entities = jpaRepository.findByPartyEmail(email, pageable);
+        // 이메일 해시로 검색 (Blind Index 사용)
+        String emailHash = encryptionService.hashEmail(email);
+        Page<ContractJpaEntity> entities = jpaRepository.findByPartyEmailHash(emailHash, pageable);
         return entities.map(entityMapper::toDomain);
     }
 
@@ -89,7 +95,9 @@ public class ContractRepositoryImpl implements ContractRepository {
             ContractStatus status,
             Pageable pageable
     ) {
-        Page<ContractJpaEntity> entities = jpaRepository.findByPartyEmailAndStatus(email, status, pageable);
+        // 이메일 해시로 검색 (Blind Index 사용)
+        String emailHash = encryptionService.hashEmail(email);
+        Page<ContractJpaEntity> entities = jpaRepository.findByPartyEmailHashAndStatus(emailHash, status, pageable);
         return entities.map(entityMapper::toDomain);
     }
 
@@ -145,12 +153,12 @@ public class ContractRepositoryImpl implements ContractRepository {
 
     @Override
     public Optional<Contract> findBySignToken(SignToken signToken) {
-        logger.info("DB 쿼리: findBySignToken - signToken={}", signToken.value());
+        logger.info("DB 쿼리: findBySignToken");
         ContractJpaEntity entity = jpaRepository.findBySignToken(signToken.value());
         logger.info("DB 쿼리 결과: entity found={}", entity != null);
         if (entity != null) {
-            logger.info("Entity details: id={}, signToken={}, status={}",
-                    entity.getId(), entity.getSignToken(), entity.getStatus());
+            logger.info("Entity details: id={},  status={}",
+                    entity.getId(), entity.getStatus());
         }
         return entity != null ? Optional.of(entityMapper.toDomain(entity)) : Optional.empty();
     }

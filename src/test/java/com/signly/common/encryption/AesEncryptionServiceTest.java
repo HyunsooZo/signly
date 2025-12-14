@@ -25,11 +25,14 @@ class AesEncryptionServiceTest {
         properties.setIvLength(12);
         properties.setTagLength(128);
         properties.setCharset("UTF-8");
-        
+
         // 32-byte key for AES-256
         String base64Key = Base64.getEncoder().encodeToString("12345678901234567890123456789012".getBytes());
         properties.setSecretKey(base64Key);
-        
+
+        // Salt for hashing
+        properties.setSalt("testSaltForHashing123");
+
         encryptionService = new AesEncryptionService(properties);
     }
 
@@ -237,5 +240,174 @@ class AesEncryptionServiceTest {
 
         // 원인(cause)이 IllegalStateException인지 확인
         assertTrue(exception.getCause() instanceof IllegalStateException);
+    }
+
+    // ==================== Hash Tests ====================
+
+    @Test
+    @DisplayName("동일한 입력은 항상 동일한 해시를 생성한다")
+    void hash_same_input_same_output() {
+        // Given
+        String input = "test@example.com";
+
+        // When
+        String hash1 = encryptionService.hash(input);
+        String hash2 = encryptionService.hash(input);
+
+        // Then
+        assertNotNull(hash1);
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("다른 입력은 다른 해시를 생성한다")
+    void hash_different_input_different_output() {
+        // Given
+        String input1 = "test1@example.com";
+        String input2 = "test2@example.com";
+
+        // When
+        String hash1 = encryptionService.hash(input1);
+        String hash2 = encryptionService.hash(input2);
+
+        // Then
+        assertNotNull(hash1);
+        assertNotNull(hash2);
+        assertNotEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("null을 해시하면 null을 반환한다")
+    void hash_null_returns_null() {
+        // When
+        String hash = encryptionService.hash(null);
+
+        // Then
+        assertNull(hash);
+    }
+
+    @Test
+    @DisplayName("해시는 64자리 16진수 문자열이다 (SHA-256)")
+    void hash_returns_64_hex_chars() {
+        // Given
+        String input = "test@example.com";
+
+        // When
+        String hash = encryptionService.hash(input);
+
+        // Then
+        assertNotNull(hash);
+        assertEquals(64, hash.length());
+        assertTrue(hash.matches("^[0-9a-f]{64}$"));
+    }
+
+    @Test
+    @DisplayName("Salt가 설정되지 않으면 해시 생성 시 예외가 발생한다")
+    void hash_missing_salt_throws_exception() {
+        // Given
+        properties.setSalt(null);
+        AesEncryptionService service = new AesEncryptionService(properties);
+
+        // When & Then
+        assertThrows(RuntimeException.class, () -> {
+            service.hash("test");
+        });
+    }
+
+    // ==================== Email Hash Tests ====================
+
+    @Test
+    @DisplayName("이메일 해시는 대소문자를 구분하지 않는다 (정규화)")
+    void hashEmail_case_insensitive() {
+        // Given
+        String email1 = "Test@Example.COM";
+        String email2 = "test@example.com";
+        String email3 = "TEST@EXAMPLE.COM";
+
+        // When
+        String hash1 = encryptionService.hashEmail(email1);
+        String hash2 = encryptionService.hashEmail(email2);
+        String hash3 = encryptionService.hashEmail(email3);
+
+        // Then
+        assertNotNull(hash1);
+        assertEquals(hash1, hash2);
+        assertEquals(hash2, hash3);
+    }
+
+    @Test
+    @DisplayName("이메일 해시는 앞뒤 공백을 제거한다 (정규화)")
+    void hashEmail_trims_whitespace() {
+        // Given
+        String email1 = "  test@example.com  ";
+        String email2 = "test@example.com";
+        String email3 = "\ttest@example.com\n";
+
+        // When
+        String hash1 = encryptionService.hashEmail(email1);
+        String hash2 = encryptionService.hashEmail(email2);
+        String hash3 = encryptionService.hashEmail(email3);
+
+        // Then
+        assertNotNull(hash1);
+        assertEquals(hash1, hash2);
+        assertEquals(hash2, hash3);
+    }
+
+    @Test
+    @DisplayName("이메일 해시는 대소문자와 공백을 모두 정규화한다")
+    void hashEmail_normalizes_case_and_whitespace() {
+        // Given
+        String email1 = "  Test@Example.COM  ";
+        String email2 = "test@example.com";
+
+        // When
+        String hash1 = encryptionService.hashEmail(email1);
+        String hash2 = encryptionService.hashEmail(email2);
+
+        // Then
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    @DisplayName("null 이메일을 해시하면 null을 반환한다")
+    void hashEmail_null_returns_null() {
+        // When
+        String hash = encryptionService.hashEmail(null);
+
+        // Then
+        assertNull(hash);
+    }
+
+    @Test
+    @DisplayName("동일한 이메일은 항상 동일한 해시를 생성한다 (일관성)")
+    void hashEmail_consistency() {
+        // Given
+        String email = "user@example.com";
+
+        // When
+        String hash1 = encryptionService.hashEmail(email);
+        String hash2 = encryptionService.hashEmail(email);
+        String hash3 = encryptionService.hashEmail(email);
+
+        // Then
+        assertNotNull(hash1);
+        assertEquals(hash1, hash2);
+        assertEquals(hash2, hash3);
+    }
+
+    @Test
+    @DisplayName("다른 이메일은 다른 해시를 생성한다")
+    void hashEmail_different_emails_different_hashes() {
+        // Given
+        String email1 = "user1@example.com";
+        String email2 = "user2@example.com";
+
+        // When
+        String hash1 = encryptionService.hashEmail(email1);
+        String hash2 = encryptionService.hashEmail(email2);
+
+        // Then
+        assertNotEquals(hash1, hash2);
     }
 }

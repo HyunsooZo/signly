@@ -74,6 +74,7 @@ app:
     iv-length: 12
     tag-length: 128
     charset: UTF-8
+    salt: ${ENCRYPTION_SALT:myDefaultSaltForDevelopmentOnly123456}
 
   email:
     from: ${EMAIL_FROM:bzhs1992@gmail.com}

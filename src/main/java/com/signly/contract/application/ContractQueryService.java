@@ -90,11 +90,11 @@ public class ContractQueryService {
     }
 
     public ContractResponse getContractByToken(String token) {
-        logger.info("토큰으로 계약서 조회: token={}", token);
+        logger.info("토큰으로 계약서 조회 시작");
         var signToken = SignToken.of(token);
         var contract = contractRepository.findBySignToken(signToken)
                 .orElseThrow(() -> {
-                    logger.error("서명 토큰으로 계약서를 찾을 수 없음: token={}", token);
+                    logger.error("서명 토큰으로 계약서를 찾을 수 없음");
                     return new NotFoundException("유효하지 않은 서명 링크입니다");
                 });
 

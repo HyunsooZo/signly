@@ -1,28 +1,24 @@
 package com.signly.user.infrastructure.persistence.repository;
 
+import com.signly.common.encryption.AesEncryptionService;
 import com.signly.user.domain.model.Email;
 import com.signly.user.domain.model.User;
 import com.signly.user.domain.model.UserId;
 import com.signly.user.domain.repository.UserRepository;
 import com.signly.user.infrastructure.persistence.entity.UserEntity;
 import com.signly.user.infrastructure.persistence.mapper.UserEntityMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
 
     private final UserJpaRepository userJpaRepository;
     private final UserEntityMapper userEntityMapper;
-
-    public UserRepositoryImpl(
-            UserJpaRepository userJpaRepository,
-            UserEntityMapper userEntityMapper
-    ) {
-        this.userJpaRepository = userJpaRepository;
-        this.userEntityMapper = userEntityMapper;
-    }
+    private final AesEncryptionService encryptionService;
 
     @Override
     public User save(User user) {
@@ -48,13 +44,17 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByEmail(Email email) {
-        return userJpaRepository.findByEmail(email.value())
+        // 이메일 해시로 검색 (Blind Index 사용)
+        String emailHash = encryptionService.hashEmail(email.value());
+        return userJpaRepository.findByEmailHash(emailHash)
                 .map(userEntityMapper::toDomain);
     }
 
     @Override
     public boolean existsByEmail(Email email) {
-        return userJpaRepository.existsByEmail(email.value());
+        // 이메일 해시로 중복 체크 (Blind Index 사용)
+        String emailHash = encryptionService.hashEmail(email.value());
+        return userJpaRepository.existsByEmailHash(emailHash);
     }
 
     @Override

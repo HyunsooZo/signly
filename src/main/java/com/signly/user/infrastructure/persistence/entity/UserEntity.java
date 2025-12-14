@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users", indexes = {
-        @Index(name = "idx_user_email", columnList = "email"),
         @Index(name = "idx_user_status", columnList = "status"),
         @Index(name = "idx_user_type", columnList = "user_type"),
         @Index(name = "idx_user_status_type", columnList = "status, user_type"),
@@ -27,8 +26,12 @@ public class UserEntity {
     @Column(name = "user_id", length = 26)
     private String userId;
 
-    @Column(name = "email", length = 255, unique = true, nullable = false)
+    @Convert(converter = StringEncryptionConverter.class)
+    @Column(name = "email", length = 500, nullable = false)
     private String email;
+
+    @Column(name = "email_hash", length = 64, unique = true, nullable = false)
+    private String emailHash;
 
     @Column(name = "password", length = 255, nullable = false)
     private String password;

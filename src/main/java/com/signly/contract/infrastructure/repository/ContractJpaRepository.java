@@ -26,15 +26,16 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
             Pageable pageable
     );
 
-    @Query("SELECT c FROM ContractJpaEntity c WHERE c.firstPartyEmail = :email OR c.secondPartyEmail = :email ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC")
-    Page<ContractJpaEntity> findByPartyEmail(
-            @Param("email") String email,
+    // 이메일 해시로 계약 조회 (Blind Index 사용)
+    @Query("SELECT c FROM ContractJpaEntity c WHERE c.firstPartyEmailHash = :emailHash OR c.secondPartyEmailHash = :emailHash ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC")
+    Page<ContractJpaEntity> findByPartyEmailHash(
+            @Param("emailHash") String emailHash,
             Pageable pageable
     );
 
-    @Query("SELECT c FROM ContractJpaEntity c WHERE (c.firstPartyEmail = :email OR c.secondPartyEmail = :email) AND c.status = :status ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC")
-    Page<ContractJpaEntity> findByPartyEmailAndStatus(
-            @Param("email") String email,
+    @Query("SELECT c FROM ContractJpaEntity c WHERE (c.firstPartyEmailHash = :emailHash OR c.secondPartyEmailHash = :emailHash) AND c.status = :status ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC")
+    Page<ContractJpaEntity> findByPartyEmailHashAndStatus(
+            @Param("emailHash") String emailHash,
             @Param("status") ContractStatus status,
             Pageable pageable
     );

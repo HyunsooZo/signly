@@ -25,7 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(EncryptionConfig.class)
 @TestPropertySource(properties = {
     "app.encryption.enabled=true",
-    "app.encryption.secret-key=" + "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=" // Base64 of "12345678901234567890123456789012"
+    "app.encryption.secret-key=" + "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=", // Base64 of "12345678901234567890123456789012"
+    "app.encryption.salt=test-salt-for-hashing"
 })
 @DisplayName("암호화 통합 테스트")
 class EncryptionIntegrationTest {
@@ -52,6 +53,7 @@ class EncryptionIntegrationTest {
         testUser = new UserEntity(
             "01H8X9Y2Z3W4V5U6T7R8S9Q0W1",
             "test@example.com",
+            "emailHashPlaceholder",
             "encodedPassword",
             "Test User",
             "Test Company",
@@ -243,9 +245,12 @@ class EncryptionIntegrationTest {
 
     private UserEntity createTestUser(String userId) {
         LocalDateTime now = LocalDateTime.now();
+        String email = "test" + userId + "@example.com";
+        String emailHash = encryptionService.hashEmail(email);
         return new UserEntity(
             userId,
-            "test" + userId + "@example.com",
+            email,
+            emailHash,
             "encodedPassword",
             "Test User",
             "Test Company",

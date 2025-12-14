@@ -21,13 +21,11 @@ import java.util.List;
         @Index(name = "idx_contract_creator_id", columnList = "creator_id"),
         @Index(name = "idx_contract_template_id", columnList = "template_id"),
         @Index(name = "idx_contract_status", columnList = "status"),
-        @Index(name = "idx_contract_first_party_email", columnList = "first_party_email"),
-        @Index(name = "idx_contract_second_party_email", columnList = "second_party_email"),
         @Index(name = "idx_contract_expires_at", columnList = "expires_at"),
         @Index(name = "idx_contract_sign_token", columnList = "sign_token"),
         @Index(name = "idx_contract_creator_status", columnList = "creator_id, status"),
-        @Index(name = "idx_contract_status_expires", columnList = "status, expires_at"),
-        @Index(name = "idx_contract_party_emails", columnList = "first_party_email, second_party_email")
+        @Index(name = "idx_contract_status_expires", columnList = "status, expires_at")
+        // email 인덱스는 V14 마이그레이션에서 emailHash 기반으로 추가됨
 })
 public class ContractJpaEntity extends BaseEntity {
 
@@ -61,9 +59,15 @@ public class ContractJpaEntity extends BaseEntity {
     @Column(name = "first_party_name", nullable = false, length = 500)
     private String firstPartyName;
 
-
+    // 갑(First Party) 이메일 (암호화 저장)
+    @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "first_party_email", nullable = false, length = 500)
     private String firstPartyEmail;
+
+    // 갑(First Party) 이메일 해시 (검색용, Blind Index)
+    @Setter
+    @Column(name = "first_party_email_hash", length = 64)
+    private String firstPartyEmailHash;
 
     @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "first_party_organization", length = 200)
@@ -73,8 +77,15 @@ public class ContractJpaEntity extends BaseEntity {
     @Column(name = "second_party_name", nullable = false, length = 500)
     private String secondPartyName;
 
+    // 을(Second Party) 이메일 (암호화 저장)
+    @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "second_party_email", nullable = false, length = 500)
     private String secondPartyEmail;
+
+    // 을(Second Party) 이메일 해시 (검색용, Blind Index)
+    @Setter
+    @Column(name = "second_party_email_hash", length = 64)
+    private String secondPartyEmailHash;
 
     @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "second_party_organization", length = 200)
