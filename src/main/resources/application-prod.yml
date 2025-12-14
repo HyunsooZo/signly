@@ -85,7 +85,15 @@ app:
     access-token-validity-in-ms: ${ACCESS_TOKEN_VALIDITY:3600000} # 1시간
     refresh-token-validity-in-ms: ${REFRESH_TOKEN_VALIDITY:2592000000} # 30일
 
-  email:
+  encryption:
+    enabled: ${ENCRYPTION_ENABLED}
+    secret-key: ${ENCRYPTION_SECRET_KEY}
+    algorithm: AES/GCM/NoPadding
+    iv-length: 12
+    tag-length: 128
+    charset: UTF-8
+
+    email:
     from: ${EMAIL_FROM}
 
   cors:

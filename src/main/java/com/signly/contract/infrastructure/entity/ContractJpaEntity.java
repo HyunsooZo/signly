@@ -1,6 +1,7 @@
 package com.signly.contract.infrastructure.entity;
 
 import com.signly.common.domain.BaseEntity;
+import com.signly.common.encryption.StringEncryptionConverter;
 import com.signly.contract.domain.model.ContractStatus;
 import com.signly.contract.domain.model.PresetType;
 import jakarta.persistence.*;
@@ -41,33 +42,41 @@ public class ContractJpaEntity extends BaseEntity {
     private String templateId;
 
     @Setter
+    @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
     @Setter
     @Lob
+    @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Setter
+    @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "template_data", columnDefinition = "JSON")
     private String templateData;
 
-    @Column(name = "first_party_name", nullable = false, length = 100)
+    @Convert(converter = StringEncryptionConverter.class)
+    @Column(name = "first_party_name", nullable = false, length = 500)
     private String firstPartyName;
 
-    @Column(name = "first_party_email", nullable = false, length = 255)
+
+    @Column(name = "first_party_email", nullable = false, length = 500)
     private String firstPartyEmail;
 
+    @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "first_party_organization", length = 200)
     private String firstPartyOrganization;
 
-    @Column(name = "second_party_name", nullable = false, length = 100)
+    @Convert(converter = StringEncryptionConverter.class)
+    @Column(name = "second_party_name", nullable = false, length = 500)
     private String secondPartyName;
 
-    @Column(name = "second_party_email", nullable = false, length = 255)
+    @Column(name = "second_party_email", nullable = false, length = 500)
     private String secondPartyEmail;
 
+    @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "second_party_organization", length = 200)
     private String secondPartyOrganization;
 
@@ -92,6 +101,7 @@ public class ContractJpaEntity extends BaseEntity {
     private PresetType presetType = PresetType.NONE;
 
     @Setter
+    @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "pdf_path", length = 1000)
     private String pdfPath;
 

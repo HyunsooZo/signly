@@ -1,5 +1,6 @@
 package com.signly.document.infrastructure.persistence.entity;
 
+import com.signly.common.encryption.StringEncryptionConverter;
 import com.signly.document.domain.model.DocumentType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -37,9 +38,11 @@ public class DocumentJpaEntity {
     private DocumentType type;
 
     @Column(name = "filename", nullable = false, length = 500)
+    @Convert(converter = StringEncryptionConverter.class)
     private String filename;
 
     @Column(name = "original_filename", nullable = false, length = 500)
+    @Convert(converter = StringEncryptionConverter.class)
     private String originalFilename;
 
     @Column(name = "content_type", nullable = false, length = 100)
@@ -52,6 +55,7 @@ public class DocumentJpaEntity {
     private String checksum;
 
     @Column(name = "storage_path", nullable = false, length = 1000)
+    @Convert(converter = StringEncryptionConverter.class)
     private String storagePath;
 
     @CreationTimestamp

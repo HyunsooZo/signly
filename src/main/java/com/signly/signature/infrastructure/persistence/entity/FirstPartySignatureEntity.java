@@ -1,10 +1,8 @@
 package com.signly.signature.infrastructure.persistence.entity;
 
 import com.signly.common.domain.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.signly.common.encryption.StringEncryptionConverter;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,9 +23,11 @@ public class FirstPartySignatureEntity extends BaseEntity {
     private String ownerId;
 
     @Column(name = "storage_path", nullable = false, length = 512)
+    @Convert(converter = StringEncryptionConverter.class)
     private String storagePath;
 
     @Column(name = "original_filename", nullable = false, length = 255)
+    @Convert(converter = StringEncryptionConverter.class)
     private String originalFilename;
 
     @Column(name = "mime_type", nullable = false, length = 100)

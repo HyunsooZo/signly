@@ -104,6 +104,10 @@ jobs:
             # JWT 설정
             JWT_SECRET=${{ secrets.JWT_SECRET }}
 
+            # Database Encryption 설정
+            ENCRYPTION_ENABLED=${{ secrets.ENCRYPTION_ENABLED }}
+            ENCRYPTION_SECRET_KEY=${{ secrets.ENCRYPTION_SECRET_KEY }}
+
             # Docker 이미지
             APP_IMAGE=${{ secrets.DOCKER_USERNAME }}/signly-app:master-${{ github.sha }}
 

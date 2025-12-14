@@ -67,6 +67,14 @@ app:
     access-token-validity-in-ms: ${ACCESS_TOKEN_VALIDITY:3600000} # 1시간
     refresh-token-validity-in-ms: ${REFRESH_TOKEN_VALIDITY:2592000000} # 30일
 
+  encryption:
+    enabled: ${ENCRYPTION_ENABLED:true}
+    secret-key: ${ENCRYPTION_SECRET_KEY:aUvGA4N5SLtNBJVklBSEagwy3BASLEvnwnJ0fdsQx5A=}
+    algorithm: AES/GCM/NoPadding
+    iv-length: 12
+    tag-length: 128
+    charset: UTF-8
+
   email:
     from: ${EMAIL_FROM:bzhs1992@gmail.com}
 

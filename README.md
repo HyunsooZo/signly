@@ -157,6 +157,30 @@ docker-compose ps
 - **Health Check**: http://localhost:8080/actuator/health
 - **Metrics**: http://localhost:8080/actuator/metrics
 
+## 🔐 데이터베이스 암호화
+
+### 개요
+민감한 개인정보는 AES-256-GCM 알고리즘으로 암호화되어 저장됩니다.
+
+### 암호화 대상
+- 사업자 전화번호 (`users.business_phone`)
+- 사업자 주소 (`users.business_address`)
+- 서명 이미지 데이터 (`contract_signatures.signature_data`)
+- 서명자 이메일/이름 (`contract_signatures.signer_email/signer_name`)
+- 계약 당사자 이메일/이름 (`contracts.first_party_email/second_party_email`)
+
+### 환경 설정
+```bash
+# .env 파일에 추가
+ENCRYPTION_ENABLED=true
+ENCRYPTION_SECRET_KEY=$(openssl rand -base64 32)
+```
+
+### ⚠️ 주의사항
+- Secret Key는 절대 Git에 커밋하지 마세요!
+- 프로덕션 환경에서는 반드시 고유한 키를 생성하세요!
+- 키를 분실하면 데이터 복구 불가능합니다!
+
 ## 🗄️ 데이터베이스
 
 ### 로컬 개발 (Docker)

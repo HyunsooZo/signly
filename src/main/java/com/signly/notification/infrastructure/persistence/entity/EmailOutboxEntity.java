@@ -1,5 +1,6 @@
 package com.signly.notification.infrastructure.persistence.entity;
 
+import com.signly.common.encryption.StringEncryptionConverter;
 import com.signly.notification.domain.model.EmailOutboxStatus;
 import com.signly.notification.domain.model.EmailTemplate;
 import jakarta.persistence.*;
@@ -38,10 +39,12 @@ public class EmailOutboxEntity {
 
     @Lob
     @Column(name = "template_variables", nullable = false, columnDefinition = "LONGTEXT")
+    @Convert(converter = StringEncryptionConverter.class)
     private String templateVariables;
 
     @Lob
     @Column(name = "attachments", columnDefinition = "LONGTEXT")
+    @Convert(converter = StringEncryptionConverter.class)
     private String attachments;
 
     @Enumerated(EnumType.STRING)

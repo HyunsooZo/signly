@@ -1,5 +1,6 @@
 package com.signly.user.infrastructure.persistence.entity;
 
+import com.signly.common.encryption.StringEncryptionConverter;
 import com.signly.user.domain.model.UserStatus;
 import com.signly.user.domain.model.UserType;
 import jakarta.persistence.*;
@@ -32,16 +33,20 @@ public class UserEntity {
     @Column(name = "password", length = 255, nullable = false)
     private String password;
 
+    @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "name", length = 100, nullable = false)
     private String name;
 
+    @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "company_name", length = 200)
     private String companyName;
 
-    @Column(name = "business_phone", length = 20)
+    @Convert(converter = StringEncryptionConverter.class)
+    @Column(name = "business_phone", length = 500)
     private String businessPhone;
 
-    @Column(name = "business_address", length = 500)
+    @Convert(converter = StringEncryptionConverter.class)
+    @Column(name = "business_address", length = 1000)
     private String businessAddress;
 
     @Enumerated(EnumType.STRING)
