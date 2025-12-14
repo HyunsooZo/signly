@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Converter
-@Component
 @RequiredArgsConstructor
 public class StringEncryptionConverter implements AttributeConverter<String, String> {
     
