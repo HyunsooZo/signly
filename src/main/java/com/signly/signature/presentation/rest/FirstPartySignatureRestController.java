@@ -1,14 +1,16 @@
 package com.signly.signature.presentation.rest;
 
 import com.signly.common.exception.ValidationException;
+import com.signly.common.security.SecurityUser;
 import com.signly.signature.application.FirstPartySignatureService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,8 +24,26 @@ public class FirstPartySignatureRestController {
     private final FirstPartySignatureService firstPartySignatureService;
 
     @GetMapping("/me")
-    public ResponseEntity<MySignatureResponse> getMySignature(@RequestHeader("X-User-Id") String userId) {
+    public ResponseEntity<MySignatureResponse> getMySignature(
+            @AuthenticationPrincipal SecurityUser securityUser,
+            HttpServletRequest request
+    ) {
         try {
+            String userId = null;
+            if (securityUser != null) {
+                userId = securityUser.getUserId();
+            }
+            if (userId == null && request != null) {
+                Object userIdAttr = request.getAttribute("userId");
+                if (userIdAttr instanceof String id && !id.isBlank()) {
+                    userId = id;
+                }
+            }
+
+            if (userId == null || userId.isBlank()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
             var metadata = firstPartySignatureService.getSignature(userId);
             String dataUrl = firstPartySignatureService.getSignatureDataUrl(userId);
             MySignatureResponse response = new MySignatureResponse(dataUrl, metadata.updatedAt());

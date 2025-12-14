@@ -1971,8 +1971,7 @@ class ContractForm {
             const response = await fetch('/api/first-party-signature/me', {
                 method: 'GET',
                 headers: {
-                    'Accept': 'application/json',
-                    'X-User-Id': this.currentUserId
+                    'Accept': 'application/json'
                 }
             });
 

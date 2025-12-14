@@ -356,8 +356,7 @@
             fetch('/api/first-party-signature/me', {
                 method: 'GET',
                 headers: {
-                    'Accept': 'application/json',
-                    'X-User-Id': userInfo.userId
+                    'Accept': 'application/json'
                 }
             }).then(response => {
                 if (response.status === 204) {
