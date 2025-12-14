@@ -98,7 +98,14 @@ jobs:
             MYSQL_USER=${{ secrets.MYSQL_USER }}
             MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
 
+            # Database Connection URL
+            DB_URL=${{ secrets.DB_URL }}
+            DB_USERNAME=${{ secrets.MYSQL_USER }}
+            DB_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+
             # Redis 설정
+            REDIS_HOST=signly-redis-prod
+            REDIS_PORT=6379
             REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
 
             # JWT 설정
