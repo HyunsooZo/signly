@@ -35,7 +35,7 @@ public class SigningWebController {
 
             // 계약서 상태가 SIGNED 또는 COMPLETED인 경우 완료 페이지로 리다이렉트
             if (contract.getStatus().name().equals("SIGNED") || contract.getStatus().name().equals("COMPLETED")) {
-                logger.info("이미 서명 완료된 계약서, 완료 페이지로 이동: token={}", token);
+                logger.debug("이미 서명 완료된 계약서, 완료 페이지로 이동: token={}", token);
                 return "redirect:/sign/" + token + "/complete";
             }
 
@@ -115,7 +115,7 @@ public class SigningWebController {
             HttpServletRequest request
     ) {
         try {
-            logger.info("서명 처리 요청: token={}, signerEmail={}", token, signerEmail);
+            logger.debug("서명 처리 요청: token={}, signerEmail={}", token, signerEmail);
 
             String ipAddress = getClientIpAddress(request);
             String userAgent = request.getHeader("User-Agent");

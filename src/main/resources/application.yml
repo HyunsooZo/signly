@@ -62,11 +62,6 @@ app:
   version: 1.0.0
   description: 전자계약 서비스 API
 
-  jwt:
-    secret: ${JWT_SECRET:mySecretKeyForJWT123456789012345678901234567890}
-    access-token-validity-in-ms: 3600000      # 1시간
-    refresh-token-validity-in-ms: 2592000000  # 30일
-
   file:
     upload-dir: ${UPLOAD_DIR:./uploads}
     max-size: ${MAX_FILE_SIZE_BYTES:10485760} # 10MB

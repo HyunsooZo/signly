@@ -63,7 +63,7 @@ spring:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:mySecretKeyForJWTSignatureServiceSecureKey123456789012345678901234567890SignlyESignatureService}
+    secret: ${JWT_SECRET:mySecretKeyForJWT123456789012345678901234567890}
     access-token-validity-in-ms: ${ACCESS_TOKEN_VALIDITY:3600000} # 1시간
     refresh-token-validity-in-ms: ${REFRESH_TOKEN_VALIDITY:2592000000} # 30일
 

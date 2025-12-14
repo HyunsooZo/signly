@@ -65,8 +65,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         // 사용자 회원가입/로그인은 공개 허용
                         .requestMatchers("/api/users/register", "/api/users/login", "/api/users/check-email").permitAll()
-                        // 템플릿 API는 임시로 공개 허용 (개발/테스트용)
-                        .requestMatchers("/api/templates/**").permitAll()
+                        // 프리셋 템플릿 API는 공개 허용
+                        .requestMatchers("/api/templates/presets", "/api/templates/preset/**").permitAll()
                         // 프리셋 템플릿은 공개 허용
                         .requestMatchers("/templates/presets/**").permitAll()
                         // 서명 API는 공개 허용 (토큰 검증은 별도 로직에서)

@@ -6,10 +6,13 @@ import com.signly.template.application.preset.TemplatePresetService;
 import com.signly.template.domain.model.TemplateStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -38,10 +41,15 @@ public class TemplateRestController {
     @Operation(summary = "템플릿 목록 조회", description = "사용자의 템플릿 목록을 조회합니다 (계약서 생성 시 템플릿 선택용)")
     @GetMapping
     public ResponseEntity<Page<TemplateResponse>> getTemplates(
-            @Parameter(description = "사용자 ID", required = true) @RequestHeader("X-User-Id") String userId,
             @Parameter(description = "템플릿 상태") @RequestParam(required = false) TemplateStatus status,
-            @PageableDefault(size = 20) Pageable pageable
+            @PageableDefault(size = 20) Pageable pageable,
+            HttpServletRequest request
     ) {
+        // 인증된 사용자 ID 추출
+        String userId = extractUserIdFromRequest(request);
+        if (userId == null) {
+            return ResponseEntity.badRequest().build();
+        }
 
         Page<TemplateResponse> response = status != null ?
                 templateService.getTemplatesByOwnerAndStatus(userId, status, pageable) :
@@ -78,5 +86,21 @@ public class TemplateRestController {
                     return ResponseEntity.ok(response);
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * 요청에서 인증된 사용자 ID 추출
+     */
+    private String extractUserIdFromRequest(HttpServletRequest request) {
+        // Spring Security Context에서 인증 정보 확인
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            // JWT 필터에서 설정한 userId 속성 확인
+            Object userId = request.getAttribute("userId");
+            if (userId instanceof String) {
+                return (String) userId;
+            }
+        }
+        return null;
     }
 }

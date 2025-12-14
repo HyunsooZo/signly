@@ -1,16 +1,24 @@
 package com.signly.contract.application.support;
 
-import java.util.regex.Pattern;
+import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 
+@Slf4j
 public final class ContractHtmlSanitizer {
 
-    private static final Pattern DOCTYPE_PATTERN = Pattern.compile("(?is)<!DOCTYPE[^>]*>");
-    private static final Pattern META_PATTERN = Pattern.compile("(?is)<meta[^>]*>");
-    private static final Pattern TITLE_PATTERN = Pattern.compile("(?is)<title[^>]*>.*?</title>");
-    private static final Pattern HTML_TAG_PATTERN = Pattern.compile("(?is)</?html[^>]*>");
-    private static final Pattern HEAD_TAG_PATTERN = Pattern.compile("(?is)</?head[^>]*>");
-    private static final Pattern BODY_TAG_PATTERN = Pattern.compile("(?is)</?body[^>]*>");
-    private static final Pattern SCRIPT_PATTERN = Pattern.compile("(?is)<script[^>]*>.*?</script>");
+    private static final Safelist CONTRACT_HTML_WHITELIST = Safelist.relaxed()
+            .removeTags("script", "iframe", "object", "embed", "form", "input", "button")
+            .removeAttributes("a", "href", "onclick", "onload", "onerror")
+            .removeAttributes("img", "src", "onerror", "onload", "onclick")
+            .removeAttributes("*", "onclick", "onload", "onerror", "onmouseover", "onmouseout", 
+                           "onfocus", "onblur", "onchange", "onsubmit", "onreset", "onkeydown", 
+                           "onkeyup", "onkeypress", "onmousedown", "onmouseup", "onmousemove", 
+                           "onmouseenter", "onmouseleave", "ondblclick", "oncontextmenu")
+            .addAttributes("a", "href")
+            .addAttributes("img", "src", "alt", "width", "height")
+            .addProtocols("a", "href", "http", "https", "mailto")
+            .addProtocols("img", "src", "http", "https", "data");
 
     private ContractHtmlSanitizer() {
     }
@@ -20,18 +28,34 @@ public final class ContractHtmlSanitizer {
             return "";
         }
 
-        String sanitized = html
-                .replace("\uFEFF", "")
-                .trim();
-
-        sanitized = DOCTYPE_PATTERN.matcher(sanitized).replaceAll("");
-        sanitized = META_PATTERN.matcher(sanitized).replaceAll("");
-        sanitized = TITLE_PATTERN.matcher(sanitized).replaceAll("");
-        sanitized = SCRIPT_PATTERN.matcher(sanitized).replaceAll("");
-        sanitized = HTML_TAG_PATTERN.matcher(sanitized).replaceAll("");
-        sanitized = HEAD_TAG_PATTERN.matcher(sanitized).replaceAll("");
-        sanitized = BODY_TAG_PATTERN.matcher(sanitized).replaceAll("");
-
-        return sanitized.trim();
+        try {
+            String cleaned = html.replace("\uFEFF", "").trim();
+            
+            String sanitized = Jsoup.clean(cleaned, CONTRACT_HTML_WHITELIST);
+            
+            if (!sanitized.equals(cleaned)) {
+                log.debug("HTML content sanitized for security reasons");
+            }
+            
+            return sanitized.trim();
+            
+        } catch (Exception e) {
+            log.error("Failed to sanitize HTML content", e);
+            return "";
+        }
+    }
+    
+    public static boolean isSafe(String html) {
+        if (html == null) {
+            return true;
+        }
+        
+        try {
+            String sanitized = sanitize(html);
+            return sanitized.equals(html.replace("\uFEFF", "").trim());
+        } catch (Exception e) {
+            log.error("Failed to check HTML safety", e);
+            return false;
+        }
     }
 }
