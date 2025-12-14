@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   # Nginx 리버스 프록시
   nginx:
@@ -87,57 +89,10 @@ services:
         condition: service_healthy
     expose:
       - "8080"
-    environment:
-      # Spring Profile
-      SPRING_PROFILES_ACTIVE: prod
-      
-      # Database
-      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
-      DB_USERNAME: ${MYSQL_USER}
-      DB_PASSWORD: ${MYSQL_PASSWORD}
-      
-      # Redis
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
-      
-      # JWT
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_ACCESS_TOKEN_EXPIRATION: 3600000
-      JWT_REFRESH_TOKEN_EXPIRATION: 604800000
-      
-      # File Upload
-      UPLOAD_DIR: /app/uploads
-      MAX_FILE_SIZE: 10MB
-      MAX_REQUEST_SIZE: 10MB
-      
-      # Mail
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
-      EMAIL_FROM: ${EMAIL_FROM:-noreply@signly.kr}
-
-      # OAuth2 Google 설정
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      APP_BASE_URL: ${APP_BASE_URL:-https://signly.kr}
-
-      # CORS
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8080}
-
-      # Discord
-      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
-
-      # Server (behind Nginx proxy)
-      SERVER_FORWARD_HEADERS_STRATEGY: NATIVE
-      SERVER_USE_FORWARD_HEADERS: true
-      
-      # Logging
-      LOG_LEVEL: INFO
-      
-      # JVM Options
-      JAVA_OPTS: -Xms512m -Xmx1024m -XX:+UseG1GC
+    # [핵심 수정] environment 섹션을 지우고 .env 파일을 통째로 로드
+    # 이렇게 하면 cd.yml에서 생성한 암호화 키 등 모든 변수가 자동으로 주입됨
+    env_file:
+      - .env
     volumes:
       - uploads_data:/app/uploads
       - logs_data:/app/logs
