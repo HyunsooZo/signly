@@ -13,13 +13,23 @@ import java.util.List;
 
 public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, String> {
 
-    @Query("SELECT c FROM ContractJpaEntity c WHERE c.creatorId = :creatorId ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC")
+    @Query("""
+            SELECT c 
+            FROM ContractJpaEntity c 
+            WHERE c.creatorId = :creatorId 
+            ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC
+            """)
     Page<ContractJpaEntity> findByCreatorId(
             @Param("creatorId") String creatorId,
             Pageable pageable
     );
 
-    @Query("SELECT c FROM ContractJpaEntity c WHERE c.creatorId = :creatorId AND c.status = :status ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC")
+    @Query("""
+            SELECT c 
+            FROM ContractJpaEntity c 
+            WHERE c.creatorId = :creatorId AND c.status = :status 
+            ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC
+            """)
     Page<ContractJpaEntity> findByCreatorIdAndStatus(
             @Param("creatorId") String creatorId,
             @Param("status") ContractStatus status,
@@ -27,13 +37,23 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
     );
 
     // 이메일 해시로 계약 조회 (Blind Index 사용)
-    @Query("SELECT c FROM ContractJpaEntity c WHERE c.firstPartyEmailHash = :emailHash OR c.secondPartyEmailHash = :emailHash ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC")
+    @Query("""
+            SELECT c 
+            FROM ContractJpaEntity c 
+            WHERE c.firstPartyEmailHash = :emailHash OR c.secondPartyEmailHash = :emailHash 
+            ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC
+            """)
     Page<ContractJpaEntity> findByPartyEmailHash(
             @Param("emailHash") String emailHash,
             Pageable pageable
     );
 
-    @Query("SELECT c FROM ContractJpaEntity c WHERE (c.firstPartyEmailHash = :emailHash OR c.secondPartyEmailHash = :emailHash) AND c.status = :status ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC")
+    @Query("""
+            SELECT c 
+            FROM ContractJpaEntity c 
+            WHERE (c.firstPartyEmailHash = :emailHash OR c.secondPartyEmailHash = :emailHash) AND c.status = :status 
+            ORDER BY CASE WHEN c.presetType = 'LABOR_STANDARD' THEN 0 ELSE 1 END, c.createdAt DESC
+            """)
     Page<ContractJpaEntity> findByPartyEmailHashAndStatus(
             @Param("emailHash") String emailHash,
             @Param("status") ContractStatus status,
@@ -42,7 +62,12 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
 
     List<ContractJpaEntity> findByTemplateId(String templateId);
 
-    @Query("SELECT c FROM ContractJpaEntity c WHERE c.status IN (:statuses) AND c.expiresAt < :currentTime")
+    @Query("""
+            SELECT c 
+            FROM ContractJpaEntity c 
+            LEFT JOIN FETCH c.signatures
+            WHERE c.status IN (:statuses) AND c.expiresAt < :currentTime
+            """)
     List<ContractJpaEntity> findExpiredContracts(
             @Param("statuses") List<ContractStatus> statuses,
             @Param("currentTime") LocalDateTime currentTime
@@ -65,6 +90,10 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
 
     long countByTemplateId(String templateId);
 
-    @Query("SELECT c FROM ContractJpaEntity c WHERE c.signToken = :signToken")
+    @Query("""
+            SELECT c 
+            FROM ContractJpaEntity c 
+            LEFT JOIN FETCH c.signatures
+            WHERE c.signToken = :signToken""")
     ContractJpaEntity findBySignToken(@Param("signToken") String signToken);
 }
