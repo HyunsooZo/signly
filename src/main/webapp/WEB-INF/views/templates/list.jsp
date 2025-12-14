@@ -308,7 +308,11 @@
                             const previewContent = decoded ? decoded : '<p class="text-muted">템플릿 내용이 비어있습니다.</p>';
 
                             document.getElementById('previewModalTitle').textContent = title;
-                            document.getElementById('previewContent').innerHTML = previewContent;
+                            const previewContainer = document.getElementById('previewContent');
+                            const template = document.createElement('template');
+                            template.innerHTML = previewContent;
+                            previewContainer.innerHTML = '';
+                            previewContainer.appendChild(template.content);
                             new bootstrap.Modal(document.getElementById('previewModal')).show();
                         }
 
