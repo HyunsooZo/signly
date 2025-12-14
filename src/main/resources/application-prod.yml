@@ -87,7 +87,7 @@ app:
     refresh-token-validity-in-ms: ${REFRESH_TOKEN_VALIDITY:2592000000} # 30일
 
   encryption:
-    enabled: ${ENCRYPTION_ENABLED}
+    enabled: ${ENCRYPTION_ENABLED:true}
     secret-key: ${ENCRYPTION_SECRET_KEY}
     algorithm: AES/GCM/NoPadding
     iv-length: 12
