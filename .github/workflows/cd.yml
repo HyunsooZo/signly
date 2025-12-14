@@ -107,6 +107,7 @@ jobs:
             # Database Encryption 설정
             ENCRYPTION_ENABLED=${{ secrets.ENCRYPTION_ENABLED }}
             ENCRYPTION_SECRET_KEY=${{ secrets.ENCRYPTION_SECRET_KEY }}
+            ENCRYPTION_SALT=${{ secrets.ENCRYPTION_SALT }}
 
             # Docker 이미지
             APP_IMAGE=${{ secrets.DOCKER_USERNAME }}/signly-app:master-${{ github.sha }}
