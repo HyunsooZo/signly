@@ -5,24 +5,29 @@ import com.signly.user.domain.model.UserType;
 import com.signly.user.infrastructure.persistence.entity.UserEntity;
 import com.signly.user.infrastructure.persistence.repository.UserJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-@Import({EncryptionConfig.class, EncryptionProperties.class})
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(EncryptionConfig.class)
 @TestPropertySource(properties = {
     "app.encryption.enabled=true",
     "app.encryption.secret-key=" + "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=" // Base64 of "12345678901234567890123456789012"
 })
+@DisplayName("암호화 통합 테스트")
 class EncryptionIntegrationTest {
 
     @Autowired
@@ -38,20 +43,32 @@ class EncryptionIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        testUser = new UserEntity();
-        testUser.setUserId("01H8X9Y2Z3W4V5U6T7R8S9Q0W1E");
-        testUser.setEmail("test@example.com");
-        testUser.setPassword("encodedPassword");
-        testUser.setName("Test User");
-        testUser.setCompanyName("Test Company");
-        testUser.setBusinessPhone("010-1234-5678");
-        testUser.setBusinessAddress("서울시 강남구 테헤란로 123");
-        testUser.setUserType(UserType.OWNER);
-        testUser.setStatus(UserStatus.ACTIVE);
-        testUser.setEmailVerified(true);
+        // 이전 테스트 데이터 정리
+        userRepository.deleteAll();
+        entityManager.flush();
+        entityManager.clear();
+
+        LocalDateTime now = LocalDateTime.now();
+        testUser = new UserEntity(
+            "01H8X9Y2Z3W4V5U6T7R8S9Q0W1",
+            "test@example.com",
+            "encodedPassword",
+            "Test User",
+            "Test Company",
+            "010-1234-5678",
+            "서울시 강남구 테헤란로 123",
+            UserType.OWNER,
+            UserStatus.ACTIVE,
+            true,
+            null,
+            null,
+            now,
+            now
+        );
     }
 
     @Test
+    @DisplayName("암호화된 필드를 포함한 사용자 엔티티를 저장하고 로드할 수 있다")
     void userEntity_save_and_load_encrypted_fields() {
         // When
         UserEntity savedUser = userRepository.save(testUser);
@@ -70,6 +87,7 @@ class EncryptionIntegrationTest {
     }
 
     @Test
+    @DisplayName("데이터베이스에는 암호화된 값이 저장되고 평문은 저장되지 않는다")
     void database_contains_encrypted_not_plaintext() {
         // When
         UserEntity savedUser = userRepository.save(testUser);
@@ -103,10 +121,11 @@ class EncryptionIntegrationTest {
     }
 
     @Test
+    @DisplayName("동일한 데이터를 가진 여러 사용자는 서로 다른 암호문을 갖는다")
     void multiple_users_same_data_different_encrypted_values() {
         // Given
-        UserEntity user1 = createTestUser("01H8X9Y2Z3W4V5U6T7R8S9Q0W1A");
-        UserEntity user2 = createTestUser("01H8X9Y2Z3W4V5U6T7R8S9Q0W1B");
+        UserEntity user1 = createTestUser("01H8X9Y2Z3W4V5U6T7R8S9Q0WA");
+        UserEntity user2 = createTestUser("01H8X9Y2Z3W4V5U6T7R8S9Q0WB");
 
         user1.setBusinessPhone("010-1234-5678");
         user1.setBusinessAddress("서울시 강남구 테헤란로 123");
@@ -152,6 +171,7 @@ class EncryptionIntegrationTest {
     }
 
     @Test
+    @DisplayName("null 값도 정상적으로 처리된다")
     void null_values_handled_correctly() {
         // Given
         testUser.setBusinessPhone(null);
@@ -172,6 +192,7 @@ class EncryptionIntegrationTest {
     }
 
     @Test
+    @DisplayName("빈 문자열도 정상적으로 처리된다")
     void empty_values_handled_correctly() {
         // Given
         testUser.setBusinessPhone("");
@@ -192,6 +213,7 @@ class EncryptionIntegrationTest {
     }
 
     @Test
+    @DisplayName("암호화된 필드를 업데이트할 수 있다")
     void update_encrypted_field() {
         // When
         UserEntity savedUser = userRepository.save(testUser);
@@ -220,15 +242,22 @@ class EncryptionIntegrationTest {
     }
 
     private UserEntity createTestUser(String userId) {
-        UserEntity user = new UserEntity();
-        user.setUserId(userId);
-        user.setEmail("test" + userId + "@example.com");
-        user.setPassword("encodedPassword");
-        user.setName("Test User");
-        user.setCompanyName("Test Company");
-        user.setUserType(UserType.OWNER);
-        user.setStatus(UserStatus.ACTIVE);
-        user.setEmailVerified(true);
-        return user;
+        LocalDateTime now = LocalDateTime.now();
+        return new UserEntity(
+            userId,
+            "test" + userId + "@example.com",
+            "encodedPassword",
+            "Test User",
+            "Test Company",
+            null,
+            null,
+            UserType.OWNER,
+            UserStatus.ACTIVE,
+            true,
+            null,
+            null,
+            now,
+            now
+        );
     }
 }
