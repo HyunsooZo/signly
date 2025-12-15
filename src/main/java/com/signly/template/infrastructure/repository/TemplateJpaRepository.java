@@ -13,20 +13,35 @@ import java.util.Optional;
 
 public interface TemplateJpaRepository extends JpaRepository<TemplateEntity, String> {
 
-    @Query("SELECT t FROM TemplateEntity t WHERE t.ownerId = :ownerId ORDER BY CASE WHEN t.isPreset = true THEN 0 ELSE 1 END, t.createdAt DESC")
+    @Query("""
+            SELECT t 
+             FROM TemplateEntity t 
+             WHERE t.ownerId = :ownerId 
+             ORDER BY CASE WHEN t.isPreset = true THEN 0 ELSE 1 END, t.createdAt DESC
+            """)
     Page<TemplateEntity> findByOwnerId(
             @Param("ownerId") String ownerId,
             Pageable pageable
     );
 
-    @Query("SELECT t FROM TemplateEntity t WHERE t.ownerId = :ownerId AND t.status = :status ORDER BY CASE WHEN t.isPreset = true THEN 0 ELSE 1 END, t.createdAt DESC")
+    @Query("""
+           SELECT t 
+            FROM TemplateEntity t 
+            WHERE t.ownerId = :ownerId AND t.status = :status 
+           ORDER BY CASE WHEN t.isPreset = true THEN 0 ELSE 1 END, t.createdAt DESC
+            """)
     Page<TemplateEntity> findByOwnerIdAndStatus(
             @Param("ownerId") String ownerId,
             @Param("status") TemplateStatus status,
             Pageable pageable
     );
 
-    @Query("SELECT t FROM TemplateEntity t WHERE t.ownerId = :ownerId AND t.status = 'ACTIVE' ORDER BY CASE WHEN t.isPreset = true THEN 0 ELSE 1 END, t.createdAt DESC")
+    @Query("""
+            SELECT t 
+            FROM TemplateEntity t 
+            WHERE t.ownerId = :ownerId AND t.status = 'ACTIVE' 
+            ORDER BY CASE WHEN t.isPreset = true THEN 0 ELSE 1 END, t.createdAt DESC
+            """)
     List<TemplateEntity> findActiveTemplatesByOwnerId(@Param("ownerId") String ownerId);
 
     boolean existsByOwnerIdAndTitle(
@@ -36,8 +51,17 @@ public interface TemplateJpaRepository extends JpaRepository<TemplateEntity, Str
 
     long countByOwnerId(String ownerId);
 
+    long countByOwnerIdAndStatus(
+            String ownerId,
+            TemplateStatus status
+    );
+
     // 프리셋 관련 메서드
-    @Query("SELECT t FROM TemplateEntity t WHERE t.isPreset = true AND t.status = 'ACTIVE'")
+    @Query("""
+           SELECT t 
+            FROM TemplateEntity t 
+            WHERE t.isPreset = true AND t.status = 'ACTIVE'
+            """)
     List<TemplateEntity> findAllActivePresets();
 
     Optional<TemplateEntity> findByIsPresetTrueAndPresetId(String presetId);

@@ -139,6 +139,11 @@ public class ContractRepositoryImpl implements ContractRepository {
     }
 
     @Override
+    public long countByCreatorId(UserId creatorId) {
+        return jpaRepository.countByCreatorId(creatorId.value());
+    }
+
+    @Override
     public long countByCreatorIdAndStatus(
             UserId creatorId,
             ContractStatus status

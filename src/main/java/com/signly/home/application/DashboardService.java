@@ -3,14 +3,16 @@ package com.signly.home.application;
 import com.signly.contract.application.ContractService;
 import com.signly.contract.application.dto.ContractResponse;
 import com.signly.contract.domain.model.ContractStatus;
+import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.home.application.dto.DashboardResponse;
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.dto.TemplateResponse;
 import com.signly.template.domain.model.TemplateStatus;
+import com.signly.template.domain.repository.TemplateRepository;
+import com.signly.user.domain.model.UserId;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,8 @@ public class DashboardService {
 
     private final TemplateService templateService;
     private final ContractService contractService;
+    private final TemplateRepository templateRepository;
+    private final ContractRepository contractRepository;
 
     /**
      * 사용자의 대시보드 데이터를 조회합니다
@@ -82,74 +86,49 @@ public class DashboardService {
     }
 
     /**
-     * 템플릿 통계 조회
+     * 템플릿 통계 조회 (최적화: count 쿼리 직접 사용)
      */
     private Map<String, Long> getTemplateStatistics(String userId) {
         var stats = new HashMap<String, Long>();
-        stats.put("total", getTemplateCount(userId, null));
-        stats.put("active", getTemplateCount(userId, TemplateStatus.ACTIVE));
-        stats.put("draft", getTemplateCount(userId, TemplateStatus.DRAFT));
+        var userIdObj = UserId.of(userId);
+
+        try {
+            stats.put("total", templateRepository.countByOwnerId(userIdObj));
+            stats.put("active", templateRepository.countByOwnerIdAndStatus(userIdObj, TemplateStatus.ACTIVE));
+            stats.put("draft", templateRepository.countByOwnerIdAndStatus(userIdObj, TemplateStatus.DRAFT));
+        } catch (Exception e) {
+            logger.warn("템플릿 통계 조회 실패: userId={}", userId, e);
+            stats.put("total", 0L);
+            stats.put("active", 0L);
+            stats.put("draft", 0L);
+        }
+
         return stats;
     }
 
     /**
-     * 계약서 통계 조회
+     * 계약서 통계 조회 (최적화: count 쿼리 직접 사용)
      */
     private Map<String, Long> getContractStatistics(String userId) {
         var stats = new HashMap<String, Long>();
-        stats.put("total", getContractCount(userId, null));
-        stats.put("draft", getContractCount(userId, ContractStatus.DRAFT));
-        stats.put("pending", getContractCount(userId, ContractStatus.PENDING));
-        stats.put("signed", getContractCount(userId, ContractStatus.SIGNED));
-        stats.put("completed", getContractCount(userId, ContractStatus.SIGNED));
+        var userIdObj = UserId.of(userId);
+
+        try {
+            stats.put("total", contractRepository.countByCreatorId(userIdObj));
+            stats.put("draft", contractRepository.countByCreatorIdAndStatus(userIdObj, ContractStatus.DRAFT));
+            stats.put("pending", contractRepository.countByCreatorIdAndStatus(userIdObj, ContractStatus.PENDING));
+            stats.put("signed", contractRepository.countByCreatorIdAndStatus(userIdObj, ContractStatus.SIGNED));
+            stats.put("completed", contractRepository.countByCreatorIdAndStatus(userIdObj, ContractStatus.SIGNED));
+        } catch (Exception e) {
+            logger.warn("계약서 통계 조회 실패: userId={}", userId, e);
+            stats.put("total", 0L);
+            stats.put("draft", 0L);
+            stats.put("pending", 0L);
+            stats.put("signed", 0L);
+            stats.put("completed", 0L);
+        }
+
         return stats;
     }
 
-    /**
-     * 템플릿 개수 조회 (상태별 또는 전체)
-     */
-    private long getTemplateCount(
-            String userId,
-            TemplateStatus status
-    ) {
-        try {
-            var pageRequest = PageRequest.of(0, 1);
-            Page<TemplateResponse> templates;
-
-            if (status != null) {
-                templates = templateService.getTemplatesByOwnerAndStatus(userId, status, pageRequest);
-            } else {
-                templates = templateService.getTemplatesByOwner(userId, pageRequest);
-            }
-
-            return templates.getTotalElements();
-        } catch (Exception e) {
-            logger.warn("템플릿 개수 조회 실패: userId={}, status={}", userId, status, e);
-            return 0;
-        }
-    }
-
-    /**
-     * 계약서 개수 조회 (상태별 또는 전체)
-     */
-    private long getContractCount(
-            String userId,
-            ContractStatus status
-    ) {
-        try {
-            var pageRequest = PageRequest.of(0, 1);
-            Page<ContractResponse> contracts;
-
-            if (status != null) {
-                contracts = contractService.getContractsByCreatorAndStatus(userId, status, pageRequest);
-            } else {
-                contracts = contractService.getContractsByCreator(userId, pageRequest);
-            }
-
-            return contracts.getTotalElements();
-        } catch (Exception e) {
-            logger.warn("계약서 개수 조회 실패: userId={}, status={}", userId, status, e);
-            return 0;
-        }
-    }
 }

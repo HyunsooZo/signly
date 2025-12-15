@@ -58,6 +58,8 @@ public interface ContractRepository {
             String title
     );
 
+    long countByCreatorId(UserId creatorId);
+
     long countByCreatorIdAndStatus(
             UserId creatorId,
             ContractStatus status

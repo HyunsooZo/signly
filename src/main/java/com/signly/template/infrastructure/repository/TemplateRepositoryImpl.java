@@ -1,4 +1,4 @@
-package com.signly.template.infrastructure.repository.impl;
+package com.signly.template.infrastructure.repository;
 
 import com.signly.template.domain.model.ContractTemplate;
 import com.signly.template.domain.model.TemplateId;
@@ -6,7 +6,6 @@ import com.signly.template.domain.model.TemplateStatus;
 import com.signly.template.domain.repository.TemplateRepository;
 import com.signly.template.infrastructure.entity.TemplateEntity;
 import com.signly.template.infrastructure.mapper.TemplateEntityMapper;
-import com.signly.template.infrastructure.repository.TemplateJpaRepository;
 import com.signly.user.domain.model.UserId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -95,5 +94,10 @@ public class TemplateRepositoryImpl implements TemplateRepository {
     @Override
     public long countByOwnerId(UserId ownerId) {
         return templateJpaRepository.countByOwnerId(ownerId.value());
+    }
+
+    @Override
+    public long countByOwnerIdAndStatus(UserId ownerId, TemplateStatus status) {
+        return templateJpaRepository.countByOwnerIdAndStatus(ownerId.value(), status);
     }
 }

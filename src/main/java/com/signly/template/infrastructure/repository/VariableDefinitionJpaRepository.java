@@ -44,12 +44,21 @@ public interface VariableDefinitionJpaRepository extends JpaRepository<TemplateV
     /**
      * 변수명 목록으로 변수 정의들 조회
      */
-    @Query("SELECT v FROM TemplateVariableDefinition v WHERE v.variableName IN :variableNames AND v.isActive = true")
+    @Query("""
+            SELECT v 
+            FROM TemplateVariableDefinition v 
+            WHERE v.variableName IN :variableNames AND v.isActive = true
+            """)
     List<TemplateVariableDefinition> findByVariableNamesAndIsActiveTrue(@Param("variableNames") List<String> variableNames);
 
     /**
      * 표시 순서 범위 내의 변수 정의 조회 (페이지네이션용)
      */
-    @Query("SELECT v FROM TemplateVariableDefinition v WHERE v.isActive = true ORDER BY v.displayOrder")
+    @Query("""
+            SELECT v 
+            FROM TemplateVariableDefinition v 
+            WHERE v.isActive = true 
+            ORDER BY v.displayOrder
+            """)
     List<TemplateVariableDefinition> findActiveVariablesOrderByDisplayOrder();
 }

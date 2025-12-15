@@ -37,4 +37,6 @@ public interface TemplateRepository {
     void delete(ContractTemplate template);
 
     long countByOwnerId(UserId ownerId);
+
+    long countByOwnerIdAndStatus(UserId ownerId, TemplateStatus status);
 }

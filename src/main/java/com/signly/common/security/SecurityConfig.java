@@ -72,7 +72,7 @@ public class SecurityConfig {
                         // 서명 API는 공개 허용 (토큰 검증은 별도 로직에서)
                         .requestMatchers("/api/sign/**").permitAll()
                         // 인증 관련 페이지는 공개 허용
-                        .requestMatchers("/", "/login", "/register", "/forgot-password").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/forgot-password", "/reset-password").permitAll()
                         .requestMatchers("/verify-email", "/email-verified", "/email-verify-error", "/registration-pending", "/resend-verification").permitAll()
                         .requestMatchers("/WEB-INF/views/auth/**").permitAll()
                         // OAuth2 로그인 엔드포인트 허용

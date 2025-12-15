@@ -4,6 +4,7 @@ import com.signly.contract.domain.model.ContractStatus;
 import com.signly.contract.infrastructure.entity.ContractJpaEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +14,7 @@ import java.util.List;
 
 public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, String> {
 
+    @EntityGraph(attributePaths = {"signatures"})
     @Query("""
             SELECT c 
             FROM ContractJpaEntity c 
@@ -24,6 +26,7 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
             Pageable pageable
     );
 
+    @EntityGraph(attributePaths = {"signatures"})
     @Query("""
             SELECT c 
             FROM ContractJpaEntity c 
@@ -37,6 +40,7 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
     );
 
     // 이메일 해시로 계약 조회 (Blind Index 사용)
+    @EntityGraph(attributePaths = {"signatures"})
     @Query("""
             SELECT c 
             FROM ContractJpaEntity c 
@@ -48,6 +52,7 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
             Pageable pageable
     );
 
+    @EntityGraph(attributePaths = {"signatures"})
     @Query("""
             SELECT c 
             FROM ContractJpaEntity c 
@@ -60,6 +65,7 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
             Pageable pageable
     );
 
+    @EntityGraph(attributePaths = {"signatures"})
     List<ContractJpaEntity> findByTemplateId(String templateId);
 
     @Query("""
@@ -82,6 +88,8 @@ public interface ContractJpaRepository extends JpaRepository<ContractJpaEntity, 
             String creatorId,
             String title
     );
+
+    long countByCreatorId(String creatorId);
 
     long countByCreatorIdAndStatus(
             String creatorId,
