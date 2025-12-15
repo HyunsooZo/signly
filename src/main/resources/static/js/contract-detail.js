@@ -30,15 +30,16 @@ class ContractDetail {
     }
 
     determineContentType() {
-        // HTML 내용인지 자동 감지 (meta, div, style 태그 등이 있으면 HTML로 판단)
-        const looksLikeHtml = this.contractRawContent && (
-            this.contractRawContent.includes('<meta') ||
-            this.contractRawContent.includes('<div') ||
-            this.contractRawContent.includes('<style') ||
-            this.contractRawContent.includes('<body')
-        );
+        // HTML 내용인지 자동 감지 (태그가 하나라도 있으면 HTML로 판단)
+        const looksLikeHtml = this.contractRawContent && /<[a-z][\s\S]*>/i.test(this.contractRawContent);
 
         this.isHtmlPreset = (this.presetTypeValue && this.presetTypeValue !== 'NONE') || looksLikeHtml;
+
+        console.log('=== Contract Content Type Detection ===');
+        console.log('presetType:', this.presetTypeValue);
+        console.log('looksLikeHtml:', looksLikeHtml);
+        console.log('isHtmlPreset:', this.isHtmlPreset);
+        console.log('content preview:', this.contractRawContent.substring(0, 200));
     }
 
     renderContent() {
@@ -79,6 +80,20 @@ class ContractDetail {
             return '';
         }
 
+        const processSelector = (selector) => {
+            selector = selector.trim();
+            if (selector === 'body' || selector === 'html') {
+                return scopeSelector;
+            }
+            if (selector.startsWith('body ')) {
+                return scopeSelector + ' ' + selector.substring(5);
+            }
+            if (selector.startsWith('html ')) {
+                return scopeSelector + ' ' + selector.substring(5);
+            }
+            return scopeSelector + ' ' + selector;
+        };
+
         let tempStyle;
         try {
             tempStyle = document.createElement('style');
@@ -99,7 +114,7 @@ class ContractDetail {
                     if (CSSRuleRef.STYLE_RULE !== undefined && ruleType === CSSRuleRef.STYLE_RULE) {
                         const scopedSelectors = rule.selectorText
                             .split(',')
-                            .map(selector => scopeSelector + ' ' + selector.trim())
+                            .map(selector => processSelector(selector))
                             .join(', ');
                         output.push(scopedSelectors + ' { ' + rule.style.cssText + ' }');
                     } else if (CSSRuleRef.MEDIA_RULE !== undefined && ruleType === CSSRuleRef.MEDIA_RULE) {
@@ -137,22 +152,41 @@ class ContractDetail {
         }
 
         return cssText.replace(/([^{}]+)\s*\{/g, (match, selector) => {
-            selector = selector.trim();
-            if (selector.startsWith('@') || selector.includes(':root')) {
-                return match;
-            }
-            return scopeSelector + ' ' + selector + ' {';
+            const selectors = selector.split(',').map(s => {
+                s = s.trim();
+                if (s.startsWith('@') || s.includes(':root')) {
+                    return s;
+                }
+                if (s === 'body' || s === 'html') {
+                    return scopeSelector;
+                }
+                if (s.startsWith('body ')) {
+                    return scopeSelector + ' ' + s.substring(5);
+                }
+                if (s.startsWith('html ')) {
+                    return scopeSelector + ' ' + s.substring(5);
+                }
+                return scopeSelector + ' ' + s;
+            });
+            return selectors.join(', ') + ' {';
         });
     }
 
     renderHtmlContract(htmlContent) {
+        console.log('=== renderHtmlContract called ===');
+        console.log('htmlContent length:', htmlContent.length);
+
         const container = document.getElementById('templateHtmlContainer');
         if (!container) {
+            console.error('Container not found!');
             return;
         }
 
+        console.log('Container found, rendering HTML...');
+
         // preset-document 클래스 추가 (form.js와 동일하게)
         container.className = 'preset-document';
+        container.innerHTML = ''; // Clear existing content
 
         const tempWrapper = document.createElement('div');
         tempWrapper.innerHTML = htmlContent;
@@ -166,12 +200,18 @@ class ContractDetail {
             styleEl.parentNode.removeChild(styleEl);
         });
 
-        const scopedStyle = document.createElement('style');
-        scopedStyle.textContent = styles.join('\n');
-        container.appendChild(scopedStyle);
+        if (styles.length > 0) {
+            const scopedStyle = document.createElement('style');
+            scopedStyle.textContent = styles.join('\n');
+            container.appendChild(scopedStyle);
+        }
 
         const bodyContent = tempWrapper.querySelector('body') || tempWrapper;
-        container.innerHTML += bodyContent.innerHTML;
+
+        // Move children to container to preserve event listeners and structure
+        while (bodyContent.firstChild) {
+            container.appendChild(bodyContent.firstChild);
+        }
 
         const defaults = this.getPreviewDefaults();
         const placeholders = {
@@ -184,18 +224,24 @@ class ContractDetail {
             'SECOND_PARTY_ORG': defaults.secondPartyOrg
         };
 
+        // Replace placeholders in text nodes only to avoid breaking HTML structure
+        // But for simplicity and performance in this specific case, innerHTML replacement is acceptable 
+        // if we do it carefully. However, since we just appended children, we are working with DOM.
+        // Let's use a tree walker or just simple innerHTML replacement on the container *after* appending.
+        // Note: innerHTML replacement destroys event listeners, but for a contract view this is usually fine.
+
         let finalHtml = container.innerHTML;
         Object.entries(placeholders).forEach(([key, value]) => {
             const regex = new RegExp(`\\{${key}\\}`, 'g');
             finalHtml = finalHtml.replace(regex, value);
         });
 
-        // 서명 플레이스홀더 처리 (문자열로 표시되는 것 방지)
-        // [EMPLOYER_SIGNATURE_IMAGE]와 [EMPLOYEE_SIGNATURE_IMAGE]를 적절히 처리
+        // 서명 플레이스홀더 처리
         finalHtml = finalHtml.replace(/\[EMPLOYER_SIGNATURE_IMAGE\]/g, '<span class="text-muted small">(갑 서명 위치)</span>');
         finalHtml = finalHtml.replace(/\[EMPLOYEE_SIGNATURE_IMAGE\]/g, '<span class="text-muted small">(을 서명 위치)</span>');
 
         container.innerHTML = finalHtml;
+        console.log('HTML rendering complete');
     }
 
     async submitFormWithJwt(form) {
@@ -207,7 +253,7 @@ class ContractDetail {
             if (window.jwtClient) {
                 // JWT 클라이언트로 폼 제출
                 const response = await window.jwtClient.submitFormWithAuth(form);
-                
+
                 if (response.ok) {
                     // 성공 시 페이지 리로드 또는 리다이렉트
                     window.location.reload();
@@ -319,31 +365,31 @@ class ContractDetail {
 }
 
 // Global functions for onclick handlers
-window.downloadPdf = function() {
+window.downloadPdf = function () {
     if (window.contractDetail) {
         window.contractDetail.downloadPdf();
     }
 };
 
-window.resendEmail = function() {
+window.resendEmail = function () {
     if (window.contractDetail) {
         window.contractDetail.resendEmail();
     }
 };
 
-window.cancelContract = function() {
+window.cancelContract = function () {
     if (window.contractDetail) {
         window.contractDetail.cancelContract();
     }
 };
 
-window.deleteContract = function() {
+window.deleteContract = function () {
     if (window.contractDetail) {
         window.contractDetail.deleteContract();
     }
 };
 
-window.previewContract = function() {
+window.previewContract = function () {
     if (window.contractDetail) {
         window.contractDetail.previewContract();
     }

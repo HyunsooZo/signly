@@ -32,10 +32,8 @@ public class HtmlSectionRenderer {
      * 미리보기용 섹션 렌더링 (밑줄 포함)
      */
     private String renderForPreview(TemplateSection section) {
-        // 사용자 입력을 HTML로 해석하지 않도록 이스케이프 후 밑줄 변환
-        String escaped = TemplateVariableUtils.escapeHtml(section.getContent());
-        escaped = escaped.replace("\n", "<br>");
-        String content = TemplateVariableUtils.convertVariablesToUnderlines(escaped, true);
+        String content = TemplateVariableUtils.convertVariablesToUnderlines(
+                section.getContent(), true);
         return "<section class=\"template-section\" data-type=\"" +
                 section.getType() + "\"><p>" + content + "</p></section>";
     }

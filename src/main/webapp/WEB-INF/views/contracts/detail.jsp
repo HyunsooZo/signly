@@ -382,7 +382,7 @@
      data-preset-type="<c:out value='${contract.presetType}'/>">
 </div>
 
-<textarea id="contractContentHtml" hidden>${fn:escapeXml(contract.content)}</textarea>
+<textarea id="contractContentHtml" hidden><c:out value="${contract.content}" escapeXml="false"/></textarea>
 
 <!-- External JavaScript -->
 <script src="/js/contract-detail.js"></script>
