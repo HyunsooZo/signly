@@ -90,7 +90,14 @@ public class ContractSigningCoordinator {
     ) {
         var contract = findContract(contractId);
 
-        var request = new ContractSigningService.SigningRequest(signerEmail, command.signerName(), command.signatureData(), command.ipAddress());
+        var request = new ContractSigningService.SigningRequest(
+                signerEmail, 
+                command.signerName(), 
+                command.signatureData(), 
+                command.ipAddress(),
+                command.deviceInfo(),
+                null  // signaturePath는 이 메서드에서 사용하지 않음
+        );
 
         var result = contractSigningService.processSigning(contract, request);
         var savedContract = contractRepository.save(contract);
@@ -116,7 +123,8 @@ public class ContractSigningCoordinator {
             String signerEmail,
             String signerName,
             String signatureData,
-            String ipAddress
+            String ipAddress,
+            String deviceInfo
     ) {
         var contract = contractRepository.findBySignToken(com.signly.contract.domain.model.SignToken.of(token))
                 .orElseThrow(() -> new NotFoundException("유효하지 않은 서명 링크입니다"));
@@ -130,12 +138,25 @@ public class ContractSigningCoordinator {
                 signerEmail,
                 signerName,
                 ipAddress,
-                null
+                deviceInfo
         );
         signatureService.createSignature(command);
 
+        // 저장된 서명에서 signaturePath 가져오기
+        var savedSignature = signatureRepository.findByContractIdAndSignerEmail(
+                contractId, 
+                signerEmail
+        ).orElseThrow(() -> new NotFoundException("저장된 서명을 찾을 수 없습니다"));
+
         // 서명 처리 및 상태 업데이트
-        var request = new ContractSigningService.SigningRequest(signerEmail, signerName, signatureData, ipAddress);
+        var request = new ContractSigningService.SigningRequest(
+                signerEmail, 
+                signerName, 
+                signatureData, 
+                ipAddress,
+                deviceInfo,
+                savedSignature.signaturePath()
+        );
 
         var result = contractSigningService.processSigning(contract, request);
         var savedContract = contractRepository.save(contract);

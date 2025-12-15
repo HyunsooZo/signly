@@ -99,9 +99,10 @@ public class ContractService {
             String signerEmail,
             String signerName,
             String signatureData,
-            String ipAddress
+            String ipAddress,
+            String deviceInfo
     ) {
-        Contract contract = signingCoordinator.processSignature(token, signerEmail, signerName, signatureData, ipAddress);
+        Contract contract = signingCoordinator.processSignature(token, signerEmail, signerName, signatureData, ipAddress, deviceInfo);
         return contractDtoMapper.toResponse(contract);
     }
 

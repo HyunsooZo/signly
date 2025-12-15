@@ -151,7 +151,7 @@ class ContractTest {
 
         ContractSigningService signingService = new ContractSigningService();
         ContractSigningService.SigningRequest request = new ContractSigningService.SigningRequest(
-                "first@example.com", "홍길동", "서명데이터", "192.168.1.1");
+                "first@example.com", "홍길동", "서명데이터", "192.168.1.1", "test-device-info", null);
         
         signingService.processSigning(contract, request);
 
@@ -166,9 +166,9 @@ class ContractTest {
 
         ContractSigningService signingService = new ContractSigningService();
         ContractSigningService.SigningRequest request1 = new ContractSigningService.SigningRequest(
-                "first@example.com", "홍길동", "서명데이터1", "192.168.1.1");
+                "first@example.com", "홍길동", "서명데이터1", "192.168.1.1", "test-device-info", null);
         ContractSigningService.SigningRequest request2 = new ContractSigningService.SigningRequest(
-                "second@example.com", "김철수", "서명데이터2", "192.168.1.2");
+                "second@example.com", "김철수", "서명데이터2", "192.168.1.2", "test-device-info", null);
         
         signingService.processSigning(contract, request1);
         signingService.processSigning(contract, request2);
@@ -225,7 +225,7 @@ class ContractTest {
 
         ContractSigningService signingService = new ContractSigningService();
         ContractSigningService.SigningRequest request = new ContractSigningService.SigningRequest(
-                "first@example.com", "홍길동", "서명데이터", "192.168.1.1");
+                "first@example.com", "홍길동", "서명데이터", "192.168.1.1", "test-device-info", null);
         
         signingService.processSigning(contract, request);
 
@@ -239,7 +239,7 @@ class ContractTest {
 
         ContractSigningService signingService = new ContractSigningService();
         ContractSigningService.SigningRequest request = new ContractSigningService.SigningRequest(
-                "unauthorized@example.com", "무권한자", "서명데이터", "192.168.1.1");
+                "unauthorized@example.com", "무권한자", "서명데이터", "192.168.1.1", "test-device-info", null);
         
         assertThatThrownBy(() -> signingService.processSigning(contract, request))
                 .isInstanceOf(ValidationException.class)
@@ -253,9 +253,9 @@ class ContractTest {
         
         ContractSigningService signingService = new ContractSigningService();
         ContractSigningService.SigningRequest request1 = new ContractSigningService.SigningRequest(
-                "first@example.com", "홍길동", "서명데이터", "192.168.1.1");
+                "first@example.com", "홍길동", "서명데이터", "192.168.1.1", "test-device-info", null);
         ContractSigningService.SigningRequest request2 = new ContractSigningService.SigningRequest(
-                "first@example.com", "홍길동", "서명데이터2", "192.168.1.1");
+                "first@example.com", "홍길동", "서명데이터2", "192.168.1.1", "test-device-info", null);
         
         signingService.processSigning(contract, request1);
         

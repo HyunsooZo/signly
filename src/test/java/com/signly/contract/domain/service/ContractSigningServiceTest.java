@@ -56,7 +56,9 @@ class ContractSigningServiceTest {
             firstPartyEmail,
             "First Party",
             "signature-data-base64",
-            "192.168.1.1"
+            "192.168.1.1",
+            "test-device-info",
+            null
         );
 
         // When
@@ -79,14 +81,18 @@ class ContractSigningServiceTest {
             firstPartyEmail,
             "First Party",
             "first-signature-data",
-            "192.168.1.1"
+            "192.168.1.1",
+            "test-device-info",
+            null
         );
         
         ContractSigningService.SigningRequest secondRequest = new ContractSigningService.SigningRequest(
             secondPartyEmail,
             "Second Party",
             "second-signature-data",
-            "192.168.1.2"
+            "192.168.1.2",
+            "test-device-info",
+            null
         );
 
         // When
@@ -109,7 +115,9 @@ class ContractSigningServiceTest {
             firstPartyEmail,
             "First Party",
             "signature-data",
-            "192.168.1.1"
+            "192.168.1.1",
+            "test-device-info",
+            null
         );
 
         // When & Then
@@ -141,7 +149,9 @@ class ContractSigningServiceTest {
             firstPartyEmail,
             "First Party",
             "signature-data",
-            "192.168.1.1"
+            "192.168.1.1",
+            "test-device-info",
+            null
         );
 
         // When & Then
@@ -158,7 +168,9 @@ class ContractSigningServiceTest {
             invalidEmail,
             "Invalid User",
             "signature-data",
-            "192.168.1.1"
+            "192.168.1.1",
+            "test-device-info",
+            null
         );
 
         // When & Then
@@ -175,7 +187,9 @@ class ContractSigningServiceTest {
             firstPartyEmail,
             "First Party",
             "first-signature-data",
-            "192.168.1.1"
+            "192.168.1.1",
+            "test-device-info",
+            null
         );
         contractSigningService.processSigning(testContract, firstRequest);
         
@@ -231,7 +245,9 @@ class ContractSigningServiceTest {
             firstPartyEmail.toUpperCase(), // 대문자로 변환
             "First Party",
             "signature-data",
-            "192.168.1.1"
+            "192.168.1.1",
+            "test-device-info",
+            null
         );
 
         // When
@@ -253,7 +269,9 @@ class ContractSigningServiceTest {
             firstPartyEmail,
             "First Party",
             expectedSignatureData,
-            expectedIpAddress
+            expectedIpAddress,
+            "test-device-info",
+            null
         );
 
         // When

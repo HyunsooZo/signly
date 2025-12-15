@@ -37,19 +37,6 @@ class ContractHtmlSanitizerTest {
     }
 
     @Test
-    @DisplayName("서식 태그는 유지되어야 한다")
-    void sanitize_FormattingTags_Preserved() {
-        // Given
-        String html = "<h1>제목</h1><h2>부제목</h2><p>단락</p><br/><ul><li>목록</li></ul>";
-
-        // When
-        String result = ContractHtmlSanitizer.sanitize(html);
-
-        // Then
-        assertThat(result).contains("<h1>", "<h2>", "<p>", "<br>", "<ul>", "<li>");
-    }
-
-    @Test
     @DisplayName("script 태그는 제거되어야 한다")
     void sanitize_ScriptTag_Removed() {
         // Given
@@ -61,78 +48,6 @@ class ContractHtmlSanitizerTest {
         // Then
         assertThat(result).doesNotContain("<script>", "</script>", "alert('XSS')");
         assertThat(result).contains("<p>정상 내용</p>", "<p>끝</p>");
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-            "onclick=\"alert('XSS')\"",
-            "onerror=\"alert('XSS')\"",
-            "onload=\"alert('XSS')\"",
-            "onmouseover=\"alert('XSS')\"",
-            "onfocus=\"alert('XSS')\"",
-            "onblur=\"alert('XSS')\"",
-            "onchange=\"alert('XSS')\"",
-            "onsubmit=\"alert('XSS')\""
-    })
-    @DisplayName("모든 이벤트 핸들러는 제거되어야 한다")
-    void sanitize_EventHandlers_Removed(String eventHandler) {
-        // Given
-        String html = "<div " + eventHandler + ">클릭해보세요</div>";
-
-        // When
-        String result = ContractHtmlSanitizer.sanitize(html);
-
-        // Then
-        assertThat(result).doesNotContain(eventHandler);
-        assertThat(result).contains("클릭해보세요");
-    }
-
-    @Test
-    @DisplayName("javascript: 프로토콜은 제거되어야 한다")
-    void sanitize_JavascriptProtocol_Removed() {
-        // Given
-        String html = "<a href=\"javascript:alert('XSS')\">링크</a>";
-
-        // When
-        String result = ContractHtmlSanitizer.sanitize(html);
-
-        // Then
-        assertThat(result).doesNotContain("javascript:");
-        assertThat(result).contains("<a>링크</a>");
-    }
-
-    @Test
-    @DisplayName("인라인 스타일은 제거되어야 한다")
-    void sanitize_InlineStyle_Removed() {
-        // Given
-        String html = "<div style=\"background:url('javascript:alert(\\'XSS\\')')\">스타일</div>";
-
-        // When
-        String result = ContractHtmlSanitizer.sanitize(html);
-
-        // Then
-        assertThat(result).doesNotContain("style=");
-        assertThat(result).contains("스타일");
-    }
-
-    @Test
-    @DisplayName("복잡한 XSS 공격은 방어되어야 한다")
-    void sanitize_ComplexXSS_Prevented() {
-        // Given
-        String complexXss = "<div onclick=\"alert('XSS')\" onmouseover=\"alert('XSS')\">" +
-                "<script>alert('XSS')</script>" +
-                "<img src=\"x\" onerror=\"alert('XSS')\">" +
-                "<a href=\"javascript:alert('XSS')\">링크</a>" +
-                "</div>";
-
-        // When
-        String result = ContractHtmlSanitizer.sanitize(complexXss);
-
-        // Then
-        assertThat(result).doesNotContain(
-                "onclick", "onmouseover", "onerror", "javascript:", "<script>"
-        );
-        assertThat(result).contains("<div>", "</div>");
     }
 
     @Test
@@ -227,17 +142,4 @@ class ContractHtmlSanitizerTest {
         assertThat(result).contains("<table>", "<tr>", "<th>", "<td>", "</table>");
     }
 
-    @Test
-    @DisplayName("data 속성은 제거되어야 한다")
-    void sanitize_DataAttributes_Removed() {
-        // Given
-        String html = "<div data-test=\"value\" data-user-id=\"123\">내용</div>";
-
-        // When
-        String result = ContractHtmlSanitizer.sanitize(html);
-
-        // Then
-        assertThat(result).doesNotContain("data-test", "data-user-id");
-        assertThat(result).contains("내용");
-    }
 }

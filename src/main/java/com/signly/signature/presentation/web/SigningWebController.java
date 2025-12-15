@@ -122,7 +122,7 @@ public class SigningWebController {
 
             // Contract 상태 업데이트 및 서명 처리
             ContractResponse contract = contractService.processSignature(token, signerEmail, signerName, signatureData,
-                    ipAddress);
+                    ipAddress, userAgent);
 
             logger.info("서명 처리 완료: contractId={}", contract.getId());
 

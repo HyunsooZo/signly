@@ -4,21 +4,20 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Converter
 @RequiredArgsConstructor
 public class StringEncryptionConverter implements AttributeConverter<String, String> {
-    
+
     private final AesEncryptionService encryptionService;
-    
+
     @Override
     public String convertToDatabaseColumn(String attribute) {
         if (attribute == null) {
             return null;
         }
-        
+
         try {
             return encryptionService.encrypt(attribute);
         } catch (Exception e) {
@@ -26,13 +25,17 @@ public class StringEncryptionConverter implements AttributeConverter<String, Str
             throw new RuntimeException("Encryption failed during database conversion", e);
         }
     }
-    
+
     @Override
     public String convertToEntityAttribute(String dbData) {
         if (dbData == null) {
             return null;
         }
-        
+
+        if (!encryptionService.isEncrypted(dbData)) {
+            return dbData;
+        }
+
         try {
             String decrypted = encryptionService.decrypt(dbData);
             if (decrypted == null) {

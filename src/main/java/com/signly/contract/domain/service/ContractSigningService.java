@@ -129,7 +129,9 @@ public class ContractSigningService {
                 request.signerEmail(),
                 request.signerName(),
                 request.signatureData(),
-                request.ipAddress()
+                request.ipAddress(),
+                request.deviceInfo(),
+                request.signaturePath()
         );
     }
 
@@ -140,7 +142,9 @@ public class ContractSigningService {
             String signerEmail,
             String signerName,
             String signatureData,
-            String ipAddress
+            String ipAddress,
+            String deviceInfo,
+            String signaturePath
     ) {}
 
     /**

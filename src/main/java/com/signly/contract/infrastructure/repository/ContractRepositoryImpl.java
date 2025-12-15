@@ -167,4 +167,48 @@ public class ContractRepositoryImpl implements ContractRepository {
         }
         return entity != null ? Optional.of(entityMapper.toDomain(entity)) : Optional.empty();
     }
+
+    /**
+     * 도메인 모델의 변경사항을 기존 JPA 엔티티에 반영
+     */
+    private void updateEntityFromDomain(ContractJpaEntity entity, Contract contract) {
+        // EntityMapper를 사용하여 새 엔티티 생성 후 필드 복사
+        ContractJpaEntity updatedEntity = entityMapper.toEntity(contract);
+        
+        // 기존 엔티티의 필드 업데이트 (setter가 있는 필드들)
+        entity.setTitle(updatedEntity.getTitle());
+        entity.setContent(updatedEntity.getContent());
+        entity.setTemplateData(updatedEntity.getTemplateData());
+        entity.setFirstPartyEmailHash(updatedEntity.getFirstPartyEmailHash());
+        entity.setSecondPartyEmailHash(updatedEntity.getSecondPartyEmailHash());
+        entity.setStatus(updatedEntity.getStatus());
+        entity.setSignToken(updatedEntity.getSignToken());
+        entity.setExpiresAt(updatedEntity.getExpiresAt());
+        entity.setPdfPath(updatedEntity.getPdfPath());
+        entity.setPresetType(updatedEntity.getPresetType());
+        
+        // setter가 없는 필드들은 reflection으로 업데이트
+        updateField(entity, "firstPartyName", updatedEntity.getFirstPartyName());
+        updateField(entity, "firstPartyEmail", updatedEntity.getFirstPartyEmail());
+        updateField(entity, "firstPartyOrganization", updatedEntity.getFirstPartyOrganization());
+        updateField(entity, "secondPartyName", updatedEntity.getSecondPartyName());
+        updateField(entity, "secondPartyEmail", updatedEntity.getSecondPartyEmail());
+        updateField(entity, "secondPartyOrganization", updatedEntity.getSecondPartyOrganization());
+        
+        // 서명은 별도로 SignatureRepository에서 관리하므로 여기서는 건드리지 않음
+        // 기존 서명을 덮어쓰지 않고 유지하여 deviceInfo와 signaturePath를 보존
+    }
+
+    /**
+     * Reflection을 사용하여 private 필드 업데이트
+     */
+    private void updateField(Object target, String fieldName, Object value) {
+        try {
+            java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (Exception e) {
+            logger.warn("Failed to update field: " + fieldName, e);
+        }
+    }
 }
