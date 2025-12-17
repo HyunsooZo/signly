@@ -47,8 +47,8 @@
                                             <i class="bi bi-chevron-up text-muted" id="presetToggleIcon"></i>
                                         </div>
                                     </div>
-                                    <div class="card-body" id="presetSection">
-                                        <div id="presetContent">
+                                    <div class="card-body p-0" id="presetSection">
+                                        <div id="presetContent" class="preset-content">
                                             <div class="text-center py-4" id="presetLoading">
                                                 <div class="spinner-border text-primary mb-2" role="status">
                                                     <span class="visually-hidden">로딩 중...</span>
@@ -177,7 +177,7 @@
                 <c:set var="sectionsJsonSafe" value="${fn:replace(sectionsJsonRaw, '</script>', '<&#92;/script>')}" />
                 <script id="initialSections"
                     type="application/json"><c:out value="${sectionsJsonSafe}" escapeXml="false" /></script>
-                
+
                 <!-- Variable definitions from database -->
                 <script id="variableDefinitions" type="application/json">
 <c:out value="${variableDefinitionsJson}" escapeXml="false"/>
