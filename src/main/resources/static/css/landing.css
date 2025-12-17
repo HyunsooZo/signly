@@ -1,13 +1,13 @@
 :root {
     /* App Theme Colors */
-    --primary-color: #2d4a3f;
-    --primary-hover: #1a2e27;
-    --text-main: #1e293b;
+    --primary-color: #1e3a2f;
+    --primary-hover: #142820;
+    --text-main: #0f172a;
     --text-sub: #64748b;
-    --bg-gradient-start: #f4f6f5;
-    --bg-gradient-end: #e8ebe9;
-    --card-bg: rgba(255, 255, 255, 0.9);
-    --glass-border: rgba(255, 255, 255, 0.8);
+    --bg-gradient-start: #f8fafc;
+    --bg-gradient-end: #e2e8f0;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.6);
 }
 
 body {

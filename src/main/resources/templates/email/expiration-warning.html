@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>계약서 만료 임박 알림</title>
     <th:block th:replace="~{fragments/email-style :: emailStyles}"></th:block>
 </head>
+
 <body class="email-body">
     <div class="email-wrapper">
         <div class="email-card">
@@ -14,7 +16,9 @@
             </div>
 
             <div class="email-content">
-                <div class="email-warning-icon">⚠️</div>
+                <div class="email-icon-wrapper email-icon-wrapper--warning">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
 
                 <h2 class="email-title email-title--warning email-center">계약서 만료 임박</h2>
 
@@ -47,4 +51,5 @@
         </div>
     </div>
 </body>
+
 </html>

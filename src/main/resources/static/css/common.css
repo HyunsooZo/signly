@@ -3,14 +3,21 @@
 /* CSS 변수 정의 */
 :root {
     /* 컬러 팔레트 */
-    --primary-color: #2d4a3f;
-    --primary-hover: #1a2e27;
+    /* 컬러 팔레트 - Premium Forest Theme */
+    --primary-color: #1e3a2f;
+    /* Deeper, richer forest green */
+    --primary-hover: #142820;
+    --primary-light: #3d5a4f;
+    --primary-lighter: #e6f0eb;
 
     /* Bootstrap 변수 오버라이드 */
-    --bs-primary: #2d4a3f !important;
-    --bs-primary-rgb: 45, 74, 63 !important;
-    --bs-primary-hover: #1a2e27 !important;
+    --bs-primary: #1e3a2f !important;
+    --bs-primary-rgb: 30, 58, 47 !important;
+    --bs-primary-hover: #142820 !important;
+
     --secondary-color: #64748b;
+    --secondary-light: #94a3b8;
+
     --success-color: #059669;
     --warning-color: #d97706;
     --danger-color: #dc2626;
@@ -29,12 +36,23 @@
     --gray-900: #1a2e27;
 
     /* 레이아웃 */
-    --header-height: 64px;
+    /* 레이아웃 & UI 요소 */
+    --header-height: 70px;
+    /* Slightly taller for better presence */
     --sidebar-width: 280px;
-    --border-radius: 10px;
-    --border-radius-lg: 16px;
-    --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.08);
-    --box-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+
+    --border-radius-sm: 8px;
+    --border-radius: 12px;
+    --border-radius-lg: 20px;
+    --border-radius-xl: 32px;
+
+    /* Premium Shadows */
+    --box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --box-shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+    --box-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    --box-shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+
     --font-tracking: -0.015em;
 
     /* 폰트 */
@@ -583,32 +601,16 @@ a:hover {
     }
 }
 
-.icon-contracts::before {
-    content: "📋";
-}
-
-.icon-templates::before {
-    content: "📝";
-}
-
-.icon-user::before {
-    content: "👤";
-}
-
-.icon-profile::before {
-    content: "👤";
-}
-
-.icon-settings::before {
-    content: "⚙️";
-}
-
-.icon-logout::before {
-    content: "🚪";
-}
-
+/* 아이콘 스타일 제거 (Bootstrap Icons 사용 권장) */
+.icon-contracts::before,
+.icon-templates::before,
+.icon-user::before,
+.icon-profile::before,
+.icon-settings::before,
+.icon-logout::before,
 .icon-chevron-down::before {
-    content: "▼";
+    display: none;
+    content: "";
 }
 
 /* 푸터 레이아웃 */

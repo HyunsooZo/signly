@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>계약서 서명 완료</title>
     <th:block th:replace="~{fragments/email-style :: emailStyles}"></th:block>
 </head>
+
 <body class="email-body">
     <div class="email-wrapper">
         <div class="email-card">
@@ -14,7 +16,9 @@
             </div>
 
             <div class="email-content">
-                <div class="email-success-icon">✅</div>
+                <div class="email-icon-wrapper email-icon-wrapper--success">
+                    <i class="bi bi-vector-pen"></i>
+                </div>
 
                 <h2 class="email-title email-title--success email-center">계약서 서명 완료</h2>
 
@@ -35,4 +39,5 @@
         </div>
     </div>
 </body>
+
 </html>
