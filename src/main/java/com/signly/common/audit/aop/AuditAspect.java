@@ -14,7 +14,11 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import com.signly.common.security.SecurityUser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -134,17 +138,35 @@ public class AuditAspect {
     }
 
     /**
-     * 사용자 ID 추출 (첫 번째 String 파라미터를 userId로 가정)
+     * SecurityContextHolder로부터 인증된 사용자 ID 추출
+     *
+     * SecurityContextHolder는 JwtAuthenticationFilter에서 설정되며,
+     * 인증되지 않은 요청의 경우 null을 반환하여 감사 로그에 userId=null로 기록됨
      */
     private String extractUserId(ProceedingJoinPoint joinPoint) {
-        Object[] args = joinPoint.getArgs();
-        if (args.length > 0 && args[0] instanceof String firstArg) {
-            // ULID 형식인지 확인 (26자)
-            if (firstArg != null && firstArg.length() == 26) {
-                return firstArg;
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication == null || !authentication.isAuthenticated()) {
+                log.debug("인증된 사용자가 없습니다. (감사 로그에는 userId=null로 기록됨)");
+                return null;
             }
+
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof SecurityUser securityUser) {
+                String userId = securityUser.getUserId();
+                log.debug("SecurityContextHolder에서 사용자 ID 추출: userId={}", userId);
+                return userId;
+            }
+
+            log.debug("예상 외의 principal 타입: type={}", principal.getClass().getSimpleName());
+            return null;
+
+        } catch (Exception e) {
+            // SecurityContextHolder 접근 중 예외 발생 (매우 드문 경우)
+            log.warn("SecurityContextHolder 접근 중 예외 발생 (감사 로그에는 userId=null로 기록됨)", e);
+            return null;
         }
-        return null;
     }
 
     /**
