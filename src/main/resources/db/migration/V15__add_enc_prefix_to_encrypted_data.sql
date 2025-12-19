@@ -6,33 +6,9 @@
 -- Date: 2025-12-19
 -- Author: Claude Code
 -- ========================================
-
--- Helper function to detect if string is valid Base64 and should have prefix added
--- Returns 1 if should add prefix, 0 otherwise
-DELIMITER $$
-
-CREATE FUNCTION is_encryptable(input_str TEXT)
-RETURNS TINYINT DETERMINISTIC READS SQL DATA
-BEGIN
-    DECLARE result TINYINT DEFAULT 0;
-
-    -- Check conditions:
-    -- 1. String is not NULL
-    -- 2. String doesn't already have {ENC} prefix
-    -- 3. String length > 20 (reasonable minimum for Base64 + IV)
-    -- 4. String matches Base64 pattern (A-Za-z0-9+/= only)
-    IF input_str IS NOT NULL
-       AND NOT input_str LIKE '{ENC}%'
-       AND CHAR_LENGTH(input_str) > 20
-       AND input_str REGEXP '^[A-Za-z0-9+/]+={0,2}$'
-    THEN
-        SET result = 1;
-    END IF;
-
-    RETURN result;
-END$$
-
-DELIMITER ;
+-- Note: This migration uses direct WHERE conditions instead of
+-- a helper function to avoid DELIMITER issues with Flyway
+-- ========================================
 
 -- ========================================
 -- Table: users (5 fields)
@@ -40,23 +16,38 @@ DELIMITER ;
 
 UPDATE users
 SET email = CONCAT('{ENC}', email)
-WHERE is_encryptable(email) = 1;
+WHERE email IS NOT NULL
+  AND email NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(email) > 20
+  AND email REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE users
 SET name = CONCAT('{ENC}', name)
-WHERE is_encryptable(name) = 1;
+WHERE name IS NOT NULL
+  AND name NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(name) > 20
+  AND name REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE users
 SET company_name = CONCAT('{ENC}', company_name)
-WHERE is_encryptable(company_name) = 1;
+WHERE company_name IS NOT NULL
+  AND company_name NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(company_name) > 20
+  AND company_name REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE users
 SET business_phone = CONCAT('{ENC}', business_phone)
-WHERE is_encryptable(business_phone) = 1;
+WHERE business_phone IS NOT NULL
+  AND business_phone NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(business_phone) > 20
+  AND business_phone REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE users
 SET business_address = CONCAT('{ENC}', business_address)
-WHERE is_encryptable(business_address) = 1;
+WHERE business_address IS NOT NULL
+  AND business_address NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(business_address) > 20
+  AND business_address REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 -- ========================================
 -- Table: contracts (10 fields)
@@ -64,43 +55,73 @@ WHERE is_encryptable(business_address) = 1;
 
 UPDATE contracts
 SET title = CONCAT('{ENC}', title)
-WHERE is_encryptable(title) = 1;
+WHERE title IS NOT NULL
+  AND title NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(title) > 20
+  AND title REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contracts
 SET content = CONCAT('{ENC}', content)
-WHERE is_encryptable(content) = 1;
+WHERE content IS NOT NULL
+  AND content NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(content) > 20
+  AND content REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contracts
 SET template_data = CONCAT('{ENC}', template_data)
-WHERE is_encryptable(template_data) = 1;
+WHERE template_data IS NOT NULL
+  AND template_data NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(template_data) > 20
+  AND template_data REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contracts
 SET first_party_name = CONCAT('{ENC}', first_party_name)
-WHERE is_encryptable(first_party_name) = 1;
+WHERE first_party_name IS NOT NULL
+  AND first_party_name NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(first_party_name) > 20
+  AND first_party_name REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contracts
 SET first_party_email = CONCAT('{ENC}', first_party_email)
-WHERE is_encryptable(first_party_email) = 1;
+WHERE first_party_email IS NOT NULL
+  AND first_party_email NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(first_party_email) > 20
+  AND first_party_email REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contracts
 SET first_party_organization = CONCAT('{ENC}', first_party_organization)
-WHERE is_encryptable(first_party_organization) = 1;
+WHERE first_party_organization IS NOT NULL
+  AND first_party_organization NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(first_party_organization) > 20
+  AND first_party_organization REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contracts
 SET second_party_name = CONCAT('{ENC}', second_party_name)
-WHERE is_encryptable(second_party_name) = 1;
+WHERE second_party_name IS NOT NULL
+  AND second_party_name NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(second_party_name) > 20
+  AND second_party_name REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contracts
 SET second_party_email = CONCAT('{ENC}', second_party_email)
-WHERE is_encryptable(second_party_email) = 1;
+WHERE second_party_email IS NOT NULL
+  AND second_party_email NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(second_party_email) > 20
+  AND second_party_email REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contracts
 SET second_party_organization = CONCAT('{ENC}', second_party_organization)
-WHERE is_encryptable(second_party_organization) = 1;
+WHERE second_party_organization IS NOT NULL
+  AND second_party_organization NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(second_party_organization) > 20
+  AND second_party_organization REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contracts
 SET pdf_path = CONCAT('{ENC}', pdf_path)
-WHERE is_encryptable(pdf_path) = 1;
+WHERE pdf_path IS NOT NULL
+  AND pdf_path NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(pdf_path) > 20
+  AND pdf_path REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 -- ========================================
 -- Table: contract_signatures (5 fields)
@@ -108,23 +129,38 @@ WHERE is_encryptable(pdf_path) = 1;
 
 UPDATE contract_signatures
 SET signer_name = CONCAT('{ENC}', signer_name)
-WHERE is_encryptable(signer_name) = 1;
+WHERE signer_name IS NOT NULL
+  AND signer_name NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(signer_name) > 20
+  AND signer_name REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contract_signatures
 SET signature_data = CONCAT('{ENC}', signature_data)
-WHERE is_encryptable(signature_data) = 1;
+WHERE signature_data IS NOT NULL
+  AND signature_data NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(signature_data) > 20
+  AND signature_data REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contract_signatures
 SET ip_address = CONCAT('{ENC}', ip_address)
-WHERE is_encryptable(ip_address) = 1;
+WHERE ip_address IS NOT NULL
+  AND ip_address NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(ip_address) > 20
+  AND ip_address REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contract_signatures
 SET device_info = CONCAT('{ENC}', device_info)
-WHERE is_encryptable(device_info) = 1;
+WHERE device_info IS NOT NULL
+  AND device_info NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(device_info) > 20
+  AND device_info REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE contract_signatures
 SET signature_path = CONCAT('{ENC}', signature_path)
-WHERE is_encryptable(signature_path) = 1;
+WHERE signature_path IS NOT NULL
+  AND signature_path NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(signature_path) > 20
+  AND signature_path REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 -- ========================================
 -- Table: first_party_signatures (2 fields)
@@ -132,11 +168,17 @@ WHERE is_encryptable(signature_path) = 1;
 
 UPDATE first_party_signatures
 SET storage_path = CONCAT('{ENC}', storage_path)
-WHERE is_encryptable(storage_path) = 1;
+WHERE storage_path IS NOT NULL
+  AND storage_path NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(storage_path) > 20
+  AND storage_path REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE first_party_signatures
 SET original_filename = CONCAT('{ENC}', original_filename)
-WHERE is_encryptable(original_filename) = 1;
+WHERE original_filename IS NOT NULL
+  AND original_filename NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(original_filename) > 20
+  AND original_filename REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 -- ========================================
 -- Table: documents (3 fields)
@@ -144,15 +186,24 @@ WHERE is_encryptable(original_filename) = 1;
 
 UPDATE documents
 SET filename = CONCAT('{ENC}', filename)
-WHERE is_encryptable(filename) = 1;
+WHERE filename IS NOT NULL
+  AND filename NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(filename) > 20
+  AND filename REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE documents
 SET original_filename = CONCAT('{ENC}', original_filename)
-WHERE is_encryptable(original_filename) = 1;
+WHERE original_filename IS NOT NULL
+  AND original_filename NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(original_filename) > 20
+  AND original_filename REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE documents
 SET storage_path = CONCAT('{ENC}', storage_path)
-WHERE is_encryptable(storage_path) = 1;
+WHERE storage_path IS NOT NULL
+  AND storage_path NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(storage_path) > 20
+  AND storage_path REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 -- ========================================
 -- Table: email_outbox (2 fields)
@@ -160,16 +211,17 @@ WHERE is_encryptable(storage_path) = 1;
 
 UPDATE email_outbox
 SET template_variables = CONCAT('{ENC}', template_variables)
-WHERE is_encryptable(template_variables) = 1;
+WHERE template_variables IS NOT NULL
+  AND template_variables NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(template_variables) > 20
+  AND template_variables REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 UPDATE email_outbox
 SET attachments = CONCAT('{ENC}', attachments)
-WHERE is_encryptable(attachments) = 1;
-
--- ========================================
--- Cleanup
--- ========================================
-DROP FUNCTION IF EXISTS is_encryptable;
+WHERE attachments IS NOT NULL
+  AND attachments NOT LIKE '{ENC}%'
+  AND CHAR_LENGTH(attachments) > 20
+  AND attachments REGEXP '^[A-Za-z0-9+/]+={0,2}$';
 
 -- ========================================
 -- Migration completed
