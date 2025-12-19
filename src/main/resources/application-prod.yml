@@ -81,6 +81,7 @@ server:
         period: 2592000  # 30일 캐시
 
 app:
+  base-url: ${APP_BASE_URL}
   jwt:
     secret: ${JWT_SECRET}
     access-token-validity-in-ms: ${ACCESS_TOKEN_VALIDITY:3600000} # 1시간

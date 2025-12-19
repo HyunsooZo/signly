@@ -136,6 +136,9 @@ jobs:
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
 
+            # Base URL 설정
+            APP_BASE_URL=${{ secrets.APP_BASE_URL }}
+
             # 로그 레벨
             LOG_LEVEL=${{ secrets.LOG_LEVEL || 'INFO' }}
             SECURITY_LOG_LEVEL=${{ secrets.SECURITY_LOG_LEVEL || 'WARN' }}

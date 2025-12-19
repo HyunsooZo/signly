@@ -42,11 +42,8 @@ public class OpenApiConfig {
                                 .url("https://opensource.org/licenses/MIT")))
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:8080")
-                                .description("개발 서버"),
-                        new Server()
-                                .url("https://api.signly.com")
-                                .description("운영 서버")))
+                                .url("${app.base-url:http://localhost:8080}")
+                                .description("현재 서버")))
                 .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
                 .components(new Components()
                         .addSecuritySchemes("Bearer Authentication",
