@@ -110,9 +110,13 @@ class EncryptionIntegrationTest {
         assertNotEquals(testUser.getBusinessPhone(), encryptedPhone);
         assertNotEquals(testUser.getBusinessAddress(), encryptedAddress);
 
-        // Verify that the data is Base64 encoded (indicates encryption)
-        assertDoesNotThrow(() -> Base64.getDecoder().decode(encryptedPhone));
-        assertDoesNotThrow(() -> Base64.getDecoder().decode(encryptedAddress));
+        // Verify that the data has {ENC} prefix
+        assertTrue(encryptedPhone.startsWith("{ENC}"), "암호화된 데이터는 {ENC} prefix를 가져야 함");
+        assertTrue(encryptedAddress.startsWith("{ENC}"), "암호화된 데이터는 {ENC} prefix를 가져야 함");
+
+        // Verify that the data is Base64 encoded after removing prefix
+        assertDoesNotThrow(() -> Base64.getDecoder().decode(encryptedPhone.substring(5)));
+        assertDoesNotThrow(() -> Base64.getDecoder().decode(encryptedAddress.substring(5)));
 
         // Verify that the data can be decrypted
         String decryptedPhone = encryptionService.decrypt(encryptedPhone);

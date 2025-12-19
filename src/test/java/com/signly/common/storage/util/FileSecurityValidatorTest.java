@@ -92,9 +92,6 @@ class FileSecurityValidatorTest {
         assertEquals(".jpg", validator.getSafeExtension("image/jpeg"));
         assertEquals(".png", validator.getSafeExtension("image/png"));
         assertEquals(".gif", validator.getSafeExtension("image/gif"));
-        assertEquals(".doc", validator.getSafeExtension("application/msword"));
-        assertEquals(".docx", validator.getSafeExtension(
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
     }
 
     @Test

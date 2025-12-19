@@ -83,7 +83,16 @@ public class Contract extends AggregateRoot {
             PartyInfo secondParty,
             LocalDateTime expiresAt
     ) {
-        return create(creatorId, templateId, title, content, firstParty, secondParty, expiresAt, PresetType.NONE);
+        return create(
+                creatorId,
+                templateId,
+                title,
+                content,
+                firstParty,
+                secondParty,
+                expiresAt,
+                PresetType.NONE
+        );
     }
 
     public static Contract create(
@@ -100,8 +109,17 @@ public class Contract extends AggregateRoot {
         validateExpirationDate(expiresAt);
         validateParties(firstParty, secondParty);
 
-        return new Contract(ContractId.generate(), creatorId, templateId,
-                title.trim(), content, firstParty, secondParty, expiresAt, presetType);
+        return new Contract(
+                ContractId.generate(),
+                creatorId,
+                templateId,
+                title.trim(),
+                content,
+                firstParty,
+                secondParty,
+                expiresAt,
+                presetType
+        );
     }
 
     public static Contract restore(

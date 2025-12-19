@@ -104,8 +104,12 @@ class EmailEncryptionIntegrationTest {
         // 암호화된 이메일은 평문과 다르다
         assertNotEquals(plainEmail, encryptedEmail);
 
-        // Base64로 인코딩되어 있다
-        assertDoesNotThrow(() -> Base64.getDecoder().decode(encryptedEmail));
+        // {ENC} prefix가 있다
+        assertTrue(encryptedEmail.startsWith("{ENC}"), "암호화된 데이터는 {ENC} prefix를 가져야 함");
+
+        // {ENC} prefix 제거 후 Base64로 디코딩 가능하다
+        String withoutPrefix = encryptedEmail.substring(5);
+        assertDoesNotThrow(() -> Base64.getDecoder().decode(withoutPrefix));
 
         // 복호화하면 원본 이메일이 나온다
         String decrypted = encryptionService.decrypt(encryptedEmail);
@@ -261,9 +265,13 @@ class EmailEncryptionIntegrationTest {
         assertNotEquals(firstPartyEmail, encryptedFirstEmail);
         assertNotEquals(secondPartyEmail, encryptedSecondEmail);
 
-        // Base64로 인코딩되어 있다
-        assertDoesNotThrow(() -> Base64.getDecoder().decode(encryptedFirstEmail));
-        assertDoesNotThrow(() -> Base64.getDecoder().decode(encryptedSecondEmail));
+        // {ENC} prefix가 있다
+        assertTrue(encryptedFirstEmail.startsWith("{ENC}"), "암호화된 데이터는 {ENC} prefix를 가져야 함");
+        assertTrue(encryptedSecondEmail.startsWith("{ENC}"), "암호화된 데이터는 {ENC} prefix를 가져야 함");
+
+        // {ENC} prefix 제거 후 Base64로 디코딩 가능하다
+        assertDoesNotThrow(() -> Base64.getDecoder().decode(encryptedFirstEmail.substring(5)));
+        assertDoesNotThrow(() -> Base64.getDecoder().decode(encryptedSecondEmail.substring(5)));
 
         // 복호화하면 원본 이메일이 나온다
         assertEquals(firstPartyEmail, encryptionService.decrypt(encryptedFirstEmail));

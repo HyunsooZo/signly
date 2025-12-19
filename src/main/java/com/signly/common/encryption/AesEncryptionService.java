@@ -17,6 +17,8 @@ import java.util.Base64;
 @RequiredArgsConstructor
 public class AesEncryptionService {
 
+    private static final String ENCRYPTION_PREFIX = "{ENC}";
+
     private final EncryptionProperties properties;
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -53,8 +55,9 @@ public class AesEncryptionService {
             byte[] combined = new byte[iv.length + encrypted.length];
             System.arraycopy(iv, 0, combined, 0, iv.length);
             System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
-            
-            return Base64.getEncoder().encodeToString(combined);
+
+            String base64Encoded = Base64.getEncoder().encodeToString(combined);
+            return ENCRYPTION_PREFIX + base64Encoded;
             
         } catch (Exception e) {
             log.error("Failed to encrypt data", e);
@@ -66,9 +69,15 @@ public class AesEncryptionService {
         if (!properties.isEnabled() || encryptedText == null) {
             return encryptedText;
         }
-        
+
         try {
-            byte[] decoded = Base64.getDecoder().decode(encryptedText);
+            // Handle both new format {ENC}base64 and legacy format (plain base64)
+            String textToDecode = encryptedText;
+            if (encryptedText.startsWith(ENCRYPTION_PREFIX)) {
+                textToDecode = encryptedText.substring(ENCRYPTION_PREFIX.length());
+            }
+
+            byte[] decoded = Base64.getDecoder().decode(textToDecode);
             
             if (decoded.length < properties.getIvLength()) {
                 log.warn("Invalid encrypted data: too short");
@@ -100,17 +109,19 @@ public class AesEncryptionService {
         return iv;
     }
     
+    /**
+     * 암호화된 데이터 여부 판별
+     *
+     * {ENC} prefix를 통해 명확하게 암호화 데이터를 식별
+     * - 신뢰성: prefix 기반으로 false positive 완전 제거
+     * - 성능: O(1) 복잡도 (Base64 디코딩 불필요)
+     */
     public boolean isEncrypted(String text) {
         if (text == null || !properties.isEnabled()) {
             return false;
         }
-
-        try {
-            byte[] decoded = Base64.getDecoder().decode(text);
-            return decoded.length >= properties.getIvLength();
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+        // 신뢰성 있는 판별: {ENC} prefix 체크
+        return text.startsWith(ENCRYPTION_PREFIX);
     }
 
     /**

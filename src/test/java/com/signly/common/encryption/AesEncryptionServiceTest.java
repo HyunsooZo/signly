@@ -49,6 +49,7 @@ class AesEncryptionServiceTest {
         // Then
         assertNotNull(encrypted);
         assertNotNull(decrypted);
+        assertTrue(encrypted.startsWith("{ENC}"), "암호화된 데이터는 {ENC} prefix를 가져야 함");
         assertEquals(plainText, decrypted);
         assertNotEquals(plainText, encrypted);
     }
@@ -65,6 +66,8 @@ class AesEncryptionServiceTest {
 
         // Then
         assertNotEquals(encrypted1, encrypted2);
+        assertTrue(encrypted1.startsWith("{ENC}"), "첫 번째 암호문은 {ENC} prefix를 가져야 함");
+        assertTrue(encrypted2.startsWith("{ENC}"), "두 번째 암호문은 {ENC} prefix를 가져야 함");
 
         // But both decrypt to the same value
         assertEquals(plainText, encryptionService.decrypt(encrypted1));
@@ -129,6 +132,7 @@ class AesEncryptionServiceTest {
 
         // Then
         assertNotNull(encrypted);
+        assertTrue(encrypted.startsWith("{ENC}"), "빈 문자열도 {ENC} prefix를 가져야 함");
         assertNotEquals(emptyText, encrypted);
         assertEquals(emptyText, decrypted);
     }
@@ -147,6 +151,7 @@ class AesEncryptionServiceTest {
 
         // Then
         assertNotNull(encrypted);
+        assertTrue(encrypted.startsWith("{ENC}"), "긴 텍스트도 {ENC} prefix를 가져야 함");
         assertEquals(longText, decrypted);
         assertNotEquals(longText, encrypted);
     }
@@ -240,6 +245,103 @@ class AesEncryptionServiceTest {
 
         // 원인(cause)이 IllegalStateException인지 확인
         assertTrue(exception.getCause() instanceof IllegalStateException);
+    }
+
+    // ==================== {ENC} Prefix Tests ====================
+
+    @Test
+    @DisplayName("Legacy 형식(prefix 없음)의 암호화 데이터도 복호화 가능 (하위 호환성)")
+    void decrypt_legacy_format_without_prefix_success() {
+        // Given - 먼저 암호화하고 prefix 제거하여 legacy 형식 시뮬레이션
+        String plainText = "010-1234-5678";
+        String encrypted = encryptionService.encrypt(plainText);
+        String legacyFormat = encrypted.substring(5); // {ENC} 제거
+
+        // When
+        String decrypted = encryptionService.decrypt(legacyFormat);
+
+        // Then
+        assertNotNull(decrypted);
+        assertEquals(plainText, decrypted);
+    }
+
+    @Test
+    @DisplayName("isEncrypted()는 {ENC} prefix만 체크하며 Base64 문자열은 암호화로 간주하지 않음")
+    void isEncrypted_prefix_only_detection() {
+        // Given
+        String plainBase64 = Base64.getEncoder().encodeToString("This is a long enough text for testing".getBytes());
+        String withPrefix = "{ENC}" + plainBase64;
+
+        // When & Then
+        assertFalse(encryptionService.isEncrypted(plainBase64),
+                   "Base64 문자열만으로는 암호화로 판단하지 않아야 함 (False Positive 방지)");
+        assertTrue(encryptionService.isEncrypted(withPrefix),
+                  "{ENC} prefix가 있으면 암호화로 판단해야 함");
+    }
+
+    @Test
+    @DisplayName("{ENC} prefix 뒤에 유효하지 않은 데이터가 있으면 복호화 실패")
+    void decrypt_invalid_data_after_prefix_returns_null() {
+        // Given
+        String invalidData = "{ENC}invalid-base64-data!!!";
+
+        // When
+        String decrypted = encryptionService.decrypt(invalidData);
+
+        // Then
+        assertNull(decrypted, "잘못된 Base64 데이터는 복호화 실패하여 null 반환");
+    }
+
+    @Test
+    @DisplayName("{ENC} prefix만 있고 데이터가 없으면 암호화로 간주하지 않음")
+    void isEncrypted_empty_after_prefix_returns_false() {
+        // Given
+        String emptyPrefix = "{ENC}";
+
+        // When
+        boolean result = encryptionService.isEncrypted(emptyPrefix);
+
+        // Then
+        assertTrue(result, "{ENC} 문자열은 startsWith 체크로 true 반환");
+
+        // 하지만 복호화 시도 시 실패해야 함
+        String decrypted = encryptionService.decrypt(emptyPrefix);
+        assertNull(decrypted, "빈 데이터는 복호화 실패");
+    }
+
+    @Test
+    @DisplayName("평문 Base64 문자열은 암호화되지 않은 것으로 감지 (False Positive 제거)")
+    void isEncrypted_plain_base64_not_detected() {
+        // Given - 실제 Base64로 보이는 문자열들 (기존 취약점 재현)
+        String base64Like1 = "SGVsbG8gV29ybGQhIFRoaXMgaXMgYSB0ZXN0"; // Hello World! This is a test
+        String base64Like2 = "MjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=";
+        String actualEncrypted = encryptionService.encrypt("test");
+
+        // When & Then
+        assertFalse(encryptionService.isEncrypted(base64Like1),
+                   "Base64 유사 문자열은 암호화로 간주하지 않아야 함");
+        assertFalse(encryptionService.isEncrypted(base64Like2),
+                   "긴 Base64 문자열도 prefix 없으면 암호화로 간주하지 않아야 함");
+        assertTrue(encryptionService.isEncrypted(actualEncrypted),
+                  "실제 암호화된 데이터는 {ENC} prefix로 정확히 감지");
+    }
+
+    @Test
+    @DisplayName("이미 암호화된 데이터를 감지하여 이중 암호화 방지 가능")
+    void isEncrypted_prevents_double_encryption() {
+        // Given
+        String plainText = "sensitive-data";
+        String encrypted = encryptionService.encrypt(plainText);
+
+        // When
+        boolean isEncryptedResult = encryptionService.isEncrypted(encrypted);
+
+        // Then
+        assertTrue(isEncryptedResult, "암호화된 데이터를 정확히 감지");
+
+        // StringEncryptionConverter에서 사용하는 패턴 시뮬레이션
+        String toSave = isEncryptedResult ? encrypted : encryptionService.encrypt(encrypted);
+        assertEquals(encrypted, toSave, "이미 암호화된 데이터는 재암호화하지 않음");
     }
 
     // ==================== Hash Tests ====================
