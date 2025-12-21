@@ -4,6 +4,7 @@ import com.signly.contract.application.ContractPdfService;
 import com.signly.contract.domain.model.Contract;
 import com.signly.contract.domain.model.GeneratedPdf;
 import com.signly.document.application.DocumentService;
+import com.signly.notification.domain.event.EmailOutboxCreatedEvent;
 import com.signly.notification.domain.model.EmailAttachment;
 import com.signly.notification.domain.model.EmailOutbox;
 import com.signly.notification.domain.model.EmailTemplate;
@@ -11,6 +12,7 @@ import com.signly.notification.domain.repository.EmailOutboxRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ public class EmailNotificationService {
     private static final Logger logger = LoggerFactory.getLogger(EmailNotificationService.class);
 
     private final EmailOutboxRepository outboxRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private final String baseUrl;
     private final String companyName;
     private final ContractPdfService contractPdfService;
@@ -30,12 +33,14 @@ public class EmailNotificationService {
 
     public EmailNotificationService(
             EmailOutboxRepository outboxRepository,
+            ApplicationEventPublisher eventPublisher,
             @Value("${app.base-url:http://localhost:8080}") String baseUrl,
             @Value("${app.name:Signly}") String companyName,
             ContractPdfService contractPdfService,
             DocumentService documentService
     ) {
         this.outboxRepository = outboxRepository;
+        this.eventPublisher = eventPublisher;
         this.baseUrl = baseUrl;
         this.companyName = companyName;
         this.contractPdfService = contractPdfService;
@@ -63,8 +68,12 @@ public class EmailNotificationService {
                     variables
             );
 
-            outboxRepository.save(outbox);
-            logger.info("계약서 서명 요청 이메일을 Outbox에 저장: contractId={}, outboxId={}", contract.getId().value(), outbox.getId().value());
+            EmailOutbox saved = outboxRepository.save(outbox);
+
+            // 이벤트 발행 - 트랜잭션 커밋 후 처리됨
+            eventPublisher.publishEvent(new EmailOutboxCreatedEvent(saved.getId()));
+
+            logger.info("계약서 서명 요청 이메일을 Outbox에 저장 및 이벤트 발행: contractId={}, outboxId={}", contract.getId().value(), saved.getId().value());
 
         } catch (Exception e) {
             logger.error("계약서 서명 요청 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
@@ -119,8 +128,12 @@ public class EmailNotificationService {
                     attachments
             );
 
-            outboxRepository.save(firstPartyOutbox);
-            outboxRepository.save(secondPartyOutbox);
+            EmailOutbox savedFirstParty = outboxRepository.save(firstPartyOutbox);
+            EmailOutbox savedSecondParty = outboxRepository.save(secondPartyOutbox);
+
+            // 이벤트 발행 - 트랜잭션 커밋 후 처리됨
+            eventPublisher.publishEvent(new EmailOutboxCreatedEvent(savedFirstParty.getId()));
+            eventPublisher.publishEvent(new EmailOutboxCreatedEvent(savedSecondParty.getId()));
 
             if (generatedPdf != null) {
                 try {
@@ -130,7 +143,7 @@ public class EmailNotificationService {
                 }
             }
 
-            logger.info("계약서 완료 알림 이메일을 Outbox에 저장: contractId={}, PDF첨부={}",
+            logger.info("계약서 완료 알림 이메일을 Outbox에 저장 및 이벤트 발행: contractId={}, PDF첨부={}",
                     contract.getId().value(), !attachments.isEmpty());
 
         } catch (Exception e) {
@@ -155,8 +168,12 @@ public class EmailNotificationService {
                     variables
             );
 
-            outboxRepository.save(outbox);
-            logger.info("계약서 취소 알림 이메일을 Outbox에 저장: contractId={}", contract.getId().value());
+            EmailOutbox saved = outboxRepository.save(outbox);
+
+            // 이벤트 발행 - 트랜잭션 커밋 후 처리됨
+            eventPublisher.publishEvent(new EmailOutboxCreatedEvent(saved.getId()));
+
+            logger.info("계약서 취소 알림 이메일을 Outbox에 저장 및 이벤트 발행: contractId={}", contract.getId().value());
 
         } catch (Exception e) {
             logger.error("계약서 취소 알림 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
@@ -188,10 +205,14 @@ public class EmailNotificationService {
                     variables
             );
 
-            outboxRepository.save(firstPartyOutbox);
-            outboxRepository.save(secondPartyOutbox);
+            EmailOutbox savedFirstParty = outboxRepository.save(firstPartyOutbox);
+            EmailOutbox savedSecondParty = outboxRepository.save(secondPartyOutbox);
 
-            logger.info("계약서 만료 알림 이메일을 Outbox에 저장: contractId={}", contract.getId().value());
+            // 이벤트 발행 - 트랜잭션 커밋 후 처리됨
+            eventPublisher.publishEvent(new EmailOutboxCreatedEvent(savedFirstParty.getId()));
+            eventPublisher.publishEvent(new EmailOutboxCreatedEvent(savedSecondParty.getId()));
+
+            logger.info("계약서 만료 알림 이메일을 Outbox에 저장 및 이벤트 발행: contractId={}", contract.getId().value());
 
         } catch (Exception e) {
             logger.error("계약서 만료 알림 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
@@ -221,8 +242,12 @@ public class EmailNotificationService {
                     variables
             );
 
-            outboxRepository.save(outbox);
-            logger.info("계약서 만료 임박 알림 이메일을 Outbox에 저장: contractId={}, daysLeft={}", contract.getId().value(), daysLeft);
+            EmailOutbox saved = outboxRepository.save(outbox);
+
+            // 이벤트 발행 - 트랜잭션 커밋 후 처리됨
+            eventPublisher.publishEvent(new EmailOutboxCreatedEvent(saved.getId()));
+
+            logger.info("계약서 만료 임박 알림 이메일을 Outbox에 저장 및 이벤트 발행: contractId={}, daysLeft={}", contract.getId().value(), daysLeft);
 
         } catch (Exception e) {
             logger.error("계약서 만료 임박 알림 이메일 Outbox 저장 실패: {}", contract.getId().value(), e);
@@ -258,8 +283,12 @@ public class EmailNotificationService {
                     variables
             );
 
-            outboxRepository.save(outbox);
-            logger.info("이메일 인증 메일을 Outbox에 저장: email={}, outboxId={}", email, outbox.getId().value());
+            EmailOutbox saved = outboxRepository.save(outbox);
+
+            // 이벤트 발행 - 트랜잭션 커밋 후 처리됨
+            eventPublisher.publishEvent(new EmailOutboxCreatedEvent(saved.getId()));
+
+            logger.info("이메일 인증 메일을 Outbox에 저장 및 이벤트 발행: email={}, outboxId={}", email, saved.getId().value());
 
         } catch (Exception e) {
             logger.error("이메일 인증 메일 Outbox 저장 실패: email={}", email, e);
