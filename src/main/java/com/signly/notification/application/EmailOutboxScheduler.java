@@ -20,7 +20,7 @@ public class EmailOutboxScheduler {
     private final EmailOutboxRepository outboxRepository;
     private final EmailSender emailSender;
 
-    @Scheduled(fixedDelay = 10000) // 10초마다 실행
+    @Scheduled(fixedRate = 3 * 60 * 1000)
     @Transactional
     public void processPendingEmails() {
         try {
