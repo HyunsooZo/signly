@@ -6,7 +6,7 @@
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Signly - 모두를 위한 전자계약</title>
+            <title>계약의 새로운 기준 | 사인리(Signly)</title>
             <link rel="icon" type="image/png" href="/images/favicon-icon.png">
 
             <!-- Fonts & Icons -->
