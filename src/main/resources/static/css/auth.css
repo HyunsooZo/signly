@@ -359,13 +359,13 @@ body.auth-page {
     border-radius: 8px;
     background: white;
     color: #3c4043;
-    border: 2px solid #dadce0;
+    border: 1px solid #dadce0;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .btn-google:hover {
@@ -379,6 +379,38 @@ body.auth-page {
 .btn-google:active {
     background: #ecf3fe;
     border-color: #4285f4;
+}
+
+/* 네이버 로그인 버튼 */
+/* 네이버 로그인 버튼 */
+.btn-naver {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 8px;
+    background: white;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    margin-bottom: 20px;
+}
+
+.btn-naver:hover {
+    background: #f8f9fa;
+    border-color: #03C75A;
+    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    color: #3c4043;
+    text-decoration: none;
+}
+
+.btn-naver:active {
+    background: #e6fcf0;
+    border-color: #03C75A;
 }
 
 .auth-footer {

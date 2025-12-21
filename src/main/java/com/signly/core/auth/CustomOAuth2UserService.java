@@ -1,6 +1,8 @@
 package com.signly.core.auth;
 
 import com.signly.common.security.OAuth2SecurityUser;
+import com.signly.core.auth.oauth2.OAuth2UserInfo;
+import com.signly.core.auth.oauth2.OAuth2UserInfoExtractor;
 import com.signly.user.domain.model.*;
 import com.signly.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +15,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.UUID;
 
-/**
- * Google OAuth2 로그인 사용자 정보 처리 서비스
- * - Google에서 받은 사용자 정보를 기반으로 자동 회원가입 또는 로그인 처리
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -26,83 +25,79 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final Map<String, OAuth2UserInfoExtractor> extractors;  // Spring이 자동 주입 (Bean 이름 = registrationId)
 
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        log.info("OAuth2 login attempt with provider: {}", registrationId);
+
         try {
-            return processOAuth2User(oAuth2User);
+            return processOAuth2User(oAuth2User, registrationId);
+        } catch (OAuth2AuthenticationException ex) {
+            throw ex;
         } catch (Exception ex) {
-            log.error("Error processing OAuth2 user", ex);
+            log.error("Unexpected error processing OAuth2 user from provider: {}", registrationId, ex);
             throw new OAuth2AuthenticationException("OAuth2 사용자 처리 중 오류가 발생했습니다");
         }
     }
 
-    /**
-     * OAuth2 사용자 정보 처리
-     * - 기존 사용자: 로그인
-     * - 신규 사용자: 자동 회원가입 (ACTIVE 상태로, 이메일 인증 완료로)
-     */
-    private OAuth2User processOAuth2User(OAuth2User oAuth2User) {
-        String email = oAuth2User.getAttribute("email");
-        String name = oAuth2User.getAttribute("name");
-        Boolean emailVerified = oAuth2User.getAttribute("email_verified");
+    private OAuth2User processOAuth2User(OAuth2User oAuth2User, String registrationId) {
+        var extractor = extractors.get(registrationId);
+        if (extractor == null) {
+            log.error("Unsupported OAuth2 provider: {}", registrationId);
+            throw new OAuth2AuthenticationException(
+                    "지원하지 않는 OAuth2 프로바이더입니다: " + registrationId
+            );
+        }
 
-        if (email == null || email.trim().isEmpty()) {
+        var userInfo = extractor.extract(oAuth2User);
+        log.debug("Extracted OAuth2 user info: provider={}, email={}, name={}",
+                userInfo.getProvider(), userInfo.getEmail(), userInfo.getName());
+
+        if (userInfo.getEmail() == null || userInfo.getEmail().trim().isEmpty()) {
+            log.error("Email is missing from OAuth2 user info: provider={}", registrationId);
             throw new OAuth2AuthenticationException("이메일 정보를 가져올 수 없습니다");
         }
 
-        // 이름이 없으면 이메일 아이디 사용 (final 변수로 생성)
-        final String userName = (name == null || name.trim().isEmpty())
-                ? email.split("@")[0]
-                : name;
+        final String userName = (userInfo.getName() == null || userInfo.getName().trim().isEmpty())
+                ? userInfo.getEmail().split("@")[0]
+                : userInfo.getName();
 
-        // Google에서 이메일 인증이 완료되지 않은 경우 차단
-        if (emailVerified == null || !emailVerified) {
-            log.warn("Google email not verified for user: {}", email);
-            throw new OAuth2AuthenticationException("Google 계정의 이메일 인증이 필요합니다");
-        }
-
-        Email userEmail = Email.of(email);
+        Email userEmail = Email.of(userInfo.getEmail());
         User user = userRepository.findByEmail(userEmail)
-                .orElseGet(() -> createNewOAuth2User(userEmail, userName));
+                .orElseGet(() -> createNewOAuth2User(userEmail, userName, userInfo.getProvider()));
 
-        // 사용자 상태 확인
+        validateAndActivateUser(user, userInfo.getEmail());
+
+        String nameAttributeKey = "google".equals(registrationId) ? "sub" : "response";
+        return new OAuth2SecurityUser(user, oAuth2User.getAttributes(), nameAttributeKey);
+    }
+
+    private void validateAndActivateUser(User user, String email) {
         if (user.getStatus() == UserStatus.SUSPENDED) {
+            log.warn("Login attempt by suspended user: {}", email);
             throw new OAuth2AuthenticationException("정지된 계정입니다. 관리자에게 문의하세요.");
         }
 
         if (user.getStatus() == UserStatus.INACTIVE) {
+            log.warn("Login attempt by inactive user: {}", email);
             throw new OAuth2AuthenticationException("비활성화된 계정입니다");
         }
 
-        // OAuth2로 로그인한 사용자가 PENDING 상태라면 자동으로 ACTIVE로 전환
-        // (Google 이메일은 이미 인증되었으므로)
         if (user.getStatus() == UserStatus.PENDING) {
             user.activate();
             userRepository.save(user);
             log.info("OAuth2 user activated: {}", email);
         }
-
-        // OAuth2SecurityUser 반환 (UserDetails + OAuth2User 구현)
-        return new OAuth2SecurityUser(user, oAuth2User.getAttributes(), "sub");
     }
 
-    /**
-     * 신규 OAuth2 사용자 생성
-     * - 이메일 인증 완료 상태로 생성 (Google 인증 완료)
-     * - ACTIVE 상태로 생성
-     * - 비밀번호는 랜덤 UUID (OAuth2만 사용)
-     */
-    private User createNewOAuth2User(
-            Email email,
-            String name
-    ) {
-        log.info("Creating new OAuth2 user: {}", email.value());
+    private User createNewOAuth2User(Email email, String name, String provider) {
+        log.info("Creating new OAuth2 user: email={}, provider={}", email.value(), provider);
 
-        // OAuth2 사용자는 비밀번호 로그인 불가 (정책 만족하는 랜덤 비밀번호)
         String oauthPassword = "OAuth2User!" + UUID.randomUUID().toString().replace("-", "");
         Password randomPassword = Password.of(oauthPassword);
 
@@ -115,9 +110,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 passwordEncoder
         );
 
-        // OAuth2 사용자는 이메일 인증 완료 상태로 생성
         newUser.activate(); // PENDING → ACTIVE
 
-        return userRepository.save(newUser);
+        User savedUser = userRepository.save(newUser);
+        log.info("New OAuth2 user created successfully: email={}, userId={}", email.value(), savedUser.getUserId());
+
+        return savedUser;
     }
 }

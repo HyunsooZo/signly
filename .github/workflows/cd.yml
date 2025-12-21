@@ -135,6 +135,10 @@ jobs:
             # Google OAuth2 설정
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            
+            # Naver OAuth2 설정
+            NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}
+            NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}
 
             # Base URL 설정
             APP_BASE_URL=${{ secrets.APP_BASE_URL }}
