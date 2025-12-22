@@ -3,6 +3,7 @@ package com.signly.template.application;
 import com.signly.common.audit.aop.Auditable;
 import com.signly.common.audit.domain.model.AuditAction;
 import com.signly.common.audit.domain.model.EntityType;
+import com.signly.common.cache.CacheEvictionService;
 import com.signly.common.exception.ForbiddenException;
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
@@ -18,11 +19,15 @@ import com.signly.template.domain.repository.TemplateRepository;
 import com.signly.user.domain.model.UserId;
 import com.signly.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -31,6 +36,7 @@ public class TemplateService {
     private final TemplateRepository templateRepository;
     private final UserRepository userRepository;
     private final TemplateDtoMapper templateDtoMapper;
+    private final CacheEvictionService cacheEvictionService;
 
     @Auditable(
             action = AuditAction.TEMPLATE_CREATED,
@@ -65,6 +71,7 @@ public class TemplateService {
             entityType = EntityType.TEMPLATE,
             entityIdParam = "#templateId"
     )
+    @CacheEvict(value = "templates", key = "#templateId")
     public TemplateResponse updateTemplate(
             String userId,
             String templateId,
@@ -86,6 +93,11 @@ public class TemplateService {
         template.updateContent(newContent);
 
         var updatedTemplate = templateRepository.save(template);
+        log.info("Updated template: {} (cache evicted)", templateId);
+
+        // 대시보드 통계 캐시 무효화
+        cacheEvictionService.evictTemplateStats(template.getOwnerId().value());
+
         return templateDtoMapper.toResponse(updatedTemplate);
     }
 
@@ -94,6 +106,7 @@ public class TemplateService {
             entityType = EntityType.TEMPLATE,
             entityIdParam = "#templateId"
     )
+    @CacheEvict(value = "templates", key = "#templateId")
     public void activateTemplate(
             String userId,
             String templateId
@@ -105,6 +118,10 @@ public class TemplateService {
         validateOwnership(userId, template);
         template.activate();
         templateRepository.save(template);
+        log.info("Activated template: {} (cache evicted)", templateId);
+
+        // 대시보드 통계 캐시 무효화
+        cacheEvictionService.evictTemplateStats(template.getOwnerId().value());
     }
 
     @Auditable(
@@ -112,6 +129,7 @@ public class TemplateService {
             entityType = EntityType.TEMPLATE,
             entityIdParam = "#templateId"
     )
+    @CacheEvict(value = "templates", key = "#templateId")
     public void archiveTemplate(
             String userId,
             String templateId
@@ -123,6 +141,10 @@ public class TemplateService {
         validateOwnership(userId, template);
         template.archive();
         templateRepository.save(template);
+        log.info("Archived template: {} (cache evicted)", templateId);
+
+        // 대시보드 통계 캐시 무효화
+        cacheEvictionService.evictTemplateStats(template.getOwnerId().value());
     }
 
     @Auditable(
@@ -130,6 +152,7 @@ public class TemplateService {
             entityType = EntityType.TEMPLATE,
             entityIdParam = "#templateId"
     )
+    @CacheEvict(value = "templates", key = "#templateId")
     public void deleteTemplate(
             String userId,
             String templateId
@@ -145,8 +168,15 @@ public class TemplateService {
         }
 
         templateRepository.delete(template);
+        log.info("Deleted template: {} (cache evicted)", templateId);
     }
 
+    /**
+     * 템플릿 조회 (캐싱 적용)
+     * 캐시 키: templateId (사용자별로 다른 템플릿이므로 userId는 키에 불필요)
+     * TTL: 1시간
+     */
+    @Cacheable(value = "templates", key = "#templateId")
     @Transactional(readOnly = true)
     public TemplateResponse getTemplate(
             String userId,
@@ -157,6 +187,7 @@ public class TemplateService {
                 .orElseThrow(() -> new NotFoundException("템플릿을 찾을 수 없습니다"));
 
         validateOwnership(userId, template);
+        log.info("Loaded template from DB: {} (cache miss)", templateId);
         return templateDtoMapper.toResponse(template);
     }
 

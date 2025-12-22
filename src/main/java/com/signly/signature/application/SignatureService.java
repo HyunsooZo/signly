@@ -10,8 +10,9 @@ import com.signly.contract.domain.model.ContractId;
 import com.signly.contract.domain.model.Signature;
 import com.signly.contract.domain.repository.SignatureRepository;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,27 +21,27 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class SignatureService {
-
-    private static final Logger logger = LoggerFactory.getLogger(SignatureService.class);
 
     private static final String STORAGE_CATEGORY_PREFIX = "signatures/contracts";
     private final SignatureRepository signatureRepository;
     private final SignatureDtoMapper mapper;
     private final FileStorageService fileStorageService;
 
+    @CacheEvict(value = "signatureStatus", key = "#command.contractId() + ':' + #command.signerEmail()")
     public void createSignature(CreateSignatureCommand command) {
         String normalizedEmail = normalizeEmail(command.signerEmail());
-        logger.info("서명 생성 시작: contractId={}, signerEmail={}", command.contractId(), normalizedEmail);
+        log.info("서명 생성 시작: contractId={}, signerEmail={}", command.contractId(), normalizedEmail);
 
         var contractId = ContractId.of(command.contractId());
 
         // 이미 서명이 존재하는 경우 기존 서명 반환 (중복 방지)
         if (signatureRepository.existsByContractIdAndSignerEmail(contractId, normalizedEmail)) {
-            logger.warn("이미 서명이 존재함, 기존 서명 반환: contractId={}, signerEmail={}", command.contractId(), normalizedEmail);
+            log.warn("이미 서명이 존재함, 기존 서명 반환: contractId={}, signerEmail={}", command.contractId(), normalizedEmail);
             var existingSignature = signatureRepository
                     .findByContractIdAndSignerEmail(contractId, normalizedEmail)
                     .orElseThrow(() -> new NotFoundException("서명을 찾을 수 없습니다"));
@@ -74,7 +75,7 @@ public class SignatureService {
 
         signatureRepository.save(contractId, signature);
 
-        logger.info("서명 생성 완료: signerEmail={}", normalizedEmail);
+        log.info("서명 생성 완료: signerEmail={} (cache evicted)", normalizedEmail);
         mapper.toResponse(signature);
     }
 
@@ -164,6 +165,12 @@ public class SignatureService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 계약서 서명 여부 조회 (캐싱 적용)
+     * 캐시 키: contractId + ':' + signerEmail
+     * TTL: 10분 (서명 상태는 중요한 정보이지만 짧게 설정)
+     */
+    @Cacheable(value = "signatureStatus", key = "#contractId + ':' + #signerEmail")
     @Transactional(readOnly = true)
     public boolean isContractSigned(
             String contractId,
@@ -172,7 +179,7 @@ public class SignatureService {
         ContractId cId = ContractId.of(contractId);
         String normalizedEmail = normalizeEmail(signerEmail);
         boolean exists = signatureRepository.existsByContractIdAndSignerEmail(cId, normalizedEmail);
-        logger.info("서명 여부 체크: contractId={}, signerEmail={}, exists={}", contractId, normalizedEmail, exists);
+        log.info("Checked signature status from DB: {}:{} (cache miss)", contractId, normalizedEmail);
         return exists;
     }
 
@@ -194,11 +201,14 @@ public class SignatureService {
     }
 
     public void deleteSignature(String signatureId) {
-        if (!signatureRepository.findById(signatureId).isPresent()) {
-            throw new NotFoundException("서명을 찾을 수 없습니다: " + signatureId);
-        }
+        var signature = signatureRepository.findById(signatureId)
+                .orElseThrow(() -> new NotFoundException("서명을 찾을 수 없습니다: " + signatureId));
+
+        // TODO: signature 엔티티에서 contractId를 알 수 없음
+        // 차후 repository에서 contractId를 조회하거나, signature 엔티티를 개선 필요
+        // 현재는 signature 삭제 시 캐시 자동 만료로 처리
 
         signatureRepository.delete(signatureId);
-        logger.info("서명 삭제 완료: signatureId={}", signatureId);
+        log.info("서명 삭제 완료: signatureId={}", signatureId);
     }
 }

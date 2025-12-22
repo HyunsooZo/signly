@@ -14,6 +14,9 @@ import com.signly.user.domain.model.Password;
 import com.signly.user.domain.model.User;
 import com.signly.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +26,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -85,12 +89,19 @@ public class UserService {
         return userDtoMapper.toResponse(savedUser);
     }
 
+    /**
+     * 이메일로 사용자 조회 (캐싱 적용)
+     * 캐시 키: email
+     * TTL: 30분
+     */
+    @Cacheable(value = "users", key = "#email")
     @Transactional(readOnly = true)
     public UserResponse getUserByEmail(String email) {
         var emailObj = Email.of(email);
         var user = userRepository.findByEmail(emailObj)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
 
+        log.info("Loaded user from DB: {} (cache miss)", email);
         return userDtoMapper.toResponse(user);
     }
 
@@ -114,6 +125,7 @@ public class UserService {
         return token;
     }
 
+    @CacheEvict(value = {"users", "userDetails"}, key = "#resetToken.email()")
     public void resetPassword(
             String token,
             String newPassword
@@ -139,6 +151,7 @@ public class UserService {
 
         // 토큰 삭제
         resetTokens.remove(token);
+        log.info("Reset password for user: {} (cache evicted)", resetToken.email());
     }
 
     @Transactional(readOnly = true)
@@ -159,7 +172,11 @@ public class UserService {
         // 도메인 로직에서 멱등성 처리
         user.verifyEmail(token);
 
-        userRepository.save(user);
+        var savedUser = userRepository.save(user);
+
+        // 이메일 인증 후 캐시 무효화 (사용자 상태 변경)
+        evictUserCache(savedUser.getEmail().value());
+        log.info("Email verified for user: {} (cache evicted)", savedUser.getEmail().value());
     }
 
     public void resendVerificationEmail(String email) {
@@ -193,8 +210,20 @@ public class UserService {
         );
 
         user.updateProfile(command.name(), company);
-        userRepository.save(user);
+        var savedUser = userRepository.save(user);
+
+        // 사용자 정보 업데이트 시 캐시 무효화
+        evictUserCache(savedUser.getEmail().value());
+        log.info("Updated user profile: {} (cache evicted)", savedUser.getEmail().value());
 
         userDtoMapper.toResponse(user);
+    }
+
+    /**
+     * 사용자 캐시 무효화 헬퍼 메서드
+     */
+    @CacheEvict(value = {"users", "userDetails"}, key = "#email")
+    private void evictUserCache(String email) {
+        // 캐시 무효화만 수행
     }
 }

@@ -3,11 +3,14 @@ package com.signly.common.security;
 import com.signly.user.domain.model.Email;
 import com.signly.user.domain.model.User;
 import com.signly.user.domain.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -17,11 +20,20 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * 사용자 인증 정보 로드 (캐싱 적용)
+     * 캐시 키: email
+     * TTL: 15분 (보안상 짧게 설정)
+     * <p>
+     * 주의: 권한이나 계정 상태가 변경될 경우 캐시 무효화 필요
+     */
+    @Cacheable(value = "userDetails", key = "#email")
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(Email.of(email))
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
 
+        log.info("Loaded user details from DB: {} (cache miss)", email);
         return new SecurityUser(user);
     }
 }

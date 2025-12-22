@@ -12,8 +12,8 @@ import com.signly.contract.domain.repository.ContractRepository;
 import com.signly.template.domain.model.TemplateId;
 import com.signly.user.domain.model.UserId;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,12 +26,11 @@ import java.util.stream.Collectors;
  * 계약서 조회 서비스
  * SRP: 읽기 전용 조회 책임만 담당
  */
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ContractQueryService {
-
-    private static final Logger logger = LoggerFactory.getLogger(ContractQueryService.class);
 
     private final ContractRepository contractRepository;
     private final ContractDtoMapper contractDtoMapper;
@@ -89,16 +88,22 @@ public class ContractQueryService {
         return contracts.stream().map(contractDtoMapper::toResponse).collect(Collectors.toList());
     }
 
+    /**
+     * 토큰으로 계약서 조회 (캐싱 적용)
+     * 캐시 키: token
+     * TTL: 2분 (서명은 시간에 민감하므로 매우 짧게 설정)
+     */
+    @Cacheable(value = "contractsByToken", key = "#token")
     public ContractResponse getContractByToken(String token) {
-        logger.info("토큰으로 계약서 조회 시작");
+        log.info("토큰으로 계약서 조회 시작");
         var signToken = SignToken.of(token);
         var contract = contractRepository.findBySignToken(signToken)
                 .orElseThrow(() -> {
-                    logger.error("서명 토큰으로 계약서를 찾을 수 없음");
+                    log.error("서명 토큰으로 계약서를 찾을 수 없음");
                     return new NotFoundException("유효하지 않은 서명 링크입니다");
                 });
 
-        logger.info("계약서 찾음: contractId={}, status={}", contract.getId().value(), contract.getStatus());
+        log.info("계약서 찾음: contractId={}, status={} (cache miss)", contract.getId().value(), contract.getStatus());
 
         if (contract.isExpired()) {
             throw new ValidationException("만료된 계약서입니다");

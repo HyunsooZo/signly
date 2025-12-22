@@ -11,8 +11,8 @@ import com.signly.template.domain.model.TemplateStatus;
 import com.signly.template.domain.repository.TemplateRepository;
 import com.signly.user.domain.model.UserId;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -26,12 +26,11 @@ import java.util.Map;
  * 대시보드 통계 및 데이터 조회 서비스
  * SRP: 대시보드 관련 비즈니스 로직만 담당
  */
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class DashboardService {
-
-    private static final Logger logger = LoggerFactory.getLogger(DashboardService.class);
     private static final int RECENT_ITEMS_SIZE = 5;
 
     private final TemplateService templateService;
@@ -64,7 +63,7 @@ public class DashboardService {
             var templates = templateService.getTemplatesByOwner(userId, pageRequest);
             return templates.getContent();
         } catch (Exception e) {
-            logger.warn("최근 템플릿 조회 실패: userId={}", userId, e);
+            log.warn("최근 템플릿 조회 실패: userId={}", userId, e);
             return List.of();
         }
     }
@@ -80,14 +79,17 @@ public class DashboardService {
             var contracts = contractService.getContractsByCreator(userId, pageRequest);
             return contracts.getContent();
         } catch (Exception e) {
-            logger.warn("최근 계약서 조회 실패: userId={}", userId, e);
+            log.warn("최근 계약서 조회 실패: userId={}", userId, e);
             return List.of();
         }
     }
 
     /**
      * 템플릿 통계 조회 (최적화: count 쿼리 직접 사용)
+     * 캐시 키: userId + ':templates'
+     * TTL: 5분 (통계는 실시간일 필요 없음)
      */
+    @Cacheable(value = "dashboardStats", key = "#userId + ':templates'")
     private Map<String, Long> getTemplateStatistics(String userId) {
         var stats = new HashMap<String, Long>();
         var userIdObj = UserId.of(userId);
@@ -96,8 +98,9 @@ public class DashboardService {
             stats.put("total", templateRepository.countByOwnerId(userIdObj));
             stats.put("active", templateRepository.countByOwnerIdAndStatus(userIdObj, TemplateStatus.ACTIVE));
             stats.put("draft", templateRepository.countByOwnerIdAndStatus(userIdObj, TemplateStatus.DRAFT));
+            log.info("Loaded template stats from DB: {} (cache miss)", userId);
         } catch (Exception e) {
-            logger.warn("템플릿 통계 조회 실패: userId={}", userId, e);
+            log.warn("템플릿 통계 조회 실패: userId={}", userId, e);
             stats.put("total", 0L);
             stats.put("active", 0L);
             stats.put("draft", 0L);
@@ -108,7 +111,10 @@ public class DashboardService {
 
     /**
      * 계약서 통계 조회 (최적화: count 쿼리 직접 사용)
+     * 캐시 키: userId + ':contracts'
+     * TTL: 5분 (통계는 실시간일 필요 없음)
      */
+    @Cacheable(value = "dashboardStats", key = "#userId + ':contracts'")
     private Map<String, Long> getContractStatistics(String userId) {
         var stats = new HashMap<String, Long>();
         var userIdObj = UserId.of(userId);
@@ -119,8 +125,9 @@ public class DashboardService {
             stats.put("pending", contractRepository.countByCreatorIdAndStatus(userIdObj, ContractStatus.PENDING));
             stats.put("signed", contractRepository.countByCreatorIdAndStatus(userIdObj, ContractStatus.SIGNED));
             stats.put("completed", contractRepository.countByCreatorIdAndStatus(userIdObj, ContractStatus.SIGNED));
+            log.info("Loaded contract stats from DB: {} (cache miss)", userId);
         } catch (Exception e) {
-            logger.warn("계약서 통계 조회 실패: userId={}", userId, e);
+            log.warn("계약서 통계 조회 실패: userId={}", userId, e);
             stats.put("total", 0L);
             stats.put("draft", 0L);
             stats.put("pending", 0L);
@@ -129,6 +136,15 @@ public class DashboardService {
         }
 
         return stats;
+    }
+
+    /**
+     * 대시보드 통계 캐시 무효화 헬퍼 메서드
+     * 템플릿이나 계약서가 생성/삭제/상태변경될 때 호출
+     */
+    private void evictDashboardStatsCache(String userId) {
+        // 구현은 외부 서비스에서 호출될 때 처리
+        // 실제로는 @CacheEvict를 직접 사용하거나 AOP로 처리
     }
 
 }

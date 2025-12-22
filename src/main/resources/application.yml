@@ -102,7 +102,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,metrics,prometheus,caches
   endpoint:
     health:
       show-details: ${HEALTH_SHOW_DETAILS:when_authorized}
@@ -110,6 +110,20 @@ management:
     export:
       prometheus:
         enabled: true
+    tags:
+      application: ${spring.application.name}
+  cache:
+    cache-names: variableDefinitions,templatePresets,templates,users,userDetails,dashboardStats,signatureStatus,contractsByToken
+  task:
+    scheduling:
+      enabled: true
+      pool:
+        size: 5
+    execution:
+      pool:
+        core-size: 10
+        max-size: 20
+        queue-capacity: 100
 
 springdoc:
   api-docs:

@@ -1,5 +1,6 @@
 package com.signly.contract.application;
 
+import com.signly.common.cache.CacheEvictionService;
 import com.signly.common.exception.ForbiddenException;
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
@@ -21,6 +22,7 @@ import com.signly.user.domain.model.UserId;
 import com.signly.user.domain.model.UserType;
 import com.signly.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -33,6 +35,7 @@ import java.util.Map;
  * 계약서 생성 서비스
  * SRP: 계약서 생성 및 수정 책임만 담당
  */
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -44,6 +47,7 @@ public class ContractCreationService {
     private final FirstPartySignatureService firstPartySignatureService;
     private final UnifiedTemplateRenderer unifiedTemplateRenderer;
     private final ContractAuthorizationService authorizationService;
+    private final CacheEvictionService cacheEvictionService;
 
     public Contract createContract(
             String userId,
@@ -84,7 +88,12 @@ public class ContractCreationService {
                 command.presetType()
         );
 
-        return contractRepository.save(contract);
+        var savedContract = contractRepository.save(contract);
+
+        // 대시보드 통계 캐시 무효화
+        cacheEvictionService.evictContractStats(userId);
+
+        return savedContract;
     }
 
     public Contract updateContract(
@@ -106,7 +115,12 @@ public class ContractCreationService {
             contract.updateExpirationDate(command.expiresAt());
         }
 
-        return contractRepository.save(contract);
+        var updatedContract = contractRepository.save(contract);
+
+        // 대시보드 통계 캐시 무효화
+        cacheEvictionService.evictContractStats(userId);
+
+        return updatedContract;
     }
 
     public void deleteContract(
@@ -123,6 +137,10 @@ public class ContractCreationService {
         }
 
         contractRepository.delete(contract);
+
+        // 대시보드 통계 캐시 무효화
+        cacheEvictionService.evictContractStats(userId);
+        log.info("Deleted contract: {} for user: {} (cache evicted)", contractId, userId);
     }
 
     private User validateUserAndPermissions(String userId) {
