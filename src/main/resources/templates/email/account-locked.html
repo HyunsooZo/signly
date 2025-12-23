@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>계정 잠금 안내</title>
+    <th:block th:replace="~{email/fragments/email-style :: email-style}"></th:block>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Nanum Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: #f5f5f5;">
+    <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; background-color: #f5f5f5;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">🔒</div>
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">계정이 잠겼습니다</h1>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
+                                안녕하세요, <strong th:text="${userName}">사용자</strong>님
+                            </p>
+
+                            <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
+                                보안을 위해 <span th:text="${lockedAt}">2025-12-23 14:30</span>에 계정이 잠겼습니다.
+                            </p>
+
+                            <!-- Alert Box -->
+                            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 25px 0; border-radius: 4px;">
+                                <h3 style="margin: 0 0 10px; font-size: 16px; color: #856404;">⚠️ 잠금 이유</h3>
+                                <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #856404;">
+                                    로그인 <strong>5회 연속 실패</strong>로 무단 접근 시도가 감지되었습니다.
+                                </p>
+                            </div>
+
+                            <!-- Instructions -->
+                            <h3 style="margin: 30px 0 15px; font-size: 18px; color: #333333;">계정 해제 방법</h3>
+                            <ol style="margin: 0 0 30px; padding-left: 20px; font-size: 15px; line-height: 1.8; color: #555555;">
+                                <li>아래 <strong>"계정 해제하기"</strong> 버튼을 클릭하세요</li>
+                                <li>자동으로 임시 비밀번호가 생성됩니다</li>
+                                <li>이메일로 발송된 임시 비밀번호로 로그인하세요</li>
+                                <li>로그인 후 새 비밀번호로 변경하세요</li>
+                            </ol>
+
+                            <!-- CTA Button -->
+                            <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a th:href="${unlockUrl}" 
+                                           style="display: inline-block; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: #ffffff; text-decoration: none; padding: 15px 40px; border-radius: 6px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(0,123,255,0.3);">
+                                            계정 해제하기
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Info Box -->
+                            <div style="background-color: #e7f3ff; border: 1px solid #b3d9ff; padding: 15px; margin: 25px 0; border-radius: 4px;">
+                                <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #004085;">
+                                    <strong>⏰ 유효기간:</strong> 이 링크는 <span th:text="${expiryHours}">24</span>시간 동안 유효합니다.<br>
+                                    <strong>🔗 링크:</strong> <span th:text="${unlockUrl}" style="word-break: break-all;">https://...</span>
+                                </p>
+                            </div>
+
+                            <!-- Help Text -->
+                            <p style="margin: 30px 0 0; font-size: 14px; line-height: 1.6; color: #666666; padding-top: 20px; border-top: 1px solid #eeeeee;">
+                                <strong>📧 이메일이 오지 않았나요?</strong><br>
+                                스팸함을 확인하시거나 <a href="mailto:support@signly.com" style="color: #007bff; text-decoration: none;">고객지원</a>에 문의하세요.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8f9fa; padding: 20px 30px; border-radius: 0 0 8px 8px; border-top: 1px solid #e9ecef;">
+                            <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #6c757d; text-align: center;">
+                                본인이 시도하지 않았다면 <strong>즉시</strong> 비밀번호를 변경하고 <a href="mailto:support@signly.com" style="color: #007bff; text-decoration: none;">고객지원</a>에 문의하세요.
+                            </p>
+                            <p style="margin: 10px 0 0; font-size: 11px; color: #adb5bd; text-align: center;">
+                                © 2025 Signly. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

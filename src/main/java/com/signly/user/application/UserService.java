@@ -5,14 +5,19 @@ import com.signly.common.audit.domain.model.AuditAction;
 import com.signly.common.audit.domain.model.EntityType;
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
+import com.signly.user.application.dto.ChangePasswordCommand;
 import com.signly.user.application.dto.RegisterUserCommand;
 import com.signly.user.application.dto.UserResponse;
 import com.signly.user.application.mapper.UserDtoMapper;
 import com.signly.user.domain.model.Company;
 import com.signly.user.domain.model.Email;
+import com.signly.user.domain.model.EncodedPassword;
 import com.signly.user.domain.model.Password;
 import com.signly.user.domain.model.User;
+import com.signly.user.domain.model.UserId;
 import com.signly.user.domain.repository.UserRepository;
+import com.signly.user.application.PasswordHistoryService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -20,6 +25,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -35,6 +42,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserDtoMapper userDtoMapper;
+    private final PasswordHistoryService passwordHistoryService;
     private final com.signly.notification.application.EmailNotificationService emailNotificationService;
 
     // 비밀번호 재설정 토큰 저장소 (실제 운영환경에서는 Redis나 DB 사용 권장)
@@ -217,6 +225,81 @@ public class UserService {
         log.info("Updated user profile: {} (cache evicted)", savedUser.getEmail().value());
 
         userDtoMapper.toResponse(user);
+    }
+
+    /**
+     * 비밀번호 변경
+     * - 기존 비밀번호 확인
+     * - 90일 이내 3개 비밀번호 재사용 방지
+     *
+     * @param userId 사용자 ID
+     * @param command 비밀번호 변경 요청
+     */
+    @Auditable(
+        entityType = EntityType.USER,
+        action = AuditAction.USER_PASSWORD_CHANGED,
+        entityIdParam = "#userId"
+    )
+    public void changePassword(String userId, ChangePasswordCommand command) {
+        var user = userRepository.findById(UserId.of(userId))
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
+
+        if (!user.isActive()) {
+            throw new ValidationException("활성화된 사용자만 비밀번호를 변경할 수 있습니다");
+        }
+
+        // 기존 비밀번호 확인
+        var oldPassword = Password.of(command.oldPassword());
+        if (!user.validatePassword(oldPassword, passwordEncoder)) {
+            throw new ValidationException("기존 비밀번호가 일치하지 않습니다");
+        }
+
+        // 새 비밀번호 유효성 검증
+        var newPassword = Password.of(command.newPassword());
+
+        // 90일 이내 3개 비밀번호 재사용 방지 검증
+        passwordHistoryService.validatePasswordReuse(user.getUserId(), newPassword);
+
+        // 기존 암호화된 비밀번호 저장 (이력용)
+        var oldEncodedPassword = user.getEncodedPassword();
+
+        // 비밀번호 변경
+        user.changePassword(oldPassword, newPassword, passwordEncoder, passwordHistoryService);
+        var savedUser = userRepository.save(user);
+
+        // 이력 저장 (변경 후의 암호화된 비밀번호)
+        var newEncodedPassword = EncodedPassword.of(savedUser.getEncodedPassword());
+        passwordHistoryService.savePasswordHistory(
+                user.getUserId(),
+                newEncodedPassword,
+                getCurrentIpAddress(),
+                null  // User-Agent는 HttpServletRequest에서 추출
+        );
+
+        // 사용자 정보 변경 시 캐시 무효화
+        evictUserCache(savedUser.getEmail().value());
+
+        log.info("Password changed successfully for user: {} (cache evicted)", savedUser.getEmail().value());
+    }
+
+    /**
+     * 현재 요청의 IP 주소 추출
+     */
+    private String getCurrentIpAddress() {
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                String xForwardedFor = request.getHeader("X-Forwarded-For");
+                if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+                    return xForwardedFor.split(",")[0].trim();
+                }
+                return request.getRemoteAddr();
+            }
+        } catch (Exception e) {
+            log.error("Failed to get IP address", e);
+        }
+        return "UNKNOWN";
     }
 
     /**

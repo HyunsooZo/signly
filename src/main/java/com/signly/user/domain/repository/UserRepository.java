@@ -24,5 +24,13 @@ public interface UserRepository {
      */
     Optional<User> findByVerificationToken(String token);
 
+    /**
+     * 계정 해제 토큰으로 사용자 조회
+     *
+     * @param token 계정 해제 토큰
+     * @return 사용자 (Optional)
+     */
+    Optional<User> findByUnlockToken(String token);
+
     void delete(User user);
 }

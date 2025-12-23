@@ -50,23 +50,28 @@ class EncryptionIntegrationTest {
         entityManager.clear();
 
         LocalDateTime now = LocalDateTime.now();
-        testUser = new UserEntity(
-            "01H8X9Y2Z3W4V5U6T7R8S9Q0W1",
-            "test@example.com",
-            "emailHashPlaceholder",
-            "encodedPassword",
-            "Test User",
-            "Test Company",
-            "010-1234-5678",
-            "서울시 강남구 테헤란로 123",
-            UserType.OWNER,
-            UserStatus.ACTIVE,
-            true,
-            null,
-            null,
-            now,
-            now
-        );
+        testUser = UserEntity.builder()
+            .userId("01H8X9Y2Z3W4V5U6T7R8S9Q0W1")
+            .email("test@example.com")
+            .emailHash("emailHashPlaceholder")
+            .password("encodedPassword")
+            .name("Test User")
+            .companyName("Test Company")
+            .businessPhone("010-1234-5678")
+            .businessAddress("서울시 강남구 테헤란로 123")
+            .userType(UserType.OWNER)
+            .status(UserStatus.ACTIVE)
+            .emailVerified(true)
+            .verificationToken("verificationToken")
+            .verificationTokenExpiry(now)
+            .failedLoginAttempts(0)
+            .lastFailedLoginAt(null)
+            .accountLockedAt(null)
+            .unlockToken("unlockToken")
+            .unlockTokenExpiry(now)
+            .createdAt(now)
+            .updatedAt(now)
+            .build();
     }
 
     @Test
@@ -251,22 +256,27 @@ class EncryptionIntegrationTest {
         LocalDateTime now = LocalDateTime.now();
         String email = "test" + userId + "@example.com";
         String emailHash = encryptionService.hashEmail(email);
-        return new UserEntity(
-            userId,
-            email,
-            emailHash,
-            "encodedPassword",
-            "Test User",
-            "Test Company",
-            null,
-            null,
-            UserType.OWNER,
-            UserStatus.ACTIVE,
-            true,
-            null,
-            null,
-            now,
-            now
-        );
+        return UserEntity.builder()
+            .userId(userId)
+            .email(email)
+            .emailHash(emailHash)
+            .password("encodedPassword")
+            .name("Test User")
+            .companyName("Test Company")
+            .businessPhone(null)
+            .businessAddress(null)
+            .userType(UserType.OWNER)
+            .status(UserStatus.ACTIVE)
+            .emailVerified(true)
+            .verificationToken("verificationToken")
+            .verificationTokenExpiry(now)
+            .failedLoginAttempts(0)
+            .lastFailedLoginAt(null)
+            .accountLockedAt(null)
+            .unlockToken("unlockToken")
+            .unlockTokenExpiry(now)
+            .createdAt(now)
+            .updatedAt(now)
+            .build();
     }
 }

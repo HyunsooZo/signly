@@ -1,12 +1,15 @@
 package com.signly.core.auth;
 
 import com.signly.common.email.EmailService;
+import com.signly.common.exception.AccountLockedException;
 import com.signly.common.exception.UnauthorizedException;
 import com.signly.common.security.SecurityUser;
 import com.signly.common.security.TokenRedisService;
 import com.signly.core.auth.dto.LoginRequest;
 import com.signly.core.auth.dto.LoginResponse;
+import com.signly.user.application.LoginAttemptService;
 import com.signly.user.application.UserService;
+import com.signly.user.application.dto.ChangePasswordCommand;
 import com.signly.user.domain.model.Email;
 import com.signly.user.domain.model.User;
 import com.signly.user.domain.model.UserStatus;
@@ -43,6 +46,7 @@ public class AuthWebController {
     private final TokenRedisService tokenRedisService;
     private final Environment environment;
     private final UserRepository userRepository;
+    private final LoginAttemptService loginAttemptService;
 
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
@@ -153,6 +157,21 @@ public class AuthWebController {
                 model.addAttribute("returnUrl", returnUrl);
             }
             return "auth/login";
+        } catch (AccountLockedException e) {
+            logger.warn("로그인 실패: {} - {}", loginRequest.email(), e.getMessage());
+            
+            // 계정 잠금 상태
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("isAccountLocked", true);
+            model.addAttribute("email", loginRequest.email());
+            
+            // 남은 로그인 시도 횟수는 0
+            model.addAttribute("remainingAttempts", 0);
+            
+            if (returnUrl != null) {
+                model.addAttribute("returnUrl", returnUrl);
+            }
+            return "auth/login";
         } catch (UnauthorizedException e) {
             logger.warn("로그인 실패: {} - {}", loginRequest.email(), e.getMessage());
 
@@ -163,6 +182,12 @@ public class AuthWebController {
                 model.addAttribute("isPendingUser", true);
             } else {
                 model.addAttribute("errorMessage", e.getMessage());
+                
+                // 남은 로그인 시도 횟수 추가
+                int remainingAttempts = loginAttemptService.getRemainingAttempts(loginRequest.email());
+                if (remainingAttempts > 0 && remainingAttempts < 5) {
+                    model.addAttribute("remainingAttempts", remainingAttempts);
+                }
             }
 
             model.addAttribute("email", loginRequest.email());
@@ -270,6 +295,40 @@ public class AuthWebController {
         }
     }
 
+    @PostMapping("/resend-unlock-email")
+    public String resendUnlockEmail(
+            @RequestParam String email,
+            HttpServletRequest request,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            logger.info("잠금 해제 이메일 재전송 요청: {}", email);
+
+            // 사용자가 존재하고 잠긴 상태인지 확인
+            User user = userRepository.findByEmail(Email.of(email))
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다"));
+
+            if (user.getStatus() != UserStatus.LOCKED) {
+                throw new IllegalArgumentException("잠긴 계정이 아닙니다");
+            }
+
+            // 잠금 해제 이메일 재전송
+            loginAttemptService.resendUnlockEmail(email, baseUrl);
+
+            logger.info("잠금 해제 이메일 재전송 완료: {}", email);
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "잠금 해제 링크를 이메일로 재전송했습니다. 이메일을 확인해주세요.");
+            return "redirect:/account-locked";
+
+        } catch (Exception e) {
+            logger.error("잠금 해제 이메일 재전송 실패: {} - {}", email, e.getMessage());
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("email", email);
+            return "auth/account-locked";
+        }
+    }
+
     @PostMapping("/reset-password")
     public String resetPassword(
             @RequestParam String token,
@@ -295,6 +354,34 @@ public class AuthWebController {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("token", token);
             return "auth/reset-password";
+        }
+    }
+
+    @GetMapping("/change-password")
+    public String changePasswordForm() {
+        return "auth/change-password";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(
+            @Valid @ModelAttribute ChangePasswordCommand command,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal SecurityUser securityUser,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (bindingResult.hasErrors()) {
+            return "auth/change-password";
+        }
+
+        try {
+            userService.changePassword(securityUser.getUser().getUserId().value(), command);
+            logger.info("Password changed for user: {}", securityUser.getUser().getUserId().value());
+            redirectAttributes.addFlashAttribute("successMessage", "비밀번호가 성공적으로 변경되었습니다.");
+            return "redirect:/profile";
+        } catch (Exception e) {
+            logger.error("Password change failed for user: {}", securityUser.getUser().getUserId().value(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/change-password";
         }
     }
 

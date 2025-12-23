@@ -64,6 +64,12 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Optional<User> findByUnlockToken(String token) {
+        return userJpaRepository.findByUnlockToken(token)
+                .map(userEntityMapper::toDomain);
+    }
+
+    @Override
     public void delete(User user) {
         userJpaRepository.deleteById(user.getUserId().value());
     }

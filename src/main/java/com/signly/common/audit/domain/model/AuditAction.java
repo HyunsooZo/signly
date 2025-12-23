@@ -30,6 +30,13 @@ public enum AuditAction {
     USER_PROFILE_UPDATED("프로필 수정"),
     USER_STATUS_CHANGED("상태 변경"),
 
+    // Login & Security
+    LOGIN_SUCCESS("로그인 성공"),
+    LOGIN_FAILED("로그인 실패"),
+    ACCOUNT_LOCKED("계정 잠금"),
+    ACCOUNT_UNLOCKED("계정 해제"),
+    PASSWORD_REUSE_ATTEMPT("비밀번호 재사용 시도"),
+
     // Signature
     FIRST_PARTY_SIGNATURE_UPLOADED("갑 서명 업로드"),
     FIRST_PARTY_SIGNATURE_UPDATED("갑 서명 수정");

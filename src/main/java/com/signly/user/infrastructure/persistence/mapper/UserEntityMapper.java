@@ -35,6 +35,11 @@ public class UserEntityMapper {
                 user.isEmailVerified(),
                 user.getVerificationTokenValue(),
                 user.getVerificationTokenExpiry(),
+                user.getFailedLoginAttempts(),
+                user.getLastFailedLoginAt(),
+                user.getAccountLockedAt(),
+                user.getUnlockTokenValue(),
+                user.getUnlockTokenExpiry(),
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );
@@ -59,6 +64,11 @@ public class UserEntityMapper {
                 entity.isEmailVerified(),
                 entity.getVerificationToken(),
                 entity.getVerificationTokenExpiry(),
+                entity.getFailedLoginAttempts(),
+                entity.getLastFailedLoginAt(),
+                entity.getAccountLockedAt(),
+                entity.getUnlockToken(),
+                entity.getUnlockTokenExpiry(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
@@ -78,6 +88,11 @@ public class UserEntityMapper {
         entity.setEmailVerified(user.isEmailVerified());
         entity.setVerificationToken(user.getVerificationTokenValue());
         entity.setVerificationTokenExpiry(user.getVerificationTokenExpiry());
+        entity.setFailedLoginAttempts(user.getFailedLoginAttempts());
+        entity.setLastFailedLoginAt(user.getLastFailedLoginAt());
+        entity.setAccountLockedAt(user.getAccountLockedAt());
+        entity.setUnlockToken(user.getUnlockTokenValue());
+        entity.setUnlockTokenExpiry(user.getUnlockTokenExpiry());
         entity.setUpdatedAt(user.getUpdatedAt());
     }
 }

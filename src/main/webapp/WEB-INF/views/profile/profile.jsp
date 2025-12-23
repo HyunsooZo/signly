@@ -21,6 +21,11 @@
                                         나의 정보 관리하기
                                     </h2>
                                     <p class="text-muted mb-0">계약서에 자동으로 삽입될 정보 및 서명을 등록하고 관리하세요.</p>
+                                    <div class="mt-2">
+                                        <a href="/change-password" class="btn btn-sm btn-outline-warning">
+                                            <i class="bi bi-key me-1"></i>비밀번호 변경
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
 

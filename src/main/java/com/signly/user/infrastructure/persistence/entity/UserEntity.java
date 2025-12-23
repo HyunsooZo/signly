@@ -14,12 +14,15 @@ import java.time.LocalDateTime;
         @Index(name = "idx_user_type", columnList = "user_type"),
         @Index(name = "idx_user_status_type", columnList = "status, user_type"),
         @Index(name = "idx_user_created_at", columnList = "created_at"),
-        @Index(name = "idx_verification_token", columnList = "verification_token")
+        @Index(name = "idx_verification_token", columnList = "verification_token"),
+        @Index(name = "idx_unlock_token", columnList = "unlock_token"),
+        @Index(name = "idx_account_locked", columnList = "status, account_locked_at")
 })
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Builder
 public class UserEntity {
 
     @Id
@@ -68,6 +71,21 @@ public class UserEntity {
 
     @Column(name = "verification_token_expiry")
     private LocalDateTime verificationTokenExpiry;
+
+    @Column(name = "failed_login_attempts", nullable = false)
+    private int failedLoginAttempts;
+
+    @Column(name = "last_failed_login_at")
+    private LocalDateTime lastFailedLoginAt;
+
+    @Column(name = "account_locked_at")
+    private LocalDateTime accountLockedAt;
+
+    @Column(name = "unlock_token", length = 255)
+    private String unlockToken;
+
+    @Column(name = "unlock_token_expiry")
+    private LocalDateTime unlockTokenExpiry;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

@@ -17,6 +17,22 @@
 
                     <c:if test="${not empty errorMessage}">
                         <c:choose>
+                            <c:when test="${isAccountLocked}">
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert"
+                                    data-auto-dismiss="false">
+                                    <strong>🔒 계정 잠금</strong>
+                                    <p class="mb-2">
+                                        <c:out value="${errorMessage}" />
+                                    </p>
+                                    <div class="mt-3">
+                                        <a href="/account-locked" class="btn btn-sm btn-outline-danger">
+                                            잠금 해제 방법 확인
+                                        </a>
+                                    </div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                                </div>
+                            </c:when>
                             <c:when test="${isPendingUser}">
                                 <div class="alert alert-warning alert-dismissible fade show" role="alert"
                                     data-auto-dismiss="false">
@@ -40,6 +56,11 @@
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert"
                                     data-auto-dismiss="true">
                                     <c:out value="${errorMessage}" />
+                                    <c:if test="${not empty remainingAttempts and remainingAttempts > 0}">
+                                        <small class="d-block mt-2 text-muted">
+                                            남은 로그인 시도 횟수: <strong>${remainingAttempts}</strong> 회
+                                        </small>
+                                    </c:if>
                                     <button type="button" class="btn-close" data-bs-dismiss="alert"
                                         aria-label="Close"></button>
                                 </div>

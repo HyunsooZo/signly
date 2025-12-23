@@ -81,9 +81,128 @@ const AuthManager = {
 window.AuthManager = AuthManager;
 
 /**
- * 페이지 로드 시 자동 인증 체크
+ * 로그인 실패 횟수 관리
+ */
+const LoginAttemptTracker = {
+    /**
+     * 로그인 실패 횟수 저장
+     */
+    saveFailureCount(count) {
+        sessionStorage.setItem('loginFailureCount', count.toString());
+    },
+
+    /**
+     * 로그인 실패 횟수 가져오기
+     */
+    getFailureCount() {
+        const count = sessionStorage.getItem('loginFailureCount');
+        return count ? parseInt(count) : 0;
+    },
+
+    /**
+     * 로그인 실패 횟수 초기화
+     */
+    resetFailureCount() {
+        sessionStorage.removeItem('loginFailureCount');
+    },
+
+    /**
+     * 남은 로그인 시도 횟수 계산
+     */
+    getRemainingAttempts() {
+        return Math.max(0, 5 - this.getFailureCount());
+    }
+};
+
+// 전역으로 노출
+window.LoginAttemptTracker = LoginAttemptTracker;
+
+/**
+ * 로그인 폼 처리
+ */
+function setupLoginForm() {
+    const loginForm = document.querySelector('form[action="/login"]');
+    if (!loginForm) return;
+
+    loginForm.addEventListener('submit', function(e) {
+        const emailInput = document.querySelector('#email');
+        const email = emailInput ? emailInput.value : '';
+        
+        // 이메일이 변경되면 실패 횟수 초기화
+        const lastEmail = sessionStorage.getItem('lastLoginEmail');
+        if (lastEmail && lastEmail !== email) {
+            LoginAttemptTracker.resetFailureCount();
+        }
+        sessionStorage.setItem('lastLoginEmail', email);
+    });
+
+    // 남은 시도 횟수 표시
+    const remainingAttempts = LoginAttemptTracker.getRemainingAttempts();
+    if (remainingAttempts < 5) {
+        updateRemainingAttemptsDisplay(remainingAttempts);
+    }
+}
+
+/**
+ * 남은 로그인 시도 횟수 표시 업데이트
+ */
+function updateRemainingAttemptsDisplay(remaining) {
+    const existingElement = document.querySelector('.remaining-attempts');
+    if (existingElement) {
+        existingElement.remove();
+    }
+
+    if (remaining > 0 && remaining < 5) {
+        const alertElement = document.querySelector('.alert-danger');
+        if (alertElement) {
+            const remainingDiv = document.createElement('div');
+            remainingDiv.className = 'remaining-attempts';
+            remainingDiv.innerHTML = `
+                <small class="d-block mt-2 text-muted">
+                    남은 로그인 시도 횟수: <strong>${remaining}</strong> 회
+                </small>
+            `;
+            alertElement.appendChild(remainingDiv);
+        }
+    }
+}
+
+/**
+ * 로그인 실패 처리
+ */
+function handleLoginFailure(errorMessage) {
+    // 계정 잠금 메시지 확인
+    if (errorMessage.includes('잠겨있습니다') || errorMessage.includes('계정이 잠겨있습니다')) {
+        // 잠금 상태면 실패 횟수 초기화
+        LoginAttemptTracker.resetFailureCount();
+        return;
+    }
+
+    // 일반 로그인 실패 처리
+    let currentCount = LoginAttemptTracker.getFailureCount();
+    currentCount++;
+    LoginAttemptTracker.saveFailureCount(currentCount);
+
+    const remainingAttempts = LoginAttemptTracker.getRemainingAttempts();
+    
+    if (remainingAttempts > 0) {
+        console.warn(`로그인 실패: ${currentCount}회 실패, 남은 시도: ${remainingAttempts}회`);
+        updateRemainingAttemptsDisplay(remainingAttempts);
+    }
+
+    // 5회 실패 시 경고
+    if (remainingAttempts === 0) {
+        console.error('5회 로그인 실패 - 계정 잠금 예정');
+    }
+}
+
+/**
+ * 페이지 로드 시 자동 인증 체크 및 로그인 폼 설정
  */
 document.addEventListener('DOMContentLoaded', function () {
+    // 로그인 폼 설정
+    setupLoginForm();
+
     // 로그인 페이지가 아닌 경우에만 체크
     const isLoginPage = window.location.pathname === '/login';
     const isPublicPage = window.location.pathname.startsWith('/sign/');
@@ -94,5 +213,14 @@ document.addEventListener('DOMContentLoaded', function () {
             // 인증 실패 시 조용히 처리
             console.log('인증 상태 확인 실패');
         });
+    }
+
+    // 로그인 페이지인 경우 실패 횟수 표시
+    if (isLoginPage) {
+        const errorMessageElement = document.querySelector('.alert-danger');
+        if (errorMessageElement) {
+            const errorText = errorMessageElement.textContent || '';
+            handleLoginFailure(errorText);
+        }
     }
 });

@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -32,6 +33,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(Email.of(email))
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
+
+        if (user.isLocked()) {
+            log.warn("Login attempt for locked account: {}", email);
+            throw new DisabledException("계정이 잠겨있습니다. 이메일을 확인해주세요.");
+        }
 
         log.info("Loaded user details from DB: {} (cache miss)", email);
         return new SecurityUser(user);

@@ -2,6 +2,7 @@ package com.signly.user.domain.model;
 
 import com.signly.common.domain.AggregateRoot;
 import com.signly.common.exception.ValidationException;
+import com.signly.user.application.PasswordHistoryService;
 import lombok.Getter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -24,6 +25,11 @@ public class User extends AggregateRoot {
     private UserStatus status;
     private boolean emailVerified;
     private VerificationToken verificationToken;
+    @Getter
+    private int failedLoginAttempts;
+    private LocalDateTime lastFailedLoginAt;
+    private LocalDateTime accountLockedAt;
+    private AccountUnlockToken unlockToken;
 
     protected User() {
         super();
@@ -39,6 +45,10 @@ public class User extends AggregateRoot {
             UserStatus status,
             boolean emailVerified,
             VerificationToken verificationToken,
+            int failedLoginAttempts,
+            LocalDateTime lastFailedLoginAt,
+            LocalDateTime accountLockedAt,
+            AccountUnlockToken unlockToken,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
@@ -52,6 +62,10 @@ public class User extends AggregateRoot {
         this.status = status;
         this.emailVerified = emailVerified;
         this.verificationToken = verificationToken;
+        this.failedLoginAttempts = failedLoginAttempts;
+        this.lastFailedLoginAt = lastFailedLoginAt;
+        this.accountLockedAt = accountLockedAt;
+        this.unlockToken = unlockToken;
     }
 
     public static User create(
@@ -80,6 +94,10 @@ public class User extends AggregateRoot {
                 status,
                 emailVerified,
                 verificationToken,
+                0,  // failedLoginAttempts
+                null,  // lastFailedLoginAt
+                null,  // accountLockedAt
+                null,  // unlockToken
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
@@ -96,6 +114,11 @@ public class User extends AggregateRoot {
             boolean emailVerified,
             String verificationTokenValue,
             LocalDateTime verificationTokenExpiry,
+            int failedLoginAttempts,
+            LocalDateTime lastFailedLoginAt,
+            LocalDateTime accountLockedAt,
+            String unlockTokenValue,
+            LocalDateTime unlockTokenExpiry,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
@@ -103,6 +126,11 @@ public class User extends AggregateRoot {
         VerificationToken token = null;
         if (verificationTokenValue != null && verificationTokenExpiry != null) {
             token = VerificationToken.of(verificationTokenValue, verificationTokenExpiry);
+        }
+        
+        AccountUnlockToken unlockToken = null;
+        if (unlockTokenValue != null && unlockTokenExpiry != null) {
+            unlockToken = AccountUnlockToken.of(unlockTokenValue, unlockTokenExpiry);
         }
 
         return new User(
@@ -115,6 +143,10 @@ public class User extends AggregateRoot {
                 status,
                 emailVerified,
                 token,
+                failedLoginAttempts,
+                lastFailedLoginAt,
+                accountLockedAt,
+                unlockToken,
                 createdAt,
                 updatedAt
         );
@@ -166,7 +198,8 @@ public class User extends AggregateRoot {
     public void changePassword(
             Password oldPassword,
             Password newPassword,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            PasswordHistoryService passwordHistoryService
     ) {
         if (!validatePassword(oldPassword, passwordEncoder)) {
             throw new ValidationException("기존 비밀번호가 일치하지 않습니다");
@@ -316,5 +349,163 @@ public class User extends AggregateRoot {
             return false;
         }
         return !company.name().trim().isEmpty();
+    }
+
+    // ========== 계정 잠금 관련 메서드 ==========
+
+    /**
+     * 로그인 실패 기록
+     * - 실패 횟수 증가
+     * - 5회 실패 시 자동 잠금
+     */
+    public void recordFailedLogin() {
+        this.failedLoginAttempts++;
+        this.lastFailedLoginAt = LocalDateTime.now();
+        updateTimestamp();
+
+        // 5회 실패 시 계정 잠금
+        if (this.failedLoginAttempts >= 5) {
+            this.lockAccount();
+        }
+    }
+
+    /**
+     * 로그인 성공 시 실패 횟수 초기화
+     */
+    public void resetLoginAttempts() {
+        this.failedLoginAttempts = 0;
+        this.lastFailedLoginAt = null;
+        updateTimestamp();
+    }
+
+    /**
+     * 계정 잠금
+     * - LOCKED 상태로 변경
+     * - 잠금 시각 기록
+     * - 해제 토큰 생성
+     */
+    public void lockAccount() {
+        if (this.status == UserStatus.LOCKED) {
+            return;  // 이미 잠긴 계정은 재잠금 방지
+        }
+
+        this.status = UserStatus.LOCKED;
+        this.accountLockedAt = LocalDateTime.now();
+        this.unlockToken = AccountUnlockToken.generate();
+        updateTimestamp();
+    }
+
+    /**
+     * 계정 해제 (토큰 검증 후)
+     * - 토큰 검증
+     * - ACTIVE 상태로 복구
+     * - 임시 비밀번호 반환
+     *
+     * @param token 계정 해제 토큰
+     * @return 암호화 전 임시 비밀번호
+     */
+    public String unlockAccount(String token) {
+        if (this.status != UserStatus.LOCKED) {
+            throw new ValidationException("잠긴 계정이 아닙니다");
+        }
+
+        if (this.unlockToken == null) {
+            throw new ValidationException("해제 토큰이 없습니다. 고객지원에 문의해주세요.");
+        }
+
+        // 토큰 검증 (만료 + 일치)
+        this.unlockToken.validate(token);
+
+        // 임시 비밀번호 생성
+        String tempPassword = generateTemporaryPassword();
+
+        // 계정 해제
+        this.status = UserStatus.ACTIVE;
+        this.accountLockedAt = null;
+        this.unlockToken = null;
+        this.resetLoginAttempts();
+        updateTimestamp();
+
+        return tempPassword;
+    }
+
+    /**
+     * 계정 잠금 여부 확인
+     */
+    public boolean isLocked() {
+        return this.status == UserStatus.LOCKED;
+    }
+
+    /**
+     * 남은 로그인 시도 횟수 반환
+     */
+    public int getRemainingLoginAttempts() {
+        return Math.max(0, 5 - this.failedLoginAttempts);
+    }
+
+    /**
+     * 임시 비밀번호 생성
+     * - 영문 대소문자 + 숫자 + 특수문자 조합
+     * - 8자리 랜덤
+     */
+    private String generateTemporaryPassword() {
+        String uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lowercase = "abcdefghijklmnopqrstuvwxyz";
+        String digits = "0123456789";
+        String special = "@$!%*#?&";
+
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        StringBuilder password = new StringBuilder(8);
+
+        // 최소 1개씩 보장
+        password.append(uppercase.charAt(random.nextInt(uppercase.length())));
+        password.append(lowercase.charAt(random.nextInt(lowercase.length())));
+        password.append(digits.charAt(random.nextInt(digits.length())));
+        password.append(special.charAt(random.nextInt(special.length())));
+
+        // 나머지 4자리 랜덤
+        String allChars = uppercase + lowercase + digits + special;
+        for (int i = 0; i < 4; i++) {
+            password.append(allChars.charAt(random.nextInt(allChars.length())));
+        }
+
+        // 셔플
+        char[] chars = password.toString().toCharArray();
+        for (int i = chars.length - 1; i > 0; i--) {
+            int j = random.nextInt(i + 1);
+            char temp = chars[i];
+            chars[i] = chars[j];
+            chars[j] = temp;
+        }
+
+        return new String(chars);
+    }
+
+    /**
+     * 계정 해제 토큰 값 반환 (영속성 계층 전용)
+     */
+    public String getUnlockTokenValue() {
+        return unlockToken != null ? unlockToken.getValue() : null;
+    }
+
+    /**
+     * 계정 해제 토큰 만료 시간 반환 (영속성 계층 전용)
+     */
+    public LocalDateTime getUnlockTokenExpiry() {
+        return unlockToken != null ? unlockToken.getExpiryTime() : null;
+    }
+
+    /**
+     * 마지막 로그인 실패 시각 반환
+     */
+    public LocalDateTime getLastFailedLoginAt() {
+        return lastFailedLoginAt;
+    }
+
+    /**
+     * 계정 잠금 시각 반환
+     */
+    public LocalDateTime getAccountLockedAt() {
+        return accountLockedAt;
     }
 }

@@ -318,23 +318,28 @@ class EmailEncryptionIntegrationTest {
 
     private UserEntity createTestUser(String userId, String email, String emailHash) {
         LocalDateTime now = LocalDateTime.now();
-        return new UserEntity(
-            userId,
-            email,
-            emailHash,
-            "encodedPassword",
-            "Test User",
-            "Test Company",
-            "010-1234-5678",
-            "서울시 강남구 테헤란로 123",
-            UserType.OWNER,
-            UserStatus.ACTIVE,
-            true,
-            null,
-            null,
-            now,
-            now
-        );
+        return UserEntity.builder()
+            .userId(userId)
+            .email(email)
+            .emailHash(emailHash)
+            .password("encodedPassword")
+            .name("Test User")
+            .companyName("Test Company")
+            .businessPhone("010-1234-5678")
+            .businessAddress("서울시 강남구 테헤란로 123")
+            .userType(UserType.OWNER)
+            .status(UserStatus.ACTIVE)
+            .emailVerified(true)
+            .verificationToken("verificationToken")
+            .verificationTokenExpiry(now)
+            .failedLoginAttempts(0)
+            .lastFailedLoginAt(null)
+            .accountLockedAt(null)
+            .unlockToken("unlockToken")
+            .unlockTokenExpiry(now)
+            .createdAt(now)
+            .updatedAt(now)
+            .build();
     }
 
     private ContractJpaEntity createTestContract(

@@ -1,13 +1,16 @@
 package com.signly.user.domain.model;
 
 import com.signly.common.exception.ValidationException;
+import com.signly.user.application.PasswordHistoryService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class UserTest {
 
@@ -15,6 +18,8 @@ class UserTest {
     private Email validEmail;
     private Password validPassword;
     private Company testCompany;
+    @Mock
+    private PasswordHistoryService passwordHistoryService;
 
     @BeforeEach
     void setUp() {
@@ -165,13 +170,13 @@ class UserTest {
         assertThat(user.getCompany()).isEqualTo(newCompany);
     }
 
-    @Test
-    @DisplayName("비밀번호를 변경할 수 있다")
+@Test
+    @DisplayName("올바른 기존 비밀번호로 변경하면 성공한다")
     void changePassword_WithCorrectOldPassword_ShouldChangePassword() {
         User user = User.create(validEmail, validPassword, "홍길동", testCompany, UserType.OWNER, passwordEncoder);
         Password newPassword = Password.of("NewPass123!@#");
 
-        user.changePassword(validPassword, newPassword, passwordEncoder);
+        user.changePassword(validPassword, newPassword, passwordEncoder, passwordHistoryService);
 
         assertThat(user.validatePassword(newPassword, passwordEncoder)).isTrue();
         assertThat(user.validatePassword(validPassword, passwordEncoder)).isFalse();
@@ -184,7 +189,7 @@ class UserTest {
         Password wrongPassword = Password.of("Wrong123!@#");
         Password newPassword = Password.of("NewPass123!@#");
 
-        assertThatThrownBy(() -> user.changePassword(wrongPassword, newPassword, passwordEncoder))
+        assertThatThrownBy(() -> user.changePassword(wrongPassword, newPassword, passwordEncoder, passwordHistoryService))
                 .isInstanceOf(ValidationException.class)
                 .hasMessage("기존 비밀번호가 일치하지 않습니다");
     }
