@@ -224,15 +224,15 @@ public class AuthWebController {
             logger.info("로그아웃 완료: userId={}", userId);
         }
 
-        // 쿠키 삭제
+        // 쿠키 삭제 (생성 시와 동일한 속성으로 삭제해야 함)
         Cookie authCookie = new Cookie("authToken", "");
-        authCookie.setHttpOnly(false);
+        authCookie.setHttpOnly(true);  // 생성 시와 동일하게 설정
         authCookie.setPath("/");
         authCookie.setMaxAge(0);
         response.addCookie(authCookie);
 
         Cookie refreshCookie = new Cookie("refreshToken", "");
-        refreshCookie.setHttpOnly(false);
+        refreshCookie.setHttpOnly(true);  // 생성 시와 동일하게 설정
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(0);
         response.addCookie(refreshCookie);

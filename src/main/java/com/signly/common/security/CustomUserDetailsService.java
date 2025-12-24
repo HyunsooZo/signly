@@ -22,13 +22,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     /**
-     * 사용자 인증 정보 로드 (캐싱 적용)
-     * 캐시 키: email
-     * TTL: 15분 (보안상 짧게 설정)
-     * <p>
-     * 주의: 권한이나 계정 상태가 변경될 경우 캐시 무효화 필요
+     * 사용자 인증 정보 로드
+     * 캐싱 제거: 사용자 정보는 자주 변경되고 민감하므로 캐싱하지 않음
      */
-    @Cacheable(value = "userDetails", key = "#email")
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(Email.of(email))
@@ -39,10 +35,9 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new DisabledException("계정이 잠겨있습니다. 이메일을 확인해주세요.");
         }
 
-        log.info("Loaded user details from DB: {} (cache miss)", email);
+        log.debug("Loaded user details from DB: {}", email);
 
-        // SecurityUser를 생성한 후 DTO로 변환하여 캐시
-        SecurityUser securityUser = new SecurityUser(user);
-        return UserDetailsDTO.from(securityUser);
+        // SecurityUser를 생성하여 반환
+        return new SecurityUser(user);
     }
 }

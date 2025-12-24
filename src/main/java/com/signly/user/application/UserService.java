@@ -98,18 +98,16 @@ public class UserService {
     }
 
     /**
-     * 이메일로 사용자 조회 (캐싱 적용)
-     * 캐시 키: email
-     * TTL: 30분
+     * 이메일로 사용자 조회
+     * 캐싱 제거: 사용자 정보는 자주 변경되고 민감하므로 캐싱하지 않음
      */
-    @Cacheable(value = "users", key = "#email")
     @Transactional(readOnly = true)
     public UserResponse getUserByEmail(String email) {
         var emailObj = Email.of(email);
         var user = userRepository.findByEmail(emailObj)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다"));
 
-        log.info("Loaded user from DB: {} (cache miss)", email);
+        log.debug("Loaded user from DB: {}", email);
         return userDtoMapper.toResponse(user);
     }
 
@@ -133,7 +131,6 @@ public class UserService {
         return token;
     }
 
-    @CacheEvict(value = {"users", "userDetails"}, key = "#resetToken.email()")
     public void resetPassword(
             String token,
             String newPassword
@@ -182,9 +179,7 @@ public class UserService {
 
         var savedUser = userRepository.save(user);
 
-        // 이메일 인증 후 캐시 무효화 (사용자 상태 변경)
-        evictUserCache(savedUser.getEmail().value());
-        log.info("Email verified for user: {} (cache evicted)", savedUser.getEmail().value());
+        log.info("Email verified for user: {}", savedUser.getEmail().value());
     }
 
     public void resendVerificationEmail(String email) {
@@ -220,9 +215,7 @@ public class UserService {
         user.updateProfile(command.name(), company);
         var savedUser = userRepository.save(user);
 
-        // 사용자 정보 업데이트 시 캐시 무효화
-        evictUserCache(savedUser.getEmail().value());
-        log.info("Updated user profile: {} (cache evicted)", savedUser.getEmail().value());
+        log.info("Updated user profile: {}", savedUser.getEmail().value());
 
         userDtoMapper.toResponse(user);
     }
@@ -276,10 +269,7 @@ public class UserService {
                 null  // User-Agent는 HttpServletRequest에서 추출
         );
 
-        // 사용자 정보 변경 시 캐시 무효화
-        evictUserCache(savedUser.getEmail().value());
-
-        log.info("Password changed successfully for user: {} (cache evicted)", savedUser.getEmail().value());
+        log.info("Password changed successfully for user: {}", savedUser.getEmail().value());
     }
 
     /**
@@ -302,11 +292,4 @@ public class UserService {
         return "UNKNOWN";
     }
 
-    /**
-     * 사용자 캐시 무효화 헬퍼 메서드
-     */
-    @CacheEvict(value = {"users", "userDetails"}, key = "#email")
-    private void evictUserCache(String email) {
-        // 캐시 무효화만 수행
-    }
 }

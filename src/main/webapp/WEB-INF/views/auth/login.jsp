@@ -169,25 +169,46 @@
             <jsp:include page="../common/footer.jsp" />
             <script src="/js/auth-pages.js"></script>
             <script>
+                // 전역 스토리지 정리 함수
+                function clearAllAuthStorage() {
+                    console.log('[INFO] 인증 스토리지 정리 시작');
+
+                    // LocalStorage 정리
+                    const keysToRemove = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        // signly_ 로 시작하는 모든 키 + 기타 인증 관련 키
+                        if (key && (key.startsWith('signly_') ||
+                                   key.includes('token') ||
+                                   key.includes('auth') ||
+                                   key.includes('user'))) {
+                            keysToRemove.push(key);
+                        }
+                    }
+                    keysToRemove.forEach(key => localStorage.removeItem(key));
+
+                    // SessionStorage 완전 초기화
+                    sessionStorage.clear();
+
+                    console.log('[INFO] 인증 스토리지 정리 완료:', keysToRemove);
+                }
+
                 // OAuth2 로그인 전 스토리지 정리 공통 함수
                 function clearAuthStorageForOAuth2(provider) {
                     console.log('[INFO] ' + provider + ' OAuth2 로그인 - 스토리지 정리 시작');
-
-                    // 모든 인증 관련 스토리지 정리
-                    if (typeof clearAllAuthStorage === 'function') {
-                        clearAllAuthStorage();
-                    } else {
-                        // fallback: 직접 정리
-                        localStorage.removeItem('signly_access_token');
-                        localStorage.removeItem('signly_refresh_token');
-                        localStorage.removeItem('signly_user_info');
-                        localStorage.removeItem('signly_owner_signature');
-                        sessionStorage.clear();
-                    }
-
+                    clearAllAuthStorage();
                     console.log('[INFO] ' + provider + ' OAuth2 로그인 - 스토리지 정리 완료');
                     return true;
                 }
+
+                // 페이지 로드 시 로그아웃 메시지가 있으면 스토리지 정리
+                document.addEventListener('DOMContentLoaded', function() {
+                    const successMessage = '<c:out value="${successMessage}" />';
+                    if (successMessage && successMessage.includes('로그아웃')) {
+                        console.log('[INFO] 로그아웃 감지 - 스토리지 정리');
+                        clearAllAuthStorage();
+                    }
+                });
 
                 // Google 로그인 전 스토리지 정리
                 function handleGoogleLogin(event) {
