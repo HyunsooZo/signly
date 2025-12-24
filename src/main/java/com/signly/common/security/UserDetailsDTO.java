@@ -1,6 +1,7 @@
 package com.signly.common.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDetailsDTO implements UserPrincipal, Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -49,11 +51,13 @@ public class UserDetailsDTO implements UserPrincipal, Serializable {
                 .collect(Collectors.toList());
     }
 
+    @JsonIgnore
     @Override
     public String getPassword() {
         return encodedPassword;
     }
 
+    @JsonIgnore
     @Override
     public String getUsername() {
         return email;
