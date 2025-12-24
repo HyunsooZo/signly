@@ -1,5 +1,6 @@
 package com.signly.common.security;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,15 +30,21 @@ public class UserDetailsDTO implements UserPrincipal, Serializable {
     private String businessAddress;
     private String userType;
     private String status;
-    private List<String> authorities;
+
+    private List<String> roles;
+
     private boolean accountNonExpired;
     private boolean accountNonLocked;
     private boolean credentialsNonExpired;
     private boolean enabled;
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities.stream()
+        if (roles == null) {
+            return List.of();
+        }
+        return roles.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
@@ -63,11 +70,13 @@ public class UserDetailsDTO implements UserPrincipal, Serializable {
         dto.setBusinessAddress(securityUser.getBusinessAddress());
         dto.setUserType(securityUser.getUserType());
         dto.setStatus(securityUser.getUser().getStatus().name());
-        dto.setAuthorities(
+
+        dto.setRoles(
                 securityUser.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toList())
         );
+
         dto.setAccountNonExpired(securityUser.isAccountNonExpired());
         dto.setAccountNonLocked(securityUser.isAccountNonLocked());
         dto.setCredentialsNonExpired(securityUser.isCredentialsNonExpired());
