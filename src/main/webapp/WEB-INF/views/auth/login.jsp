@@ -201,12 +201,26 @@
                     return true;
                 }
 
-                // 페이지 로드 시 로그아웃 메시지가 있으면 스토리지 정리
+                // 페이지 로드 시 자동 정리
                 document.addEventListener('DOMContentLoaded', function() {
                     const successMessage = '<c:out value="${successMessage}" />';
+                    const errorMessage = '<c:out value="${errorMessage}" />';
+
+                    // 로그아웃 시 스토리지 정리
                     if (successMessage && successMessage.includes('로그아웃')) {
                         console.log('[INFO] 로그아웃 감지 - 스토리지 정리');
                         clearAllAuthStorage();
+                    }
+
+                    // 로그인 실패 시 스토리지 정리 (오래된 인증 정보 제거)
+                    if (errorMessage && errorMessage.length > 0) {
+                        console.log('[INFO] 로그인 실패 감지 - 스토리지 정리');
+                        clearAllAuthStorage();
+
+                        // 쿠키도 정리
+                        document.cookie = 'authToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                        document.cookie = 'refreshToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                        console.log('[INFO] 쿠키 및 스토리지 정리 완료');
                     }
                 });
 

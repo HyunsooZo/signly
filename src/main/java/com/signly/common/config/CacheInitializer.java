@@ -19,13 +19,14 @@ public class CacheInitializer implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         log.info("🔄 Initializing caches on application startup...");
 
-        Cache userDetailsCache = cacheManager.getCache("userDetails");
-        if (userDetailsCache != null) {
-            userDetailsCache.clear();
-            log.info("✅ Cleared 'userDetails' cache to prevent deserialization errors");
-        } else {
-            log.warn("⚠️ 'userDetails' cache not found, skipping clear");
-        }
+        // 모든 캐시 초기화 (역직렬화 오류 방지)
+        cacheManager.getCacheNames().forEach(cacheName -> {
+            Cache cache = cacheManager.getCache(cacheName);
+            if (cache != null) {
+                cache.clear();
+                log.info("✅ Cleared '{}' cache", cacheName);
+            }
+        });
 
         log.info("✨ Cache initialization completed");
     }
