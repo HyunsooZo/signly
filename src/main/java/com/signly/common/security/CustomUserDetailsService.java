@@ -40,6 +40,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         log.info("Loaded user details from DB: {} (cache miss)", email);
-        return new SecurityUser(user);
+
+        // SecurityUser를 생성한 후 DTO로 변환하여 캐시
+        SecurityUser securityUser = new SecurityUser(user);
+        return UserDetailsDTO.from(securityUser);
     }
 }

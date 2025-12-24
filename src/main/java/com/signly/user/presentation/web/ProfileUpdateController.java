@@ -2,7 +2,7 @@ package com.signly.user.presentation.web;
 
 import com.signly.common.exception.ValidationException;
 import com.signly.common.security.CurrentUserProvider;
-import com.signly.common.security.SecurityUser;
+import com.signly.common.security.UserPrincipal;
 import com.signly.common.web.BaseWebController;
 import com.signly.user.application.UserService;
 import com.signly.user.application.dto.UpdateUserCommand;
@@ -28,7 +28,7 @@ public class ProfileUpdateController extends BaseWebController {
     @PostMapping("/profile/update")
     public String updateProfile(
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             @RequestParam String name,
             @RequestParam(required = false) String companyName,

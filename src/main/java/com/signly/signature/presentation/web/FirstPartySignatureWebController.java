@@ -2,7 +2,7 @@ package com.signly.signature.presentation.web;
 
 import com.signly.common.exception.ValidationException;
 import com.signly.common.security.CurrentUserProvider;
-import com.signly.common.security.SecurityUser;
+import com.signly.common.security.UserPrincipal;
 import com.signly.common.web.BaseWebController;
 import com.signly.signature.application.FirstPartySignatureService;
 import com.signly.signature.application.dto.FirstPartySignatureResponse;
@@ -32,7 +32,7 @@ public class FirstPartySignatureWebController extends BaseWebController {
     @GetMapping("/profile/info")
     public String viewSignature(
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model,
             RedirectAttributes redirectAttributes
@@ -72,7 +72,7 @@ public class FirstPartySignatureWebController extends BaseWebController {
     @PostMapping("/profile/info")
     public String uploadSignature(
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             @RequestParam("signatureData") String signatureData,
             RedirectAttributes redirectAttributes

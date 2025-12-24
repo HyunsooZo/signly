@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signly.common.exception.BusinessException;
 import com.signly.common.exception.ValidationException;
 import com.signly.common.security.CurrentUserProvider;
-import com.signly.common.security.SecurityUser;
+import com.signly.common.security.UserPrincipal;
 import com.signly.common.web.BaseWebController;
 import com.signly.contract.application.ContractPdfService;
 import com.signly.contract.application.ContractService;
@@ -75,7 +75,7 @@ public class ContractWebController extends BaseWebController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "status", required = false) ContractStatus status,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model
     ) {
@@ -104,7 +104,7 @@ public class ContractWebController extends BaseWebController {
     public String newContractForm(
             @RequestParam(value = "templateId", required = false) String templateId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model,
             RedirectAttributes redirectAttributes
@@ -208,7 +208,7 @@ public class ContractWebController extends BaseWebController {
             @Valid @ModelAttribute("contract") ContractForm form,
             BindingResult bindingResult,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model,
             RedirectAttributes redirectAttributes
@@ -300,7 +300,7 @@ public class ContractWebController extends BaseWebController {
     public String contractDetail(
             @PathVariable String contractId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model
     ) {
@@ -323,7 +323,7 @@ public class ContractWebController extends BaseWebController {
     public String editContractForm(
             @PathVariable String contractId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model
     ) {
@@ -413,7 +413,7 @@ public class ContractWebController extends BaseWebController {
             @Valid @ModelAttribute("contract") ContractForm form,
             BindingResult bindingResult,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model,
             RedirectAttributes redirectAttributes
@@ -484,7 +484,7 @@ public class ContractWebController extends BaseWebController {
     public String sendForSigning(
             @PathVariable String contractId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             RedirectAttributes redirectAttributes
     ) {
@@ -500,7 +500,7 @@ public class ContractWebController extends BaseWebController {
     public String resendSigningEmail(
             @PathVariable String contractId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             RedirectAttributes redirectAttributes
     ) {
@@ -516,7 +516,7 @@ public class ContractWebController extends BaseWebController {
     public String cancelContract(
             @PathVariable String contractId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             RedirectAttributes redirectAttributes
     ) {
@@ -532,7 +532,7 @@ public class ContractWebController extends BaseWebController {
     public String deleteContract(
             @PathVariable String contractId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             RedirectAttributes redirectAttributes
     ) {
@@ -548,7 +548,7 @@ public class ContractWebController extends BaseWebController {
     public String viewPdf(
             @PathVariable String contractId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model
     ) {
@@ -579,7 +579,7 @@ public class ContractWebController extends BaseWebController {
     public void downloadPdf(
             @PathVariable String contractId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
@@ -642,7 +642,7 @@ public class ContractWebController extends BaseWebController {
     public void viewPdfInline(
             @PathVariable String contractId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
@@ -730,35 +730,35 @@ public class ContractWebController extends BaseWebController {
     }
 
     private void applyOwnerDefaults(
-            SecurityUser securityUser,
+            UserPrincipal userPrincipal,
             ContractForm form,
             Model model
     ) {
-        if (securityUser == null || form == null) {
+        if (userPrincipal == null || form == null) {
             return;
         }
 
         if (form.getFirstPartyName() == null || form.getFirstPartyName().isBlank()) {
-            form.setFirstPartyName(securityUser.getName());
+            form.setFirstPartyName(userPrincipal.getName());
         }
         if (form.getFirstPartyEmail() == null || form.getFirstPartyEmail().isBlank()) {
-            form.setFirstPartyEmail(securityUser.getEmail());
+            form.setFirstPartyEmail(userPrincipal.getEmail());
         }
         if (form.getFirstPartyAddress() == null || form.getFirstPartyAddress().isBlank()) {
-            String addressFallback = securityUser.getBusinessAddress();
+            String addressFallback = userPrincipal.getBusinessAddress();
             if (addressFallback == null || addressFallback.isBlank()) {
-                addressFallback = securityUser.getCompanyName();
+                addressFallback = userPrincipal.getCompanyName();
             }
             if (addressFallback != null) {
                 form.setFirstPartyAddress(addressFallback);
             }
         }
 
-        model.addAttribute("currentUserName", securityUser.getName());
-        model.addAttribute("currentUserEmail", securityUser.getEmail());
-        model.addAttribute("currentUserCompany", securityUser.getCompanyName());
-        model.addAttribute("currentUserBusinessPhone", securityUser.getBusinessPhone());
-        model.addAttribute("currentUserBusinessAddress", securityUser.getBusinessAddress());
+        model.addAttribute("currentUserName", userPrincipal.getName());
+        model.addAttribute("currentUserEmail", userPrincipal.getEmail());
+        model.addAttribute("currentUserCompany", userPrincipal.getCompanyName());
+        model.addAttribute("currentUserBusinessPhone", userPrincipal.getBusinessPhone());
+        model.addAttribute("currentUserBusinessAddress", userPrincipal.getBusinessAddress());
     }
 
     @Setter

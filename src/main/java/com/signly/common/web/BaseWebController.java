@@ -2,7 +2,7 @@ package com.signly.common.web;
 
 import com.signly.common.exception.UnauthorizedException;
 import com.signly.common.security.CurrentUserProvider;
-import com.signly.common.security.SecurityUser;
+import com.signly.common.security.UserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +42,12 @@ public abstract class BaseWebController {
      */
     protected String resolveUserId(
             CurrentUserProvider currentUserProvider,
-            SecurityUser securityUser,
+            UserPrincipal userPrincipal,
             HttpServletRequest request,
             String userId,
             boolean required
     ) {
-        return currentUserProvider.resolveUserId(securityUser, request, userId, required);
+        return currentUserProvider.resolveUserId(userPrincipal, request, userId, required);
     }
 
     /**

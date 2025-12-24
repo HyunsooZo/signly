@@ -1,7 +1,7 @@
 package com.signly.home.presentation.web;
 
 import com.signly.common.security.CurrentUserProvider;
-import com.signly.common.security.SecurityUser;
+import com.signly.common.security.UserPrincipal;
 import com.signly.common.web.BaseWebController;
 import com.signly.home.application.DashboardService;
 import com.signly.home.application.dto.DashboardResponse;
@@ -35,7 +35,7 @@ public class HomeWebController extends BaseWebController {
     @GetMapping("/home")
     public String home(
             @RequestHeader(value = "X-User-Id", defaultValue = "01ARZ3NDEKTSV4RRFFQ69G5FAV") String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model
     ) {

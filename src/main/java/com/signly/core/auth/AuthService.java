@@ -3,7 +3,6 @@ package com.signly.core.auth;
 import com.signly.common.exception.AccountLockedException;
 import com.signly.common.exception.UnauthorizedException;
 import com.signly.common.security.JwtTokenProvider;
-import com.signly.common.security.SecurityUser;
 import com.signly.common.security.TokenRedisService;
 import com.signly.core.auth.dto.LoginRequest;
 import com.signly.core.auth.dto.LoginResponse;
@@ -55,8 +54,8 @@ public class AuthService {
             var token = new UsernamePasswordAuthenticationToken(email, request.password());
             var authentication = authenticationManager.authenticate(token);
 
-            var securityUser = (SecurityUser) authentication.getPrincipal();
-            var user = securityUser.getUser();
+            User user = userRepository.findByEmail(Email.of(email))
+                    .orElseThrow(() -> new UnauthorizedException("사용자를 찾을 수 없습니다"));
 
             // 2. 로그인 성공 - 실패 횟수 초기화
             loginAttemptService.resetAttempts(email);

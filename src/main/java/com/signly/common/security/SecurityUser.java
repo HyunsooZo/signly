@@ -13,7 +13,7 @@ import java.util.Collections;
 
 @Getter
 @RequiredArgsConstructor
-public class SecurityUser implements UserDetails {
+public class SecurityUser implements UserPrincipal {
 
     private final User user;
 

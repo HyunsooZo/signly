@@ -1,7 +1,7 @@
 package com.signly.signature.presentation.rest;
 
 import com.signly.common.exception.ValidationException;
-import com.signly.common.security.SecurityUser;
+import com.signly.common.security.UserPrincipal;
 import com.signly.signature.application.FirstPartySignatureService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class FirstPartySignatureRestController {
 
     @GetMapping("/me")
     public ResponseEntity<MySignatureResponse> getMySignature(
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request
     ) {
         try {

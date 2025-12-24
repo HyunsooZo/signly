@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.signly.common.exception.BusinessException;
 import com.signly.common.exception.ValidationException;
 import com.signly.common.security.CurrentUserProvider;
-import com.signly.common.security.SecurityUser;
+import com.signly.common.security.UserPrincipal;
 import com.signly.common.web.BaseWebController;
 import com.signly.template.application.TemplateService;
 import com.signly.template.application.VariableDefinitionService;
@@ -20,6 +20,7 @@ import com.signly.template.domain.model.TemplateStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +35,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 
 @Controller
+@RequiredArgsConstructor
 @RequestMapping("/templates")
 public class TemplateWebController extends BaseWebController {
 
@@ -45,20 +49,6 @@ public class TemplateWebController extends BaseWebController {
     private final TemplatePresetService templatePresetService;
     private final VariableDefinitionService variableDefinitionService;
     private final ObjectMapper objectMapper;
-
-    public TemplateWebController(
-            TemplateService templateService,
-            CurrentUserProvider currentUserProvider,
-            TemplatePresetService templatePresetService,
-            VariableDefinitionService variableDefinitionService,
-            ObjectMapper objectMapper
-    ) {
-        this.templateService = templateService;
-        this.currentUserProvider = currentUserProvider;
-        this.templatePresetService = templatePresetService;
-        this.variableDefinitionService = variableDefinitionService;
-        this.objectMapper = objectMapper;
-    }
 
     /**
      * 변수 정의를 JSON 문자열로 변환하여 Model에 추가
@@ -82,7 +72,7 @@ public class TemplateWebController extends BaseWebController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "status", required = false) TemplateStatus status,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model
     ) {
@@ -106,7 +96,7 @@ public class TemplateWebController extends BaseWebController {
     @GetMapping("/new")
     public String newTemplateForm(
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model
     ) {
@@ -126,7 +116,7 @@ public class TemplateWebController extends BaseWebController {
             @Valid @ModelAttribute("template") TemplateForm form,
             BindingResult bindingResult,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model,
             RedirectAttributes redirectAttributes
@@ -153,7 +143,7 @@ public class TemplateWebController extends BaseWebController {
     public String templateDetail(
             @PathVariable String templateId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model
     ) {
@@ -176,7 +166,7 @@ public class TemplateWebController extends BaseWebController {
     public String editTemplateForm(
             @PathVariable String templateId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model
     ) {
@@ -208,7 +198,7 @@ public class TemplateWebController extends BaseWebController {
             @Valid @ModelAttribute("template") TemplateForm form,
             BindingResult bindingResult,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             Model model,
             RedirectAttributes redirectAttributes
@@ -310,7 +300,7 @@ public class TemplateWebController extends BaseWebController {
     public String activateTemplate(
             @PathVariable String templateId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             RedirectAttributes redirectAttributes
     ) {
@@ -330,7 +320,7 @@ public class TemplateWebController extends BaseWebController {
     public String archiveTemplate(
             @PathVariable String templateId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             RedirectAttributes redirectAttributes
     ) {
@@ -350,7 +340,7 @@ public class TemplateWebController extends BaseWebController {
     public String deleteTemplate(
             @PathVariable String templateId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletRequest request,
             RedirectAttributes redirectAttributes
     ) {
@@ -376,6 +366,10 @@ public class TemplateWebController extends BaseWebController {
         public void setSectionsJson(String sectionsJson) {this.sectionsJson = (sectionsJson == null || sectionsJson.isBlank()) ? "[]" : sectionsJson;}
     }
 
-    private record TemplatePresetResponse(String id, String name, java.util.List<PresetSection> sections,
-                                          String renderedHtml) {}
+    private record TemplatePresetResponse(
+            String id,
+            String name,
+            List<PresetSection> sections,
+            String renderedHtml
+    ) {}
 }

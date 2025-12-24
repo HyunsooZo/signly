@@ -3,8 +3,8 @@ package com.signly.core.auth;
 import com.signly.common.email.EmailService;
 import com.signly.common.exception.AccountLockedException;
 import com.signly.common.exception.UnauthorizedException;
-import com.signly.common.security.SecurityUser;
 import com.signly.common.security.TokenRedisService;
+import com.signly.common.security.UserPrincipal;
 import com.signly.core.auth.dto.LoginRequest;
 import com.signly.core.auth.dto.LoginResponse;
 import com.signly.user.application.LoginAttemptService;
@@ -213,13 +213,13 @@ public class AuthWebController {
 
     @GetMapping("/logout")
     public String logout(
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             HttpServletResponse response,
             RedirectAttributes redirectAttributes
     ) {
         // Redis에서 토큰 삭제
         if (securityUser != null) {
-            String userId = securityUser.getUser().getUserId().value();
+            String userId = securityUser.getUserId();
             authService.logout(userId);
             logger.info("로그아웃 완료: userId={}", userId);
         }
@@ -366,7 +366,7 @@ public class AuthWebController {
     public String changePassword(
             @Valid @ModelAttribute ChangePasswordCommand command,
             BindingResult bindingResult,
-            @AuthenticationPrincipal SecurityUser securityUser,
+            @AuthenticationPrincipal UserPrincipal securityUser,
             RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
@@ -374,12 +374,12 @@ public class AuthWebController {
         }
 
         try {
-            userService.changePassword(securityUser.getUser().getUserId().value(), command);
-            logger.info("Password changed for user: {}", securityUser.getUser().getUserId().value());
+            userService.changePassword(securityUser.getUserId(), command);
+            logger.info("Password changed for user: {}", securityUser.getUserId());
             redirectAttributes.addFlashAttribute("successMessage", "비밀번호가 성공적으로 변경되었습니다.");
             return "redirect:/profile";
         } catch (Exception e) {
-            logger.error("Password change failed for user: {}", securityUser.getUser().getUserId().value(), e);
+            logger.error("Password change failed for user: {}", securityUser.getUserId(), e);
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/change-password";
         }
@@ -387,11 +387,13 @@ public class AuthWebController {
 
     @GetMapping("/api/profile-status")
     @ResponseBody
-    public Map<String, Object> getProfileStatus(@AuthenticationPrincipal SecurityUser securityUser) {
+    public Map<String, Object> getProfileStatus(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         Map<String, Object> response = new HashMap<>();
 
-        if (securityUser != null) {
-            User user = securityUser.getUser();
+        if (userPrincipal != null) {
+            User user = userRepository.findByEmail(Email.of(userPrincipal.getEmail()))
+                    .orElseThrow(() -> new UnauthorizedException("사용자를 찾을 수 없습니다"));
+
             boolean isProfileComplete = user.isProfileComplete();
 
             response.put("isProfileComplete", isProfileComplete);
