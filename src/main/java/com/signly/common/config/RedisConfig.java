@@ -41,7 +41,7 @@ public class RedisConfig {
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        // ObjectMapper 설정 - Java 8 날짜/시간 타입 지원
+        // ObjectMapper 설정 - Java 8 날짜/시간 타입 지원 (타입 정보 포함)
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.activateDefaultTyping(
@@ -50,9 +50,22 @@ public class RedisConfig {
                 JsonTypeInfo.As.PROPERTY
         );
 
-        // JSON 직렬화 설정
+        // JSON 직렬화 설정 (기본 - 타입 정보 포함)
         GenericJackson2JsonRedisSerializer jsonSerializer =
                 new GenericJackson2JsonRedisSerializer(objectMapper);
+
+        // UserDetails 전용 ObjectMapper (타입 정보 제외)
+        ObjectMapper userDetailsObjectMapper = new ObjectMapper();
+        userDetailsObjectMapper.registerModule(new JavaTimeModule());
+        // 타입 정보를 포함하지 않음 - UserDetailsDTO는 단순 POJO이므로 타입 정보 불필요
+        userDetailsObjectMapper.activateDefaultTyping(
+                LaissezFaireSubTypeValidator.instance,
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY
+        );
+        // UserDetails 전용 직렬화 설정
+        GenericJackson2JsonRedisSerializer userDetailsSerializer =
+                new GenericJackson2JsonRedisSerializer(userDetailsObjectMapper);
 
         // 기본 캐시 설정
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
@@ -79,8 +92,18 @@ public class RedisConfig {
                 defaultConfig.entryTtl(Duration.ofHours(1))); // 1시간
         cacheConfigurations.put("users",
                 defaultConfig.entryTtl(Duration.ofMinutes(30))); // 30분
+
+        // userDetails는 타입 정보 제외한 별도 직렬화 사용
         cacheConfigurations.put("userDetails",
-                defaultConfig.entryTtl(Duration.ofMinutes(15))); // 15분
+                RedisCacheConfiguration.defaultCacheConfig()
+                        .serializeKeysWith(
+                                RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer())
+                        )
+                        .serializeValuesWith(
+                                RedisSerializationContext.SerializationPair.fromSerializer(userDetailsSerializer)
+                        )
+                        .entryTtl(Duration.ofMinutes(15)) // 15분
+                        .disableCachingNullValues());
 
         // Phase 3 준비: 대시보드 통계 & 서명 상태 (짧은 TTL)
         cacheConfigurations.put("dashboardStats",

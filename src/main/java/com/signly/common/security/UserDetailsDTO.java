@@ -62,6 +62,7 @@ public class UserDetailsDTO implements UserPrincipal, Serializable {
         dto.setBusinessPhone(securityUser.getBusinessPhone());
         dto.setBusinessAddress(securityUser.getBusinessAddress());
         dto.setUserType(securityUser.getUserType());
+        dto.setStatus(securityUser.getUser().getStatus().name());
         dto.setAuthorities(
                 securityUser.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
