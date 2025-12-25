@@ -141,6 +141,7 @@ public class AuthService {
         return "UNKNOWN";
     }
 
+    @Transactional
     public LoginResponse refreshToken(RefreshTokenRequest request) {
         String refreshToken = request.refreshToken();
 
@@ -194,6 +195,7 @@ public class AuthService {
     /**
      * 로그아웃 - Redis에서 토큰 삭제
      */
+    @Transactional
     public void logout(String userId) {
         tokenRedisService.deleteAllTokens(userId);
     }

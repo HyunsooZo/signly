@@ -136,6 +136,9 @@ public class AuthWebController {
         } catch (DisabledException e) {
             logger.warn("로그인 실패: {} - 계정 비활성화", loginRequest.email());
 
+            // 로그인 실패 시 기존 쿠키 삭제
+            clearAuthCookies(response);
+
             // PENDING 상태인지 확인
             try {
                 User user = userRepository.findByEmail(Email.of(loginRequest.email())).orElse(null);
@@ -159,21 +162,27 @@ public class AuthWebController {
             return "auth/login";
         } catch (AccountLockedException e) {
             logger.warn("로그인 실패: {} - {}", loginRequest.email(), e.getMessage());
-            
+
+            // 로그인 실패 시 기존 쿠키 삭제
+            clearAuthCookies(response);
+
             // 계정 잠금 상태
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("isAccountLocked", true);
             model.addAttribute("email", loginRequest.email());
-            
+
             // 남은 로그인 시도 횟수는 0
             model.addAttribute("remainingAttempts", 0);
-            
+
             if (returnUrl != null) {
                 model.addAttribute("returnUrl", returnUrl);
             }
             return "auth/login";
         } catch (UnauthorizedException e) {
             logger.warn("로그인 실패: {} - {}", loginRequest.email(), e.getMessage());
+
+            // 로그인 실패 시 기존 쿠키 삭제
+            clearAuthCookies(response);
 
             // 이메일 인증 필요 메시지 체크
             if (e.getMessage() != null && e.getMessage().contains("이메일 인증")) {
@@ -182,7 +191,7 @@ public class AuthWebController {
                 model.addAttribute("isPendingUser", true);
             } else {
                 model.addAttribute("errorMessage", e.getMessage());
-                
+
                 // 남은 로그인 시도 횟수 추가
                 int remainingAttempts = loginAttemptService.getRemainingAttempts(loginRequest.email());
                 if (remainingAttempts > 0 && remainingAttempts < 5) {
@@ -197,6 +206,10 @@ public class AuthWebController {
             return "auth/login";
         } catch (Exception e) {
             logger.warn("로그인 실패: {} - {}", loginRequest.email(), e.getMessage());
+
+            // 로그인 실패 시 기존 쿠키 삭제
+            clearAuthCookies(response);
+
             model.addAttribute("errorMessage", "이메일 또는 비밀번호가 올바르지 않습니다.");
             model.addAttribute("email", loginRequest.email());
             if (returnUrl != null) {
@@ -204,6 +217,30 @@ public class AuthWebController {
             }
             return "auth/login";
         }
+    }
+
+    /**
+     * 인증 관련 쿠키 삭제 헬퍼 메서드
+     */
+    private void clearAuthCookies(HttpServletResponse response) {
+        Cookie authCookie = new Cookie("authToken", "");
+        authCookie.setHttpOnly(true);
+        authCookie.setPath("/");
+        authCookie.setMaxAge(0);
+        response.addCookie(authCookie);
+
+        Cookie refreshCookie = new Cookie("refreshToken", "");
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0);
+        response.addCookie(refreshCookie);
+
+        Cookie sessionCookie = new Cookie("JSESSIONID", "");
+        sessionCookie.setPath("/");
+        sessionCookie.setMaxAge(0);
+        response.addCookie(sessionCookie);
+
+        logger.debug("인증 쿠키 삭제 완료 (authToken, refreshToken, JSESSIONID)");
     }
 
     @GetMapping("/register")
@@ -214,6 +251,7 @@ public class AuthWebController {
     @GetMapping("/logout")
     public String logout(
             @AuthenticationPrincipal UserPrincipal securityUser,
+            HttpServletRequest request,
             HttpServletResponse response,
             RedirectAttributes redirectAttributes
     ) {
@@ -222,6 +260,14 @@ public class AuthWebController {
             String userId = securityUser.getUserId();
             authService.logout(userId);
             logger.info("로그아웃 완료: userId={}", userId);
+        }
+
+        // 세션 무효화
+        try {
+            request.getSession().invalidate();
+            logger.debug("세션 무효화 완료");
+        } catch (IllegalStateException e) {
+            logger.debug("이미 무효화된 세션");
         }
 
         // 쿠키 삭제 (생성 시와 동일한 속성으로 삭제해야 함)
@@ -237,6 +283,13 @@ public class AuthWebController {
         refreshCookie.setMaxAge(0);
         response.addCookie(refreshCookie);
 
+        // JSESSIONID 쿠키 삭제
+        Cookie sessionCookie = new Cookie("JSESSIONID", "");
+        sessionCookie.setPath("/");
+        sessionCookie.setMaxAge(0);
+        response.addCookie(sessionCookie);
+
+        logger.debug("모든 인증 쿠키 및 세션 삭제 완료");
         redirectAttributes.addFlashAttribute("successMessage", "로그아웃되었습니다.");
         return "redirect:/login";
     }
@@ -358,7 +411,8 @@ public class AuthWebController {
     }
 
     @GetMapping("/change-password")
-    public String changePasswordForm() {
+    public String changePasswordForm(Model model) {
+        model.addAttribute("changePasswordCommand", new ChangePasswordCommand("", "", ""));
         return "auth/change-password";
     }
 
@@ -367,9 +421,16 @@ public class AuthWebController {
             @Valid @ModelAttribute ChangePasswordCommand command,
             BindingResult bindingResult,
             @AuthenticationPrincipal UserPrincipal securityUser,
+            Model model,
             RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
+            return "auth/change-password";
+        }
+
+        // 비밀번호 확인 검증
+        if (!command.newPassword().equals(command.confirmPassword())) {
+            model.addAttribute("errorMessage", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
             return "auth/change-password";
         }
 
@@ -377,11 +438,11 @@ public class AuthWebController {
             userService.changePassword(securityUser.getUserId(), command);
             logger.info("Password changed for user: {}", securityUser.getUserId());
             redirectAttributes.addFlashAttribute("successMessage", "비밀번호가 성공적으로 변경되었습니다.");
-            return "redirect:/profile";
+            return "redirect:/profile/info";
         } catch (Exception e) {
             logger.error("Password change failed for user: {}", securityUser.getUserId(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/change-password";
+            model.addAttribute("errorMessage", e.getMessage());
+            return "auth/change-password";
         }
     }
 

@@ -7,5 +7,8 @@ public record ChangePasswordCommand(
     String oldPassword,
 
     @NotEmpty(message = "새 비밀번호는 필수입니다")
-    String newPassword
+    String newPassword,
+
+    @NotEmpty(message = "비밀번호 확인은 필수입니다")
+    String confirmPassword
 ) {}

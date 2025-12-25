@@ -198,8 +198,7 @@ public class User extends AggregateRoot {
     public void changePassword(
             Password oldPassword,
             Password newPassword,
-            PasswordEncoder passwordEncoder,
-            PasswordHistoryService passwordHistoryService
+            PasswordEncoder passwordEncoder
     ) {
         if (!validatePassword(oldPassword, passwordEncoder)) {
             throw new ValidationException("기존 비밀번호가 일치하지 않습니다");

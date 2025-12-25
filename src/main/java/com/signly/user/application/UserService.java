@@ -117,6 +117,7 @@ public class UserService {
         return userRepository.existsByEmail(emailObj);
     }
 
+    @Transactional
     public String generatePasswordResetToken(String email) {
         var emailObj = Email.of(email);
         var user = userRepository.findByEmail(emailObj)
@@ -257,7 +258,7 @@ public class UserService {
         var oldEncodedPassword = user.getEncodedPassword();
 
         // 비밀번호 변경
-        user.changePassword(oldPassword, newPassword, passwordEncoder, passwordHistoryService);
+        user.changePassword(oldPassword, newPassword, passwordEncoder);
         var savedUser = userRepository.save(user);
 
         // 이력 저장 (변경 후의 암호화된 비밀번호)

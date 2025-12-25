@@ -176,7 +176,7 @@ class UserTest {
         User user = User.create(validEmail, validPassword, "홍길동", testCompany, UserType.OWNER, passwordEncoder);
         Password newPassword = Password.of("NewPass123!@#");
 
-        user.changePassword(validPassword, newPassword, passwordEncoder, passwordHistoryService);
+        user.changePassword(validPassword, newPassword, passwordEncoder);
 
         assertThat(user.validatePassword(newPassword, passwordEncoder)).isTrue();
         assertThat(user.validatePassword(validPassword, passwordEncoder)).isFalse();
@@ -189,7 +189,7 @@ class UserTest {
         Password wrongPassword = Password.of("Wrong123!@#");
         Password newPassword = Password.of("NewPass123!@#");
 
-        assertThatThrownBy(() -> user.changePassword(wrongPassword, newPassword, passwordEncoder, passwordHistoryService))
+        assertThatThrownBy(() -> user.changePassword(wrongPassword, newPassword, passwordEncoder))
                 .isInstanceOf(ValidationException.class)
                 .hasMessage("기존 비밀번호가 일치하지 않습니다");
     }

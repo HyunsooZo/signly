@@ -90,7 +90,7 @@ public class DashboardService {
      * TTL: 5분 (통계는 실시간일 필요 없음)
      */
     @Cacheable(value = "dashboardStats", key = "#userId + ':templates'")
-    private Map<String, Long> getTemplateStatistics(String userId) {
+    public Map<String, Long> getTemplateStatistics(String userId) {
         var stats = new HashMap<String, Long>();
         var userIdObj = UserId.of(userId);
 
@@ -115,7 +115,7 @@ public class DashboardService {
      * TTL: 5분 (통계는 실시간일 필요 없음)
      */
     @Cacheable(value = "dashboardStats", key = "#userId + ':contracts'")
-    private Map<String, Long> getContractStatistics(String userId) {
+    public Map<String, Long> getContractStatistics(String userId) {
         var stats = new HashMap<String, Long>();
         var userIdObj = UserId.of(userId);
 

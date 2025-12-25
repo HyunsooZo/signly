@@ -78,13 +78,13 @@ app:
     # 인증 엔드포인트 제한 (IP 기준)
     auth:
       login:
-        limit: 5
+        limit: 10
         window: 1m
       register:
-        limit: 3
+        limit: 10
         window: 5m
       forgot-password:
-        limit: 3
+        limit: 10
         window: 15m
     # API 엔드포인트 제한 (사용자 기준)
     api:
