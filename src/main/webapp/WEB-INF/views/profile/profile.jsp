@@ -7,6 +7,7 @@
                 <jsp:include page="../common/header.jsp">
                     <jsp:param name="additionalCss" value="/css/signature.css" />
                 </jsp:include>
+
                 <body class="signature-management-page">
                     <jsp:include page="../common/navbar.jsp">
                         <jsp:param name="currentPage" value="signature" />
@@ -21,11 +22,7 @@
                                         나의 정보 관리하기
                                     </h2>
                                     <p class="text-muted mb-0">계약서에 자동으로 삽입될 정보 및 서명을 등록하고 관리하세요.</p>
-                                    <div class="mt-2">
-                                        <a href="/change-password" class="btn btn-sm btn-outline-warning">
-                                            <i class="bi bi-key me-1"></i>비밀번호 변경
-                                        </a>
-                                    </div>
+
                                 </div>
                             </div>
 
@@ -76,7 +73,10 @@
                                                         placeholder="서울시 강남구 테헤란로 123">
                                                 </div>
 
-                                                <div class="col-md-6 d-flex justify-content-end align-items-end">
+                                                <div class="col-md-6 d-flex justify-content-end align-items-end gap-2">
+                                                    <a href="/change-password" class="btn btn-outline-warning">
+                                                        <i class="bi bi-key me-1"></i>비밀번호 변경
+                                                    </a>
                                                     <button class="btn btn-primary" type="submit">
                                                         <i class="bi bi-check-lg me-1"></i>저장
                                                     </button>
