@@ -1,5 +1,9 @@
 package com.signly.common.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -36,9 +40,20 @@ public class RedisConfig {
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        // GenericJackson2JsonRedisSerializer 기본 생성자 사용
-        // 자동으로 타입 정보와 JavaTimeModule 포함
-        var jsonSerializer = new GenericJackson2JsonRedisSerializer();
+        // 커스텀 ObjectMapper 설정
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule()); // Java 8 날짜/시간 모듈 지원
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        // 타입 정보 저장 활성화 (GenericJackson2JsonRedisSerializer 필수 설정)
+        objectMapper.activateDefaultTyping(
+                BasicPolymorphicTypeValidator.builder()
+                        .allowIfBaseType(Object.class)
+                        .build(),
+                ObjectMapper.DefaultTyping.NON_FINAL
+        );
+
+        // 설정한 ObjectMapper를 사용하는 Serializer 생성
+        var jsonSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
 
         // 기본 캐시 설정
         var defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
@@ -50,18 +65,18 @@ public class RedisConfig {
         // 캐시별 개별 TTL 설정
         var cacheConfigurations = new HashMap<String, RedisCacheConfiguration>();
 
-        // Phase 1: 변수 정의 & 템플릿 프리셋 (적극적 캐싱 - 긴 TTL)
-        cacheConfigurations.put("variableDefinitions", defaultConfig.entryTtl(Duration.ofHours(24))); // 24시간
-        cacheConfigurations.put("templatePresets", defaultConfig.entryTtl(Duration.ofDays(7))); // 7일 (거의 변경 안됨)
+        // Phase 1: 변수 정의 & 템플릿 프리셋
+        cacheConfigurations.put("variableDefinitions", defaultConfig.entryTtl(Duration.ofHours(24)));
+        // 캐시 이름 변경으로 기존 오염된 데이터 회피 (templatePresets -> template_presets_v2)
+        cacheConfigurations.put("template_presets_v2", defaultConfig.entryTtl(Duration.ofDays(7)));
 
-        // Phase 2 준비: 템플릿 (중간 TTL)
-        // 사용자 정보는 캐싱하지 않음 (자주 변경되고 민감함)
-        cacheConfigurations.put("templates", defaultConfig.entryTtl(Duration.ofHours(1))); // 1시간
+        // Phase 2: 템플릿
+        cacheConfigurations.put("templates", defaultConfig.entryTtl(Duration.ofHours(1)));
 
-        // Phase 3 준비: 대시보드 통계 & 서명 상태 (짧은 TTL)
-        cacheConfigurations.put("dashboardStats", defaultConfig.entryTtl(Duration.ofMinutes(5))); // 5분
-        cacheConfigurations.put("signatureStatus", defaultConfig.entryTtl(Duration.ofMinutes(10))); // 10분
-        cacheConfigurations.put("contractsByToken", defaultConfig.entryTtl(Duration.ofMinutes(2))); // 2분
+        // Phase 3: 대시보드 통계 & 서명 상태
+        cacheConfigurations.put("dashboardStats", defaultConfig.entryTtl(Duration.ofMinutes(5)));
+        cacheConfigurations.put("signatureStatus", defaultConfig.entryTtl(Duration.ofMinutes(10)));
+        cacheConfigurations.put("contractsByToken", defaultConfig.entryTtl(Duration.ofMinutes(2)));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
