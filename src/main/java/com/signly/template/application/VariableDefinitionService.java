@@ -8,8 +8,6 @@ import com.signly.template.domain.model.VariableType;
 import com.signly.template.domain.repository.VariableDefinitionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,13 +32,11 @@ public class VariableDefinitionService {
 
     /**
      * 모든 활성화된 변수 정의 조회
-     * 캐시 TTL: 24시간 (거의 변경되지 않는 데이터)
      */
-    @Cacheable(value = "variableDefinitions", key = "'all'")
     public List<VariableDefinitionDto> getAllActiveVariables() {
         try {
             List<TemplateVariableDefinition> definitions = variableDefinitionRepository.findAllActive();
-            log.info("Loaded {} active variable definitions from DB (cache miss)", definitions.size());
+            log.info("Loaded {} active variable definitions from DB", definitions.size());
 
             return definitions.stream()
                     .map(VariableDefinitionDto::from)
@@ -53,13 +49,11 @@ public class VariableDefinitionService {
 
     /**
      * 카테고리별 변수 정의 조회
-     * 캐시 TTL: 24시간 (거의 변경되지 않는 데이터)
      */
-    @Cacheable(value = "variableDefinitions", key = "'byCategory'")
     public Map<String, List<VariableDefinitionDto>> getVariablesByCategory() {
         try {
             List<TemplateVariableDefinition> all = variableDefinitionRepository.findAllActive();
-            log.info("Loaded {} active variable definitions grouped by category from DB (cache miss)", all.size());
+            log.info("Loaded {} active variable definitions grouped by category from DB", all.size());
 
             return all.stream()
                     .map(VariableDefinitionDto::from)
@@ -76,12 +70,10 @@ public class VariableDefinitionService {
 
     /**
      * 특정 변수 정의 조회
-     * 캐시 TTL: 24시간
      */
-    @Cacheable(value = "variableDefinitions", key = "'byName:' + #variableName")
     public Optional<VariableDefinitionDto> getVariableByName(String variableName) {
         try {
-            log.info("Loading variable definition by name from DB: {} (cache miss)", variableName);
+            log.info("Loading variable definition by name from DB: {}", variableName);
             return variableDefinitionRepository.findByVariableName(variableName)
                     .map(VariableDefinitionDto::from);
         } catch (Exception e) {
@@ -155,10 +147,8 @@ public class VariableDefinitionService {
 
     /**
      * 변수 정의 생성 (관리자용)
-     * 캐시 무효화: 모든 variableDefinitions 캐시 삭제
      */
     @Transactional
-    @CacheEvict(value = "variableDefinitions", allEntries = true)
     public VariableDefinitionDto createVariableDefinition(
             String variableName,
             String displayName,
@@ -191,17 +181,15 @@ public class VariableDefinitionService {
         );
 
         TemplateVariableDefinition saved = variableDefinitionRepository.save(definition);
-        log.info("Created new variable definition: {} (cache evicted)", saved.getVariableName());
+        log.info("Created new variable definition: {}", saved.getVariableName());
 
         return VariableDefinitionDto.from(saved);
     }
 
     /**
      * 변수 정의 업데이트 (관리자용)
-     * 캐시 무효화: 모든 variableDefinitions 캐시 삭제
      */
     @Transactional
-    @CacheEvict(value = "variableDefinitions", allEntries = true)
     public VariableDefinitionDto updateVariableDefinition(
             Long id,
             String displayName,
@@ -226,20 +214,15 @@ public class VariableDefinitionService {
         );
 
         TemplateVariableDefinition saved = variableDefinitionRepository.save(definition);
-        log.info("Updated variable definition: {} (cache evicted)", saved.getVariableName());
-
-        // 이벤트 발행으로 재캐싱 트리거
-        eventPublisher.publishEvent(new VariableCacheRefreshEvent(this));
+        log.info("Updated variable definition: {}", saved.getVariableName());
 
         return VariableDefinitionDto.from(saved);
     }
 
     /**
      * 변수 정의 활성화/비활성화 (관리자용)
-     * 캐시 무효화: 모든 variableDefinitions 캐시 삭제
      */
     @Transactional
-    @CacheEvict(value = "variableDefinitions", allEntries = true)
     public void toggleVariableActivation(
             Long id,
             boolean activate
@@ -249,15 +232,12 @@ public class VariableDefinitionService {
 
         if (activate) {
             definition.activate();
-            log.info("Activated variable definition: {} (cache evicted)", definition.getVariableName());
+            log.info("Activated variable definition: {}", definition.getVariableName());
         } else {
             definition.deactivate();
-            log.info("Deactivated variable definition: {} (cache evicted)", definition.getVariableName());
+            log.info("Deactivated variable definition: {}", definition.getVariableName());
         }
 
         variableDefinitionRepository.save(definition);
-
-        // 이벤트 발행으로 재캐싱 트리거
-        eventPublisher.publishEvent(new VariableCacheRefreshEvent(this));
     }
 }

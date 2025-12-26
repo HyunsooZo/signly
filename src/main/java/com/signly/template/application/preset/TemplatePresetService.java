@@ -6,7 +6,6 @@ import com.signly.template.infrastructure.entity.TemplateEntity;
 import com.signly.template.infrastructure.repository.TemplateJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,9 +18,8 @@ public class TemplatePresetService {
 
     private final TemplateJpaRepository templateRepository;
 
-    @Cacheable(value = "templatePresets", key = "'summaries'")
     public List<TemplatePresetSummary> getSummaries() {
-        log.info("Loading preset template summaries from DB (cache miss)");
+        log.info("Loading preset template summaries from DB");
         return templateRepository.findAllActivePresets().stream()
                 .map(entity -> new TemplatePresetSummary(
                         entity.getPresetId(),
@@ -31,9 +29,8 @@ public class TemplatePresetService {
                 .toList();
     }
 
-    @Cacheable(value = "templatePresets", key = "#presetId")
     public Optional<TemplatePreset> getPreset(String presetId) {
-        log.info("Loading preset template from DB: {} (cache miss)", presetId);
+        log.info("Loading preset template from DB: {}", presetId);
         return templateRepository.findByIsPresetTrueAndPresetId(presetId)
                 .map(entity -> {
                     List<PresetSection> sections = parsePresetSections(entity);

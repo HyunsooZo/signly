@@ -11,8 +11,6 @@ import com.signly.contract.domain.model.Signature;
 import com.signly.contract.domain.repository.SignatureRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +30,6 @@ public class SignatureService {
     private final SignatureDtoMapper mapper;
     private final FileStorageService fileStorageService;
 
-    @CacheEvict(value = "signatureStatus", key = "#command.contractId() + ':' + #command.signerEmail()")
     public void createSignature(CreateSignatureCommand command) {
         String normalizedEmail = normalizeEmail(command.signerEmail());
         log.info("서명 생성 시작: contractId={}, signerEmail={}", command.contractId(), normalizedEmail);
@@ -75,7 +72,7 @@ public class SignatureService {
 
         signatureRepository.save(contractId, signature);
 
-        log.info("서명 생성 완료: signerEmail={} (cache evicted)", normalizedEmail);
+        log.info("서명 생성 완료: signerEmail={}", normalizedEmail);
         mapper.toResponse(signature);
     }
 
@@ -166,11 +163,8 @@ public class SignatureService {
     }
 
     /**
-     * 계약서 서명 여부 조회 (캐싱 적용)
-     * 캐시 키: contractId + ':' + signerEmail
-     * TTL: 10분 (서명 상태는 중요한 정보이지만 짧게 설정)
+     * 계약서 서명 여부 조회
      */
-    @Cacheable(value = "signatureStatus", key = "#contractId + ':' + #signerEmail")
     @Transactional(readOnly = true)
     public boolean isContractSigned(
             String contractId,
@@ -179,7 +173,7 @@ public class SignatureService {
         ContractId cId = ContractId.of(contractId);
         String normalizedEmail = normalizeEmail(signerEmail);
         boolean exists = signatureRepository.existsByContractIdAndSignerEmail(cId, normalizedEmail);
-        log.info("Checked signature status from DB: {}:{} (cache miss)", contractId, normalizedEmail);
+        log.info("Checked signature status from DB: {}:{}", contractId, normalizedEmail);
         return exists;
     }
 
@@ -203,10 +197,6 @@ public class SignatureService {
     public void deleteSignature(String signatureId) {
         var signature = signatureRepository.findById(signatureId)
                 .orElseThrow(() -> new NotFoundException("서명을 찾을 수 없습니다: " + signatureId));
-
-        // TODO: signature 엔티티에서 contractId를 알 수 없음
-        // 차후 repository에서 contractId를 조회하거나, signature 엔티티를 개선 필요
-        // 현재는 signature 삭제 시 캐시 자동 만료로 처리
 
         signatureRepository.delete(signatureId);
         log.info("서명 삭제 완료: signatureId={}", signatureId);

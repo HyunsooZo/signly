@@ -12,7 +12,6 @@ import com.signly.template.domain.repository.TemplateRepository;
 import com.signly.user.domain.model.UserId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -86,10 +85,7 @@ public class DashboardService {
 
     /**
      * 템플릿 통계 조회 (최적화: count 쿼리 직접 사용)
-     * 캐시 키: userId + ':templates'
-     * TTL: 5분 (통계는 실시간일 필요 없음)
      */
-    @Cacheable(value = "dashboardStats", key = "#userId + ':templates'")
     public Map<String, Long> getTemplateStatistics(String userId) {
         var stats = new HashMap<String, Long>();
         var userIdObj = UserId.of(userId);
@@ -98,7 +94,7 @@ public class DashboardService {
             stats.put("total", templateRepository.countByOwnerId(userIdObj));
             stats.put("active", templateRepository.countByOwnerIdAndStatus(userIdObj, TemplateStatus.ACTIVE));
             stats.put("draft", templateRepository.countByOwnerIdAndStatus(userIdObj, TemplateStatus.DRAFT));
-            log.info("Loaded template stats from DB: {} (cache miss)", userId);
+            log.info("Loaded template stats from DB: {}", userId);
         } catch (Exception e) {
             log.warn("템플릿 통계 조회 실패: userId={}", userId, e);
             stats.put("total", 0L);
@@ -111,10 +107,7 @@ public class DashboardService {
 
     /**
      * 계약서 통계 조회 (최적화: count 쿼리 직접 사용)
-     * 캐시 키: userId + ':contracts'
-     * TTL: 5분 (통계는 실시간일 필요 없음)
      */
-    @Cacheable(value = "dashboardStats", key = "#userId + ':contracts'")
     public Map<String, Long> getContractStatistics(String userId) {
         var stats = new HashMap<String, Long>();
         var userIdObj = UserId.of(userId);
@@ -125,7 +118,7 @@ public class DashboardService {
             stats.put("pending", contractRepository.countByCreatorIdAndStatus(userIdObj, ContractStatus.PENDING));
             stats.put("signed", contractRepository.countByCreatorIdAndStatus(userIdObj, ContractStatus.SIGNED));
             stats.put("completed", contractRepository.countByCreatorIdAndStatus(userIdObj, ContractStatus.SIGNED));
-            log.info("Loaded contract stats from DB: {} (cache miss)", userId);
+            log.info("Loaded contract stats from DB: {}", userId);
         } catch (Exception e) {
             log.warn("계약서 통계 조회 실패: userId={}", userId, e);
             stats.put("total", 0L);
@@ -137,14 +130,4 @@ public class DashboardService {
 
         return stats;
     }
-
-    /**
-     * 대시보드 통계 캐시 무효화 헬퍼 메서드
-     * 템플릿이나 계약서가 생성/삭제/상태변경될 때 호출
-     */
-    private void evictDashboardStatsCache(String userId) {
-        // 구현은 외부 서비스에서 호출될 때 처리
-        // 실제로는 @CacheEvict를 직접 사용하거나 AOP로 처리
-    }
-
 }

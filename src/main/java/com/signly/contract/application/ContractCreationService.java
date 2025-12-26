@@ -1,6 +1,5 @@
 package com.signly.contract.application;
 
-import com.signly.common.cache.CacheEvictionService;
 import com.signly.common.exception.ForbiddenException;
 import com.signly.common.exception.NotFoundException;
 import com.signly.common.exception.ValidationException;
@@ -47,7 +46,6 @@ public class ContractCreationService {
     private final FirstPartySignatureService firstPartySignatureService;
     private final UnifiedTemplateRenderer unifiedTemplateRenderer;
     private final ContractAuthorizationService authorizationService;
-    private final CacheEvictionService cacheEvictionService;
 
     public Contract createContract(
             String userId,
@@ -90,9 +88,6 @@ public class ContractCreationService {
 
         var savedContract = contractRepository.save(contract);
 
-        // 대시보드 통계 캐시 무효화
-        cacheEvictionService.evictContractStats(userId);
-
         return savedContract;
     }
 
@@ -117,9 +112,6 @@ public class ContractCreationService {
 
         var updatedContract = contractRepository.save(contract);
 
-        // 대시보드 통계 캐시 무효화
-        cacheEvictionService.evictContractStats(userId);
-
         return updatedContract;
     }
 
@@ -138,9 +130,7 @@ public class ContractCreationService {
 
         contractRepository.delete(contract);
 
-        // 대시보드 통계 캐시 무효화
-        cacheEvictionService.evictContractStats(userId);
-        log.info("Deleted contract: {} for user: {} (cache evicted)", contractId, userId);
+        log.info("Deleted contract: {} for user: {}", contractId, userId);
     }
 
     private User validateUserAndPermissions(String userId) {
