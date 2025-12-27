@@ -24,6 +24,7 @@ public class EmailService {
         this.fromEmail = fromEmail;
     }
 
+    @Async
     public void sendSimpleEmail(
             String to,
             String subject,
@@ -38,7 +39,6 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    @Async
     public void sendTemplateEmail(
             String to,
             EmailTemplate template,
@@ -118,6 +118,7 @@ public class EmailService {
         );
     }
 
+    @Async
     public void sendContractSigningRequest(
             String to,
             String contractTitle,
@@ -134,6 +135,7 @@ public class EmailService {
         sendTemplateEmail(to, EmailTemplate.CONTRACT_SIGNING_REQUEST, variables);
     }
 
+    @Async
     public void sendContractSigned(
             String to,
             String contractTitle,
@@ -148,6 +150,7 @@ public class EmailService {
         sendTemplateEmail(to, EmailTemplate.CONTRACT_SIGNED, variables);
     }
 
+    @Async
     public void sendContractCompleted(
             String to,
             String contractTitle
@@ -160,6 +163,7 @@ public class EmailService {
         sendTemplateEmail(to, EmailTemplate.CONTRACT_COMPLETED, variables);
     }
 
+    @Async
     public void sendContractCancelled(
             String to,
             String contractTitle,
@@ -174,6 +178,7 @@ public class EmailService {
         sendTemplateEmail(to, EmailTemplate.CONTRACT_CANCELLED, variables);
     }
 
+    @Async
     public void sendContractExpired(
             String to,
             String contractTitle
@@ -186,6 +191,7 @@ public class EmailService {
         sendTemplateEmail(to, EmailTemplate.CONTRACT_EXPIRED, variables);
     }
 
+    @Async
     public void sendWelcomeEmail(
             String to,
             String userName
@@ -198,6 +204,7 @@ public class EmailService {
         sendTemplateEmail(to, EmailTemplate.USER_WELCOME, variables);
     }
 
+    @Async
     public void sendPasswordResetEmail(
             String to,
             String userName,
